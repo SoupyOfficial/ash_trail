@@ -695,7 +695,7 @@ features:
       - Deep links to primary tabs supported (home, logs) and future-ready for charts, settings.
       - Tab bar safe-area aware; no overlap with iOS home indicator; minimum tap target ≥48px.
       - Logs tab initially contains both log table and inline / toggleable chart view (chart segment behind feature flag until charts epic delivered).
-      - Separate Charts tab disabled until insights.charts_time_series marked done; enabling it moves chart UI from Logs tab.
+      - "Separate Charts tab disabled until insights.charts_time_series marked done; enabling it moves chart UI from Logs tab."
     screens: [home, logs, charts, settings]
     components: [app_shell, nav_bar, adaptive_layout]
     offline:

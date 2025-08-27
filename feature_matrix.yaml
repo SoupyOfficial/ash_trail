@@ -67,6 +67,12 @@ entities:
         type: string
       - name: displayName
         type: string
+      - name: firstName
+        type: "string?"
+      - name: lastName
+        type: "string?"
+      - name: email
+        type: "string?"
       - name: photoUrl
         type: "string?"
       - name: provider
@@ -377,6 +383,10 @@ entities:
         type: bool
       - name: reminderTimes
         type: "time[]?"
+      - name: preferredTheme
+        type: "enum[system,light,dark]"
+      - name: accentColor
+        type: "string?"  # hex or token from palette
 
   - name: Device
     pk: id
@@ -864,6 +874,114 @@ features:
     acceptance:
       - Analytics opt-in with clear copy.
       - Local data clear action.
+
+  - id: settings.personal_info
+    title: Personal Information (Profile)
+    status: planned
+    priority: P1
+    epic: settings
+    rationale: View and edit personal profile fields used for account and export flows.
+    user_stories:
+      - As a user I can view and edit my first name, last name, and email.
+      - As a user changing my email prompts validation (verify or reauth) before persisting.
+    acceptance:
+      - Profile screen shows firstName, lastName, email and photoUrl.
+      - Email change triggers validation flow (send verification or require credential reauth depending on provider).
+    screens: [settings]
+    components: [profile_form, email_validation_modal]
+    data:
+      reads:
+        - entity: Account
+      writes:
+        - entity: Account
+          op: update_fields
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: settings.my_data
+    title: My Data (Stats & Management)
+    status: planned
+    priority: P1
+    epic: settings
+    rationale: Give users transparency and controls over their personal data.
+    user_stories:
+      - As a user I can view high-level stats about my logs (totals and averages).
+      - As a user I can trigger a full data sync, export my data, or delete all local data.
+    acceptance:
+      - Stats displayed: totalLogs, firstLogTs, totalDurationMs, avgDurationByHour/day/month/year.
+      - Export action prepares a file and can email it to the user's address or open platform share.
+      - Full data sync enqueues a sync op and reports result to user.
+      - Delete all data clears local storage and optionally requests remote deletion when account-scoped.
+    screens: [settings]
+    components: [data_stats_card, data_actions_row, export_flow, delete_confirm]
+    data:
+      reads:
+        - entity: StatsDaily
+        - entity: SmokeLog
+      writes:
+        - entity: SyncOp
+        - entity: ImportBatch
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: settings.account_options
+    title: Account Options
+    status: planned
+    priority: P0
+    epic: settings
+    rationale: Manage signed-in identities, sessions and account lifecycle.
+    user_stories:
+      - As a user I can view signed-in accounts and add another.
+      - As a user I can sign out of individual accounts or all accounts.
+      - As a user I can change password (for email provider) or delete my account.
+    acceptance:
+      - Account list shows active sessions and provider type.
+      - Add-account flows co-exist with multi-sign-in feature.
+      - Change password flow exists for email-based accounts and requires reauth.
+      - Delete account triggers confirmation and backups/export prompt.
+    screens: [settings, account_switcher]
+    components: [account_list, add_account_button, sign_out_button, delete_account_confirm]
+    data:
+      reads:
+        - entity: Account
+        - entity: Session
+      writes:
+        - entity: Session
+          op: update_fields
+        - entity: Account
+          op: delete_by_id
+    offline:
+      behavior: allow_local_sign_out; remote ops queued
+
+  - id: settings.customization
+    title: Customization
+    status: planned
+    priority: P2
+    epic: settings
+    rationale: Let users tailor appearance and theme behavior.
+    acceptance:
+      - Toggle: follow_system_theme (on/off).
+      - Select accent color from a small palette and persist per-account.
+      - Theme changes apply instantly across app.
+    screens: [settings]
+    components: [theme_toggle, accent_picker]
+    data:
+      reads:
+        - entity: Prefs
+      writes:
+        - entity: Prefs
+          op: update_fields
+
+  - id: settings.about
+    title: About
+    status: planned
+    priority: P2
+    epic: settings
+    acceptance:
+      - Show app name, version, copyright, license and link to privacy policy.
+      - License view displays bundled LICENSE file content.
+    screens: [settings]
+    components: [about_card, license_modal]
 
   - id: notifications.reminders
     title: Reminders

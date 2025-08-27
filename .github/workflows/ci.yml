@@ -8,10 +8,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install pyyaml requests jsonschema; fi
+      - name: Validate feature_matrix schema
+        run: |
+          if [ -f feature_matrix.yaml ]; then \
+            python -c "import json,yaml,jsonschema,pathlib;d=yaml.safe_load(pathlib.Path('feature_matrix.yaml').read_text(encoding='utf-8'));s=json.loads(pathlib.Path('tool/json_schema/feature_matrix.schema.json').read_text(encoding='utf-8'));jsonschema.validate(d,s);print('Schema validation OK')"; \
+          else echo 'No feature_matrix.yaml present'; fi
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
       - run: flutter pub get
+      - name: Run generator
+        run: |
+          if [ -f scripts/generate_from_feature_matrix.py ]; then python scripts/generate_from_feature_matrix.py; fi
+      - name: Run build_runner
+        run: |
+          if grep -q 'freezed_annotation' pubspec.yaml; then flutter pub run build_runner build --delete-conflicting-outputs; fi
+      - name: Python generator unit tests
+        run: |
+          if [ -d scripts/tests ]; then python -m unittest discover -s scripts/tests -p '*_test.py'; fi
+      - name: Check generator drift
+        run: |
+          git add .
+          if ! git diff --cached --quiet; then
+            echo 'ERROR: Generated artifacts drift detected. Commit updates.'
+            git diff --cached --name-only
+            exit 1
+          fi
       - run: flutter analyze
       - run: flutter test --coverage
       - uses: codecov/codecov-action@v4

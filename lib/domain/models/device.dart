@@ -7,7 +7,6 @@ part 'device.freezed.dart';
 part 'device.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Device with _$Device {
   const factory Device({
     required String id,

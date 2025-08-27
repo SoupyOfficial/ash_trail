@@ -7,7 +7,6 @@ part 'smoke_log_tag.freezed.dart';
 part 'smoke_log_tag.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class SmokeLogTag with _$SmokeLogTag {
   const factory SmokeLogTag({
     required String id,

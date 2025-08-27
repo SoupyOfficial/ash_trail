@@ -7,7 +7,6 @@ part 'session.freezed.dart';
 part 'session.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Session with _$Session {
   const factory Session({
     required String id,

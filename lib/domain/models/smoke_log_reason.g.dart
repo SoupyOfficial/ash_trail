@@ -6,26 +6,6 @@ part of 'smoke_log_reason.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SmokeLogReason _$SmokeLogReasonFromJson(Map<String, dynamic> json) =>
-    SmokeLogReason(
-      id: json['id'] as String,
-      smokeLogId: json['smokeLogId'] as String,
-      reasonId: json['reasonId'] as String,
-      accountId: json['accountId'] as String,
-      ts: DateTime.parse(json['ts'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
-
-Map<String, dynamic> _$SmokeLogReasonToJson(SmokeLogReason instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'smokeLogId': instance.smokeLogId,
-      'reasonId': instance.reasonId,
-      'accountId': instance.accountId,
-      'ts': instance.ts.toIso8601String(),
-      'createdAt': instance.createdAt.toIso8601String(),
-    };
-
 _$SmokeLogReasonImpl _$$SmokeLogReasonImplFromJson(Map<String, dynamic> json) =>
     _$SmokeLogReasonImpl(
       id: json['id'] as String,

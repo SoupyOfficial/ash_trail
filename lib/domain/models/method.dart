@@ -7,7 +7,6 @@ part 'method.freezed.dart';
 part 'method.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Method with _$Method {
   const factory Method({
     required String id,

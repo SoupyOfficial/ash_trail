@@ -7,7 +7,6 @@ part 'filter_preset.freezed.dart';
 part 'filter_preset.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class FilterPreset with _$FilterPreset {
   const factory FilterPreset({
     required String id,

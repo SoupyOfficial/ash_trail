@@ -7,7 +7,6 @@ part 'chart_view.freezed.dart';
 part 'chart_view.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class ChartView with _$ChartView {
   const factory ChartView({
     required String id,

@@ -7,7 +7,6 @@ part 'stats_daily.freezed.dart';
 part 'stats_daily.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class StatsDaily with _$StatsDaily {
   const factory StatsDaily({
     required String id,

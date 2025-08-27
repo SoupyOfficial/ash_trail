@@ -7,7 +7,6 @@ part 'rule.freezed.dart';
 part 'rule.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Rule with _$Rule {
   const factory Rule({
     required String id,

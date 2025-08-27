@@ -7,7 +7,6 @@ part 'import_batch.freezed.dart';
 part 'import_batch.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class ImportBatch with _$ImportBatch {
   const factory ImportBatch({
     required String id,

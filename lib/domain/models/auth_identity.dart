@@ -7,7 +7,6 @@ part 'auth_identity.freezed.dart';
 part 'auth_identity.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class AuthIdentity with _$AuthIdentity {
   const factory AuthIdentity({
     required String id,

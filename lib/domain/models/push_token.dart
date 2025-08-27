@@ -7,7 +7,6 @@ part 'push_token.freezed.dart';
 part 'push_token.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class PushToken with _$PushToken {
   const factory PushToken({
     required String id,

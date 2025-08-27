@@ -7,7 +7,6 @@ part 'goal.freezed.dart';
 part 'goal.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Goal with _$Goal {
   const factory Goal({
     required String id,

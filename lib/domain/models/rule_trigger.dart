@@ -7,7 +7,6 @@ part 'rule_trigger.freezed.dart';
 part 'rule_trigger.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class RuleTrigger with _$RuleTrigger {
   const factory RuleTrigger({
     required String id,

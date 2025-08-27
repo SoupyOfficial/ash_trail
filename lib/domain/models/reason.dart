@@ -7,7 +7,6 @@ part 'reason.freezed.dart';
 part 'reason.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Reason with _$Reason {
   const factory Reason({
     required String id,

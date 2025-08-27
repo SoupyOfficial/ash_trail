@@ -7,7 +7,6 @@ part 'tag.freezed.dart';
 part 'tag.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Tag with _$Tag {
   const factory Tag({
     required String id,

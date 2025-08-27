@@ -7,7 +7,6 @@ part 'import_item.freezed.dart';
 part 'import_item.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class ImportItem with _$ImportItem {
   const factory ImportItem({
     required String id,

@@ -53,6 +53,33 @@ CI and code generation workflows pin Flutter to `3.29.2` (Dart >=3.5) to satisfy
 - Linting & formatting: the repo includes `analysis_options.yaml`; run `dart analyze` and `flutter format`.
 - CI: CI (if configured) will run analysis, tests and builds. See repository settings.
 
+### GitHub Copilot Enhanced Development
+
+This project is optimized for GitHub Copilot development with:
+
+- **AI Instructions**: Comprehensive context in `.github/instructions/` for architecture-aware code generation
+- **Feature Scaffolding**: Automated feature creation with Clean Architecture structure
+- **VS Code Integration**: Optimized settings for Copilot autocompletions and chat
+- **Development Scripts**: Automated setup and code generation workflows
+
+#### Quick Setup for Copilot Development
+```bash
+# Run the development environment setup
+python scripts/setup_dev_env.py
+
+# Create a new feature scaffold  
+python scripts/simple_feature_scaffold.py user_profile --epic accounts
+
+# Generate code from feature matrix
+scripts\dev_generate.bat
+```
+
+#### GitHub Copilot Usage Tips
+- Use `@github #workspace` for project-wide questions
+- Reference `.github/copilot-instructions.md` for architecture context
+- Use `@github #file:current` for file-specific improvements
+- Leverage feature_matrix.yaml for requirements context
+
 ### Feature matrix driven generation
 
 Artifacts generated from `feature_matrix.yaml`:

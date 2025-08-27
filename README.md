@@ -123,4 +123,4 @@ See the repository `LICENSE` file if present. If no license file exists, contact
 
 ---
 
-Last updated: 2025-08-26 (matches `feature_matrix.yaml` last_updated)
+Last updated: 2025-08-27 (matches `feature_matrix.yaml` last_updated)

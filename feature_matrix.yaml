@@ -1,6 +1,6 @@
 version: 0.3.0
 app: AshTrail
-last_updated: 2025-08-27
+last_updated: '2025-08-27'
 
 principles:
   - mobile_first
@@ -723,7 +723,7 @@ features:
       - Supports push and replace for modal vs full-screen flows.
       - Handles incoming deep link for /log/{id} opening detail view when available locally or after fetch.
       - Supports Universal Links / custom scheme (ashtrail://) for primary routes and log detail.
-      - State restoration: deep link launched cold start restores target screen after providers initialize.
+      - "State restoration: deep link launched cold start restores target screen after providers initialize."
     components: [router]
     telemetry:
       events: [route_navigate, route_unknown]
@@ -781,7 +781,7 @@ features:
     acceptance:
       - Home, logs table, and charts show skeletons for ≥300ms pending loads.
       - Avoids layout shift >16px on content load.
-      - Respects Reduce Motion: shimmer replaced by subtle fade when enabled.
+      - "Respects Reduce Motion: shimmer replaced by subtle fade when enabled."
     components: [skeleton_list, skeleton_chart]
 
   - id: ui.accessibility_foundation
@@ -808,10 +808,10 @@ features:
     priority: P1
     epic: ui
     acceptance:
-      - Central utility exposes semantic haptic events: tap, success, warning, error, impact_light.
+      - "Central utility exposes semantic haptic events: tap, success, warning, error, impact_light."
       - Logging capture uses press (impact_light) and release (success) patterns.
       - Haptics disabled automatically when Reduce Motion or system haptics disabled (if detectable) or via dev flag.
-      - Unit test: utility no-op when disabled flag set.
+      - "Unit test: utility no-op when disabled flag set."
     components: [haptics_service]
 
   - id: ui.quick_actions
@@ -821,7 +821,7 @@ features:
     priority: P1
     epic: ui
     acceptance:
-      - Long-press app icon shows: Log Hit, View Logs, Start Timed Log (last optional behind flag).
+      - "Long-press app icon shows: Log Hit, View Logs, Start Timed Log (last optional behind flag)."
       - Each quick action deep links into routed screen or opens record overlay.
       - Telemetry event for each invocation.
     components: [quick_actions]
@@ -1311,7 +1311,7 @@ features:
     priority: P0
     epic: data
     acceptance:
-      - Entities defined: Account, SmokeLog, Prefs.
+      - "Entities defined: Account, SmokeLog, Prefs."
       - Migrations from v0 handled safely.
     artifacts: [entities]
 
@@ -1456,7 +1456,7 @@ features:
       - As a user I can view high-level stats about my logs (totals and averages).
       - As a user I can trigger a full data sync, export my data, or delete all local data.
     acceptance:
-      - Stats displayed: totalLogs, firstLogTs, totalDurationMs, avgDurationByHour/day/month/year.
+      - "Stats displayed: totalLogs, firstLogTs, totalDurationMs, avgDurationByHour/day/month/year."
       - Export action prepares a file and can email it to the user's address or open platform share.
       - Full data sync enqueues a sync op and reports result to user.
       - Delete all data clears local storage and optionally requests remote deletion when account-scoped.
@@ -1534,7 +1534,7 @@ features:
     epic: settings
     rationale: Let users tailor appearance and theme behavior.
     acceptance:
-      - Toggle: follow_system_theme (on/off).
+      - "Toggle follow_system_theme (on/off)."
       - Select accent color from a small palette and persist per-account.
       - Theme changes apply instantly across app.
     screens: [settings]

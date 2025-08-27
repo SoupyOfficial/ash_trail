@@ -28,6 +28,7 @@ from __future__ import annotations
 import sys
 import yaml
 import re
+import argparse
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
@@ -328,11 +329,24 @@ def generate_acceptance_tests(data: Dict[str, Any]) -> List[Path]:
     return paths
 
 
-def main():
+def main(argv: List[str]):
+    """Entry point with simple CLI.
+
+    Flags:
+      --validate : only run validation (no file generation). Used by CI to gate PRs.
+    """
+    parser = argparse.ArgumentParser(description="Generate domain artifacts from feature_matrix.yaml")
+    parser.add_argument("--validate", action="store_true", help="Validate only; do not write any generated files")
+    args = parser.parse_args(argv)
+
     if not FEATURE_MATRIX.exists():
         fail("feature_matrix.yaml not found")
     data = load_yaml()
     validate(data)
+    if args.validate:
+        print("Validation succeeded (no files generated).")
+        return 0
+
     models = generate_models(data)
     indexes = generate_indexes(data)
     events = extract_telemetry_events(data)
@@ -345,7 +359,8 @@ def main():
     print(f"Telemetry events: {len(events)} -> {events_file.relative_to(ROOT)}")
     print(f"Feature flags: {flags_file.relative_to(ROOT)}")
     print(f"Acceptance test files: {len(tests)}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main(sys.argv[1:]))

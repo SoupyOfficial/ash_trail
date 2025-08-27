@@ -12,8 +12,10 @@ Always exits 0 (intended for PR comments).
 from __future__ import annotations
 import subprocess
 import yaml
+import argparse
+import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 ROOT = Path(__file__).resolve().parent.parent
 FILE = ROOT / "feature_matrix.yaml"
@@ -30,9 +32,14 @@ def git_show(rev: str) -> str:
         return ""
 
 
-def main():
+def main(argv: List[str]):
+    parser = argparse.ArgumentParser(description="Diff feature_matrix.yaml between current HEAD and a base ref")
+    parser.add_argument("--base-ref", default="origin/main", help="Base git ref to diff against (default: origin/main)")
+    parser.add_argument("--fail-on-change", action="store_true", help="Exit non-zero if any changes detected (useful for guarding accidental edits)")
+    args = parser.parse_args(argv)
+
     current_text = FILE.read_text(encoding="utf-8")
-    prev_text = git_show("HEAD^")
+    prev_text = git_show(args.base_ref)
     cur = read_yaml(current_text)
     prev = read_yaml(prev_text)
     cur_feats = {f['id']: f for f in cur.get('features', [])}
@@ -74,9 +81,13 @@ def main():
         for fid, pp, cp in priority_changes:
             print(f"- {fid}: {pp} -> {cp}")
         print()
-    if not any([added, removed, status_changes, priority_changes]):
+    changed = any([added, removed, status_changes, priority_changes])
+    if not changed:
         print("No changes detected.")
+    if args.fail_on_change and changed:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main(sys.argv[1:]))

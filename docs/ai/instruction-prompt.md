@@ -170,6 +170,24 @@ And the Charts and Table reflect the new entry
 * Do not add heavy dependencies without an ADR
 * Keep binary assets out of the repo unless essential
 
+## Automation Addendum: Feature Matrix CI
+
+This repository includes a `feature-matrix` GitHub Actions workflow providing early automation around the central `feature_matrix.yaml` source of truth:
+
+* Validates structure and enums via `scripts/generate_from_feature_matrix.py --validate` for every PR touching the matrix or generator scripts.
+* Generates a sticky PR comment (`feature-matrix-diff`) with human readable changes using `scripts/diff_feature_matrix.py --base-ref <base>`.
+* On push to `main` (and nightly cron) regenerates deterministic artifacts (models, indexes, telemetry events list, feature flags map, acceptance test scaffolds) and commits them if they changed, keeping manual code untouched (guarded by generated file banner).
+* Syncs GitHub issues from feature entries with labels (`feature`, `epic:<epic>`, `priority:<p>`, `status:<s>`). Dry‑runs when token/repo context missing (e.g., fork PRs).
+
+Planned (future gates):
+1. Per‑feature test coverage extraction & thresholds (fail if below defined min for in_progress/done features).
+2. Folder skeleton enforcement for features entering `in_progress`.
+3. Dependency gate (prevent implementation PR merge if prerequisite features not yet `done`).
+4. Roadmap & status badge doc generation (`docs/roadmap.md`).
+5. Drift detection between entities in matrix and committed model classes.
+
+Keep this section updated when additional automation stages land.
+
 ## Output Format Example (strict)
 
 ```

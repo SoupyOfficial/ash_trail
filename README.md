@@ -14,3 +14,9 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Data model
+
+The canonical data model is defined in `feature_matrix.yaml` and summarized in `docs/data-model.md`.
+
+Key recent changes: SmokeLog now uses numeric mood/physical scores and edges for tags and reasons are modelled with `SmokeLogTag` and `SmokeLogReason` join tables. See `docs/data-model.md` for details and Isar/Dart examples.

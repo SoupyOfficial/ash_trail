@@ -1,0 +1,949 @@
+version: 0.2.0
+app: AshTrail
+last_updated: 2025-08-26
+
+principles:
+  - offline_first
+  - multi_account
+  - clean_architecture
+  - single_source_of_truth
+  - privacy_by_default
+  - explicit_undo
+  - performance_budgets
+  - analytics_opt_in
+  - testability
+
+platforms:
+  flutter:
+    targets: [android, ios]
+    min_android_sdk: 23
+    min_ios: 13
+    state_mgmt: riverpod
+    charts_lib: fl_chart
+
+enums:
+  status: [planned, in_progress, done, parked]
+  priority: [P0, P1, P2]
+  write_policy: [enqueue_then_write_remote, write_through, local_only]
+  conflict_policy: [last_write_wins_per_field, server_timestamp_wins, custom_merge]
+
+epics:
+  - id: logging
+    title: Logging
+    desc: Capture and edit smoking events quickly with minimal friction.
+  - id: insights
+    title: Insights
+    desc: Charts and analytics across ranges and accounts.
+  - id: accounts
+    title: Accounts
+    desc: Multi-account auth, session, and switching.
+  - id: sync
+    title: Sync
+    desc: Background queue, retry, conflict handling.
+  - id: data
+    title: Data
+    desc: Schema, indexing, and perf for queries.
+  - id: settings
+    title: Settings
+    desc: App preferences, privacy, units.
+  - id: notifications
+    title: Notifications
+    desc: Reminders and system prompts.
+  - id: export
+    title: Export & Share
+    desc: CSV/JSON export and share flows.
+  - id: quality
+    title: Quality
+    desc: A11y, telemetry, error handling, perf budgets.
+  - id: devtools
+    title: Dev & Ops
+    desc: Feature flags, demo mode, logging console.
+
+entities:
+  - name: Account
+    pk: id
+    fields:
+      - name: id
+        type: string
+      - name: displayName
+        type: string
+      - name: photoUrl
+        type: "string?"
+      - name: provider
+        type: "enum[google,email,device]"
+
+  - name: SmokeLog
+    pk: id
+    indexes:
+      - name: byAccountTs
+        fields:
+          - accountId
+          - ts
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: ts
+        type: datetime
+      - name: durationMs
+        type: int
+      - name: methodId
+        type: "fk(Method.id)?"
+      - name: potency
+        type: "int?"
+      - name: moodScore            # 1..10 inclusive
+        type: int
+      - name: physicalScore        # 1..10 inclusive
+        type: int
+      - name: notes
+        type: "string?"
+      - name: deviceLocalId
+        type: "string?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+  - name: SmokeLogTag
+    pk: id
+    indexes:
+      - name: byLog
+        fields:
+          - smokeLogId
+      - name: byTag
+        fields:
+          - tagId
+      - name: byAccountTag
+        fields:
+          - accountId
+          - tagId
+      - name: byAccountTagTs
+        fields:
+          - accountId
+          - tagId
+          - ts
+    fields:
+      - name: id
+        type: string
+      - name: smokeLogId
+        type: "fk(SmokeLog.id)"
+      - name: tagId
+        type: "fk(Tag.id)"
+      - name: accountId                # denorm for partitioned queries
+        type: "fk(Account.id)"
+      - name: ts                        # denorm to filter by date without fetching logs
+        type: datetime
+      - name: createdAt
+        type: datetime
+      # Note: enforce uniqueness of (smokeLogId, tagId) in app logic.
+  
+  - name: Reason
+    pk: id
+    indexes:
+      - name: byAccountOrder
+        fields:
+          - accountId
+          - orderIndex
+      - name: byAccountName
+        fields:
+          - accountId
+          - name
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)?"
+      - name: name
+        type: string
+      - name: enabled
+        type: bool
+      - name: orderIndex
+        type: int
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: SmokeLogReason
+    pk: id
+    indexes:
+      - name: byLog
+        fields:
+          - smokeLogId
+      - name: byReason
+        fields:
+          - reasonId
+      - name: byAccountReason
+        fields:
+          - accountId
+          - reasonId
+      - name: byAccountReasonTs
+        fields:
+          - accountId
+          - reasonId
+          - ts
+    fields:
+      - name: id
+        type: string
+      - name: smokeLogId
+        type: "fk(SmokeLog.id)"
+      - name: reasonId
+        type: "fk(Reason.id)"
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: ts
+        type: datetime
+      - name: createdAt
+        type: datetime
+  
+  - name: FilterPreset
+    pk: id
+    indexes:
+      - name: byAccountUpdated
+        fields:
+          - accountId
+          - updatedAt
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: name
+        type: string
+      - name: range
+        type: "enum[7d,30d,90d,1y,all,custom]"
+      - name: customStart
+        type: "date?"
+      - name: customEnd
+        type: "date?"
+      - name: includeTags
+        type: "string[]?"
+      - name: excludeTags
+        type: "string[]?"
+      - name: sort
+        type: "enum[tsAsc,tsDesc,durationAsc,durationDesc]"
+      - name: query
+        type: "string?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: Goal
+    pk: id
+    indexes:
+      - name: byAccountActive
+        fields:
+          - accountId
+          - active
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: type
+        type: "enum[countPerDay,durationPerDay,streak]"
+      - name: target
+        type: int
+      - name: window
+        type: "enum[day,week,month]"
+      - name: startDate
+        type: date
+      - name: endDate
+        type: "date?"
+      - name: active
+        type: bool
+      - name: progress
+        type: "int?"
+      - name: achievedAt
+        type: "datetime?"
+
+  - name: Rule
+    pk: id
+    indexes:
+      - name: byAccountEnabled
+        fields:
+          - accountId
+          - enabled
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: name
+        type: string
+      - name: condition
+        type: json
+      - name: action
+        type: "enum[notify,tag,reminder]"
+      - name: enabled
+        type: bool
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: RuleTrigger
+    pk: id
+    indexes:
+      - name: byRuleTime
+        fields:
+          - ruleId
+          - triggeredAt
+    fields:
+      - name: id
+        type: string
+      - name: ruleId
+        type: "fk(Rule.id)"
+      - name: triggeredAt
+        type: datetime
+      - name: context
+        type: json
+
+  - name: ImportItem
+    pk: id
+    indexes:
+      - name: byBatchStatus
+        fields:
+          - batchId
+          - status
+    fields:
+      - name: id
+        type: string
+      - name: batchId
+        type: "fk(ImportBatch.id)"
+      - name: status
+        type: "enum[inserted,failed,skipped]"
+      - name: raw
+        type: json
+      - name: error
+        type: "string?"
+
+  - name: PushToken
+    pk: id
+    indexes:
+      - name: byDeviceActive
+        fields:
+          - deviceId
+          - active
+    fields:
+      - name: id
+        type: string
+      - name: deviceId
+        type: "fk(Device.id)"
+      - name: platform
+        type: "enum[apns,fcm,web]"
+      - name: token
+        type: string
+      - name: active
+        type: bool
+      - name: createdAt
+        type: datetime
+      - name: revokedAt
+        type: "datetime?"
+
+  - name: Onboarding
+    pk: accountId
+    fields:
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: stepsCompleted
+        type: "enum[welcome,recordedFirst,createdTag,enabledReminders,createdGoal][]"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: DbMeta
+    pk: id
+    fields:
+      - name: id
+        type: string
+      - name: schemaVersion
+        type: int
+      - name: migratedAt
+        type: datetime
+
+  - name: Prefs
+    pk: accountId
+    fields:
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: defaultRange
+        type: "enum[7d,30d,90d,1y,all]"
+      - name: unit
+        type: "enum[ms,s]"
+      - name: analyticsOptIn
+        type: bool
+      - name: reminderTimes
+        type: "time[]?"
+
+  - name: Device
+    pk: id
+    indexes:
+      - name: byPlatform
+        fields:
+          - platform
+    fields:
+      - name: id
+        type: string
+      - name: platform
+        type: "enum[android,ios,web,desktop]"
+      - name: appVersion
+        type: string
+      - name: osVersion
+        type: "string?"
+      - name: model
+        type: "string?"
+      - name: createdAt
+        type: datetime
+
+  - name: AuthIdentity
+    pk: id
+    indexes:
+      - name: byAccountProvider
+        fields:
+          - accountId
+          - provider
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: provider
+        type: "enum[google,email,device]"
+      - name: providerUid
+        type: string
+      - name: email
+        type: "string?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: Session
+    pk: id
+    indexes:
+      - name: byAccountStatus
+        fields:
+          - accountId
+          - status
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: deviceId
+        type: "fk(Device.id)?"
+      - name: status
+        type: "enum[active,revoked,expired]"
+      - name: tokenHash
+        type: "string?"
+      - name: expiresAt
+        type: "datetime?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: SyncState
+    pk: accountId
+    fields:
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: lastPulledAt
+        type: "datetime?"
+      - name: lastPushedAt
+        type: "datetime?"
+      - name: remoteVersion
+        type: "string?"
+      - name: tombstoneWatermark
+        type: "string?"
+      - name: backoffUntil
+        type: "datetime?"
+
+  - name: SyncOp
+    pk: id
+    indexes:
+      - name: byAccountStatusCreated
+        fields:
+          - accountId
+          - status
+          - createdAt
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: entity
+        type: "enum[SmokeLog,Prefs,Account,Tag,SmokeLogTag,Method,Reason,SmokeLogReason]"
+      - name: op
+        type: "enum[upsert,delete]"
+      - name: recordId
+        type: string
+      - name: payload
+        type: json
+      - name: status
+        type: "enum[queued,sending,ack,failed]"
+      - name: attempts
+        type: int
+      - name: lastError
+        type: "string?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: ImportBatch
+    pk: id
+    indexes:
+      - name: byAccountCreated
+        fields:
+          - accountId
+          - startedAt
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: source
+        type: "enum[csv,json,cloud]"
+      - name: fileName
+        type: "string?"
+      - name: countInserted
+        type: int
+      - name: countFailed
+        type: int
+      - name: startedAt
+        type: datetime
+      - name: finishedAt
+        type: "datetime?"
+      - name: log
+        type: "string?"
+
+  - name: ChartView
+    pk: id
+    indexes:
+      - name: byAccountUpdated
+        fields:
+          - accountId
+          - updatedAt
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: title
+        type: string
+      - name: range
+        type: "enum[7d,30d,90d,1y,all,custom]"
+      - name: customStart
+        type: "date?"
+      - name: customEnd
+        type: "date?"
+      - name: groupBy
+        type: "enum[day,week,month]"
+      - name: metric
+        type: "enum[count,duration]"
+      - name: smoothing
+        type: "enum[none,ema,rolling]"
+      - name: smoothingWindow
+        type: "int?"
+      - name: visibleTags
+        type: "string[]?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: StatsDaily
+    pk: id
+    indexes:
+      - name: byAccountDate
+        fields:
+          - accountId
+          - date
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: date
+        type: date
+      - name: hitCount
+        type: int
+      - name: totalDurationMs
+        type: int
+      - name: avgDurationMs
+        type: int
+
+  - name: Tag
+    pk: id
+    indexes:
+      - name: byAccountName
+        fields:
+          - accountId
+          - name
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: name
+        type: string
+      - name: color
+        type: "string?"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+  - name: Reminder
+    pk: id
+    indexes:
+      - name: byAccountTime
+        fields:
+          - accountId
+          - time
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)"
+      - name: time
+        type: time
+      - name: days
+        type: "enum[mon,tue,wed,thu,fri,sat,sun][]"
+      - name: enabled
+        type: bool
+      - name: lastTriggeredAt
+        type: "datetime?"
+
+  - name: Method
+    pk: id
+    indexes:
+      - name: byAccountName
+        fields:
+          - accountId
+          - name
+    fields:
+      - name: id
+        type: string
+      - name: accountId
+        type: "fk(Account.id)?"
+      - name: name
+        type: string
+      - name: category
+        type: "enum[combustion,vaporization,edible,other]"
+      - name: createdAt
+        type: datetime
+      - name: updatedAt
+        type: datetime
+
+perf_budgets:
+  app:
+    cold_start_p95_ms: 1200
+    warm_start_p95_ms: 500
+    home_first_paint_p95_ms: 700
+    bundle_size_max_mb: 30
+  charts:
+    render_p95_ms: 200
+    range_query_p95_ms: 120
+  logging:
+    save_latency_p95_ms: 80
+    undo_latency_p95_ms: 60
+  sync:
+    retry_backoff_ms: [1000, 5000, 15000]
+
+security:
+  data_at_rest: os_keystore_protected
+  data_in_transit: tls12_plus
+  pii:
+    - Account.displayName
+    - Account.photoUrl
+  export_redaction: none_by_default
+
+features:
+
+  - id: logging.capture_hit
+    title: Hold-to-Record Hit Duration
+    status: planned
+    priority: P0
+    epic: logging
+    rationale: Fast logging with minimal taps.
+    user_stories:
+      - As a user I press and hold to capture duration then release to save.
+      - As a user I can add optional notes, method, mood, potency.
+    acceptance:
+      - Release creates SmokeLog with durationMs = hold_time.
+      - Snackbar offers Undo for 6 seconds.
+      - Works offline with queued write.
+    screens: [home, record_overlay]
+    components: [record_button, method_picker, mood_picker, snackbar_undo]
+    data:
+      writes:
+        - entity: SmokeLog
+          fields: [id, accountId, ts, durationMs, method?, notes?, mood?, potency?]
+      reads: []
+    offline:
+      write_policy: enqueue_then_write_remote
+      conflict: last_write_wins_per_field
+    telemetry:
+      events:
+        - log_created
+        - log_undone
+    a11y:
+      labels:
+        - "Record hit. Hold to start, release to save."
+      min_touch_target_px: 48
+    errors:
+      - code: E_RECORD_FAIL
+        message: "Failed to save. Tap to retry."
+
+  - id: logging.undo_last
+    title: Undo Last Log
+    status: planned
+    priority: P0
+    epic: logging
+    acceptance:
+      - Undo deletes last created SmokeLog if pressed within timeout.
+      - Undo is idempotent and safe offline.
+    components: [snackbar_undo]
+    data:
+      writes:
+        - entity: SmokeLog
+          op: delete_by_id
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: logs.table_browse_edit
+    title: Logs Table Browse + Edit
+    status: planned
+    priority: P0
+    epic: logging
+    rationale: Review and correct logs quickly.
+    user_stories:
+      - As a user I view, sort, filter, edit, and delete logs.
+    acceptance:
+      - Sort by date, duration, method.
+      - Filter by range, method, tags, mood.
+      - Inline edit duration and notes with validation.
+    screens: [logs]
+    components: [log_table, filter_bar, pagination, edit_modal, delete_confirm]
+    data:
+      reads:
+        - entity: SmokeLog
+          query: byAccountTs
+      writes:
+        - entity: SmokeLog
+          op: update_fields
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: logs.detail_view
+    title: Log Detail
+    status: planned
+    priority: P2
+    epic: logging
+    acceptance:
+      - Open from table to view full metadata and history.
+    screens: [log_detail]
+    components: [detail_card, actions_row]
+
+  - id: insights.charts_time_series
+    title: "Charts: Daily | Weekly | Monthly | Cumulative | Moving Avg"
+    status: planned
+    priority: P0
+    epic: insights
+    screens: [charts]
+    components: [time_range_picker, fl_chart_line, legend, empty_state, aggregation_toggle]
+    data:
+      reads:
+        - entity: SmokeLog
+          query: byAccountTs_with_range
+    perf_budget:
+      chart_render_p95_ms: 200
+    acceptance:
+      - Aggregations switch without re-navigation.
+      - Panning respects selected range and account.
+
+  - id: accounts.multi_sign_in_switch
+    title: Multi-Account Sign-In + Switch
+    status: planned
+    priority: P0
+    epic: accounts
+    rationale: Household and shared device support.
+    user_stories:
+      - As a user I can sign in multiple accounts and switch without reauth.
+      - As a user I see which account is active on all screens.
+    acceptance:
+      - Active account pill visible and tappable.
+      - Switching updates all queries and UI state.
+    screens: [account_switcher, home, charts, logs]
+    components: [account_chip, account_menu]
+    data:
+      reads:
+        - entity: Account
+      writes: []
+    offline:
+      behavior: switch_works_offline_with_cached_profiles
+
+  - id: accounts.sessions_persistence
+    title: Persistent Sessions
+    status: planned
+    priority: P1
+    epic: accounts
+    acceptance:
+      - Sessions survive app restarts and short network loss.
+
+  - id: devtools.demo_mode
+    title: Demo Mode with Static Users
+    status: planned
+    priority: P1
+    epic: devtools
+    rationale: Development and presentations.
+    acceptance:
+      - Toggle to preload 2–3 demo accounts and sample logs.
+      - Isolated from production data.
+    flags: [DEMO_MODE]
+
+  - id: sync.background_queue
+    title: Background Sync Queue + Retry
+    status: planned
+    priority: P0
+    epic: sync
+    acceptance:
+      - Exponential backoff retry until success.
+      - Queue survives app restarts.
+    triggers: [app_start, foreground, connectivity_gain]
+    telemetry:
+      events: [sync_enqueued, sync_success, sync_failure]
+
+  - id: sync.conflict_resolution
+    title: Conflict Resolution
+    status: planned
+    priority: P1
+    epic: sync
+    policy: last_write_wins_per_field
+    acceptance:
+      - Conflicts resolved deterministically and logged.
+
+  - id: data.schema_v1
+    title: Data Schema v1
+    status: in_progress
+    priority: P0
+    epic: data
+    acceptance:
+      - Entities defined: Account, SmokeLog, Prefs.
+      - Migrations from v0 handled safely.
+    artifacts: [entities]
+
+  - id: data.indexing_perf
+    title: Indexing + Query Perf
+    status: planned
+    priority: P1
+    epic: data
+    acceptance:
+      - P95 range query ≤ 120 ms on 50k rows.
+      - Pagination consistent and stable.
+
+  - id: settings.preferences
+    title: Preferences and Units
+    status: planned
+    priority: P2
+    epic: settings
+    acceptance:
+      - Switch ms/s units across UI.
+      - Default chart range per account.
+
+  - id: settings.privacy
+    title: Privacy Controls
+    status: planned
+    priority: P2
+    epic: settings
+    acceptance:
+      - Analytics opt-in with clear copy.
+      - Local data clear action.
+
+  - id: notifications.reminders
+    title: Reminders
+    status: parked
+    priority: P2
+    epic: notifications
+    acceptance:
+      - Schedule daily or custom times to log.
+
+  - id: export.csv_json
+    title: Export CSV/JSON
+    status: planned
+    priority: P1
+    epic: export
+    acceptance:
+      - Share CSV or JSON for selected range and account.
+      - Valid headers and RFC3339 timestamps.
+
+  - id: quality.a11y_baseline
+    title: Accessibility Baseline
+    status: planned
+    priority: P1
+    epic: quality
+    acceptance:
+      - All touch targets ≥ 48 px.
+      - Labels on interactive elements.
+      - Screen reader order logical.
+
+  - id: quality.error_handling
+    title: Error Handling + Retry UI
+    status: planned
+    priority: P1
+    epic: quality
+    acceptance:
+      - Inline error states with retry.
+      - Centralized error codes.
+
+  - id: quality.telemetry
+    title: Telemetry Events
+    status: planned
+    priority: P1
+    epic: quality
+    events:
+      - app_open
+      - account_switch
+      - chart_view
+      - filter_apply
+      - export_started
+      - export_completed
+
+  - id: devtools.feature_flags
+    title: Feature Flags
+    status: in_progress
+    priority: P1
+    epic: devtools
+    acceptance:
+      - Per-feature flags gate new UI safely.
+      - Flags readable at runtime.
+
+open_questions:
+  - How strict should dedupe be for rapid hold-release logs? Use deviceLocalId+ts?
+  - Do we support cross-account aggregated charts or keep account-scoped?
+  - Export: include tags and mood by default or behind toggle?
+  - Minimum supported offline duration before queue purged?
+
+risks:
+  - Large datasets may degrade client-side aggregation. Mitigate with pre-agg or windowing.
+  - Multi-account confusion in UI. Mitigate with persistent active account chip and color accent.
+
+dependencies:
+  - charts_time_series depends_on: [data.indexing_perf, data.schema_v1]
+  - export.csv_json depends_on: [logs.table_browse_edit, data.indexing_perf]
+  - sync.background_queue depends_on: [data.schema_v1]
+
+owners:
+  - logging: backend_team
+  - insights: app_team
+  - sync: platform_team
+  - data: platform_team
+
+notes:
+  - All timestamps use UTC ISO-8601 with timezone offset when displayed.
+  - Range presets: 7d, 30d, 90d, 1y, all.

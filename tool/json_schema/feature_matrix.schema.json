@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AshTrail Feature Matrix",
+  "type": "object",
+  "required": ["version", "app", "last_updated", "principles", "enums", "epics", "entities", "features"],
+  "properties": {
+    "version": {"type": "string"},
+    "app": {"type": "string"},
+    "last_updated": {"type": "string"},
+    "principles": {"type": "array", "items": {"type": "string"}},
+    "enums": {"type": "object"},
+    "epics": {"type": "array", "items": {"type": "object", "required": ["id", "title"], "properties": {"id": {"type": "string"}, "title": {"type": "string"}, "desc": {"type": "string"}}}},
+    "entities": {"type": "array", "items": {"type": "object", "required": ["name", "pk", "fields"], "properties": {"name": {"type": "string"}, "pk": {"type": "string"}}}},
+    "perf_budgets": {"type": "object"},
+    "security": {"type": "object"},
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status", "priority", "epic"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+            "status": {"type": "string"},
+            "priority": {"type": "string"},
+            "epic": {"type": "string"},
+            "acceptance": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

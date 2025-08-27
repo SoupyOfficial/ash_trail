@@ -1,0 +1,61 @@
+name: Generate Artifacts
+
+on:
+  push:
+    paths:
+      - 'feature_matrix.yaml'
+      - 'scripts/**'
+  pull_request:
+    paths:
+      - 'feature_matrix.yaml'
+      - 'scripts/**'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Flutter pub get (if flutter project)
+        if: hashFiles('pubspec.yaml') != ''
+        run: |
+          if grep -q 'sdk: flutter' pubspec.yaml; then
+            dart pub get || flutter pub get || true
+          else
+            dart pub get
+          fi
+
+      - name: Run generator
+        run: |
+          python scripts/generate_from_feature_matrix.py
+
+      - name: Run build_runner (Freezed)
+        run: |
+          if grep -q 'freezed_annotation' pubspec.yaml; then
+            dart run build_runner build --delete-conflicting-outputs || true
+          fi
+
+      - name: Run tests
+        run: |
+          if [ -d test ] && [ "$(ls -A test)" ]; then
+            dart test || true
+          fi
+
+      - name: Check for uncommitted changes
+        run: |
+          git add .
+          git diff --cached --quiet || (echo "ERROR: Generated artifacts not committed." && git diff --cached --name-only && exit 1)

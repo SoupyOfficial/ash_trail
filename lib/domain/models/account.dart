@@ -7,8 +7,9 @@ part 'account.freezed.dart';
 part 'account.g.dart';
 
 @freezed
-@JsonSerializable(explicitToJson: true)
 class Account with _$Account {
+  // NOTE: Removed @JsonSerializable on the class to prevent json_serializable from
+  // generating a duplicate top-level `_$AccountFromJson`. Freezed handles JSON.
   const factory Account({
     required String id,
     required String displayName,
@@ -19,5 +20,6 @@ class Account with _$Account {
     required String provider, // TODO: constrain to enum values
   }) = _Account;
 
-  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
+  factory Account.fromJson(Map<String, dynamic> json) =>
+      _$AccountFromJson(json);
 }

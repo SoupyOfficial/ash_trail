@@ -19,5 +19,6 @@ class PushToken with _$PushToken {
     DateTime? revokedAt,
   }) = _PushToken;
 
-  factory PushToken.fromJson(Map<String, dynamic> json) => _$PushTokenFromJson(json);
+  factory PushToken.fromJson(Map<String, dynamic> json) =>
+      _$PushTokenFromJson(json);
 }

@@ -16,5 +16,6 @@ class RuleTrigger with _$RuleTrigger {
     required Map<String, dynamic> context,
   }) = _RuleTrigger;
 
-  factory RuleTrigger.fromJson(Map<String, dynamic> json) => _$RuleTriggerFromJson(json);
+  factory RuleTrigger.fromJson(Map<String, dynamic> json) =>
+      _$RuleTriggerFromJson(json);
 }

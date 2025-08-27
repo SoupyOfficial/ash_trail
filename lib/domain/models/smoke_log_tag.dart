@@ -18,5 +18,6 @@ class SmokeLogTag with _$SmokeLogTag {
     required DateTime createdAt,
   }) = _SmokeLogTag;
 
-  factory SmokeLogTag.fromJson(Map<String, dynamic> json) => _$SmokeLogTagFromJson(json);
+  factory SmokeLogTag.fromJson(Map<String, dynamic> json) =>
+      _$SmokeLogTagFromJson(json);
 }

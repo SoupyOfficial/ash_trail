@@ -7,8 +7,8 @@ part 'reminder.freezed.dart';
 part 'reminder.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Reminder with _$Reminder {
-  @JsonSerializable(explicitToJson: true)
   const factory Reminder({
     required String id,
     required String accountId, // TODO: FK to Account

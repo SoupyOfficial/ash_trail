@@ -54,7 +54,8 @@ jobs:
           if [ -d scripts/tests ]; then python -m unittest discover -s scripts/tests -p '*_test.py'; fi
       - name: Check generator drift
         run: |
-          git add .
+          # Restrict added paths to intentional generator outputs to prevent coverage/ and other runtime files from triggering drift.
+          git add lib/domain/models lib/domain/indexes lib/telemetry tool/feature_flags.g.dart test/acceptance || true
           if ! git diff --cached --quiet; then
             echo 'ERROR: Generated artifacts drift detected. Commit updates.'
             echo 'Changed files:'

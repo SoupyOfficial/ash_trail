@@ -57,7 +57,8 @@ jobs:
 
       - name: Check for uncommitted changes
         run: |
-          git add .
+          # Add only known generated artifact paths; avoid staging coverage reports or unrelated files.
+          git add lib/domain/models lib/domain/indexes lib/telemetry tool/feature_flags.g.dart test/acceptance || true
           if ! git diff --cached --quiet; then
             echo 'ERROR: Generated artifacts not committed.'
             echo 'Changed files:'

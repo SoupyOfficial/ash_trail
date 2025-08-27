@@ -689,6 +689,7 @@ features:
       - As a user I can add optional notes, method, mood, potency.
     acceptance:
       - Release creates SmokeLog with durationMs = hold_time.
+      - Considers the time it takes to detect a long press and properly account for it in durationMs.
       - Snackbar offers Undo for 6 seconds.
       - Works offline with queued write.
     screens: [home, record_overlay]

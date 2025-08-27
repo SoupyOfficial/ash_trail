@@ -28,6 +28,9 @@ enums:
   conflict_policy: [last_write_wins_per_field, server_timestamp_wins, custom_merge]
 
 epics:
+  - id: ui
+    title: UI Architecture & Navigation
+    desc: App shell, routing, adaptive layouts, and theme scaffolding.
   - id: logging
     title: Logging
     desc: Capture and edit smoking events quickly with minimal friction.
@@ -675,6 +678,104 @@ security:
 
 features:
   # Grouped & ordered by epic; 'order' denotes implementation sequence within the epic (lower first)
+
+  # === UI Architecture & Navigation ===
+  - id: ui.app_shell
+    order: 1
+    title: App Shell & Navigation Scaffold
+    status: planned
+    priority: P0
+    epic: ui
+    rationale: Establish consistent structure for all screens and enable future features.
+    acceptance:
+      - Implements app root with Riverpod providers initialization and error boundary.
+      - iPhone (incl. 16 Pro Max) uses bottom navigation bar with at least Home and Logs tabs (initial release scope); Charts & Settings accessible via overflow / future tabs.
+      - Side / rail navigation activates for width ≥ 840dp (tablet/desktop) showing Home, Logs, Charts, Settings icons.
+      - Navigation state (active tab + stack) persists across app restarts (last active primary tab preserved).
+      - Deep links to primary tabs supported (home, logs) and future-ready for charts, settings.
+      - Tab bar safe-area aware; no overlap with iOS home indicator; minimum tap target ≥48px.
+      - Logs tab initially contains both log table and inline / toggleable chart view (chart segment behind feature flag until charts epic delivered).
+      - "Separate Charts tab disabled until insights.charts_time_series marked done; enabling it moves chart UI from Logs tab."
+    screens: [home, logs, charts, settings]
+    components: [app_shell, nav_bar, adaptive_layout]
+    offline:
+      behavior: shell_renders_with_cached_theme_and_last_tab
+
+  - id: ui.routing
+    order: 2
+    title: Typed Routing & Deep Link Handling
+    status: planned
+    priority: P0
+    epic: ui
+    acceptance:
+      - Define central route map with typed params (e.g., log detail id).
+      - Unknown routes redirect to safe default (home) with telemetry event.
+      - Supports push and replace for modal vs full-screen flows.
+      - Handles incoming deep link for /log/{id} opening detail view when available locally or after fetch.
+    components: [router]
+    telemetry:
+      events: [route_navigate, route_unknown]
+
+  - id: ui.theming
+    order: 3
+    title: Theming System & Dark Mode
+    status: planned
+    priority: P0
+    epic: ui
+    acceptance:
+      - Light/dark themes implemented with semantic color/token set.
+      - Theme reacts to system preference unless overridden (future customization feature flag gated).
+      - High-contrast mode ready (placeholder tokens) without regressions.
+    components: [theme_provider]
+    offline:
+      behavior: theme_persists_locally
+
+  - id: ui.responsive
+    order: 4
+    title: Responsive & Adaptive Layout
+    status: planned
+    priority: P1
+    epic: ui
+    acceptance:
+      - Tablet/desktop shows dual-pane for logs (table + detail preview) when width ≥ 840dp.
+      - Charts screen scales legend layout (wrap vs side) based on width breakpoint.
+      - Minimum tap targets enforced (≥48px) via shared style.
+    components: [adaptive_layout, breakpoint_builder]
+
+  - id: ui.error_boundary
+    order: 5
+    title: Global Error Boundary & Retry Surface
+    status: planned
+    priority: P1
+    epic: ui
+    acceptance:
+      - Uncaught UI errors show fallback with Restart and Copy Logs (dev) actions.
+      - Boundary logs sanitized error event (respects analyticsOptIn).
+      - Unit tests cover error boundary capturing and reset logic.
+    components: [error_boundary]
+
+  - id: ui.loading_skeletons
+    order: 6
+    title: Skeleton & Shimmer States
+    status: planned
+    priority: P2
+    epic: ui
+    acceptance:
+      - Home, logs table, and charts show skeletons for ≥300ms pending loads.
+      - Avoids layout shift >16px on content load.
+    components: [skeleton_list, skeleton_chart]
+
+  - id: ui.accessibility_foundation
+    order: 7
+    title: Accessibility Foundation
+    status: planned
+    priority: P2
+    epic: ui
+    acceptance:
+      - Global text scale up to 200% without overflow on primary screens.
+      - Focus order and traversal defined for keyboard / assistive tech.
+      - Semantics labels on navigation items and record button.
+    components: [semantics_wrappers]
 
   # === Logging ===
   - id: logging.capture_hit

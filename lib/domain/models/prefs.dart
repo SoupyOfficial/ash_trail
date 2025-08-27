@@ -7,8 +7,8 @@ part 'prefs.freezed.dart';
 part 'prefs.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Prefs with _$Prefs {
-  @JsonSerializable(explicitToJson: true)
   const factory Prefs({
     required String accountId, // TODO: FK to Account
     required String defaultRange, // TODO: constrain to enum values

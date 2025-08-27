@@ -7,8 +7,8 @@ part 'onboarding.freezed.dart';
 part 'onboarding.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Onboarding with _$Onboarding {
-  @JsonSerializable(explicitToJson: true)
   const factory Onboarding({
     required String accountId, // TODO: FK to Account
     required List<String> stepsCompleted, // TODO: constrain to enum values

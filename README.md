@@ -46,6 +46,27 @@ Notes
 - Linting & formatting: the repo includes `analysis_options.yaml`; run `dart analyze` and `flutter format`.
 - CI: CI (if configured) will run analysis, tests and builds. See repository settings.
 
+### Feature matrix driven generation
+
+Artifacts generated from `feature_matrix.yaml`:
+- Domain models (`lib/domain/models/*.dart`)
+- Entity index map (`lib/domain/indexes/entity_indexes.dart`)
+- Telemetry events list (`lib/telemetry/events.dart`)
+- Feature flags map (`tool/feature_flags.g.dart`)
+- Acceptance test scaffolds (`test/acceptance/*_test.dart`)
+
+Regenerate locally after matrix edits:
+- macOS/Linux: `./scripts/dev_generate.sh`
+- Windows (cmd): `scripts\\dev_generate.bat`
+
+Optional pre-commit hook to auto-regenerate before commit:
+```
+pip install pre-commit
+pre-commit install
+```
+
+CI workflow "Generate Artifacts" validates schema, runs the generator, executes `build_runner`, analyzes, tests, and fails if artifacts drift from the matrix.
+
 ## Data model & sync
 
 The canonical data model and platform decisions are in `feature_matrix.yaml`. For a readable schema and examples, see `docs/data-model.md`.

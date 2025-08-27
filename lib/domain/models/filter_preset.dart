@@ -7,8 +7,8 @@ part 'filter_preset.freezed.dart';
 part 'filter_preset.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class FilterPreset with _$FilterPreset {
-  @JsonSerializable(explicitToJson: true)
   const factory FilterPreset({
     required String id,
     required String accountId, // TODO: FK to Account

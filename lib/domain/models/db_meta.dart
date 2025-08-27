@@ -7,8 +7,8 @@ part 'db_meta.freezed.dart';
 part 'db_meta.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class DbMeta with _$DbMeta {
-  @JsonSerializable(explicitToJson: true)
   const factory DbMeta({
     required String id,
     required int schemaVersion,

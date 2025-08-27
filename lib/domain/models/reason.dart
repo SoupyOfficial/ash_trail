@@ -7,8 +7,8 @@ part 'reason.freezed.dart';
 part 'reason.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Reason with _$Reason {
-  @JsonSerializable(explicitToJson: true)
   const factory Reason({
     required String id,
     String? accountId, // TODO: FK to Account

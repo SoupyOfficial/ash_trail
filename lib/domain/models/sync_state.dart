@@ -7,8 +7,8 @@ part 'sync_state.freezed.dart';
 part 'sync_state.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class SyncState with _$SyncState {
-  @JsonSerializable(explicitToJson: true)
   const factory SyncState({
     required String accountId, // TODO: FK to Account
     DateTime? lastPulledAt,

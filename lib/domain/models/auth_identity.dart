@@ -7,8 +7,8 @@ part 'auth_identity.freezed.dart';
 part 'auth_identity.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class AuthIdentity with _$AuthIdentity {
-  @JsonSerializable(explicitToJson: true)
   const factory AuthIdentity({
     required String id,
     required String accountId, // TODO: FK to Account

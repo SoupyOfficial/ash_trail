@@ -7,8 +7,8 @@ part 'sync_op.freezed.dart';
 part 'sync_op.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class SyncOp with _$SyncOp {
-  @JsonSerializable(explicitToJson: true)
   const factory SyncOp({
     required String id,
     required String accountId, // TODO: FK to Account

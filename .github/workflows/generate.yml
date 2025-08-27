@@ -25,37 +25,47 @@ jobs:
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml requests
+          pip install pyyaml requests jsonschema
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
-
-      - name: Flutter pub get (if flutter project)
-        if: hashFiles('pubspec.yaml') != ''
+      - name: Validate feature_matrix schema
         run: |
-          if grep -q 'sdk: flutter' pubspec.yaml; then
-            dart pub get || flutter pub get || true
-          else
-            dart pub get
-          fi
+          python -c "import json,yaml,jsonschema,pathlib;d=yaml.safe_load(pathlib.Path('feature_matrix.yaml').read_text(encoding='utf-8'));s=json.loads(pathlib.Path('tool/json_schema/feature_matrix.schema.json').read_text(encoding='utf-8'));jsonschema.validate(d,s);print('Schema validation OK')"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Flutter pub get
+        run: flutter pub get
 
       - name: Run generator
-        run: |
-          python scripts/generate_from_feature_matrix.py
+        run: python scripts/generate_from_feature_matrix.py
 
       - name: Run build_runner (Freezed)
-        run: |
-          if grep -q 'freezed_annotation' pubspec.yaml; then
-            dart run build_runner build --delete-conflicting-outputs || true
-          fi
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze
+        run: flutter analyze
 
       - name: Run tests
         run: |
           if [ -d test ] && [ "$(ls -A test)" ]; then
-            dart test || true
+            flutter test --coverage
           fi
 
       - name: Check for uncommitted changes
         run: |
           git add .
-          git diff --cached --quiet || (echo "ERROR: Generated artifacts not committed." && git diff --cached --name-only && exit 1)
+          if ! git diff --cached --quiet; then
+            echo 'ERROR: Generated artifacts not committed.'
+            git diff --cached --name-only
+            exit 1
+          fi
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info

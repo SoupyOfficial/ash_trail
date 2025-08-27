@@ -7,8 +7,8 @@ part 'session.freezed.dart';
 part 'session.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Session with _$Session {
-  @JsonSerializable(explicitToJson: true)
   const factory Session({
     required String id,
     required String accountId, // TODO: FK to Account

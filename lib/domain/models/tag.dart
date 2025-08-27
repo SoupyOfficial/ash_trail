@@ -7,8 +7,8 @@ part 'tag.freezed.dart';
 part 'tag.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Tag with _$Tag {
-  @JsonSerializable(explicitToJson: true)
   const factory Tag({
     required String id,
     required String accountId, // TODO: FK to Account

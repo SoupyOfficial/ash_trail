@@ -7,8 +7,8 @@ part 'device.freezed.dart';
 part 'device.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Device with _$Device {
-  @JsonSerializable(explicitToJson: true)
   const factory Device({
     required String id,
     required String platform, // TODO: constrain to enum values

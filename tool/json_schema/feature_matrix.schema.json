@@ -10,7 +10,44 @@
     "principles": {"type": "array", "items": {"type": "string"}},
     "enums": {"type": "object"},
     "epics": {"type": "array", "items": {"type": "object", "required": ["id", "title"], "properties": {"id": {"type": "string"}, "title": {"type": "string"}, "desc": {"type": "string"}}}},
-    "entities": {"type": "array", "items": {"type": "object", "required": ["name", "pk", "fields"], "properties": {"name": {"type": "string"}, "pk": {"type": "string"}}}},
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "pk", "fields"],
+        "properties": {
+          "name": {"type": "string"},
+          "pk": {"type": "string"},
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "properties": {
+                "name": {"type": "string"},
+                "type": {"type": "string"},
+                "desc": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "indexes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "fields"],
+              "properties": {
+                "name": {"type": "string"},
+                "fields": {"type": "array", "items": {"type": "string"}},
+                "unique": {"type": "boolean"}
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
     "perf_budgets": {"type": "object"},
     "security": {"type": "object"},
     "features": {

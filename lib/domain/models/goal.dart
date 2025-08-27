@@ -7,8 +7,8 @@ part 'goal.freezed.dart';
 part 'goal.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Goal with _$Goal {
-  @JsonSerializable(explicitToJson: true)
   const factory Goal({
     required String id,
     required String accountId, // TODO: FK to Account

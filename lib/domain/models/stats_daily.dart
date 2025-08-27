@@ -7,8 +7,8 @@ part 'stats_daily.freezed.dart';
 part 'stats_daily.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class StatsDaily with _$StatsDaily {
-  @JsonSerializable(explicitToJson: true)
   const factory StatsDaily({
     required String id,
     required String accountId, // TODO: FK to Account

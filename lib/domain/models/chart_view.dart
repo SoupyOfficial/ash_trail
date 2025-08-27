@@ -7,8 +7,8 @@ part 'chart_view.freezed.dart';
 part 'chart_view.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class ChartView with _$ChartView {
-  @JsonSerializable(explicitToJson: true)
   const factory ChartView({
     required String id,
     required String accountId, // TODO: FK to Account

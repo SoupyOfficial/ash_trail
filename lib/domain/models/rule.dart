@@ -7,8 +7,8 @@ part 'rule.freezed.dart';
 part 'rule.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Rule with _$Rule {
-  @JsonSerializable(explicitToJson: true)
   const factory Rule({
     required String id,
     required String accountId, // TODO: FK to Account

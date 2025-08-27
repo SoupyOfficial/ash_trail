@@ -7,8 +7,8 @@ part 'import_item.freezed.dart';
 part 'import_item.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class ImportItem with _$ImportItem {
-  @JsonSerializable(explicitToJson: true)
   const factory ImportItem({
     required String id,
     required String batchId, // TODO: FK to ImportBatch

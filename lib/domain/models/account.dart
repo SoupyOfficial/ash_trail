@@ -7,8 +7,8 @@ part 'account.freezed.dart';
 part 'account.g.dart';
 
 @freezed
+@JsonSerializable(explicitToJson: true)
 class Account with _$Account {
-  @JsonSerializable(explicitToJson: true)
   const factory Account({
     required String id,
     required String displayName,

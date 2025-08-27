@@ -5,8 +5,6 @@
     "GitHub.copilot",
     "GitHub.copilot-chat",
     "ms-python.python",
-    "redhat.vscode-yaml",
-    "ms-vscode.vscode-json",
-    "bradlc.vscode-tailwindcss"
+    "redhat.vscode-yaml"
   ]
 }

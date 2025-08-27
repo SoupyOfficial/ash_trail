@@ -288,7 +288,7 @@ lib/features/{feature_snake}/
 '''
     
     readme_file = base_path / "README.md"
-    readme_file.write_text(readme_content)
+    readme_file.write_text(readme_content, encoding='utf-8')
     print(f"📚 Created {readme_file}")
     
     print(f"\n✅ Feature scaffold completed!")

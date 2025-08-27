@@ -17,11 +17,12 @@ def run_command(cmd, description="", cwd=None):
     print(f"🔄 {description or cmd}")
     try:
         result = subprocess.run(
-            cmd.split() if isinstance(cmd, str) else cmd,
+            cmd,
             cwd=cwd,
             check=True,
             capture_output=True,
-            text=True
+            text=True,
+            shell=True  # Use shell=True for Windows compatibility
         )
         if result.stdout.strip():
             print(f"✅ {result.stdout.strip()}")
@@ -31,22 +32,25 @@ def run_command(cmd, description="", cwd=None):
         if e.stderr:
             print(f"   {e.stderr.strip()}")
         return False
+    except FileNotFoundError as e:
+        print(f"❌ Command not found: {cmd}")
+        return False
 
 def check_prerequisites():
     """Check if required tools are installed."""
     print("🔍 Checking prerequisites...")
     
     tools = [
-        ("flutter", "Flutter SDK"),
-        ("python", "Python 3.x"),
-        ("git", "Git")
+        ("flutter --version", "Flutter SDK"),
+        ("python --version", "Python 3.x"),
+        ("git --version", "Git")
     ]
     
     missing = []
     for tool, name in tools:
         try:
-            subprocess.run([tool, "--version"], 
-                         capture_output=True, check=True)
+            subprocess.run(tool, 
+                         capture_output=True, check=True, shell=True)
             print(f"✅ {name} found")
         except (subprocess.CalledProcessError, FileNotFoundError):
             missing.append(name)

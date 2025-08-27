@@ -1,5 +1,8 @@
 # AshTrail
 
+[![CI](https://github.com/SoupyOfficial/ash_trail/actions/workflows/ci.yml/badge.svg)](https://github.com/SoupyOfficial/ash_trail/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/SoupyOfficial/ash_trail/branch/main/graph/badge.svg)](https://codecov.io/gh/SoupyOfficial/ash_trail)
+
 Compact, privacy-minded smoking event logger and insights app built with Flutter.
 
 This repository contains the AshTrail mobile app (Flutter) and supporting documentation for development, data model, and platform-specific builds.

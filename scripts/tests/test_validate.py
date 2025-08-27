@@ -31,5 +31,31 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(SystemExit):
             validate(data)
 
+    def test_invalid_enum_status(self):
+        data = load_yaml()
+        feats = data.get('features') or []
+        if not feats:
+            self.skipTest('No features in matrix')
+        # Set first feature status to invalid value
+        feats[0]['status'] = '__not_a_valid_status__'
+        with self.assertRaises(SystemExit):
+            validate(data)
+
+    def test_duplicate_index_name(self):
+        data = load_yaml()
+        ents = data.get('entities') or []
+        if not ents:
+            self.skipTest('No entities in matrix')
+        # Find or create indexes list
+        ent = ents[0]
+        existing = ent.setdefault('indexes', [])
+        # If empty, add a base index
+        if not existing:
+            existing.append({'name': 'idx_a', 'fields': ['id']})
+        # Duplicate first index name
+        existing.append({'name': existing[0]['name'], 'fields': existing[0].get('fields', [])})
+        with self.assertRaises(SystemExit):
+            validate(data)
+
 if __name__ == '__main__':
     unittest.main()

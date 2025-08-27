@@ -1,4 +1,5 @@
 // GENERATED - DO NOT EDIT.
+
 /// Per-entity index field groupings.
 const Map<String, List<List<String>>> entityIndexes = {
   'SmokeLog': [

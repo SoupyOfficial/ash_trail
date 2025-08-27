@@ -1,4 +1,5 @@
 // GENERATED - DO NOT EDIT.
+
 /// Telemetry events collected from feature matrix.
 const List<String> kTelemetryEvents = [
   'account_switch',
@@ -13,5 +14,5 @@ const List<String> kTelemetryEvents = [
   'route_unknown',
   'sync_enqueued',
   'sync_failure',
-  'sync_success',
+  'sync_success'
 ];

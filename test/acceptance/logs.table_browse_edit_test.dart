@@ -13,11 +13,8 @@ void main() {
     test('3. Inline edit duration and notes with validation.', () async {
       // TODO: implement acceptance validation
     });
-    test(
-      '4. iOS swipe actions (Delete, Edit) on rows; long-press context menu supports quick tag add/remove.',
-      () async {
-        // TODO: implement acceptance validation
-      },
-    );
+    test('4. iOS swipe actions (Delete, Edit) on rows; long-press context menu supports quick', () async {
+      // TODO: implement acceptance validation
+    });
   });
 }

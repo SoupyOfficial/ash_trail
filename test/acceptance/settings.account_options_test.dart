@@ -10,23 +10,14 @@ void main() {
     test('2. Add-account flows co-exist with multi-sign-in feature.', () async {
       // TODO: implement acceptance validation
     });
-    test(
-      '3. Change password flow exists for email-based accounts and requires reauth.',
-      () async {
-        // TODO: implement acceptance validation
-      },
-    );
-    test(
-      '4. Delete account triggers confirmation and backups/export prompt.',
-      () async {
-        // TODO: implement acceptance validation
-      },
-    );
-    test(
-      '5. Destructive actions (delete account, sign out all) use native iOS action sheet / bottom sheet pattern.',
-      () async {
-        // TODO: implement acceptance validation
-      },
-    );
+    test('3. Change password flow exists for email-based accounts and requires reauth.', () async {
+      // TODO: implement acceptance validation
+    });
+    test('4. Delete account triggers confirmation and backups/export prompt.', () async {
+      // TODO: implement acceptance validation
+    });
+    test('5. Destructive actions (delete account, sign out all) use native iOS action sheet /', () async {
+      // TODO: implement acceptance validation
+    });
   });
 }

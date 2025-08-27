@@ -3,8 +3,8 @@
 import 'package:test/test.dart';
 
 void main() {
-  group('Feature devtools.time_travel', () {
-    test('1. Override app clock for testing charts, streaks, reminders.', () async {
+  group('Feature notifications.reminders', () {
+    test('1. Schedule daily or custom times to log.', () async {
       // TODO: implement acceptance validation
     });
   });

@@ -1,4 +1,5 @@
 // GENERATED - DO NOT EDIT.
+
 /// Feature flags derived from feature statuses (status == 'done').
 const Map<String, bool> kFeatureFlags = {
   'accounts.avatar_edit': false,

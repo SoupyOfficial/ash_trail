@@ -28,7 +28,7 @@ platforms:
 
 enums:
   status: [planned, in_progress, done, parked]
-  priority: [P0, P1, P2]
+  priority: [P0, P1, P2, P3]
   write_policy: [enqueue_then_write_remote, write_through, local_only]
   conflict_policy: [last_write_wins_per_field, server_timestamp_wins, custom_merge]
 

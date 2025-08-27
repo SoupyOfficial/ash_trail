@@ -10,11 +10,8 @@ void main() {
     test('2. Panning respects selected range and account.', () async {
       // TODO: implement acceptance validation
     });
-    test(
-      '3. Baseline device pan/zoom maintains ≥55fps average (validated in dev perf overlay).',
-      () async {
-        // TODO: implement acceptance validation
-      },
-    );
+    test('3. Baseline device pan/zoom maintains ≥55fps average (validated in dev perf overlay', () async {
+      // TODO: implement acceptance validation
+    });
   });
 }

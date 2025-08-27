@@ -42,6 +42,10 @@ Clone and run
 Notes
 - If the project uses generated code (e.g. Freezed, Isar models, OpenAPI clients), run code generation after `pub get`: `flutter pub run build_runner build --delete-conflicting-outputs`.
 
+### Flutter SDK version pin
+
+CI and code generation workflows pin Flutter to `3.22.2` (see `.github/workflows/ci.yml`, `.github/workflows/generate.yml` and `.fvm/fvm_config.json`). Use the same version locally (e.g. via [FVM](https://fvm.app/) or `flutter downgrade 3.22.2`) before committing `pubspec.lock` to avoid drift in automated checks.
+
 ## Development workflow
 
 - Branching: follow GitHub flow on `main` (feature branches → PRs → review).

@@ -24,6 +24,5 @@ class ChartView with _$ChartView {
     required DateTime updatedAt,
   }) = _ChartView;
 
-  factory ChartView.fromJson(Map<String, dynamic> json) =>
-      _$ChartViewFromJson(json);
+  factory ChartView.fromJson(Map<String, dynamic> json) => _$ChartViewFromJson(json);
 }

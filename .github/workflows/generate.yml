@@ -59,7 +59,14 @@ jobs:
           git add .
           if ! git diff --cached --quiet; then
             echo 'ERROR: Generated artifacts not committed.'
-            git diff --cached --name-only
+            echo 'Changed files:'
+            git diff --cached --name-only | sed -n '1,50p'
+            echo '--- Unified diff (truncated) ---'
+            for f in $(git diff --cached --name-only | head -n 5); do
+              echo "::: Diff for $f";
+              git diff --cached --unified=3 -- $f | sed -n '1,200p';
+              echo "::: End diff for $f";
+            done
             exit 1
           fi
 

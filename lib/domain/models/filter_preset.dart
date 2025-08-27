@@ -23,6 +23,5 @@ class FilterPreset with _$FilterPreset {
     required DateTime updatedAt,
   }) = _FilterPreset;
 
-  factory FilterPreset.fromJson(Map<String, dynamic> json) =>
-      _$FilterPresetFromJson(json);
+  factory FilterPreset.fromJson(Map<String, dynamic> json) => _$FilterPresetFromJson(json);
 }

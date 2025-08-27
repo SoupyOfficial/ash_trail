@@ -16,6 +16,5 @@ class ImportItem with _$ImportItem {
     String? error,
   }) = _ImportItem;
 
-  factory ImportItem.fromJson(Map<String, dynamic> json) =>
-      _$ImportItemFromJson(json);
+  factory ImportItem.fromJson(Map<String, dynamic> json) => _$ImportItemFromJson(json);
 }

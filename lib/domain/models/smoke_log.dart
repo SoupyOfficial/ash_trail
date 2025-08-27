@@ -23,6 +23,5 @@ class SmokeLog with _$SmokeLog {
     required DateTime updatedAt,
   }) = _SmokeLog;
 
-  factory SmokeLog.fromJson(Map<String, dynamic> json) =>
-      _$SmokeLogFromJson(json);
+  factory SmokeLog.fromJson(Map<String, dynamic> json) => _$SmokeLogFromJson(json);
 }

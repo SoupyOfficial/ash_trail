@@ -18,6 +18,5 @@ class AuthIdentity with _$AuthIdentity {
     required DateTime updatedAt,
   }) = _AuthIdentity;
 
-  factory AuthIdentity.fromJson(Map<String, dynamic> json) =>
-      _$AuthIdentityFromJson(json);
+  factory AuthIdentity.fromJson(Map<String, dynamic> json) => _$AuthIdentityFromJson(json);
 }

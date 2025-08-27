@@ -183,7 +183,6 @@ def generate_models(data: Dict[str, Any]) -> List[Path]:
             "part '" + snake_case(name) + ".g.dart';",
             "",
             "@freezed",
-            "@JsonSerializable(explicitToJson: true)",
             f"class {name} with _${name} {{",
             f"  const factory {name}({{",
         ]

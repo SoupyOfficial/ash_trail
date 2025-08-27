@@ -17,6 +17,5 @@ class SmokeLogReason with _$SmokeLogReason {
     required DateTime createdAt,
   }) = _SmokeLogReason;
 
-  factory SmokeLogReason.fromJson(Map<String, dynamic> json) =>
-      _$SmokeLogReasonFromJson(json);
+  factory SmokeLogReason.fromJson(Map<String, dynamic> json) => _$SmokeLogReasonFromJson(json);
 }

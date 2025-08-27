@@ -3,6 +3,7 @@ app: AshTrail
 last_updated: 2025-08-27
 
 principles:
+  - mobile_first
   - offline_first
   - multi_account
   - clean_architecture
@@ -15,11 +16,15 @@ principles:
 
 platforms:
   flutter:
-    targets: [android, ios]
-    min_android_sdk: 23
-    min_ios: 13
-    state_mgmt: riverpod
-    charts_lib: fl_chart
+  # iOS (iPhone) is the sole launch platform; Android is deferred until post-MVP.
+  targets: [ios]
+  android_planned: true           # marker for future enablement
+  android_status: planned_post_mvp
+  baseline_device: "iPhone 16 Pro Max"  # design & perf budgets validated here
+  min_android_sdk: 23
+  min_ios: 13
+  state_mgmt: riverpod
+  charts_lib: fl_chart
 
 enums:
   status: [planned, in_progress, done, parked]
@@ -737,8 +742,9 @@ features:
     priority: P1
     epic: ui
     acceptance:
-      - Tablet/desktop shows dual-pane for logs (table + detail preview) when width ≥ 840dp.
-      - Charts screen scales legend layout (wrap vs side) based on width breakpoint.
+      - Phone (portrait & landscape) layouts optimized first; non-phone adaptations may slip if schedule risk.
+      - Dual-pane (table + detail preview) activates for width ≥ 840dp (iPad / desktop) once desktop/iPad builds enabled.
+      - "Charts legend layout adapts (wrap vs side) when charts feature/tab is enabled and width breakpoint exceeded."
       - Minimum tap targets enforced (≥48px) via shared style.
     components: [adaptive_layout, breakpoint_builder]
 

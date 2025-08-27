@@ -131,6 +131,10 @@ def normalize_type(raw: str) -> str:
             dart = "List<String>"
         elif inner == "string":
             dart = "List<String>"
+        elif inner in TYPE_MAP:
+            # Map arrays of known primitive / temporal types (int, bool, datetime, date, time) to concrete typed lists
+            # Assumption: 'time' stored as DateTime (time-of-day in UTC or with a sentinel date) – documented in feature_matrix notes.
+            dart = f"List<{TYPE_MAP[inner]}>"
         else:
             # Fallback generic list of dynamic
             dart = "List<dynamic>"

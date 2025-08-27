@@ -1,0 +1,26 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Flutter Pub Get
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Build Runner (check drift)
+        run: |
+          flutter pub run build_runner build --delete-conflicting-outputs
+          git diff --exit-code || (echo 'Generated code drift detected. Run build_runner and commit.' && exit 1)
+      - name: Tests with Coverage
+        run: flutter test --coverage
+      - name: Coverage Gate (80%)
+        run: dart scripts/coverage_gate.dart 80

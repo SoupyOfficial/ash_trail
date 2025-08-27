@@ -906,7 +906,9 @@ features:
     data:
       writes:
         - entity: SmokeLog
-          fields: [id, accountId, ts, durationMs, method?, notes?, mood?, potency?]
+          fields:
+            required: [id, accountId, ts, durationMs]
+            optional: [method, notes, mood, potency]
       reads: []
     offline:
       write_policy: enqueue_then_write_remote

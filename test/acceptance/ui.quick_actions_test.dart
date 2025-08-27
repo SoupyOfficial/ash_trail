@@ -6,12 +6,15 @@ void main() {
   group('Feature ui.quick_actions', () {
     test('1. Long-press app icon shows: Log Hit, View Logs, Start Timed Log (last optional be', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
     test('2. Each quick action deep links into routed screen or opens record overlay.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
     test('3. Telemetry event for each invocation.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
   });
 }

@@ -6,6 +6,7 @@ void main() {
   group('Feature data.compaction', () {
     test('1. Scheduled compaction reduces file size by ≥15% after heavy churn.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
   });
 }

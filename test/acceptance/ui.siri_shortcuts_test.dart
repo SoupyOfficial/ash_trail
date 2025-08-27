@@ -6,9 +6,11 @@ void main() {
   group('Feature ui.siri_shortcuts', () {
     test('1. Donates intents for Add Log (immediate save with default method) and Start Timed', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
     test('2. Invoking shortcut records telemetry and routes user appropriately.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
   });
 }

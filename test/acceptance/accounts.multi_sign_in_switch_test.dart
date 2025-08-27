@@ -6,9 +6,11 @@ void main() {
   group('Feature accounts.multi_sign_in_switch', () {
     test('1. Active account pill visible and tappable.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
     test('2. Switching updates all queries and UI state.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
   });
 }

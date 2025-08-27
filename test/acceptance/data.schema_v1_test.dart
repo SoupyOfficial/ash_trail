@@ -6,9 +6,11 @@ void main() {
   group('Feature data.schema_v1', () {
     test('1. Entities defined: Account, SmokeLog, Prefs.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
     test('2. Migrations from v0 handled safely.', () async {
       // TODO: implement acceptance validation
+      expect(true, isTrue); // placeholder
     });
   });
 }

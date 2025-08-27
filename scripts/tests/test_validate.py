@@ -104,5 +104,28 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(SystemExit):
             validate(data)
 
+    def test_duplicate_entity_name(self):
+        data = load_yaml()
+        ents = data.get('entities') or []
+        if len(ents) < 1:
+            self.skipTest('No entities to duplicate')
+        dup = dict(ents[0])
+        # Ensure we don't trigger other failures first
+        ents.append(dup)
+        with self.assertRaises(SystemExit):
+            validate(data)
+
+    def test_invalid_index_missing_name(self):
+        data = load_yaml()
+        ents = data.get('entities') or []
+        if len(ents) < 1:
+            self.skipTest('No entities present')
+        ent = ents[0]
+        idxs = ent.setdefault('indexes', [])
+        # Add invalid index without name
+        idxs.append({'fields': ['id']})
+        with self.assertRaises(SystemExit):
+            validate(data)
+
 if __name__ == '__main__':
     unittest.main()

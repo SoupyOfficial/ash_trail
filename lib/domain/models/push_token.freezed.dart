@@ -12,8 +12,7 @@ part of 'push_token.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 PushToken _$PushTokenFromJson(Map<String, dynamic> json) {
   return _PushToken.fromJson(json);
@@ -46,15 +45,14 @@ abstract class $PushTokenCopyWith<$Res> {
   factory $PushTokenCopyWith(PushToken value, $Res Function(PushToken) then) =
       _$PushTokenCopyWithImpl<$Res, PushToken>;
   @useResult
-  $Res call({
-    String id,
-    String deviceId,
-    String platform,
-    String token,
-    bool active,
-    DateTime createdAt,
-    DateTime? revokedAt,
-  });
+  $Res call(
+      {String id,
+      String deviceId,
+      String platform,
+      String token,
+      bool active,
+      DateTime createdAt,
+      DateTime? revokedAt});
 }
 
 /// @nodoc
@@ -80,46 +78,36 @@ class _$PushTokenCopyWithImpl<$Res, $Val extends PushToken>
     Object? createdAt = null,
     Object? revokedAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            deviceId:
-                null == deviceId
-                    ? _value.deviceId
-                    : deviceId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            platform:
-                null == platform
-                    ? _value.platform
-                    : platform // ignore: cast_nullable_to_non_nullable
-                        as String,
-            token:
-                null == token
-                    ? _value.token
-                    : token // ignore: cast_nullable_to_non_nullable
-                        as String,
-            active:
-                null == active
-                    ? _value.active
-                    : active // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            revokedAt:
-                freezed == revokedAt
-                    ? _value.revokedAt
-                    : revokedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      deviceId: null == deviceId
+          ? _value.deviceId
+          : deviceId // ignore: cast_nullable_to_non_nullable
+              as String,
+      platform: null == platform
+          ? _value.platform
+          : platform // ignore: cast_nullable_to_non_nullable
+              as String,
+      token: null == token
+          ? _value.token
+          : token // ignore: cast_nullable_to_non_nullable
+              as String,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      revokedAt: freezed == revokedAt
+          ? _value.revokedAt
+          : revokedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
@@ -127,20 +115,18 @@ class _$PushTokenCopyWithImpl<$Res, $Val extends PushToken>
 abstract class _$$PushTokenImplCopyWith<$Res>
     implements $PushTokenCopyWith<$Res> {
   factory _$$PushTokenImplCopyWith(
-    _$PushTokenImpl value,
-    $Res Function(_$PushTokenImpl) then,
-  ) = __$$PushTokenImplCopyWithImpl<$Res>;
+          _$PushTokenImpl value, $Res Function(_$PushTokenImpl) then) =
+      __$$PushTokenImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String deviceId,
-    String platform,
-    String token,
-    bool active,
-    DateTime createdAt,
-    DateTime? revokedAt,
-  });
+  $Res call(
+      {String id,
+      String deviceId,
+      String platform,
+      String token,
+      bool active,
+      DateTime createdAt,
+      DateTime? revokedAt});
 }
 
 /// @nodoc
@@ -148,9 +134,8 @@ class __$$PushTokenImplCopyWithImpl<$Res>
     extends _$PushTokenCopyWithImpl<$Res, _$PushTokenImpl>
     implements _$$PushTokenImplCopyWith<$Res> {
   __$$PushTokenImplCopyWithImpl(
-    _$PushTokenImpl _value,
-    $Res Function(_$PushTokenImpl) _then,
-  ) : super(_value, _then);
+      _$PushTokenImpl _value, $Res Function(_$PushTokenImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of PushToken
   /// with the given fields replaced by the non-null parameter values.
@@ -165,60 +150,50 @@ class __$$PushTokenImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? revokedAt = freezed,
   }) {
-    return _then(
-      _$PushTokenImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        deviceId:
-            null == deviceId
-                ? _value.deviceId
-                : deviceId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        platform:
-            null == platform
-                ? _value.platform
-                : platform // ignore: cast_nullable_to_non_nullable
-                    as String,
-        token:
-            null == token
-                ? _value.token
-                : token // ignore: cast_nullable_to_non_nullable
-                    as String,
-        active:
-            null == active
-                ? _value.active
-                : active // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        revokedAt:
-            freezed == revokedAt
-                ? _value.revokedAt
-                : revokedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-      ),
-    );
+    return _then(_$PushTokenImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      deviceId: null == deviceId
+          ? _value.deviceId
+          : deviceId // ignore: cast_nullable_to_non_nullable
+              as String,
+      platform: null == platform
+          ? _value.platform
+          : platform // ignore: cast_nullable_to_non_nullable
+              as String,
+      token: null == token
+          ? _value.token
+          : token // ignore: cast_nullable_to_non_nullable
+              as String,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      revokedAt: freezed == revokedAt
+          ? _value.revokedAt
+          : revokedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$PushTokenImpl implements _PushToken {
-  const _$PushTokenImpl({
-    required this.id,
-    required this.deviceId,
-    required this.platform,
-    required this.token,
-    required this.active,
-    required this.createdAt,
-    this.revokedAt,
-  });
+  const _$PushTokenImpl(
+      {required this.id,
+      required this.deviceId,
+      required this.platform,
+      required this.token,
+      required this.active,
+      required this.createdAt,
+      this.revokedAt});
 
   factory _$PushTokenImpl.fromJson(Map<String, dynamic> json) =>
       _$$PushTokenImplFromJson(json);
@@ -227,10 +202,10 @@ class _$PushTokenImpl implements _PushToken {
   final String id;
   @override
   final String deviceId;
-  // TODO: FK to Device
+// TODO: FK to Device
   @override
   final String platform;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String token;
   @override
@@ -266,15 +241,7 @@ class _$PushTokenImpl implements _PushToken {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    deviceId,
-    platform,
-    token,
-    active,
-    createdAt,
-    revokedAt,
-  );
+      runtimeType, id, deviceId, platform, token, active, createdAt, revokedAt);
 
   /// Create a copy of PushToken
   /// with the given fields replaced by the non-null parameter values.
@@ -286,20 +253,21 @@ class _$PushTokenImpl implements _PushToken {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$PushTokenImplToJson(this);
+    return _$$PushTokenImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _PushToken implements PushToken {
-  const factory _PushToken({
-    required final String id,
-    required final String deviceId,
-    required final String platform,
-    required final String token,
-    required final bool active,
-    required final DateTime createdAt,
-    final DateTime? revokedAt,
-  }) = _$PushTokenImpl;
+  const factory _PushToken(
+      {required final String id,
+      required final String deviceId,
+      required final String platform,
+      required final String token,
+      required final bool active,
+      required final DateTime createdAt,
+      final DateTime? revokedAt}) = _$PushTokenImpl;
 
   factory _PushToken.fromJson(Map<String, dynamic> json) =
       _$PushTokenImpl.fromJson;

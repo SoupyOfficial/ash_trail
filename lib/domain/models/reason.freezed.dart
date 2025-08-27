@@ -12,8 +12,7 @@ part of 'reason.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Reason _$ReasonFromJson(Map<String, dynamic> json) {
   return _Reason.fromJson(json);
@@ -44,15 +43,14 @@ abstract class $ReasonCopyWith<$Res> {
   factory $ReasonCopyWith(Reason value, $Res Function(Reason) then) =
       _$ReasonCopyWithImpl<$Res, Reason>;
   @useResult
-  $Res call({
-    String id,
-    String? accountId,
-    String name,
-    bool enabled,
-    int orderIndex,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String? accountId,
+      String name,
+      bool enabled,
+      int orderIndex,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -78,66 +76,54 @@ class _$ReasonCopyWithImpl<$Res, $Val extends Reason>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                freezed == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
-            enabled:
-                null == enabled
-                    ? _value.enabled
-                    : enabled // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            orderIndex:
-                null == orderIndex
-                    ? _value.orderIndex
-                    : orderIndex // ignore: cast_nullable_to_non_nullable
-                        as int,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: freezed == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      orderIndex: null == orderIndex
+          ? _value.orderIndex
+          : orderIndex // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$ReasonImplCopyWith<$Res> implements $ReasonCopyWith<$Res> {
   factory _$$ReasonImplCopyWith(
-    _$ReasonImpl value,
-    $Res Function(_$ReasonImpl) then,
-  ) = __$$ReasonImplCopyWithImpl<$Res>;
+          _$ReasonImpl value, $Res Function(_$ReasonImpl) then) =
+      __$$ReasonImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String? accountId,
-    String name,
-    bool enabled,
-    int orderIndex,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String? accountId,
+      String name,
+      bool enabled,
+      int orderIndex,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -145,9 +131,8 @@ class __$$ReasonImplCopyWithImpl<$Res>
     extends _$ReasonCopyWithImpl<$Res, _$ReasonImpl>
     implements _$$ReasonImplCopyWith<$Res> {
   __$$ReasonImplCopyWithImpl(
-    _$ReasonImpl _value,
-    $Res Function(_$ReasonImpl) _then,
-  ) : super(_value, _then);
+      _$ReasonImpl _value, $Res Function(_$ReasonImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Reason
   /// with the given fields replaced by the non-null parameter values.
@@ -162,60 +147,50 @@ class __$$ReasonImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$ReasonImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            freezed == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
-        enabled:
-            null == enabled
-                ? _value.enabled
-                : enabled // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        orderIndex:
-            null == orderIndex
-                ? _value.orderIndex
-                : orderIndex // ignore: cast_nullable_to_non_nullable
-                    as int,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$ReasonImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: freezed == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      orderIndex: null == orderIndex
+          ? _value.orderIndex
+          : orderIndex // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ReasonImpl implements _Reason {
-  const _$ReasonImpl({
-    required this.id,
-    this.accountId,
-    required this.name,
-    required this.enabled,
-    required this.orderIndex,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const _$ReasonImpl(
+      {required this.id,
+      this.accountId,
+      required this.name,
+      required this.enabled,
+      required this.orderIndex,
+      required this.createdAt,
+      required this.updatedAt});
 
   factory _$ReasonImpl.fromJson(Map<String, dynamic> json) =>
       _$$ReasonImplFromJson(json);
@@ -224,7 +199,7 @@ class _$ReasonImpl implements _Reason {
   final String id;
   @override
   final String? accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String name;
   @override
@@ -261,16 +236,8 @@ class _$ReasonImpl implements _Reason {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    name,
-    enabled,
-    orderIndex,
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, name, enabled,
+      orderIndex, createdAt, updatedAt);
 
   /// Create a copy of Reason
   /// with the given fields replaced by the non-null parameter values.
@@ -282,20 +249,21 @@ class _$ReasonImpl implements _Reason {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ReasonImplToJson(this);
+    return _$$ReasonImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Reason implements Reason {
-  const factory _Reason({
-    required final String id,
-    final String? accountId,
-    required final String name,
-    required final bool enabled,
-    required final int orderIndex,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$ReasonImpl;
+  const factory _Reason(
+      {required final String id,
+      final String? accountId,
+      required final String name,
+      required final bool enabled,
+      required final int orderIndex,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$ReasonImpl;
 
   factory _Reason.fromJson(Map<String, dynamic> json) = _$ReasonImpl.fromJson;
 

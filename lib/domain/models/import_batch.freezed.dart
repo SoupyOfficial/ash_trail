@@ -12,8 +12,7 @@ part of 'import_batch.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 ImportBatch _$ImportBatchFromJson(Map<String, dynamic> json) {
   return _ImportBatch.fromJson(json);
@@ -46,21 +45,19 @@ mixin _$ImportBatch {
 /// @nodoc
 abstract class $ImportBatchCopyWith<$Res> {
   factory $ImportBatchCopyWith(
-    ImportBatch value,
-    $Res Function(ImportBatch) then,
-  ) = _$ImportBatchCopyWithImpl<$Res, ImportBatch>;
+          ImportBatch value, $Res Function(ImportBatch) then) =
+      _$ImportBatchCopyWithImpl<$Res, ImportBatch>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String source,
-    String? fileName,
-    int countInserted,
-    int countFailed,
-    DateTime startedAt,
-    DateTime? finishedAt,
-    String? log,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String source,
+      String? fileName,
+      int countInserted,
+      int countFailed,
+      DateTime startedAt,
+      DateTime? finishedAt,
+      String? log});
 }
 
 /// @nodoc
@@ -88,56 +85,44 @@ class _$ImportBatchCopyWithImpl<$Res, $Val extends ImportBatch>
     Object? finishedAt = freezed,
     Object? log = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            source:
-                null == source
-                    ? _value.source
-                    : source // ignore: cast_nullable_to_non_nullable
-                        as String,
-            fileName:
-                freezed == fileName
-                    ? _value.fileName
-                    : fileName // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            countInserted:
-                null == countInserted
-                    ? _value.countInserted
-                    : countInserted // ignore: cast_nullable_to_non_nullable
-                        as int,
-            countFailed:
-                null == countFailed
-                    ? _value.countFailed
-                    : countFailed // ignore: cast_nullable_to_non_nullable
-                        as int,
-            startedAt:
-                null == startedAt
-                    ? _value.startedAt
-                    : startedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            finishedAt:
-                freezed == finishedAt
-                    ? _value.finishedAt
-                    : finishedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            log:
-                freezed == log
-                    ? _value.log
-                    : log // ignore: cast_nullable_to_non_nullable
-                        as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      fileName: freezed == fileName
+          ? _value.fileName
+          : fileName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      countInserted: null == countInserted
+          ? _value.countInserted
+          : countInserted // ignore: cast_nullable_to_non_nullable
+              as int,
+      countFailed: null == countFailed
+          ? _value.countFailed
+          : countFailed // ignore: cast_nullable_to_non_nullable
+              as int,
+      startedAt: null == startedAt
+          ? _value.startedAt
+          : startedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      finishedAt: freezed == finishedAt
+          ? _value.finishedAt
+          : finishedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      log: freezed == log
+          ? _value.log
+          : log // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
@@ -145,22 +130,20 @@ class _$ImportBatchCopyWithImpl<$Res, $Val extends ImportBatch>
 abstract class _$$ImportBatchImplCopyWith<$Res>
     implements $ImportBatchCopyWith<$Res> {
   factory _$$ImportBatchImplCopyWith(
-    _$ImportBatchImpl value,
-    $Res Function(_$ImportBatchImpl) then,
-  ) = __$$ImportBatchImplCopyWithImpl<$Res>;
+          _$ImportBatchImpl value, $Res Function(_$ImportBatchImpl) then) =
+      __$$ImportBatchImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String source,
-    String? fileName,
-    int countInserted,
-    int countFailed,
-    DateTime startedAt,
-    DateTime? finishedAt,
-    String? log,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String source,
+      String? fileName,
+      int countInserted,
+      int countFailed,
+      DateTime startedAt,
+      DateTime? finishedAt,
+      String? log});
 }
 
 /// @nodoc
@@ -168,9 +151,8 @@ class __$$ImportBatchImplCopyWithImpl<$Res>
     extends _$ImportBatchCopyWithImpl<$Res, _$ImportBatchImpl>
     implements _$$ImportBatchImplCopyWith<$Res> {
   __$$ImportBatchImplCopyWithImpl(
-    _$ImportBatchImpl _value,
-    $Res Function(_$ImportBatchImpl) _then,
-  ) : super(_value, _then);
+      _$ImportBatchImpl _value, $Res Function(_$ImportBatchImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of ImportBatch
   /// with the given fields replaced by the non-null parameter values.
@@ -187,72 +169,60 @@ class __$$ImportBatchImplCopyWithImpl<$Res>
     Object? finishedAt = freezed,
     Object? log = freezed,
   }) {
-    return _then(
-      _$ImportBatchImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        source:
-            null == source
-                ? _value.source
-                : source // ignore: cast_nullable_to_non_nullable
-                    as String,
-        fileName:
-            freezed == fileName
-                ? _value.fileName
-                : fileName // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        countInserted:
-            null == countInserted
-                ? _value.countInserted
-                : countInserted // ignore: cast_nullable_to_non_nullable
-                    as int,
-        countFailed:
-            null == countFailed
-                ? _value.countFailed
-                : countFailed // ignore: cast_nullable_to_non_nullable
-                    as int,
-        startedAt:
-            null == startedAt
-                ? _value.startedAt
-                : startedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        finishedAt:
-            freezed == finishedAt
-                ? _value.finishedAt
-                : finishedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        log:
-            freezed == log
-                ? _value.log
-                : log // ignore: cast_nullable_to_non_nullable
-                    as String?,
-      ),
-    );
+    return _then(_$ImportBatchImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      source: null == source
+          ? _value.source
+          : source // ignore: cast_nullable_to_non_nullable
+              as String,
+      fileName: freezed == fileName
+          ? _value.fileName
+          : fileName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      countInserted: null == countInserted
+          ? _value.countInserted
+          : countInserted // ignore: cast_nullable_to_non_nullable
+              as int,
+      countFailed: null == countFailed
+          ? _value.countFailed
+          : countFailed // ignore: cast_nullable_to_non_nullable
+              as int,
+      startedAt: null == startedAt
+          ? _value.startedAt
+          : startedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      finishedAt: freezed == finishedAt
+          ? _value.finishedAt
+          : finishedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      log: freezed == log
+          ? _value.log
+          : log // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ImportBatchImpl implements _ImportBatch {
-  const _$ImportBatchImpl({
-    required this.id,
-    required this.accountId,
-    required this.source,
-    this.fileName,
-    required this.countInserted,
-    required this.countFailed,
-    required this.startedAt,
-    this.finishedAt,
-    this.log,
-  });
+  const _$ImportBatchImpl(
+      {required this.id,
+      required this.accountId,
+      required this.source,
+      this.fileName,
+      required this.countInserted,
+      required this.countFailed,
+      required this.startedAt,
+      this.finishedAt,
+      this.log});
 
   factory _$ImportBatchImpl.fromJson(Map<String, dynamic> json) =>
       _$$ImportBatchImplFromJson(json);
@@ -261,10 +231,10 @@ class _$ImportBatchImpl implements _ImportBatch {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String source;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String? fileName;
   @override
@@ -307,18 +277,8 @@ class _$ImportBatchImpl implements _ImportBatch {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    source,
-    fileName,
-    countInserted,
-    countFailed,
-    startedAt,
-    finishedAt,
-    log,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, source, fileName,
+      countInserted, countFailed, startedAt, finishedAt, log);
 
   /// Create a copy of ImportBatch
   /// with the given fields replaced by the non-null parameter values.
@@ -330,22 +290,23 @@ class _$ImportBatchImpl implements _ImportBatch {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ImportBatchImplToJson(this);
+    return _$$ImportBatchImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _ImportBatch implements ImportBatch {
-  const factory _ImportBatch({
-    required final String id,
-    required final String accountId,
-    required final String source,
-    final String? fileName,
-    required final int countInserted,
-    required final int countFailed,
-    required final DateTime startedAt,
-    final DateTime? finishedAt,
-    final String? log,
-  }) = _$ImportBatchImpl;
+  const factory _ImportBatch(
+      {required final String id,
+      required final String accountId,
+      required final String source,
+      final String? fileName,
+      required final int countInserted,
+      required final int countFailed,
+      required final DateTime startedAt,
+      final DateTime? finishedAt,
+      final String? log}) = _$ImportBatchImpl;
 
   factory _ImportBatch.fromJson(Map<String, dynamic> json) =
       _$ImportBatchImpl.fromJson;

@@ -12,8 +12,7 @@ part of 'onboarding.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Onboarding _$OnboardingFromJson(Map<String, dynamic> json) {
   return _Onboarding.fromJson(json);
@@ -41,16 +40,14 @@ mixin _$Onboarding {
 /// @nodoc
 abstract class $OnboardingCopyWith<$Res> {
   factory $OnboardingCopyWith(
-    Onboarding value,
-    $Res Function(Onboarding) then,
-  ) = _$OnboardingCopyWithImpl<$Res, Onboarding>;
+          Onboarding value, $Res Function(Onboarding) then) =
+      _$OnboardingCopyWithImpl<$Res, Onboarding>;
   @useResult
-  $Res call({
-    String accountId,
-    List<String> stepsCompleted,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String accountId,
+      List<String> stepsCompleted,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -73,31 +70,24 @@ class _$OnboardingCopyWithImpl<$Res, $Val extends Onboarding>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            stepsCompleted:
-                null == stepsCompleted
-                    ? _value.stepsCompleted
-                    : stepsCompleted // ignore: cast_nullable_to_non_nullable
-                        as List<String>,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      stepsCompleted: null == stepsCompleted
+          ? _value.stepsCompleted
+          : stepsCompleted // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
@@ -105,17 +95,15 @@ class _$OnboardingCopyWithImpl<$Res, $Val extends Onboarding>
 abstract class _$$OnboardingImplCopyWith<$Res>
     implements $OnboardingCopyWith<$Res> {
   factory _$$OnboardingImplCopyWith(
-    _$OnboardingImpl value,
-    $Res Function(_$OnboardingImpl) then,
-  ) = __$$OnboardingImplCopyWithImpl<$Res>;
+          _$OnboardingImpl value, $Res Function(_$OnboardingImpl) then) =
+      __$$OnboardingImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String accountId,
-    List<String> stepsCompleted,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String accountId,
+      List<String> stepsCompleted,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -123,9 +111,8 @@ class __$$OnboardingImplCopyWithImpl<$Res>
     extends _$OnboardingCopyWithImpl<$Res, _$OnboardingImpl>
     implements _$$OnboardingImplCopyWith<$Res> {
   __$$OnboardingImplCopyWithImpl(
-    _$OnboardingImpl _value,
-    $Res Function(_$OnboardingImpl) _then,
-  ) : super(_value, _then);
+      _$OnboardingImpl _value, $Res Function(_$OnboardingImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Onboarding
   /// with the given fields replaced by the non-null parameter values.
@@ -137,51 +124,45 @@ class __$$OnboardingImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$OnboardingImpl(
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        stepsCompleted:
-            null == stepsCompleted
-                ? _value._stepsCompleted
-                : stepsCompleted // ignore: cast_nullable_to_non_nullable
-                    as List<String>,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$OnboardingImpl(
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      stepsCompleted: null == stepsCompleted
+          ? _value._stepsCompleted
+          : stepsCompleted // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$OnboardingImpl implements _Onboarding {
-  const _$OnboardingImpl({
-    required this.accountId,
-    required final List<String> stepsCompleted,
-    required this.createdAt,
-    required this.updatedAt,
-  }) : _stepsCompleted = stepsCompleted;
+  const _$OnboardingImpl(
+      {required this.accountId,
+      required final List<String> stepsCompleted,
+      required this.createdAt,
+      required this.updatedAt})
+      : _stepsCompleted = stepsCompleted;
 
   factory _$OnboardingImpl.fromJson(Map<String, dynamic> json) =>
       _$$OnboardingImplFromJson(json);
 
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   final List<String> _stepsCompleted;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   List<String> get stepsCompleted {
     if (_stepsCompleted is EqualUnmodifiableListView) return _stepsCompleted;
@@ -189,7 +170,7 @@ class _$OnboardingImpl implements _Onboarding {
     return EqualUnmodifiableListView(_stepsCompleted);
   }
 
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final DateTime createdAt;
   @override
@@ -207,10 +188,8 @@ class _$OnboardingImpl implements _Onboarding {
             other is _$OnboardingImpl &&
             (identical(other.accountId, accountId) ||
                 other.accountId == accountId) &&
-            const DeepCollectionEquality().equals(
-              other._stepsCompleted,
-              _stepsCompleted,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._stepsCompleted, _stepsCompleted) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -220,12 +199,11 @@ class _$OnboardingImpl implements _Onboarding {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    accountId,
-    const DeepCollectionEquality().hash(_stepsCompleted),
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      accountId,
+      const DeepCollectionEquality().hash(_stepsCompleted),
+      createdAt,
+      updatedAt);
 
   /// Create a copy of Onboarding
   /// with the given fields replaced by the non-null parameter values.
@@ -237,17 +215,18 @@ class _$OnboardingImpl implements _Onboarding {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$OnboardingImplToJson(this);
+    return _$$OnboardingImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Onboarding implements Onboarding {
-  const factory _Onboarding({
-    required final String accountId,
-    required final List<String> stepsCompleted,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$OnboardingImpl;
+  const factory _Onboarding(
+      {required final String accountId,
+      required final List<String> stepsCompleted,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$OnboardingImpl;
 
   factory _Onboarding.fromJson(Map<String, dynamic> json) =
       _$OnboardingImpl.fromJson;

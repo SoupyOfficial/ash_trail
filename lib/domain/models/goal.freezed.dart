@@ -12,8 +12,7 @@ part of 'goal.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Goal _$GoalFromJson(Map<String, dynamic> json) {
   return _Goal.fromJson(json);
@@ -49,18 +48,17 @@ abstract class $GoalCopyWith<$Res> {
   factory $GoalCopyWith(Goal value, $Res Function(Goal) then) =
       _$GoalCopyWithImpl<$Res, Goal>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String type,
-    int target,
-    String window,
-    DateTime startDate,
-    DateTime? endDate,
-    bool active,
-    int? progress,
-    DateTime? achievedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String type,
+      int target,
+      String window,
+      DateTime startDate,
+      DateTime? endDate,
+      bool active,
+      int? progress,
+      DateTime? achievedAt});
 }
 
 /// @nodoc
@@ -89,84 +87,69 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
     Object? progress = freezed,
     Object? achievedAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            type:
-                null == type
-                    ? _value.type
-                    : type // ignore: cast_nullable_to_non_nullable
-                        as String,
-            target:
-                null == target
-                    ? _value.target
-                    : target // ignore: cast_nullable_to_non_nullable
-                        as int,
-            window:
-                null == window
-                    ? _value.window
-                    : window // ignore: cast_nullable_to_non_nullable
-                        as String,
-            startDate:
-                null == startDate
-                    ? _value.startDate
-                    : startDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            endDate:
-                freezed == endDate
-                    ? _value.endDate
-                    : endDate // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            active:
-                null == active
-                    ? _value.active
-                    : active // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            progress:
-                freezed == progress
-                    ? _value.progress
-                    : progress // ignore: cast_nullable_to_non_nullable
-                        as int?,
-            achievedAt:
-                freezed == achievedAt
-                    ? _value.achievedAt
-                    : achievedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as int,
+      window: null == window
+          ? _value.window
+          : window // ignore: cast_nullable_to_non_nullable
+              as String,
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      endDate: freezed == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+      progress: freezed == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as int?,
+      achievedAt: freezed == achievedAt
+          ? _value.achievedAt
+          : achievedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$GoalImplCopyWith<$Res> implements $GoalCopyWith<$Res> {
   factory _$$GoalImplCopyWith(
-    _$GoalImpl value,
-    $Res Function(_$GoalImpl) then,
-  ) = __$$GoalImplCopyWithImpl<$Res>;
+          _$GoalImpl value, $Res Function(_$GoalImpl) then) =
+      __$$GoalImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String type,
-    int target,
-    String window,
-    DateTime startDate,
-    DateTime? endDate,
-    bool active,
-    int? progress,
-    DateTime? achievedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String type,
+      int target,
+      String window,
+      DateTime startDate,
+      DateTime? endDate,
+      bool active,
+      int? progress,
+      DateTime? achievedAt});
 }
 
 /// @nodoc
@@ -174,7 +157,7 @@ class __$$GoalImplCopyWithImpl<$Res>
     extends _$GoalCopyWithImpl<$Res, _$GoalImpl>
     implements _$$GoalImplCopyWith<$Res> {
   __$$GoalImplCopyWithImpl(_$GoalImpl _value, $Res Function(_$GoalImpl) _then)
-    : super(_value, _then);
+      : super(_value, _then);
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -192,78 +175,65 @@ class __$$GoalImplCopyWithImpl<$Res>
     Object? progress = freezed,
     Object? achievedAt = freezed,
   }) {
-    return _then(
-      _$GoalImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        type:
-            null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                    as String,
-        target:
-            null == target
-                ? _value.target
-                : target // ignore: cast_nullable_to_non_nullable
-                    as int,
-        window:
-            null == window
-                ? _value.window
-                : window // ignore: cast_nullable_to_non_nullable
-                    as String,
-        startDate:
-            null == startDate
-                ? _value.startDate
-                : startDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        endDate:
-            freezed == endDate
-                ? _value.endDate
-                : endDate // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        active:
-            null == active
-                ? _value.active
-                : active // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        progress:
-            freezed == progress
-                ? _value.progress
-                : progress // ignore: cast_nullable_to_non_nullable
-                    as int?,
-        achievedAt:
-            freezed == achievedAt
-                ? _value.achievedAt
-                : achievedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-      ),
-    );
+    return _then(_$GoalImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      target: null == target
+          ? _value.target
+          : target // ignore: cast_nullable_to_non_nullable
+              as int,
+      window: null == window
+          ? _value.window
+          : window // ignore: cast_nullable_to_non_nullable
+              as String,
+      startDate: null == startDate
+          ? _value.startDate
+          : startDate // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      endDate: freezed == endDate
+          ? _value.endDate
+          : endDate // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      active: null == active
+          ? _value.active
+          : active // ignore: cast_nullable_to_non_nullable
+              as bool,
+      progress: freezed == progress
+          ? _value.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as int?,
+      achievedAt: freezed == achievedAt
+          ? _value.achievedAt
+          : achievedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$GoalImpl implements _Goal {
-  const _$GoalImpl({
-    required this.id,
-    required this.accountId,
-    required this.type,
-    required this.target,
-    required this.window,
-    required this.startDate,
-    this.endDate,
-    required this.active,
-    this.progress,
-    this.achievedAt,
-  });
+  const _$GoalImpl(
+      {required this.id,
+      required this.accountId,
+      required this.type,
+      required this.target,
+      required this.window,
+      required this.startDate,
+      this.endDate,
+      required this.active,
+      this.progress,
+      this.achievedAt});
 
   factory _$GoalImpl.fromJson(Map<String, dynamic> json) =>
       _$$GoalImplFromJson(json);
@@ -272,15 +242,15 @@ class _$GoalImpl implements _Goal {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String type;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final int target;
   @override
   final String window;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final DateTime startDate;
   @override
@@ -320,19 +290,8 @@ class _$GoalImpl implements _Goal {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    type,
-    target,
-    window,
-    startDate,
-    endDate,
-    active,
-    progress,
-    achievedAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, type, target,
+      window, startDate, endDate, active, progress, achievedAt);
 
   /// Create a copy of Goal
   /// with the given fields replaced by the non-null parameter values.
@@ -344,23 +303,24 @@ class _$GoalImpl implements _Goal {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GoalImplToJson(this);
+    return _$$GoalImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Goal implements Goal {
-  const factory _Goal({
-    required final String id,
-    required final String accountId,
-    required final String type,
-    required final int target,
-    required final String window,
-    required final DateTime startDate,
-    final DateTime? endDate,
-    required final bool active,
-    final int? progress,
-    final DateTime? achievedAt,
-  }) = _$GoalImpl;
+  const factory _Goal(
+      {required final String id,
+      required final String accountId,
+      required final String type,
+      required final int target,
+      required final String window,
+      required final DateTime startDate,
+      final DateTime? endDate,
+      required final bool active,
+      final int? progress,
+      final DateTime? achievedAt}) = _$GoalImpl;
 
   factory _Goal.fromJson(Map<String, dynamic> json) = _$GoalImpl.fromJson;
 

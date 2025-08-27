@@ -12,8 +12,7 @@ part of 'stats_daily.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 StatsDaily _$StatsDailyFromJson(Map<String, dynamic> json) {
   return _StatsDaily.fromJson(json);
@@ -42,18 +41,16 @@ mixin _$StatsDaily {
 /// @nodoc
 abstract class $StatsDailyCopyWith<$Res> {
   factory $StatsDailyCopyWith(
-    StatsDaily value,
-    $Res Function(StatsDaily) then,
-  ) = _$StatsDailyCopyWithImpl<$Res, StatsDaily>;
+          StatsDaily value, $Res Function(StatsDaily) then) =
+      _$StatsDailyCopyWithImpl<$Res, StatsDaily>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    DateTime date,
-    int hitCount,
-    int totalDurationMs,
-    int avgDurationMs,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      DateTime date,
+      int hitCount,
+      int totalDurationMs,
+      int avgDurationMs});
 }
 
 /// @nodoc
@@ -78,41 +75,32 @@ class _$StatsDailyCopyWithImpl<$Res, $Val extends StatsDaily>
     Object? totalDurationMs = null,
     Object? avgDurationMs = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            date:
-                null == date
-                    ? _value.date
-                    : date // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            hitCount:
-                null == hitCount
-                    ? _value.hitCount
-                    : hitCount // ignore: cast_nullable_to_non_nullable
-                        as int,
-            totalDurationMs:
-                null == totalDurationMs
-                    ? _value.totalDurationMs
-                    : totalDurationMs // ignore: cast_nullable_to_non_nullable
-                        as int,
-            avgDurationMs:
-                null == avgDurationMs
-                    ? _value.avgDurationMs
-                    : avgDurationMs // ignore: cast_nullable_to_non_nullable
-                        as int,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      hitCount: null == hitCount
+          ? _value.hitCount
+          : hitCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalDurationMs: null == totalDurationMs
+          ? _value.totalDurationMs
+          : totalDurationMs // ignore: cast_nullable_to_non_nullable
+              as int,
+      avgDurationMs: null == avgDurationMs
+          ? _value.avgDurationMs
+          : avgDurationMs // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
   }
 }
 
@@ -120,19 +108,17 @@ class _$StatsDailyCopyWithImpl<$Res, $Val extends StatsDaily>
 abstract class _$$StatsDailyImplCopyWith<$Res>
     implements $StatsDailyCopyWith<$Res> {
   factory _$$StatsDailyImplCopyWith(
-    _$StatsDailyImpl value,
-    $Res Function(_$StatsDailyImpl) then,
-  ) = __$$StatsDailyImplCopyWithImpl<$Res>;
+          _$StatsDailyImpl value, $Res Function(_$StatsDailyImpl) then) =
+      __$$StatsDailyImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    DateTime date,
-    int hitCount,
-    int totalDurationMs,
-    int avgDurationMs,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      DateTime date,
+      int hitCount,
+      int totalDurationMs,
+      int avgDurationMs});
 }
 
 /// @nodoc
@@ -140,9 +126,8 @@ class __$$StatsDailyImplCopyWithImpl<$Res>
     extends _$StatsDailyCopyWithImpl<$Res, _$StatsDailyImpl>
     implements _$$StatsDailyImplCopyWith<$Res> {
   __$$StatsDailyImplCopyWithImpl(
-    _$StatsDailyImpl _value,
-    $Res Function(_$StatsDailyImpl) _then,
-  ) : super(_value, _then);
+      _$StatsDailyImpl _value, $Res Function(_$StatsDailyImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of StatsDaily
   /// with the given fields replaced by the non-null parameter values.
@@ -156,54 +141,45 @@ class __$$StatsDailyImplCopyWithImpl<$Res>
     Object? totalDurationMs = null,
     Object? avgDurationMs = null,
   }) {
-    return _then(
-      _$StatsDailyImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        date:
-            null == date
-                ? _value.date
-                : date // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        hitCount:
-            null == hitCount
-                ? _value.hitCount
-                : hitCount // ignore: cast_nullable_to_non_nullable
-                    as int,
-        totalDurationMs:
-            null == totalDurationMs
-                ? _value.totalDurationMs
-                : totalDurationMs // ignore: cast_nullable_to_non_nullable
-                    as int,
-        avgDurationMs:
-            null == avgDurationMs
-                ? _value.avgDurationMs
-                : avgDurationMs // ignore: cast_nullable_to_non_nullable
-                    as int,
-      ),
-    );
+    return _then(_$StatsDailyImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      date: null == date
+          ? _value.date
+          : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      hitCount: null == hitCount
+          ? _value.hitCount
+          : hitCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalDurationMs: null == totalDurationMs
+          ? _value.totalDurationMs
+          : totalDurationMs // ignore: cast_nullable_to_non_nullable
+              as int,
+      avgDurationMs: null == avgDurationMs
+          ? _value.avgDurationMs
+          : avgDurationMs // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$StatsDailyImpl implements _StatsDaily {
-  const _$StatsDailyImpl({
-    required this.id,
-    required this.accountId,
-    required this.date,
-    required this.hitCount,
-    required this.totalDurationMs,
-    required this.avgDurationMs,
-  });
+  const _$StatsDailyImpl(
+      {required this.id,
+      required this.accountId,
+      required this.date,
+      required this.hitCount,
+      required this.totalDurationMs,
+      required this.avgDurationMs});
 
   factory _$StatsDailyImpl.fromJson(Map<String, dynamic> json) =>
       _$$StatsDailyImplFromJson(json);
@@ -212,7 +188,7 @@ class _$StatsDailyImpl implements _StatsDaily {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final DateTime date;
   @override
@@ -246,15 +222,8 @@ class _$StatsDailyImpl implements _StatsDaily {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    date,
-    hitCount,
-    totalDurationMs,
-    avgDurationMs,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, date, hitCount,
+      totalDurationMs, avgDurationMs);
 
   /// Create a copy of StatsDaily
   /// with the given fields replaced by the non-null parameter values.
@@ -266,19 +235,20 @@ class _$StatsDailyImpl implements _StatsDaily {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$StatsDailyImplToJson(this);
+    return _$$StatsDailyImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _StatsDaily implements StatsDaily {
-  const factory _StatsDaily({
-    required final String id,
-    required final String accountId,
-    required final DateTime date,
-    required final int hitCount,
-    required final int totalDurationMs,
-    required final int avgDurationMs,
-  }) = _$StatsDailyImpl;
+  const factory _StatsDaily(
+      {required final String id,
+      required final String accountId,
+      required final DateTime date,
+      required final int hitCount,
+      required final int totalDurationMs,
+      required final int avgDurationMs}) = _$StatsDailyImpl;
 
   factory _StatsDaily.fromJson(Map<String, dynamic> json) =
       _$StatsDailyImpl.fromJson;

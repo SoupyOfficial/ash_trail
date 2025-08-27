@@ -9,20 +9,17 @@ part of 'sync_state.dart';
 _$SyncStateImpl _$$SyncStateImplFromJson(Map<String, dynamic> json) =>
     _$SyncStateImpl(
       accountId: json['accountId'] as String,
-      lastPulledAt:
-          json['lastPulledAt'] == null
-              ? null
-              : DateTime.parse(json['lastPulledAt'] as String),
-      lastPushedAt:
-          json['lastPushedAt'] == null
-              ? null
-              : DateTime.parse(json['lastPushedAt'] as String),
+      lastPulledAt: json['lastPulledAt'] == null
+          ? null
+          : DateTime.parse(json['lastPulledAt'] as String),
+      lastPushedAt: json['lastPushedAt'] == null
+          ? null
+          : DateTime.parse(json['lastPushedAt'] as String),
       remoteVersion: json['remoteVersion'] as String?,
       tombstoneWatermark: json['tombstoneWatermark'] as String?,
-      backoffUntil:
-          json['backoffUntil'] == null
-              ? null
-              : DateTime.parse(json['backoffUntil'] as String),
+      backoffUntil: json['backoffUntil'] == null
+          ? null
+          : DateTime.parse(json['backoffUntil'] as String),
     );
 
 Map<String, dynamic> _$$SyncStateImplToJson(_$SyncStateImpl instance) =>

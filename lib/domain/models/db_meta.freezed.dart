@@ -12,8 +12,7 @@ part of 'db_meta.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 DbMeta _$DbMetaFromJson(Map<String, dynamic> json) {
   return _DbMeta.fromJson(json);
@@ -61,35 +60,28 @@ class _$DbMetaCopyWithImpl<$Res, $Val extends DbMeta>
     Object? schemaVersion = null,
     Object? migratedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            schemaVersion:
-                null == schemaVersion
-                    ? _value.schemaVersion
-                    : schemaVersion // ignore: cast_nullable_to_non_nullable
-                        as int,
-            migratedAt:
-                null == migratedAt
-                    ? _value.migratedAt
-                    : migratedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      schemaVersion: null == schemaVersion
+          ? _value.schemaVersion
+          : schemaVersion // ignore: cast_nullable_to_non_nullable
+              as int,
+      migratedAt: null == migratedAt
+          ? _value.migratedAt
+          : migratedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$DbMetaImplCopyWith<$Res> implements $DbMetaCopyWith<$Res> {
   factory _$$DbMetaImplCopyWith(
-    _$DbMetaImpl value,
-    $Res Function(_$DbMetaImpl) then,
-  ) = __$$DbMetaImplCopyWithImpl<$Res>;
+          _$DbMetaImpl value, $Res Function(_$DbMetaImpl) then) =
+      __$$DbMetaImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({String id, int schemaVersion, DateTime migratedAt});
@@ -100,9 +92,8 @@ class __$$DbMetaImplCopyWithImpl<$Res>
     extends _$DbMetaCopyWithImpl<$Res, _$DbMetaImpl>
     implements _$$DbMetaImplCopyWith<$Res> {
   __$$DbMetaImplCopyWithImpl(
-    _$DbMetaImpl _value,
-    $Res Function(_$DbMetaImpl) _then,
-  ) : super(_value, _then);
+      _$DbMetaImpl _value, $Res Function(_$DbMetaImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of DbMeta
   /// with the given fields replaced by the non-null parameter values.
@@ -113,36 +104,30 @@ class __$$DbMetaImplCopyWithImpl<$Res>
     Object? schemaVersion = null,
     Object? migratedAt = null,
   }) {
-    return _then(
-      _$DbMetaImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        schemaVersion:
-            null == schemaVersion
-                ? _value.schemaVersion
-                : schemaVersion // ignore: cast_nullable_to_non_nullable
-                    as int,
-        migratedAt:
-            null == migratedAt
-                ? _value.migratedAt
-                : migratedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$DbMetaImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      schemaVersion: null == schemaVersion
+          ? _value.schemaVersion
+          : schemaVersion // ignore: cast_nullable_to_non_nullable
+              as int,
+      migratedAt: null == migratedAt
+          ? _value.migratedAt
+          : migratedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$DbMetaImpl implements _DbMeta {
-  const _$DbMetaImpl({
-    required this.id,
-    required this.schemaVersion,
-    required this.migratedAt,
-  });
+  const _$DbMetaImpl(
+      {required this.id,
+      required this.schemaVersion,
+      required this.migratedAt});
 
   factory _$DbMetaImpl.fromJson(Map<String, dynamic> json) =>
       _$$DbMetaImplFromJson(json);
@@ -185,16 +170,17 @@ class _$DbMetaImpl implements _DbMeta {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DbMetaImplToJson(this);
+    return _$$DbMetaImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _DbMeta implements DbMeta {
-  const factory _DbMeta({
-    required final String id,
-    required final int schemaVersion,
-    required final DateTime migratedAt,
-  }) = _$DbMetaImpl;
+  const factory _DbMeta(
+      {required final String id,
+      required final int schemaVersion,
+      required final DateTime migratedAt}) = _$DbMetaImpl;
 
   factory _DbMeta.fromJson(Map<String, dynamic> json) = _$DbMetaImpl.fromJson;
 

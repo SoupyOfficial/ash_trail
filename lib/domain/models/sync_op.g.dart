@@ -7,18 +7,18 @@ part of 'sync_op.dart';
 // **************************************************************************
 
 _$SyncOpImpl _$$SyncOpImplFromJson(Map<String, dynamic> json) => _$SyncOpImpl(
-  id: json['id'] as String,
-  accountId: json['accountId'] as String,
-  entity: json['entity'] as String,
-  op: json['op'] as String,
-  recordId: json['recordId'] as String,
-  payload: json['payload'] as Map<String, dynamic>,
-  status: json['status'] as String,
-  attempts: (json['attempts'] as num).toInt(),
-  lastError: json['lastError'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
-);
+      id: json['id'] as String,
+      accountId: json['accountId'] as String,
+      entity: json['entity'] as String,
+      op: json['op'] as String,
+      recordId: json['recordId'] as String,
+      payload: json['payload'] as Map<String, dynamic>,
+      status: json['status'] as String,
+      attempts: (json['attempts'] as num).toInt(),
+      lastError: json['lastError'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
 
 Map<String, dynamic> _$$SyncOpImplToJson(_$SyncOpImpl instance) =>
     <String, dynamic>{

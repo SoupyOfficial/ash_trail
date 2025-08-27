@@ -13,10 +13,9 @@ _$ReminderImpl _$$ReminderImplFromJson(Map<String, dynamic> json) =>
       time: DateTime.parse(json['time'] as String),
       days: (json['days'] as List<dynamic>).map((e) => e as String).toList(),
       enabled: json['enabled'] as bool,
-      lastTriggeredAt:
-          json['lastTriggeredAt'] == null
-              ? null
-              : DateTime.parse(json['lastTriggeredAt'] as String),
+      lastTriggeredAt: json['lastTriggeredAt'] == null
+          ? null
+          : DateTime.parse(json['lastTriggeredAt'] as String),
     );
 
 Map<String, dynamic> _$$ReminderImplToJson(_$ReminderImpl instance) =>

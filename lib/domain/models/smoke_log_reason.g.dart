@@ -17,12 +17,12 @@ _$SmokeLogReasonImpl _$$SmokeLogReasonImplFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$$SmokeLogReasonImplToJson(
-  _$SmokeLogReasonImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'smokeLogId': instance.smokeLogId,
-  'reasonId': instance.reasonId,
-  'accountId': instance.accountId,
-  'ts': instance.ts.toIso8601String(),
-  'createdAt': instance.createdAt.toIso8601String(),
-};
+        _$SmokeLogReasonImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'smokeLogId': instance.smokeLogId,
+      'reasonId': instance.reasonId,
+      'accountId': instance.accountId,
+      'ts': instance.ts.toIso8601String(),
+      'createdAt': instance.createdAt.toIso8601String(),
+    };

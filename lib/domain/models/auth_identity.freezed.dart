@@ -12,8 +12,7 @@ part of 'auth_identity.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 AuthIdentity _$AuthIdentityFromJson(Map<String, dynamic> json) {
   return _AuthIdentity.fromJson(json);
@@ -44,19 +43,17 @@ mixin _$AuthIdentity {
 /// @nodoc
 abstract class $AuthIdentityCopyWith<$Res> {
   factory $AuthIdentityCopyWith(
-    AuthIdentity value,
-    $Res Function(AuthIdentity) then,
-  ) = _$AuthIdentityCopyWithImpl<$Res, AuthIdentity>;
+          AuthIdentity value, $Res Function(AuthIdentity) then) =
+      _$AuthIdentityCopyWithImpl<$Res, AuthIdentity>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String provider,
-    String providerUid,
-    String? email,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String provider,
+      String providerUid,
+      String? email,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -82,46 +79,36 @@ class _$AuthIdentityCopyWithImpl<$Res, $Val extends AuthIdentity>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            provider:
-                null == provider
-                    ? _value.provider
-                    : provider // ignore: cast_nullable_to_non_nullable
-                        as String,
-            providerUid:
-                null == providerUid
-                    ? _value.providerUid
-                    : providerUid // ignore: cast_nullable_to_non_nullable
-                        as String,
-            email:
-                freezed == email
-                    ? _value.email
-                    : email // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+      providerUid: null == providerUid
+          ? _value.providerUid
+          : providerUid // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
@@ -129,20 +116,18 @@ class _$AuthIdentityCopyWithImpl<$Res, $Val extends AuthIdentity>
 abstract class _$$AuthIdentityImplCopyWith<$Res>
     implements $AuthIdentityCopyWith<$Res> {
   factory _$$AuthIdentityImplCopyWith(
-    _$AuthIdentityImpl value,
-    $Res Function(_$AuthIdentityImpl) then,
-  ) = __$$AuthIdentityImplCopyWithImpl<$Res>;
+          _$AuthIdentityImpl value, $Res Function(_$AuthIdentityImpl) then) =
+      __$$AuthIdentityImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String provider,
-    String providerUid,
-    String? email,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String provider,
+      String providerUid,
+      String? email,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -150,9 +135,8 @@ class __$$AuthIdentityImplCopyWithImpl<$Res>
     extends _$AuthIdentityCopyWithImpl<$Res, _$AuthIdentityImpl>
     implements _$$AuthIdentityImplCopyWith<$Res> {
   __$$AuthIdentityImplCopyWithImpl(
-    _$AuthIdentityImpl _value,
-    $Res Function(_$AuthIdentityImpl) _then,
-  ) : super(_value, _then);
+      _$AuthIdentityImpl _value, $Res Function(_$AuthIdentityImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of AuthIdentity
   /// with the given fields replaced by the non-null parameter values.
@@ -167,60 +151,50 @@ class __$$AuthIdentityImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$AuthIdentityImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        provider:
-            null == provider
-                ? _value.provider
-                : provider // ignore: cast_nullable_to_non_nullable
-                    as String,
-        providerUid:
-            null == providerUid
-                ? _value.providerUid
-                : providerUid // ignore: cast_nullable_to_non_nullable
-                    as String,
-        email:
-            freezed == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$AuthIdentityImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+      providerUid: null == providerUid
+          ? _value.providerUid
+          : providerUid // ignore: cast_nullable_to_non_nullable
+              as String,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AuthIdentityImpl implements _AuthIdentity {
-  const _$AuthIdentityImpl({
-    required this.id,
-    required this.accountId,
-    required this.provider,
-    required this.providerUid,
-    this.email,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const _$AuthIdentityImpl(
+      {required this.id,
+      required this.accountId,
+      required this.provider,
+      required this.providerUid,
+      this.email,
+      required this.createdAt,
+      required this.updatedAt});
 
   factory _$AuthIdentityImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthIdentityImplFromJson(json);
@@ -229,10 +203,10 @@ class _$AuthIdentityImpl implements _AuthIdentity {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String provider;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String providerUid;
   @override
@@ -268,16 +242,8 @@ class _$AuthIdentityImpl implements _AuthIdentity {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    provider,
-    providerUid,
-    email,
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, provider,
+      providerUid, email, createdAt, updatedAt);
 
   /// Create a copy of AuthIdentity
   /// with the given fields replaced by the non-null parameter values.
@@ -289,20 +255,21 @@ class _$AuthIdentityImpl implements _AuthIdentity {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AuthIdentityImplToJson(this);
+    return _$$AuthIdentityImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _AuthIdentity implements AuthIdentity {
-  const factory _AuthIdentity({
-    required final String id,
-    required final String accountId,
-    required final String provider,
-    required final String providerUid,
-    final String? email,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$AuthIdentityImpl;
+  const factory _AuthIdentity(
+      {required final String id,
+      required final String accountId,
+      required final String provider,
+      required final String providerUid,
+      final String? email,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$AuthIdentityImpl;
 
   factory _AuthIdentity.fromJson(Map<String, dynamic> json) =
       _$AuthIdentityImpl.fromJson;

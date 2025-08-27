@@ -9,10 +9,9 @@ part of 'onboarding.dart';
 _$OnboardingImpl _$$OnboardingImplFromJson(Map<String, dynamic> json) =>
     _$OnboardingImpl(
       accountId: json['accountId'] as String,
-      stepsCompleted:
-          (json['stepsCompleted'] as List<dynamic>)
-              .map((e) => e as String)
-              .toList(),
+      stepsCompleted: (json['stepsCompleted'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

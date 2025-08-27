@@ -12,8 +12,7 @@ part of 'device.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Device _$DeviceFromJson(Map<String, dynamic> json) {
   return _Device.fromJson(json);
@@ -43,14 +42,13 @@ abstract class $DeviceCopyWith<$Res> {
   factory $DeviceCopyWith(Device value, $Res Function(Device) then) =
       _$DeviceCopyWithImpl<$Res, Device>;
   @useResult
-  $Res call({
-    String id,
-    String platform,
-    String appVersion,
-    String? osVersion,
-    String? model,
-    DateTime createdAt,
-  });
+  $Res call(
+      {String id,
+      String platform,
+      String appVersion,
+      String? osVersion,
+      String? model,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -75,60 +73,49 @@ class _$DeviceCopyWithImpl<$Res, $Val extends Device>
     Object? model = freezed,
     Object? createdAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            platform:
-                null == platform
-                    ? _value.platform
-                    : platform // ignore: cast_nullable_to_non_nullable
-                        as String,
-            appVersion:
-                null == appVersion
-                    ? _value.appVersion
-                    : appVersion // ignore: cast_nullable_to_non_nullable
-                        as String,
-            osVersion:
-                freezed == osVersion
-                    ? _value.osVersion
-                    : osVersion // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            model:
-                freezed == model
-                    ? _value.model
-                    : model // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      platform: null == platform
+          ? _value.platform
+          : platform // ignore: cast_nullable_to_non_nullable
+              as String,
+      appVersion: null == appVersion
+          ? _value.appVersion
+          : appVersion // ignore: cast_nullable_to_non_nullable
+              as String,
+      osVersion: freezed == osVersion
+          ? _value.osVersion
+          : osVersion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      model: freezed == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$DeviceImplCopyWith<$Res> implements $DeviceCopyWith<$Res> {
   factory _$$DeviceImplCopyWith(
-    _$DeviceImpl value,
-    $Res Function(_$DeviceImpl) then,
-  ) = __$$DeviceImplCopyWithImpl<$Res>;
+          _$DeviceImpl value, $Res Function(_$DeviceImpl) then) =
+      __$$DeviceImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String platform,
-    String appVersion,
-    String? osVersion,
-    String? model,
-    DateTime createdAt,
-  });
+  $Res call(
+      {String id,
+      String platform,
+      String appVersion,
+      String? osVersion,
+      String? model,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -136,9 +123,8 @@ class __$$DeviceImplCopyWithImpl<$Res>
     extends _$DeviceCopyWithImpl<$Res, _$DeviceImpl>
     implements _$$DeviceImplCopyWith<$Res> {
   __$$DeviceImplCopyWithImpl(
-    _$DeviceImpl _value,
-    $Res Function(_$DeviceImpl) _then,
-  ) : super(_value, _then);
+      _$DeviceImpl _value, $Res Function(_$DeviceImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Device
   /// with the given fields replaced by the non-null parameter values.
@@ -152,54 +138,45 @@ class __$$DeviceImplCopyWithImpl<$Res>
     Object? model = freezed,
     Object? createdAt = null,
   }) {
-    return _then(
-      _$DeviceImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        platform:
-            null == platform
-                ? _value.platform
-                : platform // ignore: cast_nullable_to_non_nullable
-                    as String,
-        appVersion:
-            null == appVersion
-                ? _value.appVersion
-                : appVersion // ignore: cast_nullable_to_non_nullable
-                    as String,
-        osVersion:
-            freezed == osVersion
-                ? _value.osVersion
-                : osVersion // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        model:
-            freezed == model
-                ? _value.model
-                : model // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$DeviceImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      platform: null == platform
+          ? _value.platform
+          : platform // ignore: cast_nullable_to_non_nullable
+              as String,
+      appVersion: null == appVersion
+          ? _value.appVersion
+          : appVersion // ignore: cast_nullable_to_non_nullable
+              as String,
+      osVersion: freezed == osVersion
+          ? _value.osVersion
+          : osVersion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      model: freezed == model
+          ? _value.model
+          : model // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$DeviceImpl implements _Device {
-  const _$DeviceImpl({
-    required this.id,
-    required this.platform,
-    required this.appVersion,
-    this.osVersion,
-    this.model,
-    required this.createdAt,
-  });
+  const _$DeviceImpl(
+      {required this.id,
+      required this.platform,
+      required this.appVersion,
+      this.osVersion,
+      this.model,
+      required this.createdAt});
 
   factory _$DeviceImpl.fromJson(Map<String, dynamic> json) =>
       _$$DeviceImplFromJson(json);
@@ -208,7 +185,7 @@ class _$DeviceImpl implements _Device {
   final String id;
   @override
   final String platform;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String appVersion;
   @override
@@ -243,14 +220,7 @@ class _$DeviceImpl implements _Device {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    platform,
-    appVersion,
-    osVersion,
-    model,
-    createdAt,
-  );
+      runtimeType, id, platform, appVersion, osVersion, model, createdAt);
 
   /// Create a copy of Device
   /// with the given fields replaced by the non-null parameter values.
@@ -262,19 +232,20 @@ class _$DeviceImpl implements _Device {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$DeviceImplToJson(this);
+    return _$$DeviceImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Device implements Device {
-  const factory _Device({
-    required final String id,
-    required final String platform,
-    required final String appVersion,
-    final String? osVersion,
-    final String? model,
-    required final DateTime createdAt,
-  }) = _$DeviceImpl;
+  const factory _Device(
+      {required final String id,
+      required final String platform,
+      required final String appVersion,
+      final String? osVersion,
+      final String? model,
+      required final DateTime createdAt}) = _$DeviceImpl;
 
   factory _Device.fromJson(Map<String, dynamic> json) = _$DeviceImpl.fromJson;
 

@@ -12,8 +12,7 @@ part of 'filter_preset.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 FilterPreset _$FilterPresetFromJson(Map<String, dynamic> json) {
   return _FilterPreset.fromJson(json);
@@ -50,24 +49,22 @@ mixin _$FilterPreset {
 /// @nodoc
 abstract class $FilterPresetCopyWith<$Res> {
   factory $FilterPresetCopyWith(
-    FilterPreset value,
-    $Res Function(FilterPreset) then,
-  ) = _$FilterPresetCopyWithImpl<$Res, FilterPreset>;
+          FilterPreset value, $Res Function(FilterPreset) then) =
+      _$FilterPresetCopyWithImpl<$Res, FilterPreset>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String name,
-    String range,
-    DateTime? customStart,
-    DateTime? customEnd,
-    List<String>? includeTags,
-    List<String>? excludeTags,
-    String sort,
-    String? query,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String name,
+      String range,
+      DateTime? customStart,
+      DateTime? customEnd,
+      List<String>? includeTags,
+      List<String>? excludeTags,
+      String sort,
+      String? query,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -98,71 +95,56 @@ class _$FilterPresetCopyWithImpl<$Res, $Val extends FilterPreset>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
-            range:
-                null == range
-                    ? _value.range
-                    : range // ignore: cast_nullable_to_non_nullable
-                        as String,
-            customStart:
-                freezed == customStart
-                    ? _value.customStart
-                    : customStart // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            customEnd:
-                freezed == customEnd
-                    ? _value.customEnd
-                    : customEnd // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            includeTags:
-                freezed == includeTags
-                    ? _value.includeTags
-                    : includeTags // ignore: cast_nullable_to_non_nullable
-                        as List<String>?,
-            excludeTags:
-                freezed == excludeTags
-                    ? _value.excludeTags
-                    : excludeTags // ignore: cast_nullable_to_non_nullable
-                        as List<String>?,
-            sort:
-                null == sort
-                    ? _value.sort
-                    : sort // ignore: cast_nullable_to_non_nullable
-                        as String,
-            query:
-                freezed == query
-                    ? _value.query
-                    : query // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      range: null == range
+          ? _value.range
+          : range // ignore: cast_nullable_to_non_nullable
+              as String,
+      customStart: freezed == customStart
+          ? _value.customStart
+          : customStart // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      customEnd: freezed == customEnd
+          ? _value.customEnd
+          : customEnd // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      includeTags: freezed == includeTags
+          ? _value.includeTags
+          : includeTags // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      excludeTags: freezed == excludeTags
+          ? _value.excludeTags
+          : excludeTags // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      sort: null == sort
+          ? _value.sort
+          : sort // ignore: cast_nullable_to_non_nullable
+              as String,
+      query: freezed == query
+          ? _value.query
+          : query // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
@@ -170,25 +152,23 @@ class _$FilterPresetCopyWithImpl<$Res, $Val extends FilterPreset>
 abstract class _$$FilterPresetImplCopyWith<$Res>
     implements $FilterPresetCopyWith<$Res> {
   factory _$$FilterPresetImplCopyWith(
-    _$FilterPresetImpl value,
-    $Res Function(_$FilterPresetImpl) then,
-  ) = __$$FilterPresetImplCopyWithImpl<$Res>;
+          _$FilterPresetImpl value, $Res Function(_$FilterPresetImpl) then) =
+      __$$FilterPresetImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String name,
-    String range,
-    DateTime? customStart,
-    DateTime? customEnd,
-    List<String>? includeTags,
-    List<String>? excludeTags,
-    String sort,
-    String? query,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String name,
+      String range,
+      DateTime? customStart,
+      DateTime? customEnd,
+      List<String>? includeTags,
+      List<String>? excludeTags,
+      String sort,
+      String? query,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -196,9 +176,8 @@ class __$$FilterPresetImplCopyWithImpl<$Res>
     extends _$FilterPresetCopyWithImpl<$Res, _$FilterPresetImpl>
     implements _$$FilterPresetImplCopyWith<$Res> {
   __$$FilterPresetImplCopyWithImpl(
-    _$FilterPresetImpl _value,
-    $Res Function(_$FilterPresetImpl) _then,
-  ) : super(_value, _then);
+      _$FilterPresetImpl _value, $Res Function(_$FilterPresetImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of FilterPreset
   /// with the given fields replaced by the non-null parameter values.
@@ -218,91 +197,77 @@ class __$$FilterPresetImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$FilterPresetImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
-        range:
-            null == range
-                ? _value.range
-                : range // ignore: cast_nullable_to_non_nullable
-                    as String,
-        customStart:
-            freezed == customStart
-                ? _value.customStart
-                : customStart // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        customEnd:
-            freezed == customEnd
-                ? _value.customEnd
-                : customEnd // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        includeTags:
-            freezed == includeTags
-                ? _value._includeTags
-                : includeTags // ignore: cast_nullable_to_non_nullable
-                    as List<String>?,
-        excludeTags:
-            freezed == excludeTags
-                ? _value._excludeTags
-                : excludeTags // ignore: cast_nullable_to_non_nullable
-                    as List<String>?,
-        sort:
-            null == sort
-                ? _value.sort
-                : sort // ignore: cast_nullable_to_non_nullable
-                    as String,
-        query:
-            freezed == query
-                ? _value.query
-                : query // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$FilterPresetImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      range: null == range
+          ? _value.range
+          : range // ignore: cast_nullable_to_non_nullable
+              as String,
+      customStart: freezed == customStart
+          ? _value.customStart
+          : customStart // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      customEnd: freezed == customEnd
+          ? _value.customEnd
+          : customEnd // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      includeTags: freezed == includeTags
+          ? _value._includeTags
+          : includeTags // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      excludeTags: freezed == excludeTags
+          ? _value._excludeTags
+          : excludeTags // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      sort: null == sort
+          ? _value.sort
+          : sort // ignore: cast_nullable_to_non_nullable
+              as String,
+      query: freezed == query
+          ? _value.query
+          : query // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$FilterPresetImpl implements _FilterPreset {
-  const _$FilterPresetImpl({
-    required this.id,
-    required this.accountId,
-    required this.name,
-    required this.range,
-    this.customStart,
-    this.customEnd,
-    final List<String>? includeTags,
-    final List<String>? excludeTags,
-    required this.sort,
-    this.query,
-    required this.createdAt,
-    required this.updatedAt,
-  }) : _includeTags = includeTags,
-       _excludeTags = excludeTags;
+  const _$FilterPresetImpl(
+      {required this.id,
+      required this.accountId,
+      required this.name,
+      required this.range,
+      this.customStart,
+      this.customEnd,
+      final List<String>? includeTags,
+      final List<String>? excludeTags,
+      required this.sort,
+      this.query,
+      required this.createdAt,
+      required this.updatedAt})
+      : _includeTags = includeTags,
+        _excludeTags = excludeTags;
 
   factory _$FilterPresetImpl.fromJson(Map<String, dynamic> json) =>
       _$$FilterPresetImplFromJson(json);
@@ -311,12 +276,12 @@ class _$FilterPresetImpl implements _FilterPreset {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String name;
   @override
   final String range;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final DateTime? customStart;
   @override
@@ -343,7 +308,7 @@ class _$FilterPresetImpl implements _FilterPreset {
 
   @override
   final String sort;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String? query;
   @override
@@ -370,14 +335,10 @@ class _$FilterPresetImpl implements _FilterPreset {
                 other.customStart == customStart) &&
             (identical(other.customEnd, customEnd) ||
                 other.customEnd == customEnd) &&
-            const DeepCollectionEquality().equals(
-              other._includeTags,
-              _includeTags,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._excludeTags,
-              _excludeTags,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._includeTags, _includeTags) &&
+            const DeepCollectionEquality()
+                .equals(other._excludeTags, _excludeTags) &&
             (identical(other.sort, sort) || other.sort == sort) &&
             (identical(other.query, query) || other.query == query) &&
             (identical(other.createdAt, createdAt) ||
@@ -389,20 +350,19 @@ class _$FilterPresetImpl implements _FilterPreset {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    name,
-    range,
-    customStart,
-    customEnd,
-    const DeepCollectionEquality().hash(_includeTags),
-    const DeepCollectionEquality().hash(_excludeTags),
-    sort,
-    query,
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      id,
+      accountId,
+      name,
+      range,
+      customStart,
+      customEnd,
+      const DeepCollectionEquality().hash(_includeTags),
+      const DeepCollectionEquality().hash(_excludeTags),
+      sort,
+      query,
+      createdAt,
+      updatedAt);
 
   /// Create a copy of FilterPreset
   /// with the given fields replaced by the non-null parameter values.
@@ -414,25 +374,26 @@ class _$FilterPresetImpl implements _FilterPreset {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$FilterPresetImplToJson(this);
+    return _$$FilterPresetImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _FilterPreset implements FilterPreset {
-  const factory _FilterPreset({
-    required final String id,
-    required final String accountId,
-    required final String name,
-    required final String range,
-    final DateTime? customStart,
-    final DateTime? customEnd,
-    final List<String>? includeTags,
-    final List<String>? excludeTags,
-    required final String sort,
-    final String? query,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$FilterPresetImpl;
+  const factory _FilterPreset(
+      {required final String id,
+      required final String accountId,
+      required final String name,
+      required final String range,
+      final DateTime? customStart,
+      final DateTime? customEnd,
+      final List<String>? includeTags,
+      final List<String>? excludeTags,
+      required final String sort,
+      final String? query,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$FilterPresetImpl;
 
   factory _FilterPreset.fromJson(Map<String, dynamic> json) =
       _$FilterPresetImpl.fromJson;

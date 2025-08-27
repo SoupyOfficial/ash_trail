@@ -7,13 +7,13 @@ part of 'method.dart';
 // **************************************************************************
 
 _$MethodImpl _$$MethodImplFromJson(Map<String, dynamic> json) => _$MethodImpl(
-  id: json['id'] as String,
-  accountId: json['accountId'] as String?,
-  name: json['name'] as String,
-  category: json['category'] as String,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
-);
+      id: json['id'] as String,
+      accountId: json['accountId'] as String?,
+      name: json['name'] as String,
+      category: json['category'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
 
 Map<String, dynamic> _$$MethodImplToJson(_$MethodImpl instance) =>
     <String, dynamic>{

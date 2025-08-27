@@ -15,10 +15,9 @@ _$ImportBatchImpl _$$ImportBatchImplFromJson(Map<String, dynamic> json) =>
       countInserted: (json['countInserted'] as num).toInt(),
       countFailed: (json['countFailed'] as num).toInt(),
       startedAt: DateTime.parse(json['startedAt'] as String),
-      finishedAt:
-          json['finishedAt'] == null
-              ? null
-              : DateTime.parse(json['finishedAt'] as String),
+      finishedAt: json['finishedAt'] == null
+          ? null
+          : DateTime.parse(json['finishedAt'] as String),
       log: json['log'] as String?,
     );
 

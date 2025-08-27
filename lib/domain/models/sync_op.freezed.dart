@@ -12,8 +12,7 @@ part of 'sync_op.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SyncOp _$SyncOpFromJson(Map<String, dynamic> json) {
   return _SyncOp.fromJson(json);
@@ -51,19 +50,18 @@ abstract class $SyncOpCopyWith<$Res> {
   factory $SyncOpCopyWith(SyncOp value, $Res Function(SyncOp) then) =
       _$SyncOpCopyWithImpl<$Res, SyncOp>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String entity,
-    String op,
-    String recordId,
-    Map<String, dynamic> payload,
-    String status,
-    int attempts,
-    String? lastError,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String entity,
+      String op,
+      String recordId,
+      Map<String, dynamic> payload,
+      String status,
+      int attempts,
+      String? lastError,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -93,90 +91,74 @@ class _$SyncOpCopyWithImpl<$Res, $Val extends SyncOp>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            entity:
-                null == entity
-                    ? _value.entity
-                    : entity // ignore: cast_nullable_to_non_nullable
-                        as String,
-            op:
-                null == op
-                    ? _value.op
-                    : op // ignore: cast_nullable_to_non_nullable
-                        as String,
-            recordId:
-                null == recordId
-                    ? _value.recordId
-                    : recordId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            payload:
-                null == payload
-                    ? _value.payload
-                    : payload // ignore: cast_nullable_to_non_nullable
-                        as Map<String, dynamic>,
-            status:
-                null == status
-                    ? _value.status
-                    : status // ignore: cast_nullable_to_non_nullable
-                        as String,
-            attempts:
-                null == attempts
-                    ? _value.attempts
-                    : attempts // ignore: cast_nullable_to_non_nullable
-                        as int,
-            lastError:
-                freezed == lastError
-                    ? _value.lastError
-                    : lastError // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      entity: null == entity
+          ? _value.entity
+          : entity // ignore: cast_nullable_to_non_nullable
+              as String,
+      op: null == op
+          ? _value.op
+          : op // ignore: cast_nullable_to_non_nullable
+              as String,
+      recordId: null == recordId
+          ? _value.recordId
+          : recordId // ignore: cast_nullable_to_non_nullable
+              as String,
+      payload: null == payload
+          ? _value.payload
+          : payload // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      attempts: null == attempts
+          ? _value.attempts
+          : attempts // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastError: freezed == lastError
+          ? _value.lastError
+          : lastError // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$SyncOpImplCopyWith<$Res> implements $SyncOpCopyWith<$Res> {
   factory _$$SyncOpImplCopyWith(
-    _$SyncOpImpl value,
-    $Res Function(_$SyncOpImpl) then,
-  ) = __$$SyncOpImplCopyWithImpl<$Res>;
+          _$SyncOpImpl value, $Res Function(_$SyncOpImpl) then) =
+      __$$SyncOpImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String entity,
-    String op,
-    String recordId,
-    Map<String, dynamic> payload,
-    String status,
-    int attempts,
-    String? lastError,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String entity,
+      String op,
+      String recordId,
+      Map<String, dynamic> payload,
+      String status,
+      int attempts,
+      String? lastError,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -184,9 +166,8 @@ class __$$SyncOpImplCopyWithImpl<$Res>
     extends _$SyncOpCopyWithImpl<$Res, _$SyncOpImpl>
     implements _$$SyncOpImplCopyWith<$Res> {
   __$$SyncOpImplCopyWithImpl(
-    _$SyncOpImpl _value,
-    $Res Function(_$SyncOpImpl) _then,
-  ) : super(_value, _then);
+      _$SyncOpImpl _value, $Res Function(_$SyncOpImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of SyncOp
   /// with the given fields replaced by the non-null parameter values.
@@ -205,84 +186,71 @@ class __$$SyncOpImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$SyncOpImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        entity:
-            null == entity
-                ? _value.entity
-                : entity // ignore: cast_nullable_to_non_nullable
-                    as String,
-        op:
-            null == op
-                ? _value.op
-                : op // ignore: cast_nullable_to_non_nullable
-                    as String,
-        recordId:
-            null == recordId
-                ? _value.recordId
-                : recordId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        payload:
-            null == payload
-                ? _value._payload
-                : payload // ignore: cast_nullable_to_non_nullable
-                    as Map<String, dynamic>,
-        status:
-            null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                    as String,
-        attempts:
-            null == attempts
-                ? _value.attempts
-                : attempts // ignore: cast_nullable_to_non_nullable
-                    as int,
-        lastError:
-            freezed == lastError
-                ? _value.lastError
-                : lastError // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$SyncOpImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      entity: null == entity
+          ? _value.entity
+          : entity // ignore: cast_nullable_to_non_nullable
+              as String,
+      op: null == op
+          ? _value.op
+          : op // ignore: cast_nullable_to_non_nullable
+              as String,
+      recordId: null == recordId
+          ? _value.recordId
+          : recordId // ignore: cast_nullable_to_non_nullable
+              as String,
+      payload: null == payload
+          ? _value._payload
+          : payload // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      attempts: null == attempts
+          ? _value.attempts
+          : attempts // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastError: freezed == lastError
+          ? _value.lastError
+          : lastError // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SyncOpImpl implements _SyncOp {
-  const _$SyncOpImpl({
-    required this.id,
-    required this.accountId,
-    required this.entity,
-    required this.op,
-    required this.recordId,
-    required final Map<String, dynamic> payload,
-    required this.status,
-    required this.attempts,
-    this.lastError,
-    required this.createdAt,
-    required this.updatedAt,
-  }) : _payload = payload;
+  const _$SyncOpImpl(
+      {required this.id,
+      required this.accountId,
+      required this.entity,
+      required this.op,
+      required this.recordId,
+      required final Map<String, dynamic> payload,
+      required this.status,
+      required this.attempts,
+      this.lastError,
+      required this.createdAt,
+      required this.updatedAt})
+      : _payload = payload;
 
   factory _$SyncOpImpl.fromJson(Map<String, dynamic> json) =>
       _$$SyncOpImplFromJson(json);
@@ -291,13 +259,13 @@ class _$SyncOpImpl implements _SyncOp {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String entity;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String op;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String recordId;
   final Map<String, dynamic> _payload;
@@ -310,7 +278,7 @@ class _$SyncOpImpl implements _SyncOp {
 
   @override
   final String status;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final int attempts;
   @override
@@ -352,19 +320,18 @@ class _$SyncOpImpl implements _SyncOp {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    entity,
-    op,
-    recordId,
-    const DeepCollectionEquality().hash(_payload),
-    status,
-    attempts,
-    lastError,
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      id,
+      accountId,
+      entity,
+      op,
+      recordId,
+      const DeepCollectionEquality().hash(_payload),
+      status,
+      attempts,
+      lastError,
+      createdAt,
+      updatedAt);
 
   /// Create a copy of SyncOp
   /// with the given fields replaced by the non-null parameter values.
@@ -376,24 +343,25 @@ class _$SyncOpImpl implements _SyncOp {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SyncOpImplToJson(this);
+    return _$$SyncOpImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SyncOp implements SyncOp {
-  const factory _SyncOp({
-    required final String id,
-    required final String accountId,
-    required final String entity,
-    required final String op,
-    required final String recordId,
-    required final Map<String, dynamic> payload,
-    required final String status,
-    required final int attempts,
-    final String? lastError,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$SyncOpImpl;
+  const factory _SyncOp(
+      {required final String id,
+      required final String accountId,
+      required final String entity,
+      required final String op,
+      required final String recordId,
+      required final Map<String, dynamic> payload,
+      required final String status,
+      required final int attempts,
+      final String? lastError,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$SyncOpImpl;
 
   factory _SyncOp.fromJson(Map<String, dynamic> json) = _$SyncOpImpl.fromJson;
 

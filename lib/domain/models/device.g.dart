@@ -7,13 +7,13 @@ part of 'device.dart';
 // **************************************************************************
 
 _$DeviceImpl _$$DeviceImplFromJson(Map<String, dynamic> json) => _$DeviceImpl(
-  id: json['id'] as String,
-  platform: json['platform'] as String,
-  appVersion: json['appVersion'] as String,
-  osVersion: json['osVersion'] as String?,
-  model: json['model'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-);
+      id: json['id'] as String,
+      platform: json['platform'] as String,
+      appVersion: json['appVersion'] as String,
+      osVersion: json['osVersion'] as String?,
+      model: json['model'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
 
 Map<String, dynamic> _$$DeviceImplToJson(_$DeviceImpl instance) =>
     <String, dynamic>{

@@ -12,8 +12,7 @@ part of 'sync_state.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SyncState _$SyncStateFromJson(Map<String, dynamic> json) {
   return _SyncState.fromJson(json);
@@ -44,14 +43,13 @@ abstract class $SyncStateCopyWith<$Res> {
   factory $SyncStateCopyWith(SyncState value, $Res Function(SyncState) then) =
       _$SyncStateCopyWithImpl<$Res, SyncState>;
   @useResult
-  $Res call({
-    String accountId,
-    DateTime? lastPulledAt,
-    DateTime? lastPushedAt,
-    String? remoteVersion,
-    String? tombstoneWatermark,
-    DateTime? backoffUntil,
-  });
+  $Res call(
+      {String accountId,
+      DateTime? lastPulledAt,
+      DateTime? lastPushedAt,
+      String? remoteVersion,
+      String? tombstoneWatermark,
+      DateTime? backoffUntil});
 }
 
 /// @nodoc
@@ -76,41 +74,32 @@ class _$SyncStateCopyWithImpl<$Res, $Val extends SyncState>
     Object? tombstoneWatermark = freezed,
     Object? backoffUntil = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            lastPulledAt:
-                freezed == lastPulledAt
-                    ? _value.lastPulledAt
-                    : lastPulledAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            lastPushedAt:
-                freezed == lastPushedAt
-                    ? _value.lastPushedAt
-                    : lastPushedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            remoteVersion:
-                freezed == remoteVersion
-                    ? _value.remoteVersion
-                    : remoteVersion // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            tombstoneWatermark:
-                freezed == tombstoneWatermark
-                    ? _value.tombstoneWatermark
-                    : tombstoneWatermark // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            backoffUntil:
-                freezed == backoffUntil
-                    ? _value.backoffUntil
-                    : backoffUntil // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastPulledAt: freezed == lastPulledAt
+          ? _value.lastPulledAt
+          : lastPulledAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastPushedAt: freezed == lastPushedAt
+          ? _value.lastPushedAt
+          : lastPushedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      remoteVersion: freezed == remoteVersion
+          ? _value.remoteVersion
+          : remoteVersion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      tombstoneWatermark: freezed == tombstoneWatermark
+          ? _value.tombstoneWatermark
+          : tombstoneWatermark // ignore: cast_nullable_to_non_nullable
+              as String?,
+      backoffUntil: freezed == backoffUntil
+          ? _value.backoffUntil
+          : backoffUntil // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
@@ -118,19 +107,17 @@ class _$SyncStateCopyWithImpl<$Res, $Val extends SyncState>
 abstract class _$$SyncStateImplCopyWith<$Res>
     implements $SyncStateCopyWith<$Res> {
   factory _$$SyncStateImplCopyWith(
-    _$SyncStateImpl value,
-    $Res Function(_$SyncStateImpl) then,
-  ) = __$$SyncStateImplCopyWithImpl<$Res>;
+          _$SyncStateImpl value, $Res Function(_$SyncStateImpl) then) =
+      __$$SyncStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String accountId,
-    DateTime? lastPulledAt,
-    DateTime? lastPushedAt,
-    String? remoteVersion,
-    String? tombstoneWatermark,
-    DateTime? backoffUntil,
-  });
+  $Res call(
+      {String accountId,
+      DateTime? lastPulledAt,
+      DateTime? lastPushedAt,
+      String? remoteVersion,
+      String? tombstoneWatermark,
+      DateTime? backoffUntil});
 }
 
 /// @nodoc
@@ -138,9 +125,8 @@ class __$$SyncStateImplCopyWithImpl<$Res>
     extends _$SyncStateCopyWithImpl<$Res, _$SyncStateImpl>
     implements _$$SyncStateImplCopyWith<$Res> {
   __$$SyncStateImplCopyWithImpl(
-    _$SyncStateImpl _value,
-    $Res Function(_$SyncStateImpl) _then,
-  ) : super(_value, _then);
+      _$SyncStateImpl _value, $Res Function(_$SyncStateImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of SyncState
   /// with the given fields replaced by the non-null parameter values.
@@ -154,61 +140,52 @@ class __$$SyncStateImplCopyWithImpl<$Res>
     Object? tombstoneWatermark = freezed,
     Object? backoffUntil = freezed,
   }) {
-    return _then(
-      _$SyncStateImpl(
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        lastPulledAt:
-            freezed == lastPulledAt
-                ? _value.lastPulledAt
-                : lastPulledAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        lastPushedAt:
-            freezed == lastPushedAt
-                ? _value.lastPushedAt
-                : lastPushedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        remoteVersion:
-            freezed == remoteVersion
-                ? _value.remoteVersion
-                : remoteVersion // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        tombstoneWatermark:
-            freezed == tombstoneWatermark
-                ? _value.tombstoneWatermark
-                : tombstoneWatermark // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        backoffUntil:
-            freezed == backoffUntil
-                ? _value.backoffUntil
-                : backoffUntil // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-      ),
-    );
+    return _then(_$SyncStateImpl(
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastPulledAt: freezed == lastPulledAt
+          ? _value.lastPulledAt
+          : lastPulledAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastPushedAt: freezed == lastPushedAt
+          ? _value.lastPushedAt
+          : lastPushedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      remoteVersion: freezed == remoteVersion
+          ? _value.remoteVersion
+          : remoteVersion // ignore: cast_nullable_to_non_nullable
+              as String?,
+      tombstoneWatermark: freezed == tombstoneWatermark
+          ? _value.tombstoneWatermark
+          : tombstoneWatermark // ignore: cast_nullable_to_non_nullable
+              as String?,
+      backoffUntil: freezed == backoffUntil
+          ? _value.backoffUntil
+          : backoffUntil // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SyncStateImpl implements _SyncState {
-  const _$SyncStateImpl({
-    required this.accountId,
-    this.lastPulledAt,
-    this.lastPushedAt,
-    this.remoteVersion,
-    this.tombstoneWatermark,
-    this.backoffUntil,
-  });
+  const _$SyncStateImpl(
+      {required this.accountId,
+      this.lastPulledAt,
+      this.lastPushedAt,
+      this.remoteVersion,
+      this.tombstoneWatermark,
+      this.backoffUntil});
 
   factory _$SyncStateImpl.fromJson(Map<String, dynamic> json) =>
       _$$SyncStateImplFromJson(json);
 
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final DateTime? lastPulledAt;
   @override
@@ -246,15 +223,8 @@ class _$SyncStateImpl implements _SyncState {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    accountId,
-    lastPulledAt,
-    lastPushedAt,
-    remoteVersion,
-    tombstoneWatermark,
-    backoffUntil,
-  );
+  int get hashCode => Object.hash(runtimeType, accountId, lastPulledAt,
+      lastPushedAt, remoteVersion, tombstoneWatermark, backoffUntil);
 
   /// Create a copy of SyncState
   /// with the given fields replaced by the non-null parameter values.
@@ -266,19 +236,20 @@ class _$SyncStateImpl implements _SyncState {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SyncStateImplToJson(this);
+    return _$$SyncStateImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SyncState implements SyncState {
-  const factory _SyncState({
-    required final String accountId,
-    final DateTime? lastPulledAt,
-    final DateTime? lastPushedAt,
-    final String? remoteVersion,
-    final String? tombstoneWatermark,
-    final DateTime? backoffUntil,
-  }) = _$SyncStateImpl;
+  const factory _SyncState(
+      {required final String accountId,
+      final DateTime? lastPulledAt,
+      final DateTime? lastPushedAt,
+      final String? remoteVersion,
+      final String? tombstoneWatermark,
+      final DateTime? backoffUntil}) = _$SyncStateImpl;
 
   factory _SyncState.fromJson(Map<String, dynamic> json) =
       _$SyncStateImpl.fromJson;

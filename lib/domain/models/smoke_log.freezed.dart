@@ -12,8 +12,7 @@ part of 'smoke_log.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SmokeLog _$SmokeLogFromJson(Map<String, dynamic> json) {
   return _SmokeLog.fromJson(json);
@@ -51,20 +50,19 @@ abstract class $SmokeLogCopyWith<$Res> {
   factory $SmokeLogCopyWith(SmokeLog value, $Res Function(SmokeLog) then) =
       _$SmokeLogCopyWithImpl<$Res, SmokeLog>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    DateTime ts,
-    int durationMs,
-    String? methodId,
-    int? potency,
-    int moodScore,
-    int physicalScore,
-    String? notes,
-    String? deviceLocalId,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      DateTime ts,
+      int durationMs,
+      String? methodId,
+      int? potency,
+      int moodScore,
+      int physicalScore,
+      String? notes,
+      String? deviceLocalId,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -95,71 +93,56 @@ class _$SmokeLogCopyWithImpl<$Res, $Val extends SmokeLog>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            ts:
-                null == ts
-                    ? _value.ts
-                    : ts // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            durationMs:
-                null == durationMs
-                    ? _value.durationMs
-                    : durationMs // ignore: cast_nullable_to_non_nullable
-                        as int,
-            methodId:
-                freezed == methodId
-                    ? _value.methodId
-                    : methodId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            potency:
-                freezed == potency
-                    ? _value.potency
-                    : potency // ignore: cast_nullable_to_non_nullable
-                        as int?,
-            moodScore:
-                null == moodScore
-                    ? _value.moodScore
-                    : moodScore // ignore: cast_nullable_to_non_nullable
-                        as int,
-            physicalScore:
-                null == physicalScore
-                    ? _value.physicalScore
-                    : physicalScore // ignore: cast_nullable_to_non_nullable
-                        as int,
-            notes:
-                freezed == notes
-                    ? _value.notes
-                    : notes // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            deviceLocalId:
-                freezed == deviceLocalId
-                    ? _value.deviceLocalId
-                    : deviceLocalId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ts: null == ts
+          ? _value.ts
+          : ts // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      durationMs: null == durationMs
+          ? _value.durationMs
+          : durationMs // ignore: cast_nullable_to_non_nullable
+              as int,
+      methodId: freezed == methodId
+          ? _value.methodId
+          : methodId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      potency: freezed == potency
+          ? _value.potency
+          : potency // ignore: cast_nullable_to_non_nullable
+              as int?,
+      moodScore: null == moodScore
+          ? _value.moodScore
+          : moodScore // ignore: cast_nullable_to_non_nullable
+              as int,
+      physicalScore: null == physicalScore
+          ? _value.physicalScore
+          : physicalScore // ignore: cast_nullable_to_non_nullable
+              as int,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      deviceLocalId: freezed == deviceLocalId
+          ? _value.deviceLocalId
+          : deviceLocalId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
@@ -167,25 +150,23 @@ class _$SmokeLogCopyWithImpl<$Res, $Val extends SmokeLog>
 abstract class _$$SmokeLogImplCopyWith<$Res>
     implements $SmokeLogCopyWith<$Res> {
   factory _$$SmokeLogImplCopyWith(
-    _$SmokeLogImpl value,
-    $Res Function(_$SmokeLogImpl) then,
-  ) = __$$SmokeLogImplCopyWithImpl<$Res>;
+          _$SmokeLogImpl value, $Res Function(_$SmokeLogImpl) then) =
+      __$$SmokeLogImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    DateTime ts,
-    int durationMs,
-    String? methodId,
-    int? potency,
-    int moodScore,
-    int physicalScore,
-    String? notes,
-    String? deviceLocalId,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      DateTime ts,
+      int durationMs,
+      String? methodId,
+      int? potency,
+      int moodScore,
+      int physicalScore,
+      String? notes,
+      String? deviceLocalId,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -193,9 +174,8 @@ class __$$SmokeLogImplCopyWithImpl<$Res>
     extends _$SmokeLogCopyWithImpl<$Res, _$SmokeLogImpl>
     implements _$$SmokeLogImplCopyWith<$Res> {
   __$$SmokeLogImplCopyWithImpl(
-    _$SmokeLogImpl _value,
-    $Res Function(_$SmokeLogImpl) _then,
-  ) : super(_value, _then);
+      _$SmokeLogImpl _value, $Res Function(_$SmokeLogImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of SmokeLog
   /// with the given fields replaced by the non-null parameter values.
@@ -215,90 +195,75 @@ class __$$SmokeLogImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$SmokeLogImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        ts:
-            null == ts
-                ? _value.ts
-                : ts // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        durationMs:
-            null == durationMs
-                ? _value.durationMs
-                : durationMs // ignore: cast_nullable_to_non_nullable
-                    as int,
-        methodId:
-            freezed == methodId
-                ? _value.methodId
-                : methodId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        potency:
-            freezed == potency
-                ? _value.potency
-                : potency // ignore: cast_nullable_to_non_nullable
-                    as int?,
-        moodScore:
-            null == moodScore
-                ? _value.moodScore
-                : moodScore // ignore: cast_nullable_to_non_nullable
-                    as int,
-        physicalScore:
-            null == physicalScore
-                ? _value.physicalScore
-                : physicalScore // ignore: cast_nullable_to_non_nullable
-                    as int,
-        notes:
-            freezed == notes
-                ? _value.notes
-                : notes // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        deviceLocalId:
-            freezed == deviceLocalId
-                ? _value.deviceLocalId
-                : deviceLocalId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$SmokeLogImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ts: null == ts
+          ? _value.ts
+          : ts // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      durationMs: null == durationMs
+          ? _value.durationMs
+          : durationMs // ignore: cast_nullable_to_non_nullable
+              as int,
+      methodId: freezed == methodId
+          ? _value.methodId
+          : methodId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      potency: freezed == potency
+          ? _value.potency
+          : potency // ignore: cast_nullable_to_non_nullable
+              as int?,
+      moodScore: null == moodScore
+          ? _value.moodScore
+          : moodScore // ignore: cast_nullable_to_non_nullable
+              as int,
+      physicalScore: null == physicalScore
+          ? _value.physicalScore
+          : physicalScore // ignore: cast_nullable_to_non_nullable
+              as int,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
+      deviceLocalId: freezed == deviceLocalId
+          ? _value.deviceLocalId
+          : deviceLocalId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SmokeLogImpl implements _SmokeLog {
-  const _$SmokeLogImpl({
-    required this.id,
-    required this.accountId,
-    required this.ts,
-    required this.durationMs,
-    this.methodId,
-    this.potency,
-    required this.moodScore,
-    required this.physicalScore,
-    this.notes,
-    this.deviceLocalId,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const _$SmokeLogImpl(
+      {required this.id,
+      required this.accountId,
+      required this.ts,
+      required this.durationMs,
+      this.methodId,
+      this.potency,
+      required this.moodScore,
+      required this.physicalScore,
+      this.notes,
+      this.deviceLocalId,
+      required this.createdAt,
+      required this.updatedAt});
 
   factory _$SmokeLogImpl.fromJson(Map<String, dynamic> json) =>
       _$$SmokeLogImplFromJson(json);
@@ -307,14 +272,14 @@ class _$SmokeLogImpl implements _SmokeLog {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final DateTime ts;
   @override
   final int durationMs;
   @override
   final String? methodId;
-  // TODO: FK to Method
+// TODO: FK to Method
   @override
   final int? potency;
   @override
@@ -365,20 +330,19 @@ class _$SmokeLogImpl implements _SmokeLog {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    ts,
-    durationMs,
-    methodId,
-    potency,
-    moodScore,
-    physicalScore,
-    notes,
-    deviceLocalId,
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      id,
+      accountId,
+      ts,
+      durationMs,
+      methodId,
+      potency,
+      moodScore,
+      physicalScore,
+      notes,
+      deviceLocalId,
+      createdAt,
+      updatedAt);
 
   /// Create a copy of SmokeLog
   /// with the given fields replaced by the non-null parameter values.
@@ -390,25 +354,26 @@ class _$SmokeLogImpl implements _SmokeLog {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SmokeLogImplToJson(this);
+    return _$$SmokeLogImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SmokeLog implements SmokeLog {
-  const factory _SmokeLog({
-    required final String id,
-    required final String accountId,
-    required final DateTime ts,
-    required final int durationMs,
-    final String? methodId,
-    final int? potency,
-    required final int moodScore,
-    required final int physicalScore,
-    final String? notes,
-    final String? deviceLocalId,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$SmokeLogImpl;
+  const factory _SmokeLog(
+      {required final String id,
+      required final String accountId,
+      required final DateTime ts,
+      required final int durationMs,
+      final String? methodId,
+      final int? potency,
+      required final int moodScore,
+      required final int physicalScore,
+      final String? notes,
+      final String? deviceLocalId,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$SmokeLogImpl;
 
   factory _SmokeLog.fromJson(Map<String, dynamic> json) =
       _$SmokeLogImpl.fromJson;

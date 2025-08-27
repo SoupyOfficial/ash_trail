@@ -12,8 +12,7 @@ part of 'import_item.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 ImportItem _$ImportItemFromJson(Map<String, dynamic> json) {
   return _ImportItem.fromJson(json);
@@ -42,17 +41,15 @@ mixin _$ImportItem {
 /// @nodoc
 abstract class $ImportItemCopyWith<$Res> {
   factory $ImportItemCopyWith(
-    ImportItem value,
-    $Res Function(ImportItem) then,
-  ) = _$ImportItemCopyWithImpl<$Res, ImportItem>;
+          ImportItem value, $Res Function(ImportItem) then) =
+      _$ImportItemCopyWithImpl<$Res, ImportItem>;
   @useResult
-  $Res call({
-    String id,
-    String batchId,
-    String status,
-    Map<String, dynamic> raw,
-    String? error,
-  });
+  $Res call(
+      {String id,
+      String batchId,
+      String status,
+      Map<String, dynamic> raw,
+      String? error});
 }
 
 /// @nodoc
@@ -76,36 +73,28 @@ class _$ImportItemCopyWithImpl<$Res, $Val extends ImportItem>
     Object? raw = null,
     Object? error = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            batchId:
-                null == batchId
-                    ? _value.batchId
-                    : batchId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            status:
-                null == status
-                    ? _value.status
-                    : status // ignore: cast_nullable_to_non_nullable
-                        as String,
-            raw:
-                null == raw
-                    ? _value.raw
-                    : raw // ignore: cast_nullable_to_non_nullable
-                        as Map<String, dynamic>,
-            error:
-                freezed == error
-                    ? _value.error
-                    : error // ignore: cast_nullable_to_non_nullable
-                        as String?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      batchId: null == batchId
+          ? _value.batchId
+          : batchId // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      raw: null == raw
+          ? _value.raw
+          : raw // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
   }
 }
 
@@ -113,18 +102,16 @@ class _$ImportItemCopyWithImpl<$Res, $Val extends ImportItem>
 abstract class _$$ImportItemImplCopyWith<$Res>
     implements $ImportItemCopyWith<$Res> {
   factory _$$ImportItemImplCopyWith(
-    _$ImportItemImpl value,
-    $Res Function(_$ImportItemImpl) then,
-  ) = __$$ImportItemImplCopyWithImpl<$Res>;
+          _$ImportItemImpl value, $Res Function(_$ImportItemImpl) then) =
+      __$$ImportItemImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String batchId,
-    String status,
-    Map<String, dynamic> raw,
-    String? error,
-  });
+  $Res call(
+      {String id,
+      String batchId,
+      String status,
+      Map<String, dynamic> raw,
+      String? error});
 }
 
 /// @nodoc
@@ -132,9 +119,8 @@ class __$$ImportItemImplCopyWithImpl<$Res>
     extends _$ImportItemCopyWithImpl<$Res, _$ImportItemImpl>
     implements _$$ImportItemImplCopyWith<$Res> {
   __$$ImportItemImplCopyWithImpl(
-    _$ImportItemImpl _value,
-    $Res Function(_$ImportItemImpl) _then,
-  ) : super(_value, _then);
+      _$ImportItemImpl _value, $Res Function(_$ImportItemImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of ImportItem
   /// with the given fields replaced by the non-null parameter values.
@@ -147,48 +133,41 @@ class __$$ImportItemImplCopyWithImpl<$Res>
     Object? raw = null,
     Object? error = freezed,
   }) {
-    return _then(
-      _$ImportItemImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        batchId:
-            null == batchId
-                ? _value.batchId
-                : batchId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        status:
-            null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                    as String,
-        raw:
-            null == raw
-                ? _value._raw
-                : raw // ignore: cast_nullable_to_non_nullable
-                    as Map<String, dynamic>,
-        error:
-            freezed == error
-                ? _value.error
-                : error // ignore: cast_nullable_to_non_nullable
-                    as String?,
-      ),
-    );
+    return _then(_$ImportItemImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      batchId: null == batchId
+          ? _value.batchId
+          : batchId // ignore: cast_nullable_to_non_nullable
+              as String,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      raw: null == raw
+          ? _value._raw
+          : raw // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ImportItemImpl implements _ImportItem {
-  const _$ImportItemImpl({
-    required this.id,
-    required this.batchId,
-    required this.status,
-    required final Map<String, dynamic> raw,
-    this.error,
-  }) : _raw = raw;
+  const _$ImportItemImpl(
+      {required this.id,
+      required this.batchId,
+      required this.status,
+      required final Map<String, dynamic> raw,
+      this.error})
+      : _raw = raw;
 
   factory _$ImportItemImpl.fromJson(Map<String, dynamic> json) =>
       _$$ImportItemImplFromJson(json);
@@ -197,12 +176,12 @@ class _$ImportItemImpl implements _ImportItem {
   final String id;
   @override
   final String batchId;
-  // TODO: FK to ImportBatch
+// TODO: FK to ImportBatch
   @override
   final String status;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   final Map<String, dynamic> _raw;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   Map<String, dynamic> get raw {
     if (_raw is EqualUnmodifiableMapView) return _raw;
@@ -232,14 +211,8 @@ class _$ImportItemImpl implements _ImportItem {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    batchId,
-    status,
-    const DeepCollectionEquality().hash(_raw),
-    error,
-  );
+  int get hashCode => Object.hash(runtimeType, id, batchId, status,
+      const DeepCollectionEquality().hash(_raw), error);
 
   /// Create a copy of ImportItem
   /// with the given fields replaced by the non-null parameter values.
@@ -251,18 +224,19 @@ class _$ImportItemImpl implements _ImportItem {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ImportItemImplToJson(this);
+    return _$$ImportItemImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _ImportItem implements ImportItem {
-  const factory _ImportItem({
-    required final String id,
-    required final String batchId,
-    required final String status,
-    required final Map<String, dynamic> raw,
-    final String? error,
-  }) = _$ImportItemImpl;
+  const factory _ImportItem(
+      {required final String id,
+      required final String batchId,
+      required final String status,
+      required final Map<String, dynamic> raw,
+      final String? error}) = _$ImportItemImpl;
 
   factory _ImportItem.fromJson(Map<String, dynamic> json) =
       _$ImportItemImpl.fromJson;

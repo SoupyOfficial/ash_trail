@@ -7,10 +7,10 @@ part of 'db_meta.dart';
 // **************************************************************************
 
 _$DbMetaImpl _$$DbMetaImplFromJson(Map<String, dynamic> json) => _$DbMetaImpl(
-  id: json['id'] as String,
-  schemaVersion: (json['schemaVersion'] as num).toInt(),
-  migratedAt: DateTime.parse(json['migratedAt'] as String),
-);
+      id: json['id'] as String,
+      schemaVersion: (json['schemaVersion'] as num).toInt(),
+      migratedAt: DateTime.parse(json['migratedAt'] as String),
+    );
 
 Map<String, dynamic> _$$DbMetaImplToJson(_$DbMetaImpl instance) =>
     <String, dynamic>{

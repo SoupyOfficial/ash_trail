@@ -12,22 +12,19 @@ _$ChartViewImpl _$$ChartViewImplFromJson(Map<String, dynamic> json) =>
       accountId: json['accountId'] as String,
       title: json['title'] as String,
       range: json['range'] as String,
-      customStart:
-          json['customStart'] == null
-              ? null
-              : DateTime.parse(json['customStart'] as String),
-      customEnd:
-          json['customEnd'] == null
-              ? null
-              : DateTime.parse(json['customEnd'] as String),
+      customStart: json['customStart'] == null
+          ? null
+          : DateTime.parse(json['customStart'] as String),
+      customEnd: json['customEnd'] == null
+          ? null
+          : DateTime.parse(json['customEnd'] as String),
       groupBy: json['groupBy'] as String,
       metric: json['metric'] as String,
       smoothing: json['smoothing'] as String,
       smoothingWindow: (json['smoothingWindow'] as num?)?.toInt(),
-      visibleTags:
-          (json['visibleTags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList(),
+      visibleTags: (json['visibleTags'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

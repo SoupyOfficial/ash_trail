@@ -14,10 +14,9 @@ _$PushTokenImpl _$$PushTokenImplFromJson(Map<String, dynamic> json) =>
       token: json['token'] as String,
       active: json['active'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      revokedAt:
-          json['revokedAt'] == null
-              ? null
-              : DateTime.parse(json['revokedAt'] as String),
+      revokedAt: json['revokedAt'] == null
+          ? null
+          : DateTime.parse(json['revokedAt'] as String),
     );
 
 Map<String, dynamic> _$$PushTokenImplToJson(_$PushTokenImpl instance) =>

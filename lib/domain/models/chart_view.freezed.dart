@@ -12,8 +12,7 @@ part of 'chart_view.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 ChartView _$ChartViewFromJson(Map<String, dynamic> json) {
   return _ChartView.fromJson(json);
@@ -55,21 +54,20 @@ abstract class $ChartViewCopyWith<$Res> {
   factory $ChartViewCopyWith(ChartView value, $Res Function(ChartView) then) =
       _$ChartViewCopyWithImpl<$Res, ChartView>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String title,
-    String range,
-    DateTime? customStart,
-    DateTime? customEnd,
-    String groupBy,
-    String metric,
-    String smoothing,
-    int? smoothingWindow,
-    List<String>? visibleTags,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String title,
+      String range,
+      DateTime? customStart,
+      DateTime? customEnd,
+      String groupBy,
+      String metric,
+      String smoothing,
+      int? smoothingWindow,
+      List<String>? visibleTags,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -101,76 +99,60 @@ class _$ChartViewCopyWithImpl<$Res, $Val extends ChartView>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            title:
-                null == title
-                    ? _value.title
-                    : title // ignore: cast_nullable_to_non_nullable
-                        as String,
-            range:
-                null == range
-                    ? _value.range
-                    : range // ignore: cast_nullable_to_non_nullable
-                        as String,
-            customStart:
-                freezed == customStart
-                    ? _value.customStart
-                    : customStart // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            customEnd:
-                freezed == customEnd
-                    ? _value.customEnd
-                    : customEnd // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            groupBy:
-                null == groupBy
-                    ? _value.groupBy
-                    : groupBy // ignore: cast_nullable_to_non_nullable
-                        as String,
-            metric:
-                null == metric
-                    ? _value.metric
-                    : metric // ignore: cast_nullable_to_non_nullable
-                        as String,
-            smoothing:
-                null == smoothing
-                    ? _value.smoothing
-                    : smoothing // ignore: cast_nullable_to_non_nullable
-                        as String,
-            smoothingWindow:
-                freezed == smoothingWindow
-                    ? _value.smoothingWindow
-                    : smoothingWindow // ignore: cast_nullable_to_non_nullable
-                        as int?,
-            visibleTags:
-                freezed == visibleTags
-                    ? _value.visibleTags
-                    : visibleTags // ignore: cast_nullable_to_non_nullable
-                        as List<String>?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      range: null == range
+          ? _value.range
+          : range // ignore: cast_nullable_to_non_nullable
+              as String,
+      customStart: freezed == customStart
+          ? _value.customStart
+          : customStart // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      customEnd: freezed == customEnd
+          ? _value.customEnd
+          : customEnd // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      groupBy: null == groupBy
+          ? _value.groupBy
+          : groupBy // ignore: cast_nullable_to_non_nullable
+              as String,
+      metric: null == metric
+          ? _value.metric
+          : metric // ignore: cast_nullable_to_non_nullable
+              as String,
+      smoothing: null == smoothing
+          ? _value.smoothing
+          : smoothing // ignore: cast_nullable_to_non_nullable
+              as String,
+      smoothingWindow: freezed == smoothingWindow
+          ? _value.smoothingWindow
+          : smoothingWindow // ignore: cast_nullable_to_non_nullable
+              as int?,
+      visibleTags: freezed == visibleTags
+          ? _value.visibleTags
+          : visibleTags // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
@@ -178,26 +160,24 @@ class _$ChartViewCopyWithImpl<$Res, $Val extends ChartView>
 abstract class _$$ChartViewImplCopyWith<$Res>
     implements $ChartViewCopyWith<$Res> {
   factory _$$ChartViewImplCopyWith(
-    _$ChartViewImpl value,
-    $Res Function(_$ChartViewImpl) then,
-  ) = __$$ChartViewImplCopyWithImpl<$Res>;
+          _$ChartViewImpl value, $Res Function(_$ChartViewImpl) then) =
+      __$$ChartViewImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String title,
-    String range,
-    DateTime? customStart,
-    DateTime? customEnd,
-    String groupBy,
-    String metric,
-    String smoothing,
-    int? smoothingWindow,
-    List<String>? visibleTags,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String title,
+      String range,
+      DateTime? customStart,
+      DateTime? customEnd,
+      String groupBy,
+      String metric,
+      String smoothing,
+      int? smoothingWindow,
+      List<String>? visibleTags,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -205,9 +185,8 @@ class __$$ChartViewImplCopyWithImpl<$Res>
     extends _$ChartViewCopyWithImpl<$Res, _$ChartViewImpl>
     implements _$$ChartViewImplCopyWith<$Res> {
   __$$ChartViewImplCopyWithImpl(
-    _$ChartViewImpl _value,
-    $Res Function(_$ChartViewImpl) _then,
-  ) : super(_value, _then);
+      _$ChartViewImpl _value, $Res Function(_$ChartViewImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of ChartView
   /// with the given fields replaced by the non-null parameter values.
@@ -228,96 +207,81 @@ class __$$ChartViewImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$ChartViewImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        title:
-            null == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                    as String,
-        range:
-            null == range
-                ? _value.range
-                : range // ignore: cast_nullable_to_non_nullable
-                    as String,
-        customStart:
-            freezed == customStart
-                ? _value.customStart
-                : customStart // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        customEnd:
-            freezed == customEnd
-                ? _value.customEnd
-                : customEnd // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        groupBy:
-            null == groupBy
-                ? _value.groupBy
-                : groupBy // ignore: cast_nullable_to_non_nullable
-                    as String,
-        metric:
-            null == metric
-                ? _value.metric
-                : metric // ignore: cast_nullable_to_non_nullable
-                    as String,
-        smoothing:
-            null == smoothing
-                ? _value.smoothing
-                : smoothing // ignore: cast_nullable_to_non_nullable
-                    as String,
-        smoothingWindow:
-            freezed == smoothingWindow
-                ? _value.smoothingWindow
-                : smoothingWindow // ignore: cast_nullable_to_non_nullable
-                    as int?,
-        visibleTags:
-            freezed == visibleTags
-                ? _value._visibleTags
-                : visibleTags // ignore: cast_nullable_to_non_nullable
-                    as List<String>?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$ChartViewImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      range: null == range
+          ? _value.range
+          : range // ignore: cast_nullable_to_non_nullable
+              as String,
+      customStart: freezed == customStart
+          ? _value.customStart
+          : customStart // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      customEnd: freezed == customEnd
+          ? _value.customEnd
+          : customEnd // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      groupBy: null == groupBy
+          ? _value.groupBy
+          : groupBy // ignore: cast_nullable_to_non_nullable
+              as String,
+      metric: null == metric
+          ? _value.metric
+          : metric // ignore: cast_nullable_to_non_nullable
+              as String,
+      smoothing: null == smoothing
+          ? _value.smoothing
+          : smoothing // ignore: cast_nullable_to_non_nullable
+              as String,
+      smoothingWindow: freezed == smoothingWindow
+          ? _value.smoothingWindow
+          : smoothingWindow // ignore: cast_nullable_to_non_nullable
+              as int?,
+      visibleTags: freezed == visibleTags
+          ? _value._visibleTags
+          : visibleTags // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ChartViewImpl implements _ChartView {
-  const _$ChartViewImpl({
-    required this.id,
-    required this.accountId,
-    required this.title,
-    required this.range,
-    this.customStart,
-    this.customEnd,
-    required this.groupBy,
-    required this.metric,
-    required this.smoothing,
-    this.smoothingWindow,
-    final List<String>? visibleTags,
-    required this.createdAt,
-    required this.updatedAt,
-  }) : _visibleTags = visibleTags;
+  const _$ChartViewImpl(
+      {required this.id,
+      required this.accountId,
+      required this.title,
+      required this.range,
+      this.customStart,
+      this.customEnd,
+      required this.groupBy,
+      required this.metric,
+      required this.smoothing,
+      this.smoothingWindow,
+      final List<String>? visibleTags,
+      required this.createdAt,
+      required this.updatedAt})
+      : _visibleTags = visibleTags;
 
   factory _$ChartViewImpl.fromJson(Map<String, dynamic> json) =>
       _$$ChartViewImplFromJson(json);
@@ -326,25 +290,25 @@ class _$ChartViewImpl implements _ChartView {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String title;
   @override
   final String range;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final DateTime? customStart;
   @override
   final DateTime? customEnd;
   @override
   final String groupBy;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String metric;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String smoothing;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final int? smoothingWindow;
   final List<String>? _visibleTags;
@@ -387,10 +351,8 @@ class _$ChartViewImpl implements _ChartView {
                 other.smoothing == smoothing) &&
             (identical(other.smoothingWindow, smoothingWindow) ||
                 other.smoothingWindow == smoothingWindow) &&
-            const DeepCollectionEquality().equals(
-              other._visibleTags,
-              _visibleTags,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._visibleTags, _visibleTags) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -400,21 +362,20 @@ class _$ChartViewImpl implements _ChartView {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    title,
-    range,
-    customStart,
-    customEnd,
-    groupBy,
-    metric,
-    smoothing,
-    smoothingWindow,
-    const DeepCollectionEquality().hash(_visibleTags),
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      id,
+      accountId,
+      title,
+      range,
+      customStart,
+      customEnd,
+      groupBy,
+      metric,
+      smoothing,
+      smoothingWindow,
+      const DeepCollectionEquality().hash(_visibleTags),
+      createdAt,
+      updatedAt);
 
   /// Create a copy of ChartView
   /// with the given fields replaced by the non-null parameter values.
@@ -426,26 +387,27 @@ class _$ChartViewImpl implements _ChartView {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ChartViewImplToJson(this);
+    return _$$ChartViewImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _ChartView implements ChartView {
-  const factory _ChartView({
-    required final String id,
-    required final String accountId,
-    required final String title,
-    required final String range,
-    final DateTime? customStart,
-    final DateTime? customEnd,
-    required final String groupBy,
-    required final String metric,
-    required final String smoothing,
-    final int? smoothingWindow,
-    final List<String>? visibleTags,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$ChartViewImpl;
+  const factory _ChartView(
+      {required final String id,
+      required final String accountId,
+      required final String title,
+      required final String range,
+      final DateTime? customStart,
+      final DateTime? customEnd,
+      required final String groupBy,
+      required final String metric,
+      required final String smoothing,
+      final int? smoothingWindow,
+      final List<String>? visibleTags,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$ChartViewImpl;
 
   factory _ChartView.fromJson(Map<String, dynamic> json) =
       _$ChartViewImpl.fromJson;

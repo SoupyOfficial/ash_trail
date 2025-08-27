@@ -12,8 +12,7 @@ part of 'rule.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Rule _$RuleFromJson(Map<String, dynamic> json) {
   return _Rule.fromJson(json);
@@ -46,16 +45,15 @@ abstract class $RuleCopyWith<$Res> {
   factory $RuleCopyWith(Rule value, $Res Function(Rule) then) =
       _$RuleCopyWithImpl<$Res, Rule>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String name,
-    Map<String, dynamic> condition,
-    String action,
-    bool enabled,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String name,
+      Map<String, dynamic> condition,
+      String action,
+      bool enabled,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -82,72 +80,59 @@ class _$RuleCopyWithImpl<$Res, $Val extends Rule>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
-            condition:
-                null == condition
-                    ? _value.condition
-                    : condition // ignore: cast_nullable_to_non_nullable
-                        as Map<String, dynamic>,
-            action:
-                null == action
-                    ? _value.action
-                    : action // ignore: cast_nullable_to_non_nullable
-                        as String,
-            enabled:
-                null == enabled
-                    ? _value.enabled
-                    : enabled // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      condition: null == condition
+          ? _value.condition
+          : condition // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      action: null == action
+          ? _value.action
+          : action // ignore: cast_nullable_to_non_nullable
+              as String,
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$RuleImplCopyWith<$Res> implements $RuleCopyWith<$Res> {
   factory _$$RuleImplCopyWith(
-    _$RuleImpl value,
-    $Res Function(_$RuleImpl) then,
-  ) = __$$RuleImplCopyWithImpl<$Res>;
+          _$RuleImpl value, $Res Function(_$RuleImpl) then) =
+      __$$RuleImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String name,
-    Map<String, dynamic> condition,
-    String action,
-    bool enabled,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String name,
+      Map<String, dynamic> condition,
+      String action,
+      bool enabled,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -155,7 +140,7 @@ class __$$RuleImplCopyWithImpl<$Res>
     extends _$RuleCopyWithImpl<$Res, _$RuleImpl>
     implements _$$RuleImplCopyWith<$Res> {
   __$$RuleImplCopyWithImpl(_$RuleImpl _value, $Res Function(_$RuleImpl) _then)
-    : super(_value, _then);
+      : super(_value, _then);
 
   /// Create a copy of Rule
   /// with the given fields replaced by the non-null parameter values.
@@ -171,66 +156,56 @@ class __$$RuleImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$RuleImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
-        condition:
-            null == condition
-                ? _value._condition
-                : condition // ignore: cast_nullable_to_non_nullable
-                    as Map<String, dynamic>,
-        action:
-            null == action
-                ? _value.action
-                : action // ignore: cast_nullable_to_non_nullable
-                    as String,
-        enabled:
-            null == enabled
-                ? _value.enabled
-                : enabled // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$RuleImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      condition: null == condition
+          ? _value._condition
+          : condition // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+      action: null == action
+          ? _value.action
+          : action // ignore: cast_nullable_to_non_nullable
+              as String,
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$RuleImpl implements _Rule {
-  const _$RuleImpl({
-    required this.id,
-    required this.accountId,
-    required this.name,
-    required final Map<String, dynamic> condition,
-    required this.action,
-    required this.enabled,
-    required this.createdAt,
-    required this.updatedAt,
-  }) : _condition = condition;
+  const _$RuleImpl(
+      {required this.id,
+      required this.accountId,
+      required this.name,
+      required final Map<String, dynamic> condition,
+      required this.action,
+      required this.enabled,
+      required this.createdAt,
+      required this.updatedAt})
+      : _condition = condition;
 
   factory _$RuleImpl.fromJson(Map<String, dynamic> json) =>
       _$$RuleImplFromJson(json);
@@ -239,7 +214,7 @@ class _$RuleImpl implements _Rule {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String name;
   final Map<String, dynamic> _condition;
@@ -252,7 +227,7 @@ class _$RuleImpl implements _Rule {
 
   @override
   final String action;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final bool enabled;
   @override
@@ -274,10 +249,8 @@ class _$RuleImpl implements _Rule {
             (identical(other.accountId, accountId) ||
                 other.accountId == accountId) &&
             (identical(other.name, name) || other.name == name) &&
-            const DeepCollectionEquality().equals(
-              other._condition,
-              _condition,
-            ) &&
+            const DeepCollectionEquality()
+                .equals(other._condition, _condition) &&
             (identical(other.action, action) || other.action == action) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
             (identical(other.createdAt, createdAt) ||
@@ -289,16 +262,15 @@ class _$RuleImpl implements _Rule {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    name,
-    const DeepCollectionEquality().hash(_condition),
-    action,
-    enabled,
-    createdAt,
-    updatedAt,
-  );
+      runtimeType,
+      id,
+      accountId,
+      name,
+      const DeepCollectionEquality().hash(_condition),
+      action,
+      enabled,
+      createdAt,
+      updatedAt);
 
   /// Create a copy of Rule
   /// with the given fields replaced by the non-null parameter values.
@@ -310,21 +282,22 @@ class _$RuleImpl implements _Rule {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$RuleImplToJson(this);
+    return _$$RuleImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Rule implements Rule {
-  const factory _Rule({
-    required final String id,
-    required final String accountId,
-    required final String name,
-    required final Map<String, dynamic> condition,
-    required final String action,
-    required final bool enabled,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$RuleImpl;
+  const factory _Rule(
+      {required final String id,
+      required final String accountId,
+      required final String name,
+      required final Map<String, dynamic> condition,
+      required final String action,
+      required final bool enabled,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$RuleImpl;
 
   factory _Rule.fromJson(Map<String, dynamic> json) = _$RuleImpl.fromJson;
 

@@ -7,23 +7,21 @@ part of 'goal.dart';
 // **************************************************************************
 
 _$GoalImpl _$$GoalImplFromJson(Map<String, dynamic> json) => _$GoalImpl(
-  id: json['id'] as String,
-  accountId: json['accountId'] as String,
-  type: json['type'] as String,
-  target: (json['target'] as num).toInt(),
-  window: json['window'] as String,
-  startDate: DateTime.parse(json['startDate'] as String),
-  endDate:
-      json['endDate'] == null
+      id: json['id'] as String,
+      accountId: json['accountId'] as String,
+      type: json['type'] as String,
+      target: (json['target'] as num).toInt(),
+      window: json['window'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: json['endDate'] == null
           ? null
           : DateTime.parse(json['endDate'] as String),
-  active: json['active'] as bool,
-  progress: (json['progress'] as num?)?.toInt(),
-  achievedAt:
-      json['achievedAt'] == null
+      active: json['active'] as bool,
+      progress: (json['progress'] as num?)?.toInt(),
+      achievedAt: json['achievedAt'] == null
           ? null
           : DateTime.parse(json['achievedAt'] as String),
-);
+    );
 
 Map<String, dynamic> _$$GoalImplToJson(_$GoalImpl instance) =>
     <String, dynamic>{

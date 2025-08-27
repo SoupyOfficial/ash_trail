@@ -12,8 +12,7 @@ part of 'rule_trigger.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 RuleTrigger _$RuleTriggerFromJson(Map<String, dynamic> json) {
   return _RuleTrigger.fromJson(json);
@@ -39,16 +38,14 @@ mixin _$RuleTrigger {
 /// @nodoc
 abstract class $RuleTriggerCopyWith<$Res> {
   factory $RuleTriggerCopyWith(
-    RuleTrigger value,
-    $Res Function(RuleTrigger) then,
-  ) = _$RuleTriggerCopyWithImpl<$Res, RuleTrigger>;
+          RuleTrigger value, $Res Function(RuleTrigger) then) =
+      _$RuleTriggerCopyWithImpl<$Res, RuleTrigger>;
   @useResult
-  $Res call({
-    String id,
-    String ruleId,
-    DateTime triggeredAt,
-    Map<String, dynamic> context,
-  });
+  $Res call(
+      {String id,
+      String ruleId,
+      DateTime triggeredAt,
+      Map<String, dynamic> context});
 }
 
 /// @nodoc
@@ -71,31 +68,24 @@ class _$RuleTriggerCopyWithImpl<$Res, $Val extends RuleTrigger>
     Object? triggeredAt = null,
     Object? context = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            ruleId:
-                null == ruleId
-                    ? _value.ruleId
-                    : ruleId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            triggeredAt:
-                null == triggeredAt
-                    ? _value.triggeredAt
-                    : triggeredAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            context:
-                null == context
-                    ? _value.context
-                    : context // ignore: cast_nullable_to_non_nullable
-                        as Map<String, dynamic>,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      ruleId: null == ruleId
+          ? _value.ruleId
+          : ruleId // ignore: cast_nullable_to_non_nullable
+              as String,
+      triggeredAt: null == triggeredAt
+          ? _value.triggeredAt
+          : triggeredAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      context: null == context
+          ? _value.context
+          : context // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+    ) as $Val);
   }
 }
 
@@ -103,17 +93,15 @@ class _$RuleTriggerCopyWithImpl<$Res, $Val extends RuleTrigger>
 abstract class _$$RuleTriggerImplCopyWith<$Res>
     implements $RuleTriggerCopyWith<$Res> {
   factory _$$RuleTriggerImplCopyWith(
-    _$RuleTriggerImpl value,
-    $Res Function(_$RuleTriggerImpl) then,
-  ) = __$$RuleTriggerImplCopyWithImpl<$Res>;
+          _$RuleTriggerImpl value, $Res Function(_$RuleTriggerImpl) then) =
+      __$$RuleTriggerImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String ruleId,
-    DateTime triggeredAt,
-    Map<String, dynamic> context,
-  });
+  $Res call(
+      {String id,
+      String ruleId,
+      DateTime triggeredAt,
+      Map<String, dynamic> context});
 }
 
 /// @nodoc
@@ -121,9 +109,8 @@ class __$$RuleTriggerImplCopyWithImpl<$Res>
     extends _$RuleTriggerCopyWithImpl<$Res, _$RuleTriggerImpl>
     implements _$$RuleTriggerImplCopyWith<$Res> {
   __$$RuleTriggerImplCopyWithImpl(
-    _$RuleTriggerImpl _value,
-    $Res Function(_$RuleTriggerImpl) _then,
-  ) : super(_value, _then);
+      _$RuleTriggerImpl _value, $Res Function(_$RuleTriggerImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of RuleTrigger
   /// with the given fields replaced by the non-null parameter values.
@@ -135,42 +122,36 @@ class __$$RuleTriggerImplCopyWithImpl<$Res>
     Object? triggeredAt = null,
     Object? context = null,
   }) {
-    return _then(
-      _$RuleTriggerImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        ruleId:
-            null == ruleId
-                ? _value.ruleId
-                : ruleId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        triggeredAt:
-            null == triggeredAt
-                ? _value.triggeredAt
-                : triggeredAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        context:
-            null == context
-                ? _value._context
-                : context // ignore: cast_nullable_to_non_nullable
-                    as Map<String, dynamic>,
-      ),
-    );
+    return _then(_$RuleTriggerImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      ruleId: null == ruleId
+          ? _value.ruleId
+          : ruleId // ignore: cast_nullable_to_non_nullable
+              as String,
+      triggeredAt: null == triggeredAt
+          ? _value.triggeredAt
+          : triggeredAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      context: null == context
+          ? _value._context
+          : context // ignore: cast_nullable_to_non_nullable
+              as Map<String, dynamic>,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$RuleTriggerImpl implements _RuleTrigger {
-  const _$RuleTriggerImpl({
-    required this.id,
-    required this.ruleId,
-    required this.triggeredAt,
-    required final Map<String, dynamic> context,
-  }) : _context = context;
+  const _$RuleTriggerImpl(
+      {required this.id,
+      required this.ruleId,
+      required this.triggeredAt,
+      required final Map<String, dynamic> context})
+      : _context = context;
 
   factory _$RuleTriggerImpl.fromJson(Map<String, dynamic> json) =>
       _$$RuleTriggerImplFromJson(json);
@@ -179,7 +160,7 @@ class _$RuleTriggerImpl implements _RuleTrigger {
   final String id;
   @override
   final String ruleId;
-  // TODO: FK to Rule
+// TODO: FK to Rule
   @override
   final DateTime triggeredAt;
   final Map<String, dynamic> _context;
@@ -209,13 +190,8 @@ class _$RuleTriggerImpl implements _RuleTrigger {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    ruleId,
-    triggeredAt,
-    const DeepCollectionEquality().hash(_context),
-  );
+  int get hashCode => Object.hash(runtimeType, id, ruleId, triggeredAt,
+      const DeepCollectionEquality().hash(_context));
 
   /// Create a copy of RuleTrigger
   /// with the given fields replaced by the non-null parameter values.
@@ -227,17 +203,18 @@ class _$RuleTriggerImpl implements _RuleTrigger {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$RuleTriggerImplToJson(this);
+    return _$$RuleTriggerImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _RuleTrigger implements RuleTrigger {
-  const factory _RuleTrigger({
-    required final String id,
-    required final String ruleId,
-    required final DateTime triggeredAt,
-    required final Map<String, dynamic> context,
-  }) = _$RuleTriggerImpl;
+  const factory _RuleTrigger(
+      {required final String id,
+      required final String ruleId,
+      required final DateTime triggeredAt,
+      required final Map<String, dynamic> context}) = _$RuleTriggerImpl;
 
   factory _RuleTrigger.fromJson(Map<String, dynamic> json) =
       _$RuleTriggerImpl.fromJson;

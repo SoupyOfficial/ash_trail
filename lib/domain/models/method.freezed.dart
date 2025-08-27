@@ -12,8 +12,7 @@ part of 'method.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Method _$MethodFromJson(Map<String, dynamic> json) {
   return _Method.fromJson(json);
@@ -44,14 +43,13 @@ abstract class $MethodCopyWith<$Res> {
   factory $MethodCopyWith(Method value, $Res Function(Method) then) =
       _$MethodCopyWithImpl<$Res, Method>;
   @useResult
-  $Res call({
-    String id,
-    String? accountId,
-    String name,
-    String category,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String? accountId,
+      String name,
+      String category,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -76,60 +74,49 @@ class _$MethodCopyWithImpl<$Res, $Val extends Method>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                freezed == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            name:
-                null == name
-                    ? _value.name
-                    : name // ignore: cast_nullable_to_non_nullable
-                        as String,
-            category:
-                null == category
-                    ? _value.category
-                    : category // ignore: cast_nullable_to_non_nullable
-                        as String,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: freezed == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$MethodImplCopyWith<$Res> implements $MethodCopyWith<$Res> {
   factory _$$MethodImplCopyWith(
-    _$MethodImpl value,
-    $Res Function(_$MethodImpl) then,
-  ) = __$$MethodImplCopyWithImpl<$Res>;
+          _$MethodImpl value, $Res Function(_$MethodImpl) then) =
+      __$$MethodImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String? accountId,
-    String name,
-    String category,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String? accountId,
+      String name,
+      String category,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -137,9 +124,8 @@ class __$$MethodImplCopyWithImpl<$Res>
     extends _$MethodCopyWithImpl<$Res, _$MethodImpl>
     implements _$$MethodImplCopyWith<$Res> {
   __$$MethodImplCopyWithImpl(
-    _$MethodImpl _value,
-    $Res Function(_$MethodImpl) _then,
-  ) : super(_value, _then);
+      _$MethodImpl _value, $Res Function(_$MethodImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Method
   /// with the given fields replaced by the non-null parameter values.
@@ -153,54 +139,45 @@ class __$$MethodImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$MethodImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            freezed == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        name:
-            null == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                    as String,
-        category:
-            null == category
-                ? _value.category
-                : category // ignore: cast_nullable_to_non_nullable
-                    as String,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$MethodImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: freezed == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$MethodImpl implements _Method {
-  const _$MethodImpl({
-    required this.id,
-    this.accountId,
-    required this.name,
-    required this.category,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const _$MethodImpl(
+      {required this.id,
+      this.accountId,
+      required this.name,
+      required this.category,
+      required this.createdAt,
+      required this.updatedAt});
 
   factory _$MethodImpl.fromJson(Map<String, dynamic> json) =>
       _$$MethodImplFromJson(json);
@@ -209,12 +186,12 @@ class _$MethodImpl implements _Method {
   final String id;
   @override
   final String? accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String name;
   @override
   final String category;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final DateTime createdAt;
   @override
@@ -245,14 +222,7 @@ class _$MethodImpl implements _Method {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    name,
-    category,
-    createdAt,
-    updatedAt,
-  );
+      runtimeType, id, accountId, name, category, createdAt, updatedAt);
 
   /// Create a copy of Method
   /// with the given fields replaced by the non-null parameter values.
@@ -264,19 +234,20 @@ class _$MethodImpl implements _Method {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$MethodImplToJson(this);
+    return _$$MethodImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Method implements Method {
-  const factory _Method({
-    required final String id,
-    final String? accountId,
-    required final String name,
-    required final String category,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$MethodImpl;
+  const factory _Method(
+      {required final String id,
+      final String? accountId,
+      required final String name,
+      required final String category,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$MethodImpl;
 
   factory _Method.fromJson(Map<String, dynamic> json) = _$MethodImpl.fromJson;
 

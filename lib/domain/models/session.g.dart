@@ -13,10 +13,9 @@ _$SessionImpl _$$SessionImplFromJson(Map<String, dynamic> json) =>
       deviceId: json['deviceId'] as String?,
       status: json['status'] as String,
       tokenHash: json['tokenHash'] as String?,
-      expiresAt:
-          json['expiresAt'] == null
-              ? null
-              : DateTime.parse(json['expiresAt'] as String),
+      expiresAt: json['expiresAt'] == null
+          ? null
+          : DateTime.parse(json['expiresAt'] as String),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );

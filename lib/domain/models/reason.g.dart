@@ -7,14 +7,14 @@ part of 'reason.dart';
 // **************************************************************************
 
 _$ReasonImpl _$$ReasonImplFromJson(Map<String, dynamic> json) => _$ReasonImpl(
-  id: json['id'] as String,
-  accountId: json['accountId'] as String?,
-  name: json['name'] as String,
-  enabled: json['enabled'] as bool,
-  orderIndex: (json['orderIndex'] as num).toInt(),
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
-);
+      id: json['id'] as String,
+      accountId: json['accountId'] as String?,
+      name: json['name'] as String,
+      enabled: json['enabled'] as bool,
+      orderIndex: (json['orderIndex'] as num).toInt(),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
 
 Map<String, dynamic> _$$ReasonImplToJson(_$ReasonImpl instance) =>
     <String, dynamic>{

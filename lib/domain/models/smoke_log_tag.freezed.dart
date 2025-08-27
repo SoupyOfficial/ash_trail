@@ -12,8 +12,7 @@ part of 'smoke_log_tag.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SmokeLogTag _$SmokeLogTagFromJson(Map<String, dynamic> json) {
   return _SmokeLogTag.fromJson(json);
@@ -43,18 +42,16 @@ mixin _$SmokeLogTag {
 /// @nodoc
 abstract class $SmokeLogTagCopyWith<$Res> {
   factory $SmokeLogTagCopyWith(
-    SmokeLogTag value,
-    $Res Function(SmokeLogTag) then,
-  ) = _$SmokeLogTagCopyWithImpl<$Res, SmokeLogTag>;
+          SmokeLogTag value, $Res Function(SmokeLogTag) then) =
+      _$SmokeLogTagCopyWithImpl<$Res, SmokeLogTag>;
   @useResult
-  $Res call({
-    String id,
-    String smokeLogId,
-    String tagId,
-    String accountId,
-    DateTime ts,
-    DateTime createdAt,
-  });
+  $Res call(
+      {String id,
+      String smokeLogId,
+      String tagId,
+      String accountId,
+      DateTime ts,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -79,41 +76,32 @@ class _$SmokeLogTagCopyWithImpl<$Res, $Val extends SmokeLogTag>
     Object? ts = null,
     Object? createdAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            smokeLogId:
-                null == smokeLogId
-                    ? _value.smokeLogId
-                    : smokeLogId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            tagId:
-                null == tagId
-                    ? _value.tagId
-                    : tagId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            ts:
-                null == ts
-                    ? _value.ts
-                    : ts // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      smokeLogId: null == smokeLogId
+          ? _value.smokeLogId
+          : smokeLogId // ignore: cast_nullable_to_non_nullable
+              as String,
+      tagId: null == tagId
+          ? _value.tagId
+          : tagId // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ts: null == ts
+          ? _value.ts
+          : ts // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
@@ -121,19 +109,17 @@ class _$SmokeLogTagCopyWithImpl<$Res, $Val extends SmokeLogTag>
 abstract class _$$SmokeLogTagImplCopyWith<$Res>
     implements $SmokeLogTagCopyWith<$Res> {
   factory _$$SmokeLogTagImplCopyWith(
-    _$SmokeLogTagImpl value,
-    $Res Function(_$SmokeLogTagImpl) then,
-  ) = __$$SmokeLogTagImplCopyWithImpl<$Res>;
+          _$SmokeLogTagImpl value, $Res Function(_$SmokeLogTagImpl) then) =
+      __$$SmokeLogTagImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String smokeLogId,
-    String tagId,
-    String accountId,
-    DateTime ts,
-    DateTime createdAt,
-  });
+  $Res call(
+      {String id,
+      String smokeLogId,
+      String tagId,
+      String accountId,
+      DateTime ts,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -141,9 +127,8 @@ class __$$SmokeLogTagImplCopyWithImpl<$Res>
     extends _$SmokeLogTagCopyWithImpl<$Res, _$SmokeLogTagImpl>
     implements _$$SmokeLogTagImplCopyWith<$Res> {
   __$$SmokeLogTagImplCopyWithImpl(
-    _$SmokeLogTagImpl _value,
-    $Res Function(_$SmokeLogTagImpl) _then,
-  ) : super(_value, _then);
+      _$SmokeLogTagImpl _value, $Res Function(_$SmokeLogTagImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of SmokeLogTag
   /// with the given fields replaced by the non-null parameter values.
@@ -157,54 +142,45 @@ class __$$SmokeLogTagImplCopyWithImpl<$Res>
     Object? ts = null,
     Object? createdAt = null,
   }) {
-    return _then(
-      _$SmokeLogTagImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        smokeLogId:
-            null == smokeLogId
-                ? _value.smokeLogId
-                : smokeLogId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        tagId:
-            null == tagId
-                ? _value.tagId
-                : tagId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        ts:
-            null == ts
-                ? _value.ts
-                : ts // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$SmokeLogTagImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      smokeLogId: null == smokeLogId
+          ? _value.smokeLogId
+          : smokeLogId // ignore: cast_nullable_to_non_nullable
+              as String,
+      tagId: null == tagId
+          ? _value.tagId
+          : tagId // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ts: null == ts
+          ? _value.ts
+          : ts // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SmokeLogTagImpl implements _SmokeLogTag {
-  const _$SmokeLogTagImpl({
-    required this.id,
-    required this.smokeLogId,
-    required this.tagId,
-    required this.accountId,
-    required this.ts,
-    required this.createdAt,
-  });
+  const _$SmokeLogTagImpl(
+      {required this.id,
+      required this.smokeLogId,
+      required this.tagId,
+      required this.accountId,
+      required this.ts,
+      required this.createdAt});
 
   factory _$SmokeLogTagImpl.fromJson(Map<String, dynamic> json) =>
       _$$SmokeLogTagImplFromJson(json);
@@ -213,13 +189,13 @@ class _$SmokeLogTagImpl implements _SmokeLogTag {
   final String id;
   @override
   final String smokeLogId;
-  // TODO: FK to SmokeLog
+// TODO: FK to SmokeLog
   @override
   final String tagId;
-  // TODO: FK to Tag
+// TODO: FK to Tag
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final DateTime ts;
   @override
@@ -261,19 +237,20 @@ class _$SmokeLogTagImpl implements _SmokeLogTag {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SmokeLogTagImplToJson(this);
+    return _$$SmokeLogTagImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SmokeLogTag implements SmokeLogTag {
-  const factory _SmokeLogTag({
-    required final String id,
-    required final String smokeLogId,
-    required final String tagId,
-    required final String accountId,
-    required final DateTime ts,
-    required final DateTime createdAt,
-  }) = _$SmokeLogTagImpl;
+  const factory _SmokeLogTag(
+      {required final String id,
+      required final String smokeLogId,
+      required final String tagId,
+      required final String accountId,
+      required final DateTime ts,
+      required final DateTime createdAt}) = _$SmokeLogTagImpl;
 
   factory _SmokeLogTag.fromJson(Map<String, dynamic> json) =
       _$SmokeLogTagImpl.fromJson;

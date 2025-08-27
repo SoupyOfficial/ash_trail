@@ -12,8 +12,7 @@ part of 'smoke_log_reason.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 SmokeLogReason _$SmokeLogReasonFromJson(Map<String, dynamic> json) {
   return _SmokeLogReason.fromJson(json);
@@ -44,18 +43,16 @@ mixin _$SmokeLogReason {
 /// @nodoc
 abstract class $SmokeLogReasonCopyWith<$Res> {
   factory $SmokeLogReasonCopyWith(
-    SmokeLogReason value,
-    $Res Function(SmokeLogReason) then,
-  ) = _$SmokeLogReasonCopyWithImpl<$Res, SmokeLogReason>;
+          SmokeLogReason value, $Res Function(SmokeLogReason) then) =
+      _$SmokeLogReasonCopyWithImpl<$Res, SmokeLogReason>;
   @useResult
-  $Res call({
-    String id,
-    String smokeLogId,
-    String reasonId,
-    String accountId,
-    DateTime ts,
-    DateTime createdAt,
-  });
+  $Res call(
+      {String id,
+      String smokeLogId,
+      String reasonId,
+      String accountId,
+      DateTime ts,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -80,61 +77,50 @@ class _$SmokeLogReasonCopyWithImpl<$Res, $Val extends SmokeLogReason>
     Object? ts = null,
     Object? createdAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            smokeLogId:
-                null == smokeLogId
-                    ? _value.smokeLogId
-                    : smokeLogId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            reasonId:
-                null == reasonId
-                    ? _value.reasonId
-                    : reasonId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            ts:
-                null == ts
-                    ? _value.ts
-                    : ts // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      smokeLogId: null == smokeLogId
+          ? _value.smokeLogId
+          : smokeLogId // ignore: cast_nullable_to_non_nullable
+              as String,
+      reasonId: null == reasonId
+          ? _value.reasonId
+          : reasonId // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ts: null == ts
+          ? _value.ts
+          : ts // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$SmokeLogReasonImplCopyWith<$Res>
     implements $SmokeLogReasonCopyWith<$Res> {
-  factory _$$SmokeLogReasonImplCopyWith(
-    _$SmokeLogReasonImpl value,
-    $Res Function(_$SmokeLogReasonImpl) then,
-  ) = __$$SmokeLogReasonImplCopyWithImpl<$Res>;
+  factory _$$SmokeLogReasonImplCopyWith(_$SmokeLogReasonImpl value,
+          $Res Function(_$SmokeLogReasonImpl) then) =
+      __$$SmokeLogReasonImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String smokeLogId,
-    String reasonId,
-    String accountId,
-    DateTime ts,
-    DateTime createdAt,
-  });
+  $Res call(
+      {String id,
+      String smokeLogId,
+      String reasonId,
+      String accountId,
+      DateTime ts,
+      DateTime createdAt});
 }
 
 /// @nodoc
@@ -142,9 +128,8 @@ class __$$SmokeLogReasonImplCopyWithImpl<$Res>
     extends _$SmokeLogReasonCopyWithImpl<$Res, _$SmokeLogReasonImpl>
     implements _$$SmokeLogReasonImplCopyWith<$Res> {
   __$$SmokeLogReasonImplCopyWithImpl(
-    _$SmokeLogReasonImpl _value,
-    $Res Function(_$SmokeLogReasonImpl) _then,
-  ) : super(_value, _then);
+      _$SmokeLogReasonImpl _value, $Res Function(_$SmokeLogReasonImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of SmokeLogReason
   /// with the given fields replaced by the non-null parameter values.
@@ -158,54 +143,45 @@ class __$$SmokeLogReasonImplCopyWithImpl<$Res>
     Object? ts = null,
     Object? createdAt = null,
   }) {
-    return _then(
-      _$SmokeLogReasonImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        smokeLogId:
-            null == smokeLogId
-                ? _value.smokeLogId
-                : smokeLogId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        reasonId:
-            null == reasonId
-                ? _value.reasonId
-                : reasonId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        ts:
-            null == ts
-                ? _value.ts
-                : ts // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$SmokeLogReasonImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      smokeLogId: null == smokeLogId
+          ? _value.smokeLogId
+          : smokeLogId // ignore: cast_nullable_to_non_nullable
+              as String,
+      reasonId: null == reasonId
+          ? _value.reasonId
+          : reasonId // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      ts: null == ts
+          ? _value.ts
+          : ts // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SmokeLogReasonImpl implements _SmokeLogReason {
-  const _$SmokeLogReasonImpl({
-    required this.id,
-    required this.smokeLogId,
-    required this.reasonId,
-    required this.accountId,
-    required this.ts,
-    required this.createdAt,
-  });
+  const _$SmokeLogReasonImpl(
+      {required this.id,
+      required this.smokeLogId,
+      required this.reasonId,
+      required this.accountId,
+      required this.ts,
+      required this.createdAt});
 
   factory _$SmokeLogReasonImpl.fromJson(Map<String, dynamic> json) =>
       _$$SmokeLogReasonImplFromJson(json);
@@ -214,13 +190,13 @@ class _$SmokeLogReasonImpl implements _SmokeLogReason {
   final String id;
   @override
   final String smokeLogId;
-  // TODO: FK to SmokeLog
+// TODO: FK to SmokeLog
   @override
   final String reasonId;
-  // TODO: FK to Reason
+// TODO: FK to Reason
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final DateTime ts;
   @override
@@ -251,14 +227,7 @@ class _$SmokeLogReasonImpl implements _SmokeLogReason {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    smokeLogId,
-    reasonId,
-    accountId,
-    ts,
-    createdAt,
-  );
+      runtimeType, id, smokeLogId, reasonId, accountId, ts, createdAt);
 
   /// Create a copy of SmokeLogReason
   /// with the given fields replaced by the non-null parameter values.
@@ -267,25 +236,24 @@ class _$SmokeLogReasonImpl implements _SmokeLogReason {
   @pragma('vm:prefer-inline')
   _$$SmokeLogReasonImplCopyWith<_$SmokeLogReasonImpl> get copyWith =>
       __$$SmokeLogReasonImplCopyWithImpl<_$SmokeLogReasonImpl>(
-        this,
-        _$identity,
-      );
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SmokeLogReasonImplToJson(this);
+    return _$$SmokeLogReasonImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _SmokeLogReason implements SmokeLogReason {
-  const factory _SmokeLogReason({
-    required final String id,
-    required final String smokeLogId,
-    required final String reasonId,
-    required final String accountId,
-    required final DateTime ts,
-    required final DateTime createdAt,
-  }) = _$SmokeLogReasonImpl;
+  const factory _SmokeLogReason(
+      {required final String id,
+      required final String smokeLogId,
+      required final String reasonId,
+      required final String accountId,
+      required final DateTime ts,
+      required final DateTime createdAt}) = _$SmokeLogReasonImpl;
 
   factory _SmokeLogReason.fromJson(Map<String, dynamic> json) =
       _$SmokeLogReasonImpl.fromJson;

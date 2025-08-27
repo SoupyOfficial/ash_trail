@@ -7,15 +7,15 @@ part of 'rule.dart';
 // **************************************************************************
 
 _$RuleImpl _$$RuleImplFromJson(Map<String, dynamic> json) => _$RuleImpl(
-  id: json['id'] as String,
-  accountId: json['accountId'] as String,
-  name: json['name'] as String,
-  condition: json['condition'] as Map<String, dynamic>,
-  action: json['action'] as String,
-  enabled: json['enabled'] as bool,
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
-);
+      id: json['id'] as String,
+      accountId: json['accountId'] as String,
+      name: json['name'] as String,
+      condition: json['condition'] as Map<String, dynamic>,
+      action: json['action'] as String,
+      enabled: json['enabled'] as bool,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
 
 Map<String, dynamic> _$$RuleImplToJson(_$RuleImpl instance) =>
     <String, dynamic>{

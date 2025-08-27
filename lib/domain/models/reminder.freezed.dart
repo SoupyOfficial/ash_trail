@@ -12,8 +12,7 @@ part of 'reminder.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Reminder _$ReminderFromJson(Map<String, dynamic> json) {
   return _Reminder.fromJson(json);
@@ -45,14 +44,13 @@ abstract class $ReminderCopyWith<$Res> {
   factory $ReminderCopyWith(Reminder value, $Res Function(Reminder) then) =
       _$ReminderCopyWithImpl<$Res, Reminder>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    DateTime time,
-    List<String> days,
-    bool enabled,
-    DateTime? lastTriggeredAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      DateTime time,
+      List<String> days,
+      bool enabled,
+      DateTime? lastTriggeredAt});
 }
 
 /// @nodoc
@@ -77,41 +75,32 @@ class _$ReminderCopyWithImpl<$Res, $Val extends Reminder>
     Object? enabled = null,
     Object? lastTriggeredAt = freezed,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            time:
-                null == time
-                    ? _value.time
-                    : time // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            days:
-                null == days
-                    ? _value.days
-                    : days // ignore: cast_nullable_to_non_nullable
-                        as List<String>,
-            enabled:
-                null == enabled
-                    ? _value.enabled
-                    : enabled // ignore: cast_nullable_to_non_nullable
-                        as bool,
-            lastTriggeredAt:
-                freezed == lastTriggeredAt
-                    ? _value.lastTriggeredAt
-                    : lastTriggeredAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      time: null == time
+          ? _value.time
+          : time // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      days: null == days
+          ? _value.days
+          : days // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      lastTriggeredAt: freezed == lastTriggeredAt
+          ? _value.lastTriggeredAt
+          : lastTriggeredAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
   }
 }
 
@@ -119,19 +108,17 @@ class _$ReminderCopyWithImpl<$Res, $Val extends Reminder>
 abstract class _$$ReminderImplCopyWith<$Res>
     implements $ReminderCopyWith<$Res> {
   factory _$$ReminderImplCopyWith(
-    _$ReminderImpl value,
-    $Res Function(_$ReminderImpl) then,
-  ) = __$$ReminderImplCopyWithImpl<$Res>;
+          _$ReminderImpl value, $Res Function(_$ReminderImpl) then) =
+      __$$ReminderImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    DateTime time,
-    List<String> days,
-    bool enabled,
-    DateTime? lastTriggeredAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      DateTime time,
+      List<String> days,
+      bool enabled,
+      DateTime? lastTriggeredAt});
 }
 
 /// @nodoc
@@ -139,9 +126,8 @@ class __$$ReminderImplCopyWithImpl<$Res>
     extends _$ReminderCopyWithImpl<$Res, _$ReminderImpl>
     implements _$$ReminderImplCopyWith<$Res> {
   __$$ReminderImplCopyWithImpl(
-    _$ReminderImpl _value,
-    $Res Function(_$ReminderImpl) _then,
-  ) : super(_value, _then);
+      _$ReminderImpl _value, $Res Function(_$ReminderImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Reminder
   /// with the given fields replaced by the non-null parameter values.
@@ -155,54 +141,46 @@ class __$$ReminderImplCopyWithImpl<$Res>
     Object? enabled = null,
     Object? lastTriggeredAt = freezed,
   }) {
-    return _then(
-      _$ReminderImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        time:
-            null == time
-                ? _value.time
-                : time // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        days:
-            null == days
-                ? _value._days
-                : days // ignore: cast_nullable_to_non_nullable
-                    as List<String>,
-        enabled:
-            null == enabled
-                ? _value.enabled
-                : enabled // ignore: cast_nullable_to_non_nullable
-                    as bool,
-        lastTriggeredAt:
-            freezed == lastTriggeredAt
-                ? _value.lastTriggeredAt
-                : lastTriggeredAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-      ),
-    );
+    return _then(_$ReminderImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      time: null == time
+          ? _value.time
+          : time // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      days: null == days
+          ? _value._days
+          : days // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      lastTriggeredAt: freezed == lastTriggeredAt
+          ? _value.lastTriggeredAt
+          : lastTriggeredAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$ReminderImpl implements _Reminder {
-  const _$ReminderImpl({
-    required this.id,
-    required this.accountId,
-    required this.time,
-    required final List<String> days,
-    required this.enabled,
-    this.lastTriggeredAt,
-  }) : _days = days;
+  const _$ReminderImpl(
+      {required this.id,
+      required this.accountId,
+      required this.time,
+      required final List<String> days,
+      required this.enabled,
+      this.lastTriggeredAt})
+      : _days = days;
 
   factory _$ReminderImpl.fromJson(Map<String, dynamic> json) =>
       _$$ReminderImplFromJson(json);
@@ -211,7 +189,7 @@ class _$ReminderImpl implements _Reminder {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final DateTime time;
   final List<String> _days;
@@ -222,7 +200,7 @@ class _$ReminderImpl implements _Reminder {
     return EqualUnmodifiableListView(_days);
   }
 
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final bool enabled;
   @override
@@ -250,15 +228,8 @@ class _$ReminderImpl implements _Reminder {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    time,
-    const DeepCollectionEquality().hash(_days),
-    enabled,
-    lastTriggeredAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, time,
+      const DeepCollectionEquality().hash(_days), enabled, lastTriggeredAt);
 
   /// Create a copy of Reminder
   /// with the given fields replaced by the non-null parameter values.
@@ -270,19 +241,20 @@ class _$ReminderImpl implements _Reminder {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$ReminderImplToJson(this);
+    return _$$ReminderImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Reminder implements Reminder {
-  const factory _Reminder({
-    required final String id,
-    required final String accountId,
-    required final DateTime time,
-    required final List<String> days,
-    required final bool enabled,
-    final DateTime? lastTriggeredAt,
-  }) = _$ReminderImpl;
+  const factory _Reminder(
+      {required final String id,
+      required final String accountId,
+      required final DateTime time,
+      required final List<String> days,
+      required final bool enabled,
+      final DateTime? lastTriggeredAt}) = _$ReminderImpl;
 
   factory _Reminder.fromJson(Map<String, dynamic> json) =
       _$ReminderImpl.fromJson;

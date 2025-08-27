@@ -12,8 +12,7 @@ part of 'session.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Session _$SessionFromJson(Map<String, dynamic> json) {
   return _Session.fromJson(json);
@@ -47,16 +46,15 @@ abstract class $SessionCopyWith<$Res> {
   factory $SessionCopyWith(Session value, $Res Function(Session) then) =
       _$SessionCopyWithImpl<$Res, Session>;
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String? deviceId,
-    String status,
-    String? tokenHash,
-    DateTime? expiresAt,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String? deviceId,
+      String status,
+      String? tokenHash,
+      DateTime? expiresAt,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -83,72 +81,59 @@ class _$SessionCopyWithImpl<$Res, $Val extends Session>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            accountId:
-                null == accountId
-                    ? _value.accountId
-                    : accountId // ignore: cast_nullable_to_non_nullable
-                        as String,
-            deviceId:
-                freezed == deviceId
-                    ? _value.deviceId
-                    : deviceId // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            status:
-                null == status
-                    ? _value.status
-                    : status // ignore: cast_nullable_to_non_nullable
-                        as String,
-            tokenHash:
-                freezed == tokenHash
-                    ? _value.tokenHash
-                    : tokenHash // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            expiresAt:
-                freezed == expiresAt
-                    ? _value.expiresAt
-                    : expiresAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime?,
-            createdAt:
-                null == createdAt
-                    ? _value.createdAt
-                    : createdAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-            updatedAt:
-                null == updatedAt
-                    ? _value.updatedAt
-                    : updatedAt // ignore: cast_nullable_to_non_nullable
-                        as DateTime,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      deviceId: freezed == deviceId
+          ? _value.deviceId
+          : deviceId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      tokenHash: freezed == tokenHash
+          ? _value.tokenHash
+          : tokenHash // ignore: cast_nullable_to_non_nullable
+              as String?,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$SessionImplCopyWith<$Res> implements $SessionCopyWith<$Res> {
   factory _$$SessionImplCopyWith(
-    _$SessionImpl value,
-    $Res Function(_$SessionImpl) then,
-  ) = __$$SessionImplCopyWithImpl<$Res>;
+          _$SessionImpl value, $Res Function(_$SessionImpl) then) =
+      __$$SessionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String accountId,
-    String? deviceId,
-    String status,
-    String? tokenHash,
-    DateTime? expiresAt,
-    DateTime createdAt,
-    DateTime updatedAt,
-  });
+  $Res call(
+      {String id,
+      String accountId,
+      String? deviceId,
+      String status,
+      String? tokenHash,
+      DateTime? expiresAt,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -156,9 +141,8 @@ class __$$SessionImplCopyWithImpl<$Res>
     extends _$SessionCopyWithImpl<$Res, _$SessionImpl>
     implements _$$SessionImplCopyWith<$Res> {
   __$$SessionImplCopyWithImpl(
-    _$SessionImpl _value,
-    $Res Function(_$SessionImpl) _then,
-  ) : super(_value, _then);
+      _$SessionImpl _value, $Res Function(_$SessionImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Session
   /// with the given fields replaced by the non-null parameter values.
@@ -174,66 +158,55 @@ class __$$SessionImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(
-      _$SessionImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        accountId:
-            null == accountId
-                ? _value.accountId
-                : accountId // ignore: cast_nullable_to_non_nullable
-                    as String,
-        deviceId:
-            freezed == deviceId
-                ? _value.deviceId
-                : deviceId // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        status:
-            null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                    as String,
-        tokenHash:
-            freezed == tokenHash
-                ? _value.tokenHash
-                : tokenHash // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        expiresAt:
-            freezed == expiresAt
-                ? _value.expiresAt
-                : expiresAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime?,
-        createdAt:
-            null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-        updatedAt:
-            null == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
-                    as DateTime,
-      ),
-    );
+    return _then(_$SessionImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      accountId: null == accountId
+          ? _value.accountId
+          : accountId // ignore: cast_nullable_to_non_nullable
+              as String,
+      deviceId: freezed == deviceId
+          ? _value.deviceId
+          : deviceId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      tokenHash: freezed == tokenHash
+          ? _value.tokenHash
+          : tokenHash // ignore: cast_nullable_to_non_nullable
+              as String?,
+      expiresAt: freezed == expiresAt
+          ? _value.expiresAt
+          : expiresAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$SessionImpl implements _Session {
-  const _$SessionImpl({
-    required this.id,
-    required this.accountId,
-    this.deviceId,
-    required this.status,
-    this.tokenHash,
-    this.expiresAt,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  const _$SessionImpl(
+      {required this.id,
+      required this.accountId,
+      this.deviceId,
+      required this.status,
+      this.tokenHash,
+      this.expiresAt,
+      required this.createdAt,
+      required this.updatedAt});
 
   factory _$SessionImpl.fromJson(Map<String, dynamic> json) =>
       _$$SessionImplFromJson(json);
@@ -242,13 +215,13 @@ class _$SessionImpl implements _Session {
   final String id;
   @override
   final String accountId;
-  // TODO: FK to Account
+// TODO: FK to Account
   @override
   final String? deviceId;
-  // TODO: FK to Device
+// TODO: FK to Device
   @override
   final String status;
-  // TODO: constrain to enum values
+// TODO: constrain to enum values
   @override
   final String? tokenHash;
   @override
@@ -286,17 +259,8 @@ class _$SessionImpl implements _Session {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    accountId,
-    deviceId,
-    status,
-    tokenHash,
-    expiresAt,
-    createdAt,
-    updatedAt,
-  );
+  int get hashCode => Object.hash(runtimeType, id, accountId, deviceId, status,
+      tokenHash, expiresAt, createdAt, updatedAt);
 
   /// Create a copy of Session
   /// with the given fields replaced by the non-null parameter values.
@@ -308,21 +272,22 @@ class _$SessionImpl implements _Session {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SessionImplToJson(this);
+    return _$$SessionImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Session implements Session {
-  const factory _Session({
-    required final String id,
-    required final String accountId,
-    final String? deviceId,
-    required final String status,
-    final String? tokenHash,
-    final DateTime? expiresAt,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
-  }) = _$SessionImpl;
+  const factory _Session(
+      {required final String id,
+      required final String accountId,
+      final String? deviceId,
+      required final String status,
+      final String? tokenHash,
+      final DateTime? expiresAt,
+      required final DateTime createdAt,
+      required final DateTime updatedAt}) = _$SessionImpl;
 
   factory _Session.fromJson(Map<String, dynamic> json) = _$SessionImpl.fromJson;
 

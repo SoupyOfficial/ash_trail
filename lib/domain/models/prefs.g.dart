@@ -7,17 +7,16 @@ part of 'prefs.dart';
 // **************************************************************************
 
 _$PrefsImpl _$$PrefsImplFromJson(Map<String, dynamic> json) => _$PrefsImpl(
-  accountId: json['accountId'] as String,
-  defaultRange: json['defaultRange'] as String,
-  unit: json['unit'] as String,
-  analyticsOptIn: json['analyticsOptIn'] as bool,
-  reminderTimes:
-      (json['reminderTimes'] as List<dynamic>?)
+      accountId: json['accountId'] as String,
+      defaultRange: json['defaultRange'] as String,
+      unit: json['unit'] as String,
+      analyticsOptIn: json['analyticsOptIn'] as bool,
+      reminderTimes: (json['reminderTimes'] as List<dynamic>?)
           ?.map((e) => DateTime.parse(e as String))
           .toList(),
-  preferredTheme: json['preferredTheme'] as String,
-  accentColor: json['accentColor'] as String?,
-);
+      preferredTheme: json['preferredTheme'] as String,
+      accentColor: json['accentColor'] as String?,
+    );
 
 Map<String, dynamic> _$$PrefsImplToJson(_$PrefsImpl instance) =>
     <String, dynamic>{

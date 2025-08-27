@@ -12,8 +12,7 @@ part of 'account.dart';
 T _$identity<T>(T value) => value;
 
 final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 Account _$AccountFromJson(Map<String, dynamic> json) {
   return _Account.fromJson(json);
@@ -43,15 +42,14 @@ abstract class $AccountCopyWith<$Res> {
   factory $AccountCopyWith(Account value, $Res Function(Account) then) =
       _$AccountCopyWithImpl<$Res, Account>;
   @useResult
-  $Res call({
-    String id,
-    String displayName,
-    String? firstName,
-    String? lastName,
-    String? email,
-    String? photoUrl,
-    String provider,
-  });
+  $Res call(
+      {String id,
+      String displayName,
+      String? firstName,
+      String? lastName,
+      String? email,
+      String? photoUrl,
+      String provider});
 }
 
 /// @nodoc
@@ -77,66 +75,54 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
     Object? photoUrl = freezed,
     Object? provider = null,
   }) {
-    return _then(
-      _value.copyWith(
-            id:
-                null == id
-                    ? _value.id
-                    : id // ignore: cast_nullable_to_non_nullable
-                        as String,
-            displayName:
-                null == displayName
-                    ? _value.displayName
-                    : displayName // ignore: cast_nullable_to_non_nullable
-                        as String,
-            firstName:
-                freezed == firstName
-                    ? _value.firstName
-                    : firstName // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            lastName:
-                freezed == lastName
-                    ? _value.lastName
-                    : lastName // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            email:
-                freezed == email
-                    ? _value.email
-                    : email // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            photoUrl:
-                freezed == photoUrl
-                    ? _value.photoUrl
-                    : photoUrl // ignore: cast_nullable_to_non_nullable
-                        as String?,
-            provider:
-                null == provider
-                    ? _value.provider
-                    : provider // ignore: cast_nullable_to_non_nullable
-                        as String,
-          )
-          as $Val,
-    );
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: null == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String,
+      firstName: freezed == firstName
+          ? _value.firstName
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      lastName: freezed == lastName
+          ? _value.lastName
+          : lastName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
   }
 }
 
 /// @nodoc
 abstract class _$$AccountImplCopyWith<$Res> implements $AccountCopyWith<$Res> {
   factory _$$AccountImplCopyWith(
-    _$AccountImpl value,
-    $Res Function(_$AccountImpl) then,
-  ) = __$$AccountImplCopyWithImpl<$Res>;
+          _$AccountImpl value, $Res Function(_$AccountImpl) then) =
+      __$$AccountImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({
-    String id,
-    String displayName,
-    String? firstName,
-    String? lastName,
-    String? email,
-    String? photoUrl,
-    String provider,
-  });
+  $Res call(
+      {String id,
+      String displayName,
+      String? firstName,
+      String? lastName,
+      String? email,
+      String? photoUrl,
+      String provider});
 }
 
 /// @nodoc
@@ -144,9 +130,8 @@ class __$$AccountImplCopyWithImpl<$Res>
     extends _$AccountCopyWithImpl<$Res, _$AccountImpl>
     implements _$$AccountImplCopyWith<$Res> {
   __$$AccountImplCopyWithImpl(
-    _$AccountImpl _value,
-    $Res Function(_$AccountImpl) _then,
-  ) : super(_value, _then);
+      _$AccountImpl _value, $Res Function(_$AccountImpl) _then)
+      : super(_value, _then);
 
   /// Create a copy of Account
   /// with the given fields replaced by the non-null parameter values.
@@ -161,60 +146,50 @@ class __$$AccountImplCopyWithImpl<$Res>
     Object? photoUrl = freezed,
     Object? provider = null,
   }) {
-    return _then(
-      _$AccountImpl(
-        id:
-            null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                    as String,
-        displayName:
-            null == displayName
-                ? _value.displayName
-                : displayName // ignore: cast_nullable_to_non_nullable
-                    as String,
-        firstName:
-            freezed == firstName
-                ? _value.firstName
-                : firstName // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        lastName:
-            freezed == lastName
-                ? _value.lastName
-                : lastName // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        email:
-            freezed == email
-                ? _value.email
-                : email // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        photoUrl:
-            freezed == photoUrl
-                ? _value.photoUrl
-                : photoUrl // ignore: cast_nullable_to_non_nullable
-                    as String?,
-        provider:
-            null == provider
-                ? _value.provider
-                : provider // ignore: cast_nullable_to_non_nullable
-                    as String,
-      ),
-    );
+    return _then(_$AccountImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      displayName: null == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
+              as String,
+      firstName: freezed == firstName
+          ? _value.firstName
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      lastName: freezed == lastName
+          ? _value.lastName
+          : lastName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      email: freezed == email
+          ? _value.email
+          : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      provider: null == provider
+          ? _value.provider
+          : provider // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
 class _$AccountImpl implements _Account {
-  const _$AccountImpl({
-    required this.id,
-    required this.displayName,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.photoUrl,
-    required this.provider,
-  });
+  const _$AccountImpl(
+      {required this.id,
+      required this.displayName,
+      this.firstName,
+      this.lastName,
+      this.email,
+      this.photoUrl,
+      required this.provider});
 
   factory _$AccountImpl.fromJson(Map<String, dynamic> json) =>
       _$$AccountImplFromJson(json);
@@ -260,16 +235,8 @@ class _$AccountImpl implements _Account {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    displayName,
-    firstName,
-    lastName,
-    email,
-    photoUrl,
-    provider,
-  );
+  int get hashCode => Object.hash(runtimeType, id, displayName, firstName,
+      lastName, email, photoUrl, provider);
 
   /// Create a copy of Account
   /// with the given fields replaced by the non-null parameter values.
@@ -281,20 +248,21 @@ class _$AccountImpl implements _Account {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$AccountImplToJson(this);
+    return _$$AccountImplToJson(
+      this,
+    );
   }
 }
 
 abstract class _Account implements Account {
-  const factory _Account({
-    required final String id,
-    required final String displayName,
-    final String? firstName,
-    final String? lastName,
-    final String? email,
-    final String? photoUrl,
-    required final String provider,
-  }) = _$AccountImpl;
+  const factory _Account(
+      {required final String id,
+      required final String displayName,
+      final String? firstName,
+      final String? lastName,
+      final String? email,
+      final String? photoUrl,
+      required final String provider}) = _$AccountImpl;
 
   factory _Account.fromJson(Map<String, dynamic> json) = _$AccountImpl.fromJson;
 

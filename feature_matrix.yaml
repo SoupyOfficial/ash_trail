@@ -1,6 +1,6 @@
-version: 0.2.0
+version: 0.3.0
 app: AshTrail
-last_updated: 2025-08-26
+last_updated: 2025-08-27
 
 principles:
   - offline_first
@@ -1040,6 +1040,512 @@ features:
     acceptance:
       - Per-feature flags gate new UI safely.
       - Flags readable at runtime.
+
+  # --- Logging Epic Expansions ---
+  - id: logging.quick_tagging
+    title: Quick Tagging Chips
+    status: planned
+    priority: P1
+    epic: logging
+    rationale: Reduce friction adding frequent tags to a log at capture time.
+    user_stories:
+      - As a user I tap one or more recent/frequent tags before pressing the hold button.
+    acceptance:
+      - Top 5 most recent or frequent tags appear as selectable chips above record button.
+      - Ability to add from infrequent tags list.
+      - Selected tags persisted via SmokeLogTag writes with same ts as SmokeLog.
+      - Works offline and queues tag creates.
+    components: [tag_suggestion_chips]
+    data:
+      reads:
+        - entity: Tag
+          query: byAccountName
+      writes:
+        - entity: SmokeLogTag
+          op: insert
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: logging.edit_inline_snackbar
+    title: Inline Edit From Snackbar
+    status: planned
+    priority: P2
+    epic: logging
+    rationale: Fix minor mistakes immediately after creation.
+    acceptance:
+      - Snackbar expands to allow duration +/- buttons and notes field within undo window.
+      - Update cancels and replaces prior queued write if not yet synced.
+    components: [snackbar_undo, inline_edit_controls]
+    data:
+      writes:
+        - entity: SmokeLog
+          op: update_fields
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: logging.batch_edit_delete
+    title: Batch Edit & Delete
+    status: planned
+    priority: P2
+    epic: logging
+    acceptance:
+      - Multi-select in table; apply tag add/remove or delete.
+      - Confirms destructive operations.
+    screens: [logs]
+    components: [selection_toolbar]
+    data:
+      writes:
+        - entity: SmokeLog
+          op: delete_by_id
+        - entity: SmokeLog
+          op: update_fields
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  # --- Insights Epic Expansions ---
+  - id: insights.tag_breakdown
+    title: Tag Breakdown (Pie / Bar)
+    status: planned
+    priority: P1
+    epic: insights
+    rationale: Understand distribution of usage by tag.
+    acceptance:
+      - Pie or bar toggles; shows % of hits and duration per tag for selected range.
+      - Empty state when <2 tags.
+    components: [fl_chart_pie, legend, empty_state]
+    data:
+      reads:
+        - entity: SmokeLogTag
+          query: byAccountTagTs
+
+  - id: insights.goal_progress
+    title: Goal Progress Dashboard
+    status: planned
+    priority: P0
+    epic: insights
+    acceptance:
+      - Active goals show progress bar and %.
+      - Achieved goals move to Completed section with achievedAt date.
+    components: [goal_card_list]
+    data:
+      reads:
+        - entity: Goal
+          query: byAccountActive
+
+  - id: insights.streaks
+    title: Streaks View
+    status: planned
+    priority: P1
+    epic: insights
+    rationale: Provide motivational streak metrics.
+    acceptance:
+      - Shows current streak of goal compliance and longest streak.
+      - Streak calculation cached in StatsDaily or computed with ≤120ms query P95.
+    data:
+      reads:
+        - entity: StatsDaily
+
+  - id: insights.custom_views
+    title: Custom Saved Chart Views
+    status: planned
+    priority: P1
+    epic: insights
+    rationale: Persist user-defined chart configurations.
+    acceptance:
+      - Save current chart settings as named view (ChartView entity).
+      - Edit & delete existing saved views.
+    components: [save_view_button, saved_views_list]
+    data:
+      reads:
+        - entity: ChartView
+          query: byAccountUpdated
+      writes:
+        - entity: ChartView
+          op: upsert
+        - entity: ChartView
+          op: delete_by_id
+    offline:
+      write_policy: enqueue_then_write_remote
+
+  - id: insights.filter_presets
+    title: Filter Presets CRUD
+    status: planned
+    priority: P2
+    epic: insights
+    acceptance:
+      - Create, apply, rename, delete presets.
+      - Applying updates logs table and charts simultaneously.
+    data:
+      reads:
+        - entity: FilterPreset
+          query: byAccountUpdated
+      writes:
+        - entity: FilterPreset
+          op: upsert
+        - entity: FilterPreset
+          op: delete_by_id
+
+  # --- Accounts Epic Expansions ---
+  - id: accounts.identity_linking
+    title: Link Additional Identity Providers
+    status: planned
+    priority: P2
+    epic: accounts
+    acceptance:
+      - Link Google/email/device to existing account; prevent duplicates.
+      - Unlink (except if last provider) with confirmation.
+    data:
+      reads:
+        - entity: AuthIdentity
+          query: byAccountProvider
+      writes:
+        - entity: AuthIdentity
+          op: upsert
+        - entity: AuthIdentity
+          op: delete_by_id
+
+  - id: accounts.avatar_edit
+    title: Account Avatar Edit
+    status: planned
+    priority: P3
+    epic: accounts
+    acceptance:
+      - Change photoUrl via picker; optimistic preview.
+    data:
+      writes:
+        - entity: Account
+          op: update_fields
+
+  - id: accounts.offline_bootstrap
+    title: Offline Bootstrap
+    status: planned
+    priority: P1
+    epic: accounts
+    acceptance:
+      - Previously signed-in accounts restore session & cached data before network.
+      - UI marks stale data until sync completes.
+
+  # --- Sync Epic Expansions ---
+  - id: sync.delta_pull
+    title: Delta Pull (Incremental Fetch)
+    status: planned
+    priority: P1
+    epic: sync
+    acceptance:
+      - Uses lastPulledAt watermark; only changed records transferred.
+      - Watermark updated atomically after successful merge.
+    data:
+      writes:
+        - entity: SyncState
+          op: update_fields
+
+  - id: sync.tombstone_gc
+    title: Tombstone GC
+    status: planned
+    priority: P2
+    epic: sync
+    acceptance:
+      - Deletes local tombstones older than retention watermark without breaking conflict resolution.
+    data:
+      reads:
+        - entity: SyncState
+      writes:
+        - entity: SyncState
+          op: update_fields
+
+  - id: sync.import_processing
+    title: Import Batch Processing
+    status: planned
+    priority: P1
+    epic: sync
+    acceptance:
+      - Large imports chunked and enqueued to sync queue efficiently.
+      - Progress shown per ImportBatch.
+    data:
+      reads:
+        - entity: ImportBatch
+      writes:
+        - entity: SyncOp
+          op: upsert
+
+  - id: sync.backpressure
+    title: Queue Backpressure & Throttling
+    status: planned
+    priority: P2
+    epic: sync
+    acceptance:
+      - Queue size limit enforced; oldest failed entries pruned with user notice.
+      - Adaptive retry backoff extends on systemic failures.
+
+  # --- Data Epic Expansions ---
+  - id: data.migrations_framework
+    title: Migrations Framework
+    status: planned
+    priority: P1
+    epic: data
+    acceptance:
+      - Versioned migration scripts runnable idempotently.
+      - Downgrade protection and checksum logging.
+
+  - id: data.daily_aggregates
+    title: Daily Aggregates Generation
+    status: planned
+    priority: P1
+    epic: data
+    acceptance:
+      - StatsDaily rows produced/updated on log create/update/delete within 2s.
+      - Rebuild command regenerates from scratch.
+    data:
+      writes:
+        - entity: StatsDaily
+          op: upsert
+
+  - id: data.compaction
+    title: Local DB Compaction
+    status: planned
+    priority: P2
+    epic: data
+    acceptance:
+      - Scheduled compaction reduces file size by ≥15% after heavy churn.
+
+  - id: data.search_index
+    title: Full-Text Search (Notes & Tags)
+    status: planned
+    priority: P2
+    epic: data
+    acceptance:
+      - Keyword search returns matching logs ≤150ms P95 up to 50k logs.
+    data:
+      reads:
+        - entity: SmokeLog
+
+  # --- Settings Epic Expansions ---
+  - id: settings.goals_crud
+    title: Goals Management
+    status: planned
+    priority: P0
+    epic: settings
+    acceptance:
+      - Create/edit/activate/deactivate goals; validation against overlapping active goals of same type.
+    data:
+      reads:
+        - entity: Goal
+          query: byAccountActive
+      writes:
+        - entity: Goal
+          op: upsert
+        - entity: Goal
+          op: update_fields
+
+  - id: settings.rules_engine
+    title: Rules Engine Management
+    status: planned
+    priority: P1
+    epic: settings
+    acceptance:
+      - Build conditional rules (e.g., if hits > X in Y hours -> notify).
+      - JSON condition validated before save.
+    data:
+      reads:
+        - entity: Rule
+          query: byAccountEnabled
+      writes:
+        - entity: Rule
+          op: upsert
+        - entity: Rule
+          op: update_fields
+
+  - id: settings.onboarding_flow
+    title: Onboarding Flow
+    status: planned
+    priority: P1
+    epic: settings
+    acceptance:
+      - Track stepsCompleted; surfaces progress and hides completed steps.
+    data:
+      reads:
+        - entity: Onboarding
+      writes:
+        - entity: Onboarding
+          op: upsert
+
+  - id: settings.filter_defaults
+    title: Default Filter Preferences
+    status: planned
+    priority: P2
+    epic: settings
+    acceptance:
+      - User sets default range & sort applied to logs/charts on open.
+    data:
+      reads:
+        - entity: Prefs
+      writes:
+        - entity: Prefs
+          op: update_fields
+
+  - id: settings.backup_restore_local
+    title: Local Backup & Restore
+    status: planned
+    priority: P2
+    epic: settings
+    acceptance:
+      - Export encrypted local DB snapshot; restore prompts overwrite confirmation.
+    components: [backup_button, restore_button]
+
+  # --- Notifications Epic Expansions ---
+  - id: notifications.goal_milestone
+    title: Goal Milestone Notifications
+    status: planned
+    priority: P2
+    epic: notifications
+    acceptance:
+      - Notify when goal progress crosses 25/50/75/100% thresholds (single notification per threshold per goal).
+
+  - id: notifications.rule_based
+    title: Rule-Based Notifications
+    status: planned
+    priority: P1
+    epic: notifications
+    acceptance:
+      - Rules with action=notify enqueue local notification.
+      - Debounced to avoid spam (≥15 min between identical rule triggers).
+    data:
+      reads:
+        - entity: RuleTrigger
+          query: byRuleTime
+      writes:
+        - entity: RuleTrigger
+          op: insert
+
+  - id: notifications.streak_warning
+    title: Streak Break Warning
+    status: planned
+    priority: P3
+    epic: notifications
+    acceptance:
+      - Warn user X hours before streak would break (configurable X, default 12h).
+
+  - id: notifications.daily_summary
+    title: Daily Summary Digest
+    status: planned
+    priority: P3
+    epic: notifications
+    acceptance:
+      - Summary of previous day hits & goal progress at chosen morning time.
+
+  # --- Export Epic Expansions ---
+  - id: export.auto_scheduled
+    title: Scheduled Auto Export
+    status: planned
+    priority: P3
+    epic: export
+    acceptance:
+      - Weekly export emailed or saved to device when enabled.
+
+  - id: export.import_csv_json
+    title: Import CSV/JSON
+    status: planned
+    priority: P1
+    epic: export
+    acceptance:
+      - Parse file into ImportBatch + ImportItem records; show summary and errors.
+    data:
+      writes:
+        - entity: ImportBatch
+          op: insert
+        - entity: ImportItem
+          op: insert
+
+  - id: export.chart_image_share
+    title: Share Chart Image
+    status: planned
+    priority: P2
+    epic: export
+    acceptance:
+      - Export current chart as PNG with legend and range metadata.
+
+  - id: export.redaction_options
+    title: Redaction Options
+    status: planned
+    priority: P2
+    epic: export
+    acceptance:
+      - Toggle inclusion of notes, tags, mood scores in export.
+
+  # --- Quality Epic Expansions ---
+  - id: quality.perf_overlay
+    title: In-App Performance Overlay
+    status: planned
+    priority: P2
+    epic: quality
+    acceptance:
+      - Overlay shows frame time, memory, query latency sampling (dev-only flag).
+
+  - id: quality.offline_diagnostics
+    title: Offline Diagnostics Panel
+    status: planned
+    priority: P2
+    epic: quality
+    acceptance:
+      - Panel lists queued ops, last sync timestamps, and retry schedule.
+
+  - id: quality.logging_sanitization
+    title: Log Sanitization
+    status: planned
+    priority: P1
+    epic: quality
+    acceptance:
+      - PII fields excluded from telemetry events unless analyticsOptIn true.
+
+  - id: quality.test_coverage
+    title: Test Coverage Threshold
+    status: planned
+    priority: P3
+    epic: quality
+    acceptance:
+      - Enforce ≥70% line coverage on CI for core logging & sync modules.
+
+  - id: quality.crash_reporting
+    title: Opt-In Crash Reporting
+    status: planned
+    priority: P2
+    epic: quality
+    acceptance:
+      - Crashes captured only if analyticsOptIn and redacted.
+
+  # --- DevTools Epic Expansions ---
+  - id: devtools.flags_remote
+    title: Remote Flag Fetch
+    status: planned
+    priority: P2
+    epic: devtools
+    acceptance:
+      - Flags refresh interval configurable (default 15m) with manual refresh.
+
+  - id: devtools.local_data_browser
+    title: Local Data Browser
+    status: planned
+    priority: P1
+    epic: devtools
+    acceptance:
+      - Inspect entities, run simple queries, copy JSON (dev-only).
+
+  - id: devtools.log_console
+    title: In-App Log Console
+    status: planned
+    priority: P1
+    epic: devtools
+    acceptance:
+      - Stream filtered logs (info/warn/error) with export to file.
+
+  - id: devtools.time_travel
+    title: Time Travel (Mock Clock)
+    status: planned
+    priority: P3
+    epic: devtools
+    acceptance:
+      - Override app clock for testing charts, streaks, reminders.
+
 
 open_questions:
   - How strict should dedupe be for rapid hold-release logs? Use deviceLocalId+ts?

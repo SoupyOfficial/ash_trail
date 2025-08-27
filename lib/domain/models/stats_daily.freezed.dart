@@ -194,8 +194,7 @@ class __$$StatsDailyImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$StatsDailyImpl implements _StatsDaily {
   const _$StatsDailyImpl({
     required this.id,

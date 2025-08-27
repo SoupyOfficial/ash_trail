@@ -208,8 +208,7 @@ class __$$PushTokenImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$PushTokenImpl implements _PushToken {
   const _$PushTokenImpl({
     required this.id,

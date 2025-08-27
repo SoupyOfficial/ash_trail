@@ -222,8 +222,7 @@ class __$$SessionImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$SessionImpl implements _Session {
   const _$SessionImpl({
     required this.id,

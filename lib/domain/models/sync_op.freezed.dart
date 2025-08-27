@@ -268,8 +268,7 @@ class __$$SyncOpImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$SyncOpImpl implements _SyncOp {
   const _$SyncOpImpl({
     required this.id,

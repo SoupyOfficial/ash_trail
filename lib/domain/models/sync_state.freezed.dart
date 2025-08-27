@@ -192,8 +192,7 @@ class __$$SyncStateImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$SyncStateImpl implements _SyncState {
   const _$SyncStateImpl({
     required this.accountId,

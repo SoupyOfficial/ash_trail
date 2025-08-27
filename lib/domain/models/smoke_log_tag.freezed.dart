@@ -195,8 +195,7 @@ class __$$SmokeLogTagImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$SmokeLogTagImpl implements _SmokeLogTag {
   const _$SmokeLogTagImpl({
     required this.id,

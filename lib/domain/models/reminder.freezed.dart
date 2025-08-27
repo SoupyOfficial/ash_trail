@@ -193,8 +193,7 @@ class __$$ReminderImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$ReminderImpl implements _Reminder {
   const _$ReminderImpl({
     required this.id,

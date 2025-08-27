@@ -301,8 +301,7 @@ class __$$ChartViewImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$ChartViewImpl implements _ChartView {
   const _$ChartViewImpl({
     required this.id,

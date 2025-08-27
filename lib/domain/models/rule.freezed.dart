@@ -219,8 +219,7 @@ class __$$RuleImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$RuleImpl implements _Rule {
   const _$RuleImpl({
     required this.id,

@@ -136,8 +136,7 @@ class __$$DbMetaImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$DbMetaImpl implements _DbMeta {
   const _$DbMetaImpl({
     required this.id,

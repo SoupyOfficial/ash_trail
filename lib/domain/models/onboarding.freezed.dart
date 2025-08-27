@@ -165,8 +165,7 @@ class __$$OnboardingImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$OnboardingImpl implements _Onboarding {
   const _$OnboardingImpl({
     required this.accountId,

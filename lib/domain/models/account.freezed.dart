@@ -204,8 +204,7 @@ class __$$AccountImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$AccountImpl implements _Account {
   const _$AccountImpl({
     required this.id,

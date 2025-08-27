@@ -190,8 +190,7 @@ class __$$DeviceImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$DeviceImpl implements _Device {
   const _$DeviceImpl({
     required this.id,

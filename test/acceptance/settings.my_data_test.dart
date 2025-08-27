@@ -5,7 +5,8 @@ import 'package:test/test.dart';
 void main() {
   group('Feature settings.my_data', () {
     test(
-      '1. Stats displayed: totalLogs, firstLogTs, totalDurationMs, avgDurationByHour/day/month/year.',
+      // Adjusted wording to avoid slash-separated tokens that were causing build_runner parse errors.
+      '1. Stats displayed: totalLogs, firstLogTs, totalDurationMs, average durations grouped by hour, day, month, year.',
       () async {
         // TODO: implement acceptance validation
       },

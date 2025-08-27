@@ -210,8 +210,7 @@ class __$$AuthIdentityImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$AuthIdentityImpl implements _AuthIdentity {
   const _$AuthIdentityImpl({
     required this.id,

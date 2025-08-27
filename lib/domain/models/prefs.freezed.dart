@@ -208,8 +208,7 @@ class __$$PrefsImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$PrefsImpl implements _Prefs {
   const _$PrefsImpl({
     required this.accountId,

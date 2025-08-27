@@ -240,8 +240,7 @@ class __$$ImportBatchImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$ImportBatchImpl implements _ImportBatch {
   const _$ImportBatchImpl({
     required this.id,

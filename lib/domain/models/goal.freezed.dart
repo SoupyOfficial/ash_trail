@@ -250,8 +250,7 @@ class __$$GoalImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$GoalImpl implements _Goal {
   const _$GoalImpl({
     required this.id,

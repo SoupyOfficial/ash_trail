@@ -205,8 +205,7 @@ class __$$ReasonImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$ReasonImpl implements _Reason {
   const _$ReasonImpl({
     required this.id,

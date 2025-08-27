@@ -180,8 +180,7 @@ class __$$ImportItemImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$ImportItemImpl implements _ImportItem {
   const _$ImportItemImpl({
     required this.id,

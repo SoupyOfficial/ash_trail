@@ -286,8 +286,7 @@ class __$$FilterPresetImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$FilterPresetImpl implements _FilterPreset {
   const _$FilterPresetImpl({
     required this.id,

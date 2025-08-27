@@ -163,8 +163,7 @@ class __$$RuleTriggerImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$RuleTriggerImpl implements _RuleTrigger {
   const _$RuleTriggerImpl({
     required this.id,

@@ -191,8 +191,7 @@ class __$$MethodImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class _$MethodImpl implements _Method {
   const _$MethodImpl({
     required this.id,

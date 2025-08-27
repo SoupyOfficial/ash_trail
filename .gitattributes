@@ -1,0 +1,40 @@
+# Enforce consistent line endings & mark generated artifacts
+
+# Default text files use LF (CI/Linux friendly)
+* text=auto eol=lf
+
+# Explicit common sources
+*.dart text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.gradle.kts text eol=lf
+*.kts text eol=lf
+*.sh text eol=lf
+*.lock text eol=lf
+pubspec.lock text eol=lf
+
+# Windows specific scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Generated code (still tracked, but flagged)
+*.g.dart linguist-generated
+*/*.g.dart linguist-generated
+*.freezed.dart linguist-generated
+*/*.freezed.dart linguist-generated
+
+# Generated domain model base files (appear in drift check)
+lib/domain/models/*.dart linguist-generated
+
+# Images / binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+
+# Do not normalize these (keep as-is if any)
+*.keystore -text

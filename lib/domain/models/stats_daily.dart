@@ -18,6 +18,5 @@ class StatsDaily with _$StatsDaily {
     required int avgDurationMs,
   }) = _StatsDaily;
 
-  factory StatsDaily.fromJson(Map<String, dynamic> json) =>
-      _$StatsDailyFromJson(json);
+  factory StatsDaily.fromJson(Map<String, dynamic> json) => _$StatsDailyFromJson(json);
 }

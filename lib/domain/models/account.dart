@@ -19,6 +19,5 @@ class Account with _$Account {
     required String provider, // TODO: constrain to enum values
   }) = _Account;
 
-  factory Account.fromJson(Map<String, dynamic> json) =>
-      _$AccountFromJson(json);
+  factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
 }

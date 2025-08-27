@@ -4,13 +4,11 @@ import 'package:test/test.dart';
 
 void main() {
   group('Feature data.migrations_framework', () {
-    test('1. Versioned migration scripts runnable idempotently.', () async {
+    test("1. Versioned migration scripts runnable idempotently.", () async {
       // TODO: implement acceptance validation
-      expect(true, isTrue); // placeholder
     });
-    test('2. Downgrade protection and checksum logging.', () async {
+    test("2. Downgrade protection and checksum logging.", () async {
       // TODO: implement acceptance validation
-      expect(true, isTrue); // placeholder
     });
   });
 }

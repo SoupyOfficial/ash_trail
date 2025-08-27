@@ -4,13 +4,11 @@ import 'package:test/test.dart';
 
 void main() {
   group('Feature ui.spotlight_indexing', () {
-    test('1. Recent tags and saved chart views indexed; selecting result deep links correctly', () async {
+    test("1. Recent tags and saved chart views indexed; selecting result deep links correctly", () async {
       // TODO: implement acceptance validation
-      expect(true, isTrue); // placeholder
     });
-    test('2. Deindex removed / renamed items within one sync cycle.', () async {
+    test("2. Deindex removed / renamed items within one sync cycle.", () async {
       // TODO: implement acceptance validation
-      expect(true, isTrue); // placeholder
     });
   });
 }

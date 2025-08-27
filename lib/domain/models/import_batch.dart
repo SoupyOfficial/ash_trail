@@ -21,6 +21,5 @@ class ImportBatch with _$ImportBatch {
     String? log,
   }) = _ImportBatch;
 
-  factory ImportBatch.fromJson(Map<String, dynamic> json) =>
-      _$ImportBatchFromJson(json);
+  factory ImportBatch.fromJson(Map<String, dynamic> json) => _$ImportBatchFromJson(json);
 }

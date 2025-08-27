@@ -18,6 +18,5 @@ class Reminder with _$Reminder {
     DateTime? lastTriggeredAt,
   }) = _Reminder;
 
-  factory Reminder.fromJson(Map<String, dynamic> json) =>
-      _$ReminderFromJson(json);
+  factory Reminder.fromJson(Map<String, dynamic> json) => _$ReminderFromJson(json);
 }

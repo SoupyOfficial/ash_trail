@@ -151,8 +151,9 @@ def model_field_comment(raw: str) -> str:
     notes = []
     if ENUM_PATTERN.match(raw.rstrip('?')):
         notes.append("TODO: constrain to enum values")
-    if FK_PATTERN.match(raw):
-        target = FK_PATTERN.match(raw).group(1)
+    m_fk = FK_PATTERN.match(raw)
+    if m_fk:
+        target = m_fk.group(1)
         notes.append(f"TODO: FK to {target}")
     if not notes:
         return ""
@@ -167,7 +168,21 @@ def generate_models(data: Dict[str, Any]) -> List[Path]:
         fields = ent.get("fields", [])
         file_name = f"{snake_case(name)}.dart"
         path = MODELS_DIR / file_name
-        lines = [BANNER, "// coverage:ignore-file", "", "import 'package:freezed_annotation/freezed_annotation.dart';", "", "part '" + snake_case(name) + ".freezed.dart';", "part '" + snake_case(name) + ".g.dart';", "", "@freezed", f"class {name} with _${name} {{", "  @JsonSerializable(explicitToJson: true)", f"  const factory {name}({{"]
+        # Place @JsonSerializable at class level per updated requirement.
+        lines = [
+            BANNER,
+            "// coverage:ignore-file",
+            "",
+            "import 'package:freezed_annotation/freezed_annotation.dart';",
+            "",
+            "part '" + snake_case(name) + ".freezed.dart';",
+            "part '" + snake_case(name) + ".g.dart';",
+            "",
+            "@freezed",
+            "@JsonSerializable(explicitToJson: true)",
+            f"class {name} with _${name} {{",
+            f"  const factory {name}({{",
+        ]
         for f in fields:
             fname = f["name"]
             raw_type = f["type"]
@@ -263,7 +278,26 @@ def truncate(s: str, limit: int = 80) -> str:
 
 
 def sanitize_test_name(s: str) -> str:
-    return s.replace("'", "\'")
+        """Sanitize a test name for safe inclusion inside double quotes in Dart.
+
+        We intentionally switched to double quotes for generated test descriptions so
+        that single apostrophes in natural language (user's) don't terminate the
+        string literal and break parsing under build_runner on CI. The previous
+        implementation attempted to escape single quotes but produced no-op escapes
+        ("\'" -> "'") causing invalid Dart in cases like: user's.
+
+        Escaping rules applied:
+            - Backslash -> \\
+            - Double quote -> \"
+            - Carriage returns / newlines collapsed to spaces
+        Single quotes are left as-is now that we use double-quoted literals.
+        """
+        return (
+                s.replace("\\", "\\\\")
+                 .replace('"', '\\"')
+                 .replace("\r", " ")
+                 .replace("\n", " ")
+        )
 
 
 def generate_acceptance_tests(data: Dict[str, Any]) -> List[Path]:
@@ -279,7 +313,8 @@ def generate_acceptance_tests(data: Dict[str, Any]) -> List[Path]:
         for idx, line in enumerate(acceptance, start=1):
             name = truncate(line.strip())
             name = sanitize_test_name(name)
-            lines.append(f"    test('{idx}. {name}', () async {{" )
+            # Use double quotes around test description to avoid escaping apostrophes.
+            lines.append(f'    test("{idx}. {name}", () async {{')
             lines.append("      // TODO: implement acceptance validation")
             lines.append("    });")
         lines.append("  });")

@@ -16,6 +16,5 @@ class Onboarding with _$Onboarding {
     required DateTime updatedAt,
   }) = _Onboarding;
 
-  factory Onboarding.fromJson(Map<String, dynamic> json) =>
-      _$OnboardingFromJson(json);
+  factory Onboarding.fromJson(Map<String, dynamic> json) => _$OnboardingFromJson(json);
 }

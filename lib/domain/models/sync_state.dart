@@ -18,6 +18,5 @@ class SyncState with _$SyncState {
     DateTime? backoffUntil,
   }) = _SyncState;
 
-  factory SyncState.fromJson(Map<String, dynamic> json) =>
-      _$SyncStateFromJson(json);
+  factory SyncState.fromJson(Map<String, dynamic> json) => _$SyncStateFromJson(json);
 }

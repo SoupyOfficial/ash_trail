@@ -32,8 +32,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          # Pin Flutter to stabilize transitive dependency resolution & prevent pubspec.lock drift
-          flutter-version: '3.22.2'
+          # Pin Flutter to stabilize dependency resolution (Dart >=3.5 for flutter_lints 5.x)
+          flutter-version: '3.24.0'
       - name: Cache Flutter pub
         uses: actions/cache@v4
         with:

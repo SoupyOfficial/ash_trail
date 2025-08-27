@@ -44,7 +44,7 @@ Notes
 
 ### Flutter SDK version pin
 
-CI and code generation workflows pin Flutter to `3.22.2` (see `.github/workflows/ci.yml`, `.github/workflows/generate.yml` and `.fvm/fvm_config.json`). Use the same version locally (e.g. via [FVM](https://fvm.app/) or `flutter downgrade 3.22.2`) before committing `pubspec.lock` to avoid drift in automated checks.
+CI and code generation workflows pin Flutter to `3.24.0` (Dart >=3.5) to satisfy lint & toolchain constraints (e.g. `flutter_lints ^5.0.0`). See `.github/workflows/ci.yml`, `.github/workflows/generate.yml`, and `.fvm/fvm_config.json`. Use the same version locally (via [FVM](https://fvm.app/) or `flutter downgrade 3.24.0`) before committing `pubspec.lock` to avoid drift.
 
 ## Development workflow
 

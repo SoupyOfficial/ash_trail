@@ -19,8 +19,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  # Aligned with pinned Flutter 3.22.2 (Dart 3.4.x). Bump when Flutter pin updates.
-  sdk: '>=3.4.0 <4.0.0'
+  # Assumption: We align to a newer stable Flutter (3.24.x) that ships Dart >=3.5 needed by flutter_lints ^5.0.0.
+  sdk: '>=3.5.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

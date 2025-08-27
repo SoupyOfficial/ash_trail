@@ -737,6 +737,7 @@ features:
     acceptance:
       - Light/dark themes implemented with semantic color/token set.
       - Theme reacts to system preference unless overridden (future customization feature flag gated).
+      - Defaults to dark mode if system preference is not available.
       - High-contrast mode ready (placeholder tokens) without regressions.
       - Dynamic Type (system text scaling) supported up to 200%; Bold Text toggle does not clip core UI.
       - Increase Contrast / Differentiate Without Color iOS settings produce legible states (tokens prepared).

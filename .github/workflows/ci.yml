@@ -58,6 +58,16 @@ jobs:
           fi
       - run: flutter analyze
       - run: flutter test --coverage
+      - name: Enforce minimum coverage
+        run: |
+          if [ ! -f coverage/lcov.info ]; then echo 'Missing lcov.info'; exit 1; fi
+          hits=$(grep -h '^DA:' coverage/lcov.info | awk -F',' 'BEGIN{c=0} /,1$/ {c++} END{print c}')
+          total=$(grep -h '^DA:' coverage/lcov.info | wc -l | awk '{print $1}')
+          if [ "$total" -eq 0 ]; then echo 'No lines found in coverage'; exit 1; fi
+          pct=$(awk -v h="$hits" -v t="$total" 'BEGIN { printf("%.2f", (h/t)*100) }')
+          echo "Coverage: $pct% (hits=$hits total=$total)"
+          threshold=70
+          awk -v p="$pct" -v th="$threshold" 'BEGIN { exit (p+0>=th)?0:1 }' || { echo "Coverage below ${threshold}%"; exit 1; }
       - uses: codecov/codecov-action@v4
         with:
           files: coverage/lcov.info

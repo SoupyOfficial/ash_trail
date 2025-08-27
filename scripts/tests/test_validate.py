@@ -57,5 +57,52 @@ class TestValidate(unittest.TestCase):
         with self.assertRaises(SystemExit):
             validate(data)
 
+    def test_invalid_priority(self):
+        data = load_yaml()
+        feats = data.get('features') or []
+        if not feats:
+            self.skipTest('No features in matrix')
+        feats[0]['priority'] = '__not_a_valid_priority__'
+        with self.assertRaises(SystemExit):
+            validate(data)
+
+    def test_duplicate_epic_order(self):
+        data = load_yaml()
+        feats = data.get('features') or []
+        if not feats:
+            self.skipTest('No features in matrix')
+        # Attempt to find two features in same epic; if not, clone one to induce duplicate order
+        epic_groups = {}
+        for f in feats:
+            epic = f.get('epic')
+            order = f.get('order')
+            if epic is not None and order is not None:
+                epic_groups.setdefault(epic, {}).setdefault(order, []).append(f)
+        duplicate_preexisting = any(len(v) > 1 for grp in epic_groups.values() for v in grp.values())
+        if duplicate_preexisting:
+            # Already invalid; skip to avoid failing for the wrong reason
+            self.skipTest('Matrix already has duplicate epic order; test not applicable')
+        # Choose a feature with defined epic/order
+        target = None
+        for f in feats:
+            if f.get('epic') is not None and f.get('order') is not None:
+                target = f
+                break
+        if not target:
+            self.skipTest('No feature with epic+order to duplicate')
+        clone = dict(target)
+        # Ensure unique id to avoid the duplicate id failure path
+        existing_ids = {f['id'] for f in feats if 'id' in f}
+        i = 0
+        while True:
+            new_id = f"dup_epic_order_{i}"
+            if new_id not in existing_ids:
+                break
+            i += 1
+        clone['id'] = new_id
+        feats.append(clone)
+        with self.assertRaises(SystemExit):
+            validate(data)
+
 if __name__ == '__main__':
     unittest.main()

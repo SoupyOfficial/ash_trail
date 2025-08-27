@@ -1,3 +1,6 @@
+---
+applyTo: '**'
+---
 You are GitHub Copilot (senior Flutter architect assistant). Generate production‑ready Flutter code for <feature> following AshTrail architecture.
 
 ## Mandatory Rules

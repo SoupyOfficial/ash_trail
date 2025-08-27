@@ -664,6 +664,7 @@ perf_budgets:
     warm_start_p95_ms: 500
     home_first_paint_p95_ms: 700
     bundle_size_max_mb: 30
+  device_profile: iPhone16ProMax   # baseline physical device for perf measurements
   charts:
     render_p95_ms: 200
     range_query_p95_ms: 120
@@ -701,6 +702,10 @@ features:
       - Tab bar safe-area aware; no overlap with iOS home indicator; minimum tap target ≥48px.
       - Logs tab initially contains both log table and inline / toggleable chart view (chart segment behind feature flag until charts epic delivered).
       - "Separate Charts tab disabled until insights.charts_time_series marked done; enabling it moves chart UI from Logs tab."
+      - All interactive surfaces respect iOS safe areas including Dynamic Island / notch; no clipped snackbars, sheets, or toasts.
+      - "One-hand ergonomics validated: primary record action within comfortable thumb zone on iPhone 16 Pro Max portrait."
+      - "iOS back-swipe gesture (edge pan) works on nested stacks without visual jank."
+      - "Baseline haptic events are invoked (delegated to ui.haptics_baseline for mapping)."
     screens: [home, logs, charts, settings]
     components: [app_shell, nav_bar, adaptive_layout]
     offline:
@@ -717,6 +722,8 @@ features:
       - Unknown routes redirect to safe default (home) with telemetry event.
       - Supports push and replace for modal vs full-screen flows.
       - Handles incoming deep link for /log/{id} opening detail view when available locally or after fetch.
+      - Supports Universal Links / custom scheme (ashtrail://) for primary routes and log detail.
+      - State restoration: deep link launched cold start restores target screen after providers initialize.
     components: [router]
     telemetry:
       events: [route_navigate, route_unknown]
@@ -731,6 +738,8 @@ features:
       - Light/dark themes implemented with semantic color/token set.
       - Theme reacts to system preference unless overridden (future customization feature flag gated).
       - High-contrast mode ready (placeholder tokens) without regressions.
+      - Dynamic Type (system text scaling) supported up to 200%; Bold Text toggle does not clip core UI.
+      - Increase Contrast / Differentiate Without Color iOS settings produce legible states (tokens prepared).
     components: [theme_provider]
     offline:
       behavior: theme_persists_locally
@@ -743,9 +752,10 @@ features:
     epic: ui
     acceptance:
       - Phone (portrait & landscape) layouts optimized first; non-phone adaptations may slip if schedule risk.
-      - Dual-pane (table + detail preview) activates for width ≥ 840dp (iPad / desktop) once desktop/iPad builds enabled.
-      - "Charts legend layout adapts (wrap vs side) when charts feature/tab is enabled and width breakpoint exceeded."
+      - Dual-pane (table + detail preview) activates for width ≥ 840dp (iPad / desktop) once desktop/iPad builds enabled (post-initial iPhone launch; not MVP blocking).
+      - Charts legend layout adapts (wrap vs side) when charts feature/tab is enabled and width breakpoint exceeded.
       - Minimum tap targets enforced (≥48px) via shared style.
+      - Large Title collapsing header style used on primary list screens (iOS convention) when vertical scroll present.
     components: [adaptive_layout, breakpoint_builder]
 
   - id: ui.error_boundary
@@ -758,6 +768,7 @@ features:
       - Uncaught UI errors show fallback with Restart and Copy Logs (dev) actions.
       - Boundary logs sanitized error event (respects analyticsOptIn).
       - Unit tests cover error boundary capturing and reset logic.
+      - Share diagnostics uses native iOS share sheet (redacted if analyticsOptIn=false).
     components: [error_boundary]
 
   - id: ui.loading_skeletons
@@ -769,6 +780,7 @@ features:
     acceptance:
       - Home, logs table, and charts show skeletons for ≥300ms pending loads.
       - Avoids layout shift >16px on content load.
+      - Respects Reduce Motion: shimmer replaced by subtle fade when enabled.
     components: [skeleton_list, skeleton_chart]
 
   - id: ui.accessibility_foundation
@@ -781,9 +793,96 @@ features:
       - Global text scale up to 200% without overflow on primary screens.
       - Focus order and traversal defined for keyboard / assistive tech.
       - Semantics labels on navigation items and record button.
+      - VoiceOver rotor / actions labels present for log rows & record button.
+      - All interactive elements meet ≥44pt (iOS) hit area; audit documented.
+      - Supports Bold Text, Increase Contrast, Reduce Motion without layout breakage.
     components: [semantics_wrappers]
 
   # === Logging ===
+  # Additional UI (iPhone-first) features
+  - id: ui.haptics_baseline
+    order: 8
+    title: Haptics Baseline
+    status: planned
+    priority: P1
+    epic: ui
+    acceptance:
+      - Central utility exposes semantic haptic events: tap, success, warning, error, impact_light.
+      - Logging capture uses press (impact_light) and release (success) patterns.
+      - Haptics disabled automatically when Reduce Motion or system haptics disabled (if detectable) or via dev flag.
+      - Unit test: utility no-op when disabled flag set.
+    components: [haptics_service]
+
+  - id: ui.quick_actions
+    order: 9
+    title: Home Screen Quick Actions
+    status: planned
+    priority: P1
+    epic: ui
+    acceptance:
+      - Long-press app icon shows: Log Hit, View Logs, Start Timed Log (last optional behind flag).
+      - Each quick action deep links into routed screen or opens record overlay.
+      - Telemetry event for each invocation.
+    components: [quick_actions]
+
+  - id: ui.home_widgets
+    order: 10
+    title: Home Screen Widgets (iOS)
+    status: planned
+    priority: P2
+    epic: ui
+    acceptance:
+      - Small & medium widgets show today hit count & streak (if available) with last sync timestamp.
+      - Tapping widget deep links to record overlay or logs (configurable).
+      - Widget respects dark/light & accent color tokens.
+    components: [widget_extension]
+
+  - id: ui.siri_shortcuts
+    order: 11
+    title: Siri Shortcuts
+    status: planned
+    priority: P2
+    epic: ui
+    acceptance:
+      - Donates intents for Add Log (immediate save with default method) and Start Timed Log after first in-app use.
+      - Invoking shortcut records telemetry and routes user appropriately.
+    components: [siri_intents]
+
+  - id: ui.live_activity
+    order: 12
+    title: Live Activity (Recording)
+    status: planned
+    priority: P3
+    epic: ui
+    acceptance:
+      - While holding to record (extended mode) Live Activity shows elapsed duration & cancel option.
+      - Ends cleanly on release or cancel; no orphaned activities.
+    flags: [LIVE_ACTIVITY]
+    components: [live_activity]
+
+  - id: ui.spotlight_indexing
+    order: 13
+    title: Spotlight Indexing
+    status: planned
+    priority: P3
+    epic: ui
+    acceptance:
+      - Recent tags and saved chart views indexed; selecting result deep links correctly.
+      - Deindex removed / renamed items within one sync cycle.
+    components: [spotlight_indexer]
+
+  - id: ui.reachability
+    order: 14
+    title: Reachability & Ergonomics Audit
+    status: planned
+    priority: P1
+    epic: ui
+    acceptance:
+      - Primary frequent actions remain in lower 60% vertical region portrait.
+      - Audit document produced with thumb zone heatmap for baseline device.
+      - Any action outside zone has alternate accessible trigger.
+    artifacts: [reachability_audit]
+
   - id: logging.capture_hit
     order: 1
     title: Hold-to-Record Hit Duration
@@ -799,6 +898,8 @@ features:
       - Considers the time it takes to detect a long press and properly account for it in durationMs.
       - Snackbar offers Undo for 6 seconds.
       - Works offline with queued write.
+      - Haptic cues on press start and release (light impact, success) via central haptics utility.
+      - Record button placement validated for one-hand reach on baseline device.
     screens: [home, record_overlay]
     components: [record_button, method_picker, mood_picker, snackbar_undo]
     data:
@@ -830,6 +931,7 @@ features:
     acceptance:
       - Undo deletes last created SmokeLog if pressed within timeout.
       - Undo is idempotent and safe offline.
+      - Undo surface uses iOS-style bottom toast/snackbar, safe-area aware, VoiceOver announces action availability.
     components: [snackbar_undo]
     data:
       writes:
@@ -851,6 +953,7 @@ features:
       - Sort by date, duration, method.
       - Filter by range, method, tags, mood.
       - Inline edit duration and notes with validation.
+      - iOS swipe actions (Delete, Edit) on rows; long-press context menu supports quick tag add/remove.
     screens: [logs]
     components: [log_table, filter_bar, pagination, edit_modal, delete_confirm]
     data:
@@ -955,6 +1058,7 @@ features:
     acceptance:
       - Aggregations switch without re-navigation.
       - Panning respects selected range and account.
+      - Baseline device pan/zoom maintains ≥55fps average (validated in dev perf overlay).
 
   - id: insights.goal_progress
     order: 2
@@ -1280,6 +1384,7 @@ features:
       - Add-account flows co-exist with multi-sign-in feature.
       - Change password flow exists for email-based accounts and requires reauth.
       - Delete account triggers confirmation and backups/export prompt.
+      - Destructive actions (delete account, sign out all) use native iOS action sheet / bottom sheet pattern.
     screens: [settings, account_switcher]
     components: [account_list, add_account_button, sign_out_button, delete_account_confirm]
     data:
@@ -1293,6 +1398,7 @@ features:
           op: delete_by_id
     offline:
       behavior: allow_local_sign_out; remote ops queued
+
 
   - id: settings.goals_crud
     order: 2

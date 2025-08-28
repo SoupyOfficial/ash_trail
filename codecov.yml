@@ -7,19 +7,19 @@ coverage:
   precision: 2
   round: down
   range: "70...100"
-  
+
   status:
     project:
       default:
-        target: 80%
-        threshold: 1%
+        target: '80%'
+        threshold: '1%'
         if_no_uploads: error
         if_not_found: success
         if_ci_failed: error
     patch:
       default:
-        target: 75%
-        threshold: 2%
+        target: '75%'
+        threshold: '2%'
         if_no_uploads: error
         if_not_found: success
         if_ci_failed: error
@@ -27,10 +27,10 @@ coverage:
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default
-  require_changes: false
+  require_changes: true
   require_base: false
   require_head: true
-  
+
 ignore:
   - "lib/**/*.g.dart"           # Generated Freezed files
   - "lib/**/*.gr.dart"          # Generated Go Router files  

@@ -1,0 +1,81 @@
+name: Sync Labels
+
+on:
+  push:
+    paths:
+      - '.github/labels.yml'
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Sync labels
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import os, sys, yaml, requests
+
+          repo = os.environ.get('REPO')
+          token = os.environ.get('GITHUB_TOKEN')
+          if not repo or not token:
+              print('Missing env vars')
+              sys.exit(1)
+
+          with open('.github/labels.yml', 'r', encoding='utf-8') as f:
+              cfg = yaml.safe_load(f)
+
+          labels = cfg.get('labels', []) or []
+          headers = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github+json'}
+          base = f'https://api.github.com/repos/{repo}/labels'
+
+          # Get existing labels
+          resp = requests.get(base, headers=headers, timeout=15)
+          if resp.status_code != 200:
+              print('Failed to list labels', resp.status_code, resp.text)
+              sys.exit(1)
+          existing = {l['name']: l for l in resp.json()}
+
+          for lbl in labels:
+              name = lbl.get('name')
+              color = lbl.get('color', 'ffffff').lstrip('#')
+              desc = lbl.get('description', '')
+
+              payload = {'name': name, 'color': color, 'description': desc}
+
+              if name in existing:
+                  # Update existing
+                  url = base + f'/{name}'
+                  r = requests.patch(url, headers=headers, json=payload, timeout=15)
+                  if r.status_code in (200,):
+                      print(f'Updated label: {name}')
+                  else:
+                      print(f'Failed to update {name}:', r.status_code, r.text)
+              else:
+                  # Create
+                  r = requests.post(base, headers=headers, json=payload, timeout=15)
+                  if r.status_code in (200,201):
+                      print(f'Created label: {name}')
+                  else:
+                      print(f'Failed to create {name}:', r.status_code, r.text)
+
+          print('Label sync complete')
+          PY

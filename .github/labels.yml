@@ -1,0 +1,68 @@
+labels:
+  - name: automation-monitor
+    color: ff4081
+    description: "Issues created by the automation monitor (health checks, failures)"
+
+  - name: copilot-assisted
+    color: 8a2be2
+    description: "PRs or code generated/assisted by GitHub Copilot coding agent"
+
+  - name: requires-migration
+    color: d73a4a
+    description: "Changes that require data model or DB migrations"
+
+  - name: feature
+    color: 0e8a16
+    description: "Planned or in-progress feature work"
+
+  - name: bug
+    color: d73a4a
+    description: "Bug or defect"
+
+  - name: enhancement
+    color: a2eeef
+    description: "Improvement or feature enhancement"
+
+  - name: docs
+    color: 0075ca
+    description: "Documentation changes"
+
+  - name: tests
+    color: 0052cc
+    description: "Tests added or updated"
+
+  - name: ci
+    color: 1d76db
+    description: "CI workflow or tooling changes"
+
+  - name: good first issue
+    color: 7057ff
+    description: "Good for first-time contributors"
+
+  - name: help wanted
+    color: 008672
+    description: "Extra attention or help requested"
+
+  - name: security
+    color: b60205
+    description: "Security-related issue (use private disclosure channels where appropriate)"
+
+  - name: performance
+    color: fbca04
+    description: "Performance-related task or regression"
+
+  - name: accessibility
+    color: f9d0c4
+    description: "Accessibility improvement or bug"
+
+  - name: blocked
+    color: 5319e7
+    description: "Work blocked by external dependency or decision"
+
+  - name: verified
+    color: 0e8a16
+    description: "Verified by maintainer / QA"
+
+  - name: wontfix
+    color: ffffff
+    description: "Decision to not fix / accept as-is"

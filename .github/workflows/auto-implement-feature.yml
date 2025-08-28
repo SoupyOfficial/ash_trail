@@ -4,18 +4,25 @@ on:
   workflow_dispatch:
     inputs:
       feature_id:
-        description: 'Feature ID from feature_matrix.yaml (e.g., ui.app_shell)'
-        required: true
+        description: 'Feature ID from feature_matrix.yaml (e.g., ui.app_shell) - leave empty to auto-detect next feature'
+        required: false
         type: string
       use_copilot_agent:
         description: 'Use GitHub Copilot coding agent for implementation'
         required: false
         type: boolean
         default: true
+      analyze_first:
+        description: 'Show implementation status analysis before proceeding'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   auto-implement:
     runs-on: ubuntu-latest
+    outputs:
+      implemented_feature_id: ${{ steps.implement.outputs.implemented_feature_id }}
     permissions:
       contents: write
       pull-requests: write
@@ -46,18 +53,53 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Validate feature exists
+      - name: Detect implementation status and suggest next feature
+        id: detect_feature
         run: |
+          # If no feature_id provided, auto-detect next feature
+          if [ -z "${{ github.event.inputs.feature_id }}" ]; then
+            echo "No feature ID provided, analyzing implementation status..."
+            python scripts/detect_feature_status.py --suggest-next --workflow-output >> $GITHUB_OUTPUT
+            
+            NEXT_FEATURE=$(python scripts/detect_feature_status.py --suggest-next --json | jq -r '.feature_id // empty')
+            if [ -z "$NEXT_FEATURE" ]; then
+              echo "All features are implemented! Nothing to do."
+              exit 0
+            fi
+            
+            echo "Auto-detected next feature: $NEXT_FEATURE"
+            echo "selected_feature_id=$NEXT_FEATURE" >> $GITHUB_OUTPUT
+          else
+            echo "Using provided feature ID: ${{ github.event.inputs.feature_id }}"
+            echo "selected_feature_id=${{ github.event.inputs.feature_id }}" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show implementation analysis if requested
+          if [ "${{ github.event.inputs.analyze_first }}" = "true" ]; then
+            echo "Current Implementation Status:"
+            python scripts/detect_feature_status.py --analyze-all
+            echo ""
+            echo "Implementation Gaps:"
+            python scripts/detect_feature_status.py --check-gaps
+          fi
+
+      - name: Validate feature exists and get details
+        run: |
+          FEATURE_ID="${{ steps.detect_feature.outputs.selected_feature_id }}"
+          
           python -c "
           import yaml
           with open('feature_matrix.yaml') as f:
               data = yaml.safe_load(f)
           features = [f['id'] for f in data.get('features', [])]
-          if '${{ github.event.inputs.feature_id }}' not in features:
-              print('❌ Feature not found in feature_matrix.yaml')
+          if '$FEATURE_ID' not in features:
+              print('Feature not found in feature_matrix.yaml')
               exit(1)
-          print('✅ Feature found')
+          print('Feature found: $FEATURE_ID')
           "
+          
+          # Get feature implementation status
+          python scripts/detect_feature_status.py --feature-id "$FEATURE_ID"
 
       - name: Configure Git
         run: |
@@ -71,49 +113,58 @@ jobs:
           import json
           with open('health_check.json') as f:
               data = json.load(f)
-          critical = len([i for i in data['issues'] if i.startswith('❌')])
+          critical = len([i for i in data['issues'] if i.startswith('ERROR')])
           print(critical)
           ")
           
           if [ "$CRITICAL_COUNT" -gt "0" ]; then
-            echo "❌ Critical issues detected, aborting automation"
+            echo "Critical issues detected, aborting automation"
             python scripts/automation_monitor.py check
             exit 1
           fi
           
-          echo "✅ Health check passed"
+          echo "Health check passed"
 
       - name: Auto-implement feature
         id: implement
         run: |
+          FEATURE_ID="${{ steps.detect_feature.outputs.selected_feature_id }}"
+          
           # Monitor execution
-          python scripts/automation_monitor.py monitor --feature-id ${{ github.event.inputs.feature_id }} --json > monitor_result.json &
+          python scripts/automation_monitor.py monitor --feature-id "$FEATURE_ID" --json > monitor_result.json &
           MONITOR_PID=$!
           
           # Run implementation
-          python scripts/auto_implement_feature.py ${{ github.event.inputs.feature_id }} --push
+          python scripts/auto_implement_feature.py "$FEATURE_ID" --push
           
           # Stop monitoring
           kill $MONITOR_PID 2>/dev/null || true
           
-          echo "branch_name=feature/${{ github.event.inputs.feature_id }}" | tr '.' '-' >> $GITHUB_OUTPUT
+          echo "branch_name=feature/$FEATURE_ID" | tr '.' '-' >> $GITHUB_OUTPUT
+          echo "implemented_feature_id=$FEATURE_ID" >> $GITHUB_OUTPUT
 
       - name: Post-execution validation
         if: always()
         run: |
+          FEATURE_ID="${{ steps.detect_feature.outputs.selected_feature_id }}"
+          
           # Check if files were created
-          if [ ! -d "lib/features/${{ github.event.inputs.feature_id }}" ]; then
-            echo "❌ Feature directory not created"
+          if [ ! -d "lib/features/$FEATURE_ID" ] && [ ! -d "lib/features/${FEATURE_ID##*.}" ]; then
+            echo "Feature directory not created"
             exit 1
           fi
           
+          # Show updated implementation status
+          echo "Updated implementation status:"
+          python scripts/detect_feature_status.py --feature-id "$FEATURE_ID"
+          
           # Validate generated code
-          flutter analyze || echo "⚠️ Analysis warnings found"
+          flutter analyze || echo "Analysis warnings found"
           
           # Run tests with coverage
-          flutter test --coverage || echo "⚠️ Test issues found"
+          flutter test --coverage || echo "Test issues found"
           
-          echo "✅ Validation completed"
+          echo "Validation completed"
 
       - name: Check coverage quality
         if: always()
@@ -137,7 +188,7 @@ jobs:
             ")
             echo "$COVERAGE_ISSUES"
           else
-            echo "⚠️ No coverage report generated"
+            echo "No coverage report generated"
           fi
 
       - name: Upload coverage reports
@@ -167,7 +218,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          FEATURE_ID="${{ github.event.inputs.feature_id }}"
+          FEATURE_ID="${{ steps.detect_feature.outputs.selected_feature_id }}"
           BRANCH_NAME=$(echo "feature/${FEATURE_ID}" | tr '.' '-')
           
           FEATURE_TITLE=$(python -c "
@@ -175,30 +226,43 @@ jobs:
           with open('feature_matrix.yaml') as f:
               data = yaml.safe_load(f)
           for f in data.get('features', []):
-              if f['id'] == '${{ github.event.inputs.feature_id }}':
+              if f['id'] == '$FEATURE_ID':
                   print(f['title'])
                   break
           ")
           
-          cat > pr_body.md << 'EOF'
+          # Check what's next after this feature
+          NEXT_FEATURE=$(python scripts/detect_feature_status.py --suggest-next --json | jq -r '.feature_id // "None"')
+          
+          cat > pr_body.md << EOF
           ## Auto-Generated Feature Implementation
           
-          This PR contains the automatically generated scaffold for the feature.
+          This PR contains the automatically generated scaffold for the **$FEATURE_ID** feature.
           
           ### What's Included
-          - ✅ Feature scaffold with Clean Architecture structure  
-          - ✅ Generated models and providers
-          - ✅ Basic repository interfaces
-          - ✅ Acceptance tests placeholder
-          - ✅ Implementation plan
+          - Feature scaffold with Clean Architecture structure  
+          - Generated models and providers
+          - Basic repository interfaces
+          - Acceptance tests placeholder
+          - Implementation plan
+          
+          ### Implementation Status
+          $(python scripts/detect_feature_status.py --feature-id "$FEATURE_ID")
+          
+          ### Next Suggested Feature
+          **Next to implement:** \`$NEXT_FEATURE\`
+          
+          > You can run the workflow again without specifying a feature ID to automatically implement the next feature.
           
           ### Ready for GitHub Copilot Implementation
+          Use GitHub Copilot to complete the implementation based on the acceptance criteria in \`feature_matrix.yaml\`.
           EOF
           
           gh pr create \
             --title "feat: implement ${FEATURE_TITLE}" \
             --body-file pr_body.md \
             --label "feature" \
+            --label "auto-generated" \
             --head "${BRANCH_NAME}" \
             --base main
 
@@ -208,6 +272,9 @@ jobs:
     steps:
       - name: Notify completion
         run: |
-          echo "🎉 Feature implementation started!"
-          echo "📋 Check the pull request for progress"
-          echo "🤖 GitHub Copilot coding agent will complete the implementation"
+          FEATURE_ID="${{ needs.auto-implement.outputs.implemented_feature_id }}"
+          echo "Feature implementation started for: $FEATURE_ID"
+          echo "Check the pull request for progress"
+          echo "GitHub Copilot coding agent will complete the implementation"
+          echo ""
+          echo "To implement the next feature automatically, run this workflow again without specifying a feature ID"

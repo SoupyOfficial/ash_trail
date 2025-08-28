@@ -1,0 +1,265 @@
+name: Auto-Implement Next Feature
+
+on:
+  workflow_dispatch:
+    inputs:
+      continuous_mode:
+        description: 'Continue implementing features until all P0/P1 are done'
+        required: false
+        type: boolean
+        default: false
+      max_features:
+        description: 'Maximum number of features to implement in continuous mode'
+        required: false
+        type: number
+        default: 15
+  
+  # Optionally trigger after a successful PR merge
+  # pull_request:
+  #   types: [closed]
+  #   branches: [main]
+
+jobs:
+  detect-and-implement:
+    runs-on: ubuntu-latest
+    outputs:
+      has_next_feature: ${{ steps.analyze.outputs.has_next_feature }}
+      next_feature_id: ${{ steps.analyze.outputs.next_feature_id }}
+      feature_title: ${{ steps.analyze.outputs.feature_title }}
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Setup GitHub CLI
+        run: |
+          # GitHub CLI should be pre-installed on GitHub runners
+          gh --version
+
+      - name: Analyze current state
+        id: analyze
+        run: |
+          echo "Analyzing current implementation state..."
+          
+          # Get overall status
+          python scripts/detect_feature_status.py --analyze-all --json > analysis.json
+          
+          # Get next suggestion
+          python scripts/detect_feature_status.py --suggest-next --json > suggestion.json
+          
+          # Check if we have features to implement
+          NEXT_FEATURE=$(python -c "
+          import json
+          with open('suggestion.json') as f:
+              data = json.load(f)
+          print(data.get('feature_id', ''))
+          ")
+          
+          if [ -z "$NEXT_FEATURE" ]; then
+            echo "All features are implemented!"
+            echo "has_next_feature=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Found next feature: $NEXT_FEATURE"
+          echo "has_next_feature=true" >> $GITHUB_OUTPUT
+          echo "next_feature_id=$NEXT_FEATURE" >> $GITHUB_OUTPUT
+          
+          # Get feature details
+          PRIORITY=$(python -c "
+          import json
+          with open('suggestion.json') as f:
+              data = json.load(f)
+          print(data.get('priority', 'P3'))
+          ")
+          TITLE=$(python -c "
+          import json
+          with open('suggestion.json') as f:
+              data = json.load(f)
+          print(data.get('title', 'Unknown'))
+          ")
+          EPIC=$(python -c "
+          import json
+          with open('suggestion.json') as f:
+              data = json.load(f)
+          print(data.get('epic', 'Unknown'))
+          ")
+          
+          echo "feature_priority=$PRIORITY" >> $GITHUB_OUTPUT
+          echo "feature_title=$TITLE" >> $GITHUB_OUTPUT
+          echo "feature_epic=$EPIC" >> $GITHUB_OUTPUT
+          
+          # Show current state
+          echo "Current Implementation State:"
+          python scripts/detect_feature_status.py --analyze-all
+
+      - name: Implement next feature
+        if: steps.analyze.outputs.has_next_feature == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Triggering implementation of ${{ steps.analyze.outputs.next_feature_id }}"
+          
+          # Use the GitHub CLI to trigger the main workflow
+          gh workflow run auto-implement-feature.yml \
+            --field feature_id="${{ steps.analyze.outputs.next_feature_id }}" \
+            --field use_copilot_agent=true
+          
+          echo "Implementation workflow triggered!"
+          echo "Check the Actions tab for progress"
+
+      - name: Continue implementation loop
+        if: github.event.inputs.continuous_mode == 'true' && steps.analyze.outputs.has_next_feature == 'true'
+        run: |
+          IMPLEMENTED_COUNT=1
+          MAX_FEATURES=${{ github.event.inputs.max_features }}
+          
+          echo "Starting continuous implementation mode..."
+          echo "Target: Implement up to $MAX_FEATURES high-priority features"
+          
+          while [ $IMPLEMENTED_COUNT -lt $MAX_FEATURES ]; do
+            echo ""
+            echo "Looking for next feature (iteration $((IMPLEMENTED_COUNT + 1)))..."
+            
+            # Get next suggestion
+            NEXT_FEATURE=$(python scripts/detect_feature_status.py --suggest-next --json | python -c "
+            import json, sys
+            data = json.load(sys.stdin)
+            print(data.get('feature_id', ''))
+            ")
+            PRIORITY=$(python scripts/detect_feature_status.py --suggest-next --json | python -c "
+            import json, sys
+            data = json.load(sys.stdin)
+            print(data.get('priority', 'P3'))
+            ")
+            
+            if [ -z "$NEXT_FEATURE" ]; then
+              echo "No more features to implement!"
+              break
+            fi
+            
+            # Only continue with P0/P1 features in continuous mode
+            if [ "$PRIORITY" != "P0" ] && [ "$PRIORITY" != "P1" ]; then
+              echo "Stopping continuous mode - next feature ($NEXT_FEATURE) is $PRIORITY priority"
+              break
+            fi
+            
+            echo "Implementing $NEXT_FEATURE ($PRIORITY)..."
+            
+            # Trigger implementation
+            gh workflow run auto-implement-feature.yml \
+              --field feature_id="$NEXT_FEATURE" \
+              --field use_copilot_agent=true
+            
+            # Wait a bit before checking for next
+            sleep 30
+            
+            IMPLEMENTED_COUNT=$((IMPLEMENTED_COUNT + 1))
+          done
+          
+          echo "Continuous implementation completed!"
+          echo "Features processed: $IMPLEMENTED_COUNT"
+
+      - name: Generate implementation report
+        if: always()
+        run: |
+          echo "# AshTrail Feature Implementation Report" > implementation_report.md
+          echo "" >> implementation_report.md
+          echo "Generated: $(date)" >> implementation_report.md
+          echo "" >> implementation_report.md
+          
+          # Add current state
+          echo "## Current Implementation State" >> implementation_report.md
+          echo "" >> implementation_report.md
+          python scripts/detect_feature_status.py --analyze-all >> implementation_report.md
+          echo "" >> implementation_report.md
+          
+          # Add gaps analysis
+          echo "## Implementation Gaps" >> implementation_report.md
+          echo "" >> implementation_report.md
+          python scripts/detect_feature_status.py --check-gaps >> implementation_report.md
+          echo "" >> implementation_report.md
+          
+          # Add next suggestions
+          echo "## Next Suggested Features" >> implementation_report.md
+          echo "" >> implementation_report.md
+          
+          # Get top 5 next features
+          python -c "
+          import json
+          import yaml
+          from pathlib import Path
+          
+          with open('feature_matrix.yaml') as f:
+              data = yaml.safe_load(f)
+          
+          # Filter and sort planned features
+          planned = [f for f in data['features'] if f.get('status') == 'planned']
+          priority_order = {'P0': 0, 'P1': 1, 'P2': 2, 'P3': 3}
+          planned.sort(key=lambda x: (priority_order.get(x.get('priority', 'P3'), 4), x.get('id', '')))
+          
+          for i, feature in enumerate(planned[:5], 1):
+              print(f'{i}. **{feature[\"id\"]}** - {feature.get(\"title\", \"\")} ({feature.get(\"priority\", \"P3\")})')
+          " >> implementation_report.md
+          
+          echo "" >> implementation_report.md
+          echo "---" >> implementation_report.md
+          echo "*Report generated by AshTrail automation system*" >> implementation_report.md
+          
+          # Output summary
+          echo "Implementation report generated"
+          cat implementation_report.md
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: implementation-report-${{ github.run_id }}
+          path: |
+            implementation_report.md
+            analysis.json
+            suggestion.json
+
+  summary:
+    needs: detect-and-implement
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Workflow summary
+        run: |
+          echo "## Auto-Implementation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.detect-and-implement.result }}" = "success" ]; then
+            echo "**Status:** Successful" >> $GITHUB_STEP_SUMMARY
+            NEXT_FEATURE="${{ needs.detect-and-implement.outputs.next_feature_id }}"
+            if [ -n "$NEXT_FEATURE" ]; then
+              echo "**Next Feature:** $NEXT_FEATURE" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "**Status:** All features complete!" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "**Status:** Failed or skipped" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- Review the generated pull request" >> $GITHUB_STEP_SUMMARY
+          echo "- Use GitHub Copilot to complete implementation" >> $GITHUB_STEP_SUMMARY
+          echo "- Run this workflow again to continue with next features" >> $GITHUB_STEP_SUMMARY

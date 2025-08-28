@@ -1,0 +1,45 @@
+name: Codecov Status Report
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Get latest commit
+        id: commit
+        run: |
+          echo "COMMIT=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Fetch Codecov status (public API)
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import os, requests, sys
+          repo = os.environ.get('REPO')
+          if not repo:
+              print('Missing REPO')
+              sys.exit(1)
+          # Get latest commit
+          import subprocess
+          commit = subprocess.check_output(['git','rev-parse','HEAD']).decode().strip()
+          url = f'https://codecov.io/api/gh/{repo}/commit/{commit}'
+          try:
+              r = requests.get(url, timeout=10)
+              if r.status_code == 200:
+                  data = r.json()
+                  print('Codecov data for', commit[:8])
+                  print('Total coverage:', data.get('totals', {}).get('c'))
+                  print('URL:', f'https://codecov.io/gh/{repo}/commit/{commit}')
+              else:
+                  print('Codecov not found for commit', commit[:8], 'HTTP', r.status_code)
+          except Exception as e:
+              print('Error querying Codecov:', e)
+          PY

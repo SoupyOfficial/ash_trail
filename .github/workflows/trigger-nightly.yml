@@ -1,0 +1,21 @@
+name: Trigger Nightly Coverage
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger nightly-coverage workflow
+        env:
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          owner_repo="$REPO"
+          workflow_file="nightly-coverage.yml"
+          echo "Triggering $workflow_file on ref=main for $owner_repo"
+          api="https://api.github.com/repos/$owner_repo/actions/workflows/$workflow_file/dispatches"
+          curl -s -S -X POST -H "Authorization: token $TOKEN" -H "Accept: application/vnd.github+json" \
+            -d '{"ref":"main"}' "$api" || true
+          echo "Triggered (or request sent). Check Actions -> Workflows -> Nightly Coverage."

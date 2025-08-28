@@ -28,7 +28,7 @@ jobs:
 
       - name: Run automation monitor (JSON)
         run: |
-          python scripts/automation_monitor.py check --json > monitor_result.json || true
+          python scripts/automation_monitor.py check --json > monitor_result.json 2>>monitor_logs.txt || true
         working-directory: ${{ github.workspace }}
 
       - name: Upload monitor result artifact
@@ -53,7 +53,23 @@ jobs:
               print('No monitor_result.json found, skipping issue creation')
               sys.exit(0)
 
-          data = json.loads(p.read_text(encoding='utf-8'))
+          try:
+              content = p.read_text(encoding='utf-8')
+              # Strip any non-JSON content (like logging that might leak through)
+              json_start = content.find('{')
+              if json_start == -1:
+                  print('No JSON found in monitor_result.json')
+                  sys.exit(0)
+              
+              json_content = content[json_start:]
+              data = json.loads(json_content)
+          except json.JSONDecodeError as e:
+              print(f'Failed to parse JSON: {e}')
+              print(f'Content: {content[:500]}...' if len(content) > 500 else f'Content: {content}')
+              sys.exit(0)
+          except Exception as e:
+              print(f'Error reading monitor result: {e}')
+              sys.exit(0)
 
           # Detect critical issues:
           issues = data.get('issues', []) or []

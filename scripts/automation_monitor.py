@@ -22,15 +22,28 @@ from typing import Dict, List, Optional
 import logging
 
 # Setup logging with UTF-8 encoding
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('automation_monitor.log', encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+def setup_logging(json_mode=False):
+    """Setup logging with appropriate handlers based on output mode."""
+    from typing import List
+    handlers: List[logging.Handler] = [logging.FileHandler('automation_monitor.log', encoding='utf-8')]
+    
+    if not json_mode:
+        # Only add stdout handler when not in JSON mode
+        handlers.append(logging.StreamHandler(sys.stdout))
+    else:
+        # In JSON mode, log to stderr to avoid polluting JSON output
+        handlers.append(logging.StreamHandler(sys.stderr))
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=handlers,
+        force=True  # Force reconfiguration if already setup
+    )
+    
+    return logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)  # Default logger, will be reconfigured in main()
 
 ROOT = Path(__file__).resolve().parent.parent
 MONITOR_DATA = ROOT / "scripts" / "monitor_data.json"
@@ -438,6 +451,7 @@ class AutomationMonitor:
 def main():
     """Main monitoring interface."""
     import argparse
+    global logger
     
     parser = argparse.ArgumentParser(description='Automation Monitor & AI Debugger')
     parser.add_argument('command', choices=['check', 'monitor', 'metrics'], 
@@ -446,6 +460,9 @@ def main():
     parser.add_argument('--json', action='store_true', help='Output JSON format')
     
     args = parser.parse_args()
+    
+    # Setup logging based on output mode
+    logger = setup_logging(json_mode=args.json)
     
     monitor = AutomationMonitor()
     

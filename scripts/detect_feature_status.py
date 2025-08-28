@@ -21,6 +21,7 @@ class FeatureStatusDetector:
     def __init__(self):
         self.feature_matrix = self._load_feature_matrix()
         self.features = self.feature_matrix.get('features', [])
+        self.dependencies = self._parse_dependencies()
     
     def _load_feature_matrix(self) -> Dict:
         """Load feature matrix from YAML."""
@@ -30,6 +31,31 @@ class FeatureStatusDetector:
         except Exception as e:
             print(f"❌ Error loading feature matrix: {e}")
             return {}
+    
+    def _parse_dependencies(self) -> Dict[str, List[str]]:
+        """Parse feature dependencies from the matrix."""
+        dependencies = {}
+        deps_section = self.feature_matrix.get('dependencies', [])
+        
+        for dep_entry in deps_section:
+            if isinstance(dep_entry, dict):
+                # Handle format like {'charts_time_series depends_on': ['data.indexing_perf', 'data.schema_v1']}
+                for key, deps_list in dep_entry.items():
+                    if 'depends_on' in key:
+                        feature_id = key.replace(' depends_on', '').strip()
+                        dependencies[feature_id] = deps_list
+            elif isinstance(dep_entry, str) and 'depends_on:' in dep_entry:
+                # Handle string format (backup)
+                parts = dep_entry.split(' depends_on: ')
+                if len(parts) == 2:
+                    feature_id = parts[0].strip()
+                    deps_str = parts[1].strip()
+                    if deps_str.startswith('[') and deps_str.endswith(']'):
+                        deps_str = deps_str[1:-1]
+                    deps_list = [dep.strip() for dep in deps_str.split(',')]
+                    dependencies[feature_id] = deps_list
+        
+        return dependencies
     
     def detect_implementation_status(self, feature_id: str) -> Dict:
         """Detect implementation status of a specific feature."""
@@ -142,6 +168,21 @@ class FeatureStatusDetector:
         
         return results
     
+    def _are_dependencies_satisfied(self, feature_id: str) -> Tuple[bool, List[str]]:
+        """Check if all dependencies for a feature are satisfied."""
+        if feature_id not in self.dependencies:
+            return True, []  # No dependencies = satisfied
+        
+        required_deps = self.dependencies[feature_id]
+        unsatisfied_deps = []
+        
+        for dep_id in required_deps:
+            dep_status = self.detect_implementation_status(dep_id)
+            if dep_status["implementation_status"] not in ["complete", "in_progress"]:
+                unsatisfied_deps.append(dep_id)
+        
+        return len(unsatisfied_deps) == 0, unsatisfied_deps
+    
     def suggest_next_feature(self) -> Optional[Dict]:
         """Suggest the next feature to implement based on priority and dependencies."""
         analysis = self.analyze_all_features()
@@ -151,7 +192,13 @@ class FeatureStatusDetector:
         for feature in analysis["details"]:
             if feature["implementation_status"] in ["not_started", "scaffolded"]:
                 if feature["matrix_status"] == "planned":  # Only suggest planned features
-                    candidates.append(feature)
+                    # Check if dependencies are satisfied
+                    deps_satisfied, unsatisfied_deps = self._are_dependencies_satisfied(feature["feature_id"])
+                    feature["dependencies_satisfied"] = deps_satisfied
+                    feature["unsatisfied_dependencies"] = unsatisfied_deps
+                    
+                    if deps_satisfied:
+                        candidates.append(feature)
         
         if not candidates:
             return None
@@ -166,6 +213,39 @@ class FeatureStatusDetector:
         
         return candidates[0] if candidates else None
     
+    def get_blocked_features(self) -> Dict:
+        """Get features that are blocked by unsatisfied dependencies."""
+        blocked_features = []
+        
+        for feature in self.features:
+            feature_id = feature.get('id', '')
+            if feature.get('status') == 'planned':
+                deps_satisfied, unsatisfied_deps = self._are_dependencies_satisfied(feature_id)
+                if not deps_satisfied:
+                    blocked_info = {
+                        "feature_id": feature_id,
+                        "title": feature.get('title', ''),
+                        "priority": feature.get('priority', 'P3'),
+                        "epic": feature.get('epic', ''),
+                        "unsatisfied_dependencies": unsatisfied_deps,
+                        "dependency_status": {}
+                    }
+                    
+                    # Get status of each unsatisfied dependency
+                    for dep_id in unsatisfied_deps:
+                        dep_status = self.detect_implementation_status(dep_id)
+                        blocked_info["dependency_status"][dep_id] = {
+                            "status": dep_status["implementation_status"],
+                            "completeness": dep_status["completeness_score"]
+                        }
+                    
+                    blocked_features.append(blocked_info)
+        
+        return {
+            "blocked_count": len(blocked_features),
+            "blocked_features": blocked_features
+        }
+
     def get_implementation_gaps(self) -> Dict:
         """Identify gaps between matrix status and actual implementation."""
         analysis = self.analyze_all_features()
@@ -201,6 +281,7 @@ def main():
     parser.add_argument("--suggest-next", action="store_true", help="Suggest next feature to implement")
     parser.add_argument("--analyze-all", action="store_true", help="Analyze all features")
     parser.add_argument("--check-gaps", action="store_true", help="Check for gaps between matrix and implementation")
+    parser.add_argument("--check-blocked", action="store_true", help="Check for features blocked by dependencies")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--workflow-output", action="store_true", help="Output in GitHub Actions workflow format")
     
@@ -235,6 +316,10 @@ def main():
                     print(f"   Priority: {suggestion['priority']}")
                     print(f"   Epic: {suggestion['epic']}")
                     print(f"   Current Status: {suggestion['implementation_status']}")
+                    if suggestion.get('unsatisfied_dependencies'):
+                        print(f"   Dependencies: {', '.join(suggestion['unsatisfied_dependencies'])}")
+                    else:
+                        print("   Dependencies: All satisfied ✓")
             else:
                 if args.workflow_output:
                     print("next_feature_id=")
@@ -269,6 +354,22 @@ def main():
                         print(f"\n{gap_type.replace('_', ' ').title()}:")
                         for feature in features:
                             print(f"  - {feature['feature_id']} ({feature['title']})")
+        
+        elif args.check_blocked:
+            blocked = detector.get_blocked_features()
+            if args.json:
+                print(json.dumps(blocked, indent=2))
+            else:
+                print("🚫 Features Blocked by Dependencies")
+                if blocked["blocked_count"] == 0:
+                    print("No features are currently blocked by dependencies!")
+                else:
+                    print(f"Found {blocked['blocked_count']} blocked features:")
+                    for feature in blocked["blocked_features"]:
+                        print(f"\n• {feature['feature_id']} - {feature['title']} ({feature['priority']})")
+                        print(f"  Blocked by: {', '.join(feature['unsatisfied_dependencies'])}")
+                        for dep_id, dep_info in feature["dependency_status"].items():
+                            print(f"    - {dep_id}: {dep_info['status']} ({dep_info['completeness']:.0%})")
         
         else:
             # Default: show summary

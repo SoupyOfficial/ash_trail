@@ -80,6 +80,9 @@ python scripts/detect_feature_status.py --feature-id ui.app_shell
 # Find implementation gaps
 python scripts/detect_feature_status.py --check-gaps
 
+# Check for dependency-blocked features
+python scripts/detect_feature_status.py --check-blocked
+
 # JSON output for automation
 python scripts/detect_feature_status.py --suggest-next --json
 ```
@@ -104,10 +107,11 @@ The system determines implementation status by checking:
 
 Next features are suggested based on:
 
-1. **Priority**: P0 > P1 > P2 > P3
-2. **Epic Grouping**: Features from same epic grouped together
-3. **Matrix Status**: Only `planned` features are suggested
-4. **Implementation Status**: Prefers `not_started` over `scaffolded`
+1. **Dependencies**: Only features with satisfied dependencies are considered
+2. **Priority**: P0 > P1 > P2 > P3
+3. **Epic Grouping**: Features from same epic grouped together
+4. **Matrix Status**: Only `planned` features are suggested
+5. **Implementation Status**: Prefers `not_started` over `scaffolded`
 
 ## 📊 Integration with Existing Workflows
 

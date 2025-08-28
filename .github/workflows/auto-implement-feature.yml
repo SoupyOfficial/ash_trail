@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.REPO_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -165,7 +165,7 @@ jobs:
       - name: Create Pull Request
         id: create_pr
         env:
-          GH_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           FEATURE_ID="${{ github.event.inputs.feature_id }}"
           BRANCH_NAME=$(echo "feature/${FEATURE_ID}" | tr '.' '-')

@@ -103,7 +103,7 @@ jobs:
 
       - name: Sync issues
         env:
-          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/sync_github_issues.py
 
   summary:

@@ -11,17 +11,16 @@ This file explains quick, practical steps for contributors and maintainers to us
 
 ### Automated (scheduled)
 - **CI** (`flutter-ci`): runs on every PR/push with analysis, tests, coverage, and artifact validation
-- **Feature Matrix** (`Generate Artifacts`): validates feature matrix schema and regenerates code
-- **Nightly Coverage** (`Nightly Coverage`): runs daily at 04:00 UTC, uploads coverage to Codecov
+- **Feature Matrix** (`feature-matrix`): validates feature matrix schema, regenerates code, and syncs issues (daily at 03:12 UTC)
 - **Automation Monitor** (`Automation Monitor`): daily health checks at 03:17 UTC, files issues on critical problems
-- **Issue Sync** (`Sync Feature Issues`): syncs GitHub issues from feature matrix daily at 02:17 UTC
+- **Nightly Coverage** (`Nightly Coverage`): runs daily at 04:00 UTC, uploads coverage to Codecov
+- **Labels Sync** (`Sync Labels`): automatically syncs repository labels when `.github/labels.yml` changes
 
 ### Manual dispatch
+- **Auto Implement Feature** (`Auto-Implement Feature`): scaffolds and implements features using GitHub Copilot agent
 - **Trigger Nightly Coverage**: manually triggers the nightly coverage workflow
-- **Sync Labels**: synchronizes repository labels from `.github/labels.yml`
 - **Codecov Status Report**: fetches and displays Codecov summary for latest commit
-- **Auto Implement Feature**: scaffolds and implements features using GitHub Copilot agent
-- **PR Body Linter**: validates PRs have proper Copilot/AI disclosure
+- **PR Body Linter**: validates PRs have proper Copilot/AI disclosure (runs automatically on PR events)
 
 ## PR rules
 - Use the PR template when creating PRs - it includes required checklists and Copilot disclosure

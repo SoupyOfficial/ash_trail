@@ -1,0 +1,42 @@
+name: PR Body Linter
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure Copilot/AI disclosure present in PR body or label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request || {};
+            const body = (pr.body || '').toLowerCase();
+            const labels = (pr.labels || []).map(l => (l.name || '').toLowerCase());
+            
+            // Check for disclosure keywords (case-insensitive)
+            const keywords = [
+              'copilot', 
+              'copilot-assisted', 
+              'ai-assisted', 
+              'github copilot',
+              'ai assistance',
+              'copilot or ai-assisted'
+            ];
+            const foundKeyword = keywords.some(k => body.includes(k));
+            const hasLabel = labels.includes('copilot-assisted');
+            
+            // Allow bypass for docs-only or maintenance PRs
+            const isDocsOnly = body.includes('docs only') || body.includes('documentation only');
+            const isMaintenance = labels.some(l => ['chore', 'ci', 'docs'].includes(l));
+            
+            if (!foundKeyword && !hasLabel && !isDocsOnly && !isMaintenance) {
+              const message = `PR body is missing Copilot/AI disclosure. Please either:
+              1. Add the disclosure checkbox from the PR template, or
+              2. Add the label "copilot-assisted" to the PR, or  
+              3. Add "docs only" to the description if this is documentation-only`;
+              throw new Error(message);
+            }
+            console.log('Copilot disclosure check passed.');

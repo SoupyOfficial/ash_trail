@@ -2,7 +2,6 @@ version: 0.3.0
 app: AshTrail
 last_updated: '2025-08-27'
 
-
 principles:
   - mobile_first
   - offline_first

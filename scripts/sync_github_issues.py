@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FEATURE_MATRIX = ROOT / "feature_matrix.yaml"
 REPO = os.environ.get("GITHUB_REPOSITORY")  # e.g. owner/name when in Actions
-GH_TOKEN = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+GH_TOKEN = os.environ.get("GH_TOKEN") or os.environ.get("REPO_TOKEN")
 
 SESSION = requests.Session()
 if GH_TOKEN:

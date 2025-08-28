@@ -22,7 +22,7 @@ jobs:
           pip install pyyaml requests
       - name: Sync Issues
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.REPO_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           python scripts/sync_github_issues.py

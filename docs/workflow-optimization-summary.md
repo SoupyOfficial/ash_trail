@@ -115,7 +115,7 @@ coverage:
 ### Environment Variables
 - `COVERAGE_MIN`: Standardized to '80' across all workflows
 - `CODECOV_TOKEN`: Required for enhanced codecov integration
-- `GITHUB_TOKEN`: Used for issue management and PR comments
+- `REPO_TOKEN`: Used for issue management and PR comments
 
 ## Monitoring Integration
 

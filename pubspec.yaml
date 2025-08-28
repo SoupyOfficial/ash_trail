@@ -41,6 +41,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0
+  fpdart: ^1.1.0 # Either type for error handling
 
   # (Planned) Offline persistence & networking NOTE: Not yet used; kept out until first feature scaffold triggers need.
   # isar: ^3.1.0+1

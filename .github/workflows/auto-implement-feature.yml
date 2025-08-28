@@ -1,0 +1,121 @@
+name: Auto-Implement Feature
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature_id:
+        description: 'Feature ID from feature_matrix.yaml (e.g., ui.app_shell)'
+        required: true
+        type: string
+      use_copilot_agent:
+        description: 'Use GitHub Copilot coding agent for implementation'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  auto-implement:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml requests
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.29.2'
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Validate feature exists
+        run: |
+          python -c "
+          import yaml
+          with open('feature_matrix.yaml') as f:
+              data = yaml.safe_load(f)
+          features = [f['id'] for f in data.get('features', [])]
+          if '${{ github.event.inputs.feature_id }}' not in features:
+              print('❌ Feature not found in feature_matrix.yaml')
+              exit(1)
+          print('✅ Feature found')
+          "
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Auto-implement feature
+        id: implement
+        run: |
+          python scripts/auto_implement_feature.py ${{ github.event.inputs.feature_id }} --push
+          echo "branch_name=feature/${{ github.event.inputs.feature_id }}" | tr '.' '-' >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FEATURE_ID="${{ github.event.inputs.feature_id }}"
+          BRANCH_NAME=$(echo "feature/${FEATURE_ID}" | tr '.' '-')
+          
+          FEATURE_TITLE=$(python -c "
+          import yaml
+          with open('feature_matrix.yaml') as f:
+              data = yaml.safe_load(f)
+          for f in data.get('features', []):
+              if f['id'] == '${{ github.event.inputs.feature_id }}':
+                  print(f['title'])
+                  break
+          ")
+          
+          cat > pr_body.md << 'EOF'
+          ## Auto-Generated Feature Implementation
+          
+          This PR contains the automatically generated scaffold for the feature.
+          
+          ### What's Included
+          - ✅ Feature scaffold with Clean Architecture structure  
+          - ✅ Generated models and providers
+          - ✅ Basic repository interfaces
+          - ✅ Acceptance tests placeholder
+          - ✅ Implementation plan
+          
+          ### Ready for GitHub Copilot Implementation
+          EOF
+          
+          gh pr create \
+            --title "feat: implement ${FEATURE_TITLE}" \
+            --body-file pr_body.md \
+            --label "feature" \
+            --head "${BRANCH_NAME}" \
+            --base main
+
+  notify:
+    needs: auto-implement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify completion
+        run: |
+          echo "🎉 Feature implementation started!"
+          echo "📋 Check the pull request for progress"
+          echo "🤖 GitHub Copilot coding agent will complete the implementation"

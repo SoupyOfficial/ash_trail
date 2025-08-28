@@ -164,17 +164,12 @@ jobs:
             echo ""
             echo "Looking for next feature (iteration $((IMPLEMENTED_COUNT + 1)))..."
             
-            # Get next suggestion
-            NEXT_FEATURE=$(python scripts/detect_feature_status.py --suggest-next --json | python -c "
-            import json, sys
-            data = json.load(sys.stdin)
-            print(data.get('feature_id', ''))
-            ")
-            PRIORITY=$(python scripts/detect_feature_status.py --suggest-next --json | python -c "
-            import json, sys
-            data = json.load(sys.stdin)
-            print(data.get('priority', 'P3'))
-            ")
+            # Get next suggestion and save to file
+            python scripts/detect_feature_status.py --suggest-next --json > next_suggestion.json
+            
+            # Extract feature ID and priority
+            NEXT_FEATURE=$(python -c 'import json; data=json.load(open("next_suggestion.json")); print(data.get("feature_id", ""))')
+            PRIORITY=$(python -c 'import json; data=json.load(open("next_suggestion.json")); print(data.get("priority", "P3"))')
             
             if [ -z "$NEXT_FEATURE" ]; then
               echo "No more features to implement!"
@@ -190,9 +185,12 @@ jobs:
             echo "Implementing $NEXT_FEATURE ($PRIORITY)..."
             
             # Trigger implementation
-            gh workflow run auto-implement-feature.yml \
-              --field feature_id="$NEXT_FEATURE" \
-              --field use_copilot_agent=true
+            if gh workflow run auto-implement-feature.yml --field feature_id="$NEXT_FEATURE" --field use_copilot_agent=true; then
+              echo "Workflow triggered successfully for $NEXT_FEATURE"
+            else
+              echo "Failed to trigger workflow for $NEXT_FEATURE"
+              break
+            fi
             
             # Wait a bit before checking for next
             sleep 30
@@ -227,23 +225,8 @@ jobs:
           echo "## Next Suggested Features" >> implementation_report.md
           echo "" >> implementation_report.md
           
-          # Get top 5 next features
-          python -c "
-          import json
-          import yaml
-          from pathlib import Path
-          
-          with open('feature_matrix.yaml') as f:
-              data = yaml.safe_load(f)
-          
-          # Filter and sort planned features
-          planned = [f for f in data['features'] if f.get('status') == 'planned']
-          priority_order = {'P0': 0, 'P1': 1, 'P2': 2, 'P3': 3}
-          planned.sort(key=lambda x: (priority_order.get(x.get('priority', 'P3'), 4), x.get('id', '')))
-          
-          for i, feature in enumerate(planned[:5], 1):
-              print(f'{i}. **{feature[\"id\"]}** - {feature.get(\"title\", \"\")} ({feature.get(\"priority\", \"P3\")})')
-          " >> implementation_report.md
+          # Use a simpler approach for top features
+          python scripts/detect_feature_status.py --suggest-next --top-5 >> implementation_report.md || echo "1. No additional features to implement" >> implementation_report.md
           
           echo "" >> implementation_report.md
           echo "---" >> implementation_report.md

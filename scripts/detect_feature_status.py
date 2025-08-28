@@ -282,6 +282,7 @@ def main():
     parser.add_argument("--analyze-all", action="store_true", help="Analyze all features")
     parser.add_argument("--check-gaps", action="store_true", help="Check for gaps between matrix and implementation")
     parser.add_argument("--check-blocked", action="store_true", help="Check for features blocked by dependencies")
+    parser.add_argument("--top-5", action="store_true", help="Show top 5 next features to implement")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     parser.add_argument("--workflow-output", action="store_true", help="Output in GitHub Actions workflow format")
     
@@ -326,6 +327,25 @@ def main():
                     print("next_feature_title=No features available")
                 else:
                     print("🎉 No more features to implement!")
+        
+        elif args.top_5:
+            # Get top 5 planned features
+            planned_features = [f for f in detector.features if f.get('status') == 'planned']
+            priority_order = {'P0': 0, 'P1': 1, 'P2': 2, 'P3': 3}
+            planned_features.sort(key=lambda x: (
+                priority_order.get(x.get('priority', 'P3'), 4),
+                x.get('id', '')
+            ))
+            
+            top_5 = planned_features[:5]
+            if args.json:
+                print(json.dumps(top_5, indent=2))
+            else:
+                if not top_5:
+                    print("No additional features to implement")
+                else:
+                    for i, feature in enumerate(top_5, 1):
+                        print(f"{i}. **{feature['id']}** - {feature.get('title', '')} ({feature.get('priority', 'P3')})")
         
         elif args.analyze_all:
             analysis = detector.analyze_all_features()

@@ -109,9 +109,45 @@ jobs:
           
           # Validate generated code
           flutter analyze || echo "⚠️ Analysis warnings found"
-          flutter test --no-pub || echo "⚠️ Test issues found"
+          
+          # Run tests with coverage
+          flutter test --coverage || echo "⚠️ Test issues found"
           
           echo "✅ Validation completed"
+
+      - name: Check coverage quality
+        if: always()
+        run: |
+          if [ -f "coverage/lcov.info" ]; then
+            # Use our monitoring script to check coverage
+            python scripts/automation_monitor.py check --json > automation_check.json
+            
+            # Extract coverage issues
+            COVERAGE_ISSUES=$(python -c "
+            import json
+            with open('automation_check.json') as f:
+                data = json.load(f)
+            issues = [i for i in data.get('issues', []) if 'Coverage' in i]
+            if issues:
+                print('Coverage issues detected:')
+                for issue in issues:
+                    print(f'  {issue}')
+            else:
+                print('Coverage validation passed')
+            ")
+            echo "$COVERAGE_ISSUES"
+          else
+            echo "⚠️ No coverage report generated"
+          fi
+
+      - name: Upload coverage reports
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage/lcov.info
+          flags: automated-feature
+          name: auto-implementation-${{ github.event.inputs.feature_id }}
+          fail_ci_if_error: false
 
       - name: Upload monitoring data
         if: always()
@@ -121,7 +157,9 @@ jobs:
           path: |
             health_check.json
             monitor_result.json
+            automation_check.json
             automation_monitor.log
+            coverage/lcov.info
 
       - name: Create Pull Request
         id: create_pr

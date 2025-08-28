@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
 env:
-  COVERAGE_MIN: '70'
+  COVERAGE_MIN: '80'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -99,6 +99,11 @@ jobs:
             }
             const body = `${marker}\n**Coverage:** ${pct}% (min ${process.env.COVERAGE_MIN}%)`;
             await github.rest.issues.createComment({owner, repo, issue_number, body});
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           files: coverage/lcov.info
+          flags: unittests
+          name: CI Coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          verbose: true

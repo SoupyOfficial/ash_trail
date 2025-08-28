@@ -1,0 +1,61 @@
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+        if_no_uploads: error
+        if_not_found: success
+        if_ci_failed: error
+    patch:
+      default:
+        target: 75%
+        threshold: 2%
+        if_no_uploads: error
+        if_not_found: success
+        if_ci_failed: error
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  
+ignore:
+  - "lib/**/*.g.dart"           # Generated Freezed files
+  - "lib/**/*.gr.dart"          # Generated Go Router files  
+  - "lib/**/*.config.dart"      # Generated config files
+  - "lib/domain/indexes/**"     # Generated index files
+  - "lib/telemetry/events.dart" # Generated telemetry
+  - "tool/**"                   # Tool scripts
+  - "test/**/*_test.mocks.dart" # Generated mocks
+  - "android/**"                # Android platform code
+  - "ios/**"                    # iOS platform code
+  - "linux/**"                  # Linux platform code  
+  - "macos/**"                  # macOS platform code
+  - "web/**"                    # Web platform code
+  - "windows/**"                # Windows platform code
+
+flags:
+  unit_tests:
+    paths:
+      - lib/
+    carryforward: true
+  widget_tests:
+    paths:
+      - lib/
+    carryforward: true
+  integration_tests:
+    paths:
+      - lib/
+    carryforward: true

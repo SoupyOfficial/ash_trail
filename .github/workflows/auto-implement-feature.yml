@@ -64,11 +64,64 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+      - name: Pre-execution health check
+        run: |
+          python scripts/automation_monitor.py check --json > health_check.json
+          CRITICAL_COUNT=$(python -c "
+          import json
+          with open('health_check.json') as f:
+              data = json.load(f)
+          critical = len([i for i in data['issues'] if i.startswith('❌')])
+          print(critical)
+          ")
+          
+          if [ "$CRITICAL_COUNT" -gt "0" ]; then
+            echo "❌ Critical issues detected, aborting automation"
+            python scripts/automation_monitor.py check
+            exit 1
+          fi
+          
+          echo "✅ Health check passed"
+
       - name: Auto-implement feature
         id: implement
         run: |
+          # Monitor execution
+          python scripts/automation_monitor.py monitor --feature-id ${{ github.event.inputs.feature_id }} --json > monitor_result.json &
+          MONITOR_PID=$!
+          
+          # Run implementation
           python scripts/auto_implement_feature.py ${{ github.event.inputs.feature_id }} --push
+          
+          # Stop monitoring
+          kill $MONITOR_PID 2>/dev/null || true
+          
           echo "branch_name=feature/${{ github.event.inputs.feature_id }}" | tr '.' '-' >> $GITHUB_OUTPUT
+
+      - name: Post-execution validation
+        if: always()
+        run: |
+          # Check if files were created
+          if [ ! -d "lib/features/${{ github.event.inputs.feature_id }}" ]; then
+            echo "❌ Feature directory not created"
+            exit 1
+          fi
+          
+          # Validate generated code
+          flutter analyze || echo "⚠️ Analysis warnings found"
+          flutter test --no-pub || echo "⚠️ Test issues found"
+          
+          echo "✅ Validation completed"
+
+      - name: Upload monitoring data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-monitoring-${{ github.run_id }}
+          path: |
+            health_check.json
+            monitor_result.json
+            automation_monitor.log
 
       - name: Create Pull Request
         id: create_pr

@@ -25,7 +25,7 @@ coverage:
         if_ci_failed: error
 
 comment:
-  layout: "reach,diff,flags,tree"
+  layout: "header,diff,flags,components"  # Add components to show in PR comments
   behavior: default
   require_changes: false
   require_base: false
@@ -59,3 +59,104 @@ flags:
     paths:
       - lib/
     carryforward: true
+
+# Components for organized coverage tracking
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: '75%'
+        threshold: '2%'
+        if_no_uploads: error
+        if_not_found: success
+        if_ci_failed: error
+  
+  individual_components:
+    # Core Architecture Components
+    - component_id: core_layer
+      name: "Core Infrastructure"
+      paths:
+        - "lib/core/**"
+      statuses:
+        - type: project
+          target: '85%'  # Higher standard for core infrastructure
+          threshold: '1%'
+    
+    - component_id: domain_layer
+      name: "Domain Logic"
+      paths:
+        - "lib/domain/**"
+      statuses:
+        - type: project
+          target: '90%'  # Highest standard for business logic
+          threshold: '1%'
+    
+    # Feature Components (based on your feature matrix)
+    - component_id: feature_logging
+      name: "Logging Feature"
+      paths:
+        - "lib/features/logging/**"
+      statuses:
+        - type: project
+          target: '80%'
+          threshold: '2%'
+        - type: patch
+          target: '75%'
+    
+    - component_id: feature_accounts
+      name: "Accounts Feature"
+      paths:
+        - "lib/features/accounts/**"
+      statuses:
+        - type: project
+          target: '80%'
+          threshold: '2%'
+    
+    - component_id: feature_app_shell
+      name: "App Shell & Navigation"
+      paths:
+        - "lib/features/app_shell/**"
+      statuses:
+        - type: project
+          target: '75%'
+          threshold: '2%'
+    
+    # Architecture Layer Components
+    - component_id: data_layer
+      name: "Data Layer"
+      paths:
+        - "**/data/**"
+      statuses:
+        - type: project
+          target: '85%'  # High coverage for data layer
+          threshold: '2%'
+    
+    - component_id: presentation_layer
+      name: "Presentation Layer"
+      paths:
+        - "**/presentation/**"
+        - "**/widgets/**"
+      statuses:
+        - type: project
+          target: '70%'  # UI tests can be more challenging
+          threshold: '3%'
+    
+    - component_id: use_cases
+      name: "Use Cases"
+      paths:
+        - "**/domain/usecases/**"
+        - "**/domain/use_cases/**"
+      statuses:
+        - type: project
+          target: '95%'  # Critical business logic
+          threshold: '1%'
+    
+    # Utility Components
+    - component_id: telemetry
+      name: "Telemetry"
+      paths:
+        - "lib/telemetry/**"
+      statuses:
+        - type: project
+          target: '70%'
+          threshold: '5%'  # More lenient for telemetry

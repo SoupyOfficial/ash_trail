@@ -30,12 +30,13 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      actions: write
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -112,20 +113,46 @@ jobs:
       - name: Implement next feature
         if: steps.analyze.outputs.has_next_feature == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          echo "Triggering implementation of ${{ steps.analyze.outputs.next_feature_id }}"
+          echo "Implementing feature: ${{ steps.analyze.outputs.next_feature_id }}"
           
-          # Use the GitHub CLI to trigger the main workflow
-          gh workflow run auto-implement-feature.yml \
+          # Option 1: Try to trigger the workflow (requires actions:write permission)
+          echo "Attempting to trigger auto-implement-feature workflow..."
+          if gh workflow run auto-implement-feature.yml \
             --field feature_id="${{ steps.analyze.outputs.next_feature_id }}" \
-            --field use_copilot_agent=true
-          
-          echo "Implementation workflow triggered!"
-          echo "Check the Actions tab for progress"
+            --field use_copilot_agent=true; then
+            echo "Implementation workflow triggered successfully!"
+            echo "Check the Actions tab for progress"
+          else
+            echo "Failed to trigger workflow - implementing directly..."
+            
+            # Option 2: Direct implementation fallback
+            echo "Setting up environment for direct implementation..."
+            
+            # Setup Flutter
+            curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.29.2-stable.tar.xz -o flutter.tar.xz
+            tar xf flutter.tar.xz
+            export PATH="$PATH:`pwd`/flutter/bin"
+            
+            # Flutter setup
+            flutter doctor
+            flutter pub get
+            
+            # Configure Git
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            
+            # Direct implementation
+            python scripts/auto_implement_feature.py "${{ steps.analyze.outputs.next_feature_id }}" --push
+            
+            echo "Direct implementation completed!"
+          fi
 
       - name: Continue implementation loop
         if: github.event.inputs.continuous_mode == 'true' && steps.analyze.outputs.has_next_feature == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           IMPLEMENTED_COUNT=1
           MAX_FEATURES=${{ github.event.inputs.max_features }}

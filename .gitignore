@@ -48,3 +48,4 @@ app.*.map.json
 /android/app/release
 .vscode/settings.json
 scripts/monitor_data.json
+.codecov_token

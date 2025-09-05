@@ -1,7 +1,49 @@
 # AI-Assisted Development Workflow for AshTrail
 
 ## Overview
-This document establishes the industry-standard workflow for AI-assisted development of AshTrail, ensuring efficient collaboration between human guidance and AI implementation.
+This document establishes the industry-standard workflow for AI-assisted development of AshTrail, ensuring efficient collaboration between human g### Quality Gates
+
+### Code Quality
+- [ ] Follows establishe### Tools & Integrations
+
+### Required Tools
+- **GitHub CLI**: For issue and PR management
+- **Flutter SDK**: For development and testing  
+- **VS Code**: Primary development environment
+- **Git**: Version control
+- **Codecov**: Coverage analysis and reporting (optional CODECOV_TOKEN)
+
+### Workspace Configuration
+- All AI instructions in `.github/instructions/`
+- Copilot context in `.github/copilot-instructions.md`
+- Feature matrix in `feature_matrix.yaml`
+- Development scripts in `scripts/`
+- Codecov configuration in `codecov.yml`
+
+### Monitoring & Metrics
+- Track development velocity (features/week)
+- Monitor code quality metrics (coverage, complexity)
+- Track issue resolution time
+- Monitor CI/CD performance
+- Component-level coverage tracking via Codecovhub/instructions/`
+- [ ] Uses correct architectural layers (domain/data/presentation)
+- [ ] Implements proper error handling with `AppFailure`
+- [ ] Includes comprehensive tests (≥80% coverage)
+- [ ] Passes static analysis (`flutter analyze`)
+- [ ] Meets component-specific coverage targets (see Codecov config)
+
+### Documentation Quality
+- [ ] README files updated for new features
+- [ ] API documentation for public interfaces
+- [ ] Architecture decisions documented in ADRs
+- [ ] User-facing changes documented
+
+### Integration Quality
+- [ ] All tests pass (`flutter test`)
+- [ ] No breaking changes to existing functionality
+- [ ] Proper Riverpod provider integration
+- [ ] Offline-first patterns followed
+- [ ] Coverage uploaded to Codecov (CI/CD)mentation.
 
 ## Development Philosophy
 - **Human-Led**: You provide strategic direction, requirements, and triggers

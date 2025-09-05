@@ -64,8 +64,9 @@ def run_code_generation():
         # Run the development generate script
         if os.name == 'nt':  # Windows
             subprocess.run(['scripts\\dev_generate.bat'], cwd=ROOT, check=True, shell=True)
-        else:  # Unix-like
-            subprocess.run(['scripts/dev_generate.sh'], cwd=ROOT, check=True)
+        else:  # Unix-like (Linux/macOS)
+            # Use bash to run the script to avoid permission issues
+            subprocess.run(['bash', 'scripts/dev_generate.sh'], cwd=ROOT, check=True)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Code generation failed: {e}")

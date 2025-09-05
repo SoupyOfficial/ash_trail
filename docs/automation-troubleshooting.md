@@ -1,14 +1,44 @@
-# 🤖 AI-Assisted Automation Issue Resolution Guide
+# Automation Workflow Troubleshooting Guide
+
+This document addresses common issues with AshTrail's automated development workflows and provides solutions.
+
+## 🚨 Recent Critical Issues (December 2025)
+
+### HTTP 403 Workflow Trigger Error
+
+**Problem**: 
+```
+could not create workflow dispatch event: HTTP 403: Resource not accessible by integration
+```
+
+**Root Cause**: 
+The `GITHUB_TOKEN` has limited permissions and cannot trigger other workflows due to GitHub's security restrictions.
+
+**Solutions Implemented**:
+1. **Enhanced Error Handling**: Workflows now catch 403 errors and fall back to direct implementation
+2. **PAT Token Support**: Use `secrets.PAT_TOKEN` (if configured) for broader permissions
+3. **Direct Implementation Fallback**: Automatic fallback when workflow triggering fails
+
+**Quick Fix**:
+Set up PAT token:
+1. GitHub → Settings → Developer settings → Personal access tokens
+2. Create token with `repo` and `actions:write` scopes  
+3. Add as repository secret: `PAT_TOKEN`
+
+### Python Indentation Error in Coverage Check
+
+**Problem**:
+```
+IndentationError: unexpected indent
+```
+
+**Solution**: Created dedicated `scripts/check_coverage_issues.py` script to replace problematic inline Python in YAML.
+
+---
+
+## 🤖 AI-Assisted Automation Issue Resolution Guide
 
 This guide provides AI-powered diagnostics and solutions for common automation issues in AshTrail.
-
-## 🚀 Quick Start
-
-Run the health check to get instant AI diagnostics:
-
-```bash
-# Windows
-scripts\health_check.bat
 
 # Linux/Mac  
 ./scripts/health_check.sh

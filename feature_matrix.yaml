@@ -773,7 +773,7 @@ features:
 - id: ui.error_boundary
   order: 5
   title: Global Error Boundary & Retry Surface
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:

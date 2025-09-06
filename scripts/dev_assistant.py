@@ -345,6 +345,26 @@ def _suggest_next_feature(order_mode: str = "matrix") -> Optional[Dict[str, Any]
     except Exception:
         return None
 
+def _fallback_next_feature() -> Optional[str]:
+    """Fallback selection when detect_feature_status script not present or returns none.
+
+    Strategy: choose first planned feature by priority (P0..P3) then order ascending.
+    If none planned, choose first in_progress without scaffold folder present (resume) else None.
+    """
+    fm = load_feature_matrix()
+    feats = fm.get('features', []) or []
+    prio_rank = {"P0":0, "P1":1, "P2":2, "P3":3}
+    planned = [f for f in feats if f.get('status') == 'planned']
+    planned.sort(key=lambda f: (prio_rank.get(f.get('priority','P3'), 99), f.get('order', 9999)))
+    if planned:
+        return planned[0].get('id')
+    # fallback to in_progress needing scaffold
+    for f in sorted([f for f in feats if f.get('status') == 'in_progress'], key=lambda x: (prio_rank.get(x.get('priority','P3'),99), x.get('order',9999))):
+        fid = f.get('id')
+        if fid and not _feature_dir(fid).exists():
+            return fid
+    return None
+
 def _feature_dir(feature_id: str) -> Path:
     snake = feature_id.split('.')[-1]
     return ROOT / 'lib' / 'features' / snake
@@ -394,7 +414,7 @@ def _update_feature_matrix_status(feature_id: str, dry_run: bool) -> Tuple[bool,
         FEATURE_MATRIX.write_text(yaml.safe_dump(data, sort_keys=False), encoding='utf-8')
     return (prev is not None, prev, new)
 
-def cmd_start_next_feature(args) -> Dict[str, Any]:
+def cmd_start_next_feature(args) -> Dict[str, Any]:  # original implementation retained then wrapped later
     # Determine target feature
     order_mode = getattr(args, 'order_mode', 'matrix')
     dry_run = getattr(args, 'dry_run', False)
@@ -408,9 +428,13 @@ def cmd_start_next_feature(args) -> Dict[str, Any]:
         suggestion = next((f for f in fm.get('features', []) if f.get('id') == feature_id), {})
     else:
         suggestion = _suggest_next_feature(order_mode=order_mode)
-        if not suggestion:
-            return {"error": "no_feature_available"}
-        feature_id = suggestion.get('feature_id')
+        if suggestion:
+            feature_id = suggestion.get('feature_id')
+        else:
+            fallback_id = _fallback_next_feature()
+            if not fallback_id:
+                return {"error": "no_feature_available"}
+            feature_id = fallback_id
     if not isinstance(feature_id, str):  # safety
         return {"error": "invalid_feature_id", "detail": str(feature_id)}
     scaffold = _scaffold_feature(str(feature_id), dry_run)
@@ -428,6 +452,357 @@ def cmd_start_next_feature(args) -> Dict[str, Any]:
 # register command
 COMMANDS["start-next-feature"] = cmd_start_next_feature
 
+# ----------------------------- Feature Branch & AI Prompt Enhancements -----------------------------
+# Added: automatic branch creation + AI assistant implementation prompt generation when starting a feature.
+# Rationale: streamline dev workflow so invoking `start-next-feature` immediately prepares an isolated branch
+# and rich context prompt for AI / developer to implement according to architectural guardrails.
+
+def _current_branch() -> Optional[str]:
+    ok, out = run(["git", "branch", "--show-current"], timeout=10)
+    return out if ok and out else None
+
+def _create_feature_branch(feature_id: str, dry_run: bool) -> Dict[str, Any]:
+    """Create a git branch for the feature.
+
+    Branch naming convention: feat/<feature_id_with_dots_replaced_by_underscores>
+    (Using underscores avoids potential tooling issues with dots in branch refs.)
+    If branch already exists, we do not switch if already on it; otherwise checkout it.
+    """
+    result: Dict[str, Any] = {"created": False, "branch": None, "base": None, "exists": False}
+    base = _current_branch()
+    result["base"] = base
+    sanitized = feature_id.replace(" ", "_").replace("/", "_").replace("..", ".")
+    branch = f"feat/{sanitized.replace('.', '_')}"
+    result["branch"] = branch
+    if dry_run:
+        return result
+    # Check if git is available
+    ok_git, _ = run(["git", "--version"], timeout=5)
+    if not ok_git:
+        result["error"] = "git_not_available"
+        return result
+    # Does branch already exist?
+    exists_ok, _ = run(["git", "rev-parse", "--verify", branch], timeout=10)
+    if exists_ok:
+        result["exists"] = True
+        # checkout existing branch if not already on it
+        if base != branch:
+            co_ok, co_out = run(["git", "checkout", branch], timeout=20)
+            if not co_ok:
+                result["error"] = f"checkout_failed:{co_out[:120]}"
+        return result
+    # Create new branch
+    create_ok, create_out = run(["git", "checkout", "-b", branch], timeout=30)
+    if create_ok:
+        result["created"] = True
+    else:
+        result["error"] = f"branch_create_failed:{create_out[:160]}"
+    return result
+
+def _generate_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run: bool) -> Dict[str, Any]:
+    """Generate an AI assistant implementation prompt inside the feature folder.
+
+    File path: lib/features/<snake>/AI_PROMPT.md
+    Content includes: summary, rationale, acceptance, components, data/offline/telemetry/a11y/errors.
+    """
+    out: Dict[str, Any] = {"path": None}
+    if not feature_record:
+        out["error"] = "feature_record_missing"
+        return out
+    snake = feature_id.split('.')[-1]
+    feature_dir = _feature_dir(feature_id)
+    prompt_path = feature_dir / "AI_PROMPT.md"
+    if dry_run:
+        out["path"] = str(prompt_path.relative_to(ROOT))
+        return out
+    feature_dir.mkdir(parents=True, exist_ok=True)
+    title = feature_record.get("title", feature_id)
+    rationale = feature_record.get("rationale")
+    acceptance = feature_record.get("acceptance") or []
+    user_stories = feature_record.get("user_stories") or []
+    components = feature_record.get("components") or []
+    screens = feature_record.get("screens") or feature_record.get("screen") or []
+    telemetry_events = feature_record.get("telemetry", {}).get("events", []) if isinstance(feature_record.get("telemetry"), dict) else []
+    data_block = feature_record.get("data") or {}
+    offline_block = feature_record.get("offline") or {}
+    a11y = feature_record.get("a11y") or {}
+    errors = feature_record.get("errors") or []
+    perf_budget = feature_record.get("perf_budget") or {}
+
+    def bullet(lines):
+        return "\n".join(f"- {l}" for l in lines)
+
+    content_lines: List[str] = [
+        f"# Feature Implementation Prompt: {title} ({feature_id})",
+        "",
+        "This prompt is auto-generated by dev_assistant `start-next-feature` to guide AI / developer implementation.",
+        "Do not remove architectural guardrails. Keep changes minimal, tested, and aligned with Clean Architecture.",
+        "",
+        "## Context", f"Epic: {feature_record.get('epic','unknown')}", f"Priority: {feature_record.get('priority','')}  Status: {feature_record.get('status','')}",
+        "", "## Rationale", rationale or "(None provided)", "",
+    ]
+    if user_stories:
+        content_lines += ["## User Stories", bullet(user_stories), ""]
+    content_lines += ["## Acceptance Criteria", bullet(acceptance) if acceptance else "(None listed)", ""]
+    if components:
+        content_lines += ["## Components / Modules", bullet(components), ""]
+    if screens:
+        content_lines += ["## Screens", bullet(screens), ""]
+    if telemetry_events:
+        content_lines += ["## Telemetry Events", bullet(telemetry_events), ""]
+    if perf_budget:
+        content_lines += ["## Performance Budget (Target)"]
+        for k,v in perf_budget.items():
+            content_lines.append(f"- {k}: {v}")
+        content_lines.append("")
+    # Data / Offline
+    if data_block:
+        reads = data_block.get("reads") or []
+        writes = data_block.get("writes") or []
+        content_lines += ["## Data Access", "Reads:", bullet([str(r) for r in reads]) if reads else "- (none)", "Writes:", bullet([str(w) for w in writes]) if writes else "- (none)", ""]
+    if offline_block:
+        content_lines += ["## Offline", bullet([f"{k}: {v}" for k,v in offline_block.items()]), ""]
+    if a11y:
+        content_lines += ["## Accessibility", bullet([f"{k}: {v}" for k,v in a11y.items()]), ""]
+    if errors:
+        content_lines += ["## Error Codes", bullet([f"{e.get('code')}: {e.get('message')}" if isinstance(e, dict) else str(e) for e in errors]), ""]
+    content_lines += [
+    "## Output Contract (Reminders)",
+    "The PR for this feature should include in order:",
+    "1. Plan (goal, assumptions, acceptance)",
+    "2. Files changed list (paths + purpose)",
+    "3. Code (full files, no TODO placeholders)",
+    "4. Tests (unit/widget/integration as applicable)",
+    "5. Docs diffs / ADR additions (if architectural decisions changed)",
+    "6. Manual QA steps (including offline & error paths)",
+    "7. Performance & Accessibility checks",
+    "8. Conventional commit message (subject <=72 chars)",
+    "",        
+    "## Finalization Workflow",
+    "Before requesting a PR: repeatedly run the dry-run finalize until all validations pass.",
+    "Command: python scripts/dev_assistant.py finalize-feature --feature-id {feature_id} --dry-run --json",
+    "Check JSON: validations.tests_ok, validations.coverage_ok (>= ${MIN_PROJECT_COV}% line), validations.todos_ok all true.",
+    "If any false: add/adjust tests, raise coverage, or complete checklist (AI_PROMPT). Re-run dry-run.",
+    "Only when all pass: run without --dry-run to auto-stage + commit (optionally add --push).",
+    "Never commit partial feature via finalize-feature; use normal git commits for intermediate work.",
+    "",
+    "## Implementation Guidance",
+    "1. Maintain feature-first folder structure (domain, data, presentation).",
+    "2. Expose public API via Riverpod providers; avoid direct Firestore/Dio in widgets.",
+    "3. Add Freezed entities & DTO mappers; ensure serialization isolated.",
+    "4. Implement use cases (pure) in domain layer returning Either<AppFailure, T>.",
+    "5. Add minimal tests: mapper, use case happy path + one failure, provider logic.",
+    "6. Respect performance & accessibility notes above.",
+    "7. Update feature status to in_progress only if delivering code (already auto-set).",
+    "8. Keep AI generated explanations concise in PR body; no large boilerplate.",
+    "",
+    "## Initial TODO Checklist",
+    "- [ ] Define domain entities / value objects (if new).",
+    "- [ ] Add use cases (list in code comment).",
+    "- [ ] Create repository interface + impl placeholders.",
+    "- [ ] Wire Riverpod providers (autoDispose where suitable).",
+    "- [ ] Implement presentation widgets/screens behind feature flag if needed.",
+    "- [ ] Write unit tests (≥85% for new lines).",
+    "- [ ] Update docs / ADR if architectural decisions differ.",
+    "",
+    "## Do Not",
+    "- Introduce new heavy dependencies without ADR.",
+    "- Bypass error handling (always map to AppFailure).",
+    "- Expose raw exceptions or Firestore documents to UI.",
+    "",
+    "(End of prompt)",
+    "",
+    ]
+    prompt_path.write_text("\n".join(content_lines), encoding="utf-8")
+    out["path"] = str(prompt_path.relative_to(ROOT))
+    return out
+
+def _load_feature_record(feature_id: str) -> Dict[str, Any]:
+    fm = load_feature_matrix()
+    for f in fm.get('features', []) or []:
+        if f.get('id') == feature_id:
+            return f
+    return {}
+
+# Patch original cmd_start_next_feature to append branch + prompt generation (keeping existing logic)
+original_cmd_start_next_feature = cmd_start_next_feature
+
+def cmd_start_next_feature_enhanced(args) -> Dict[str, Any]:
+    base_result = original_cmd_start_next_feature(args)
+    if base_result.get("error"):
+        return base_result
+    feature_id = base_result.get("started_feature")
+    if not isinstance(feature_id, str):
+        base_result["prompt"] = {"error": "invalid_feature_id_type"}
+        return base_result
+    # Branch creation
+    branch_info = _create_feature_branch(feature_id, bool(base_result.get("dry_run")))
+    base_result["git_branch"] = branch_info
+    # AI prompt generation
+    record = _load_feature_record(feature_id)
+    prompt_info = _generate_ai_prompt(record, feature_id, bool(base_result.get("dry_run")))
+    base_result["prompt"] = prompt_info
+    # Optional auto commit & push
+    if not base_result.get("dry_run") and getattr(args, 'auto_commit', False):
+        files_to_add: List[str] = []
+        scaffold = base_result.get('scaffold', {}) or {}
+        for rel in scaffold.get('created', []) or []:
+            if isinstance(rel, str):
+                # add entire directory or file
+                files_to_add.append(rel)
+        prompt_path = prompt_info.get('path') if isinstance(prompt_info, dict) else None
+        if isinstance(prompt_path, str):
+            files_to_add.append(prompt_path)
+        if base_result.get('matrix_updated'):
+            files_to_add.append(str(FEATURE_MATRIX.relative_to(ROOT)))
+        added: Dict[str, Any] = {"staged": [], "errors": []}
+        for rel in files_to_add:
+            ok_add, out_add = run(["git", "add", rel], timeout=15)
+            if ok_add:
+                added["staged"].append(rel)
+            else:
+                added["errors"].append({"file": rel, "error": out_add[:120]})
+        commit_msg = f"feat({feature_id.split('.')[-1]}): start {feature_id} scaffold"
+        ok_commit, out_commit = run(["git", "commit", "-m", commit_msg], timeout=30)
+        commit_info = {"committed": ok_commit, "message": commit_msg, "output": out_commit[-400:] if out_commit else "", "staged_count": len(added['staged'])}
+        base_result['git_commit'] = commit_info
+        base_result['git_add'] = added
+        if ok_commit and getattr(args, 'push', False):
+            branch_name = base_result.get('git_branch', {}).get('branch') if isinstance(base_result.get('git_branch'), dict) else None
+            if branch_name:
+                ok_push, out_push = run(["git", "push", "-u", "origin", branch_name], timeout=60)
+                base_result['git_push'] = {"pushed": ok_push, "output": out_push[-400:] if out_push else ""}
+    return base_result
+
+# Re-register updated command
+COMMANDS["start-next-feature"] = cmd_start_next_feature_enhanced
+
+# ----------------------------- Finalize Feature Command -----------------------------
+def _infer_feature_id_from_branch() -> Optional[str]:
+    branch = _current_branch()
+    if not branch:
+        return None
+    if not branch.startswith("feat/"):
+        return None
+    token = branch.split('/',1)[1]
+    # token originally had '.' replaced with '_'. We'll map by comparing sanitized forms.
+    fm = load_feature_matrix()
+    for f in fm.get('features', []) or []:
+        fid = f.get('id')
+        if not isinstance(fid, str):
+            continue
+        if fid.replace('.', '_') == token:
+            return fid
+    return None
+
+def _finalize_feature_matrix_status(feature_id: str, dry_run: bool) -> Tuple[bool, Optional[str], Optional[str]]:
+    data = load_feature_matrix()
+    feats = data.get('features') or []
+    prev = None
+    new = None
+    for f in feats:
+        if f.get('id') == feature_id:
+            prev = f.get('status')
+            if prev == 'in_progress':
+                new = 'done'
+                if not dry_run:
+                    f['status'] = new
+            else:
+                new = prev
+            break
+    if not dry_run and prev == 'in_progress' and new == 'done':
+        FEATURE_MATRIX.write_text(yaml.safe_dump(data, sort_keys=False), encoding='utf-8')
+    return (prev is not None, prev, new)
+
+def _scan_prompt_todos(feature_id: str) -> Dict[str, Any]:
+    path = _feature_dir(feature_id) / 'AI_PROMPT.md'
+    if not path.exists():
+        return {"error": "prompt_missing"}
+    text = path.read_text(encoding='utf-8')
+    unchecked = []
+    checked = 0
+    for line in text.splitlines():
+        if line.strip().startswith('- [ ]'):
+            unchecked.append(line.strip())
+        elif line.strip().startswith('- [x]'):
+            checked += 1
+    return {"path": str(path.relative_to(ROOT)), "unchecked": unchecked, "checked": checked}
+
+def _feature_changed_files(feature_id: str) -> List[str]:
+    """Heuristic: list staged + unstaged files under feature dir and core routing modifications."""
+    feature_dir = _feature_dir(feature_id)
+    rel = feature_dir.relative_to(ROOT)
+    changed = _changed_files()
+    matches: List[str] = []
+    for entry in changed:
+        p = entry.get('path')
+        if isinstance(p, str) and (p.startswith(str(rel)) or p == 'feature_matrix.yaml'):
+            matches.append(p)
+    return sorted(set(matches))
+
+def cmd_finalize_feature(args) -> Dict[str, Any]:
+    feature_id = getattr(args, 'feature_id', None) or _infer_feature_id_from_branch()
+    if not feature_id:
+        return {"error": "feature_id_required"}
+    fm = load_feature_matrix()
+    record = next((f for f in fm.get('features', []) or [] if f.get('id') == feature_id), None)
+    if not record:
+        return {"error": "feature_not_found", "feature_id": feature_id}
+    status = record.get('status')
+    if status != 'in_progress':
+        return {"error": "invalid_status", "expected": "in_progress", "actual": status}
+    # Run tests & coverage unless skip-tests provided
+    if getattr(args, 'skip_tests', False):
+        tests_ok = True
+        cov = parse_lcov(COVERAGE_FILE)
+    else:
+        tests_ok, _ = ensure_tests_with_coverage()
+        cov = parse_lcov(COVERAGE_FILE)
+    cov_pct = cov.get('line_coverage') if isinstance(cov, dict) else None
+    coverage_ok = (isinstance(cov_pct, (int, float)) and cov_pct >= MIN_PROJECT_COV)
+    prompt_check = _scan_prompt_todos(feature_id)
+    todos_ok = not prompt_check.get('unchecked')
+    changed = _feature_changed_files(feature_id)
+    validations = {
+        'tests_ok': tests_ok,
+        'coverage_ok': coverage_ok,
+        'coverage_pct': cov_pct,
+        'todos_ok': todos_ok,
+        'unchecked_todos': prompt_check.get('unchecked'),
+        'prompt': prompt_check,
+        'changed_files': changed,
+    }
+    all_pass = tests_ok and coverage_ok and todos_ok
+    dry_run = getattr(args, 'dry_run', False)
+    status_change: Optional[Dict[str, Any]] = None
+    if all_pass:
+        upd = _finalize_feature_matrix_status(feature_id, dry_run)
+        status_change = {"updated": upd[0], "prev": upd[1], "new": upd[2]}
+    else:
+        status_change = {"skipped": True, "reason": "validation_failed"}
+    commit_info = None
+    if all_pass and not dry_run:
+        # Stage ALL changes (user requested behavior) instead of heuristic subset.
+        # This will include new files, modifications, deletions, and the updated feature_matrix.yaml.
+        run(["git", "add", "."], timeout=60)
+        # Capture staged files list
+        staged_list: List[str] = []
+        ok_ls, out_ls = run(["git", "diff", "--cached", "--name-only"], timeout=30)
+        if ok_ls and out_ls:
+            staged_list = [ln.strip() for ln in out_ls.splitlines() if ln.strip()]
+        commit_msg = f"feat({feature_id.split('.')[-1]}): finalize {feature_id}"
+        ok_commit, out_commit = run(["git", "commit", "-m", commit_msg], timeout=50)
+        commit_info = {"attempted": True, "committed": ok_commit, "message": commit_msg, "staged": staged_list, "errors": [], "output": out_commit[-400:] if out_commit else ""}
+        if ok_commit and getattr(args, 'push', False):
+            branch = _current_branch()
+            if branch:
+                ok_push, out_push = run(["git", "push", "origin", branch], timeout=70)
+                commit_info['push'] = {"pushed": ok_push, "output": out_push[-400:] if out_push else ""}
+    return {"feature_id": feature_id, "validations": validations, "all_pass": all_pass, "status": status_change, "commit": commit_info, "dry_run": dry_run}
+
+# Register finalize command
+COMMANDS["finalize-feature"] = cmd_finalize_feature
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="AshTrail Dev Assistant")
     p.add_argument("command", choices=COMMANDS.keys())
@@ -440,6 +815,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--feature-id", help="Explicit feature id to start (overrides suggestion)")
     p.add_argument("--order-mode", choices=["matrix","priority","appearance"], default="matrix", help="Ordering mode for next feature suggestion")
     p.add_argument("--dry-run", action="store_true", help="Show actions without modifying files")
+    p.add_argument("--auto-commit", action="store_true", help="Automatically git add + commit scaffold & prompt")
+    p.add_argument("--push", action="store_true", help="Push newly created branch after committing (implies --auto-commit)")
+    # finalize-feature options reuse --feature-id, --dry-run, --skip-tests, --push
     return p
 
 def main(argv: Optional[List[str]] = None) -> int:

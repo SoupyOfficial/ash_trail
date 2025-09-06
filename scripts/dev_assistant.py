@@ -35,7 +35,7 @@ MIN_PROJECT_COV = float(os.environ.get("COVERAGE_MIN", "80"))
 
 def run(cmd: List[str], timeout: int = 60, cwd: Path = ROOT) -> Tuple[bool, str]:
     try:
-        proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+        proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout, shell=True)
         return proc.returncode == 0, proc.stdout.strip() + ("\n" + proc.stderr.strip() if proc.stderr.strip() else "")
     except FileNotFoundError:
         return False, f"tool_not_found:{cmd[0]}"

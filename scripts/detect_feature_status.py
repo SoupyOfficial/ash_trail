@@ -183,35 +183,96 @@ class FeatureStatusDetector:
         
         return len(unsatisfied_deps) == 0, unsatisfied_deps
     
-    def suggest_next_feature(self) -> Optional[Dict]:
-        """Suggest the next feature to implement based on priority and dependencies."""
+    def suggest_next_feature(self, order_mode: str = "matrix") -> Optional[Dict]:
+        """Suggest the next feature to implement.
+
+        order_mode:
+          - 'matrix': follow explicit 'order' within an epic and epic appearance order in the YAML.
+          - 'priority': legacy behaviour (priority, epic, id).
+          - 'appearance': purely the appearance sequence in the YAML file.
+        """
         analysis = self.analyze_all_features()
+
+        # Pre-compute ordering indices based on YAML appearance and epic group ordering
+        # Epic order is defined implicitly by appearance in the 'epics' list; fallback to appearance in features.
+        epic_order_map = {}
+        epics = self.feature_matrix.get('epics', [])
+        for idx, epic in enumerate(epics):
+            if isinstance(epic, dict) and 'id' in epic:
+                epic_order_map[epic['id']] = idx
+        # Fallback: if epics list missing or a feature references an epic not in list, use first feature appearance ordering
+        if not epic_order_map:
+            seen = {}
+            for idx, feat in enumerate(self.features):
+                e = feat.get('epic')
+                if e and e not in seen:
+                    seen[e] = idx
+            epic_order_map.update(seen)
         
-        # Get features that are not started or scaffolded
-        candidates = []
+        # Map feature id -> appearance index (first occurrence)
+        appearance_index = {}
+        for idx, feat in enumerate(self.features):
+            fid = feat.get('id', '')
+            appearance_index[fid] = idx
+
+        # Get candidate features (planned & not started/scaffolded with deps satisfied)
+        candidates: List[Dict] = []
         for feature in analysis["details"]:
-            if feature["implementation_status"] in ["not_started", "scaffolded"]:
-                if feature["matrix_status"] == "planned":  # Only suggest planned features
-                    # Check if dependencies are satisfied
-                    deps_satisfied, unsatisfied_deps = self._are_dependencies_satisfied(feature["feature_id"])
-                    feature["dependencies_satisfied"] = deps_satisfied
-                    feature["unsatisfied_dependencies"] = unsatisfied_deps
-                    
-                    if deps_satisfied:
-                        candidates.append(feature)
-        
+            if feature["implementation_status"] in ["not_started", "scaffolded"] and feature["matrix_status"] == "planned":
+                deps_satisfied, unsatisfied_deps = self._are_dependencies_satisfied(feature["feature_id"])
+                feature["dependencies_satisfied"] = deps_satisfied
+                feature["unsatisfied_dependencies"] = unsatisfied_deps
+                if deps_satisfied:
+                    # Attach ordering metadata
+                    orig_meta = next((f for f in self.features if f.get('id') == feature['feature_id']), {})
+                    feature['order_within_epic'] = orig_meta.get('order')
+                    feature['appearance_index'] = appearance_index.get(feature['feature_id'], 10_000)
+                    feature['epic_order'] = epic_order_map.get(feature.get('epic',''), 10_000)
+                    candidates.append(feature)
+
         if not candidates:
             return None
-        
-        # Sort by priority (P0 > P1 > P2 > P3)
+
         priority_order = {"P0": 0, "P1": 1, "P2": 2, "P3": 3}
-        candidates.sort(key=lambda x: (
-            priority_order.get(x["priority"], 4),  # Priority first
-            x["epic"],  # Then by epic to group related features
-            x["feature_id"]  # Finally by ID for consistency
-        ))
-        
-        return candidates[0] if candidates else None
+
+        def sort_key_matrix(f: Dict):
+            # Order: epic order, then explicit order field (if any), then priority, then appearance as stable fallback
+            order_within = f.get('order_within_epic')
+            # If missing explicit order, treat as large number to avoid jumping ahead
+            order_val = order_within if isinstance(order_within, int) else 10_000
+            pr = str(f.get('priority')) if f.get('priority') is not None else 'P3'
+            return (
+                f.get('epic_order', 10_000),
+                order_val,
+                priority_order.get(pr, 4),
+                f.get('appearance_index', 10_000),
+                f.get('feature_id')
+            )
+
+        def sort_key_priority(f: Dict):
+            pr = str(f.get('priority')) if f.get('priority') is not None else 'P3'
+            return (
+                priority_order.get(pr, 4),
+                f.get('epic'),
+                f.get('feature_id')
+            )
+
+        def sort_key_appearance(f: Dict):
+            pr = str(f.get('priority')) if f.get('priority') is not None else 'P3'
+            return (
+                f.get('appearance_index', 10_000),
+                priority_order.get(pr, 4),
+                f.get('feature_id')
+            )
+
+        if order_mode == 'priority':
+            candidates.sort(key=sort_key_priority)
+        elif order_mode == 'appearance':
+            candidates.sort(key=sort_key_appearance)
+        else:  # matrix default
+            candidates.sort(key=sort_key_matrix)
+
+        return candidates[0]
     
     def get_blocked_features(self) -> Dict:
         """Get features that are blocked by unsatisfied dependencies."""
@@ -279,6 +340,7 @@ def main():
     parser = argparse.ArgumentParser(description="Detect feature implementation status")
     parser.add_argument("--feature-id", help="Analyze specific feature")
     parser.add_argument("--suggest-next", action="store_true", help="Suggest next feature to implement")
+    parser.add_argument("--order-mode", choices=["matrix","priority","appearance"], default="matrix", help="Ordering mode for next suggestion")
     parser.add_argument("--analyze-all", action="store_true", help="Analyze all features")
     parser.add_argument("--check-gaps", action="store_true", help="Check for gaps between matrix and implementation")
     parser.add_argument("--check-blocked", action="store_true", help="Check for features blocked by dependencies")
@@ -302,7 +364,7 @@ def main():
                     print(f"Missing: {', '.join(result['missing_files'])}")
         
         elif args.suggest_next:
-            suggestion = detector.suggest_next_feature()
+            suggestion = detector.suggest_next_feature(order_mode=args.order_mode)
             if suggestion:
                 if args.workflow_output:
                     print(f"next_feature_id={suggestion['feature_id']}")

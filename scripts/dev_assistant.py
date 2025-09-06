@@ -321,6 +321,113 @@ COMMANDS = {
     "adr-index": cmd_adr_index,
 }
 
+# ----------------------------- Feature Start Command -----------------------------
+def _suggest_next_feature(order_mode: str = "matrix") -> Optional[Dict[str, Any]]:
+    """Reuse detect_feature_status script suggestion to avoid duplicating logic."""
+    script = ROOT / 'scripts' / 'detect_feature_status.py'
+    if not script.exists():
+        return None
+    try:
+        proc = subprocess.run([
+            sys.executable,
+            str(script),
+            '--suggest-next',
+            '--json',
+            '--order-mode', order_mode
+        ], cwd=ROOT, capture_output=True, text=True)
+        if proc.returncode != 0:
+            return None
+        data = json.loads(proc.stdout.strip() or '{}')
+        # detect_feature_status returns None (printed) when nothing; ensure feature_id key present
+        if not isinstance(data, dict) or 'feature_id' not in data:
+            return None
+        return data
+    except Exception:
+        return None
+
+def _feature_dir(feature_id: str) -> Path:
+    snake = feature_id.split('.')[-1]
+    return ROOT / 'lib' / 'features' / snake
+
+def _scaffold_feature(feature_id: str, dry_run: bool) -> Dict[str, Any]:
+    base = _feature_dir(feature_id)
+    created: List[str] = []
+    skipped: List[str] = []
+    subdirs = ['domain', 'data', 'presentation']
+    for sub in subdirs:
+        path = base / sub
+        if path.exists():
+            skipped.append(str(path.relative_to(ROOT)))
+        else:
+            if not dry_run:
+                path.mkdir(parents=True, exist_ok=True)
+                (path / '.gitkeep').write_text('', encoding='utf-8')
+            created.append(str(path.relative_to(ROOT)))
+    # tests directory
+    test_dir = ROOT / 'test' / 'features' / feature_id.split('.')[-1]
+    if test_dir.exists():
+        skipped.append(str(test_dir.relative_to(ROOT)))
+    else:
+        if not dry_run:
+            test_dir.mkdir(parents=True, exist_ok=True)
+            (test_dir / f"{feature_id.split('.')[-1]}_placeholder_test.dart").write_text(
+                f"// Placeholder test for {feature_id}\nvoid main() {{}}\n", encoding='utf-8')
+        created.append(str(test_dir.relative_to(ROOT)))
+    return {"created": created, "skipped": skipped}
+
+def _update_feature_matrix_status(feature_id: str, dry_run: bool) -> Tuple[bool, Optional[str], Optional[str]]:
+    data = load_feature_matrix()
+    feats = data.get('features') or []
+    prev = None
+    new = None
+    for f in feats:
+        if f.get('id') == feature_id:
+            prev = f.get('status')
+            if prev == 'planned':
+                new = 'in_progress'
+                if not dry_run:
+                    f['status'] = new
+            else:
+                new = prev  # unchanged
+            break
+    if not dry_run and prev == 'planned':
+        FEATURE_MATRIX.write_text(yaml.safe_dump(data, sort_keys=False), encoding='utf-8')
+    return (prev is not None, prev, new)
+
+def cmd_start_next_feature(args) -> Dict[str, Any]:
+    # Determine target feature
+    order_mode = getattr(args, 'order_mode', 'matrix')
+    dry_run = getattr(args, 'dry_run', False)
+    feature_id = getattr(args, 'feature_id', None)
+    if feature_id:
+        # ensure exists in matrix
+        fm = load_feature_matrix()
+        ids = {f.get('id') for f in fm.get('features', [])}
+        if feature_id not in ids:
+            return {"error": "feature_not_found", "feature_id": feature_id}
+        suggestion = next((f for f in fm.get('features', []) if f.get('id') == feature_id), {})
+    else:
+        suggestion = _suggest_next_feature(order_mode=order_mode)
+        if not suggestion:
+            return {"error": "no_feature_available"}
+        feature_id = suggestion.get('feature_id')
+    if not isinstance(feature_id, str):  # safety
+        return {"error": "invalid_feature_id", "detail": str(feature_id)}
+    scaffold = _scaffold_feature(str(feature_id), dry_run)
+    updated, prev_status, new_status = _update_feature_matrix_status(str(feature_id), dry_run)
+    return {
+        "started_feature": feature_id,
+        "dry_run": dry_run,
+        "scaffold": scaffold,
+        "status_prev": prev_status,
+        "status_new": new_status,
+        "matrix_updated": (prev_status == 'planned' and new_status == 'in_progress' and not dry_run),
+        "order_mode": order_mode,
+    }
+
+# register command
+COMMANDS["start-next-feature"] = cmd_start_next_feature
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="AshTrail Dev Assistant")
     p.add_argument("command", choices=COMMANDS.keys())
@@ -329,6 +436,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--upload", action="store_true", help="Upload coverage in dev-cycle")
     p.add_argument("--skip-tests", action="store_true", help="Skip running tests in dev-cycle (used for fast manifest generation / tests)")
     p.add_argument("--log-file", help="Append structured JSONL log to file")
+    # start-next-feature options
+    p.add_argument("--feature-id", help="Explicit feature id to start (overrides suggestion)")
+    p.add_argument("--order-mode", choices=["matrix","priority","appearance"], default="matrix", help="Ordering mode for next feature suggestion")
+    p.add_argument("--dry-run", action="store_true", help="Show actions without modifying files")
     return p
 
 def main(argv: Optional[List[str]] = None) -> int:

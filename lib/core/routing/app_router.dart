@@ -13,6 +13,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/routing/domain/route_intent.dart';
 import '../../features/routing/domain/resolve_deep_link_use_case.dart';
 import '../../features/routing/presentation/log_detail_screen.dart';
+import '../../features/app_shell/presentation/app_shell.dart';
+import '../../features/logging/presentation/logs_screen.dart';
 import '../telemetry/telemetry_service.dart';
 
 // -----------------------------
@@ -21,21 +23,13 @@ import '../telemetry/telemetry_service.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('AshTrail')),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Home'),
-              ElevatedButton(
-                onPressed: () => GoRouter.of(context).go('/log/demo'),
-                child: const Text('Open Demo Log Detail (id=demo)'),
-              ),
-            ],
-          ),
-        ),
-      );
+  Widget build(BuildContext context) => const Center(child: Text('Home'));
+}
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const Center(child: Text('Settings'));
 }
 
 // Provider supplying initial deep link location (cold start). Falls back to '/'.
@@ -52,19 +46,36 @@ final routerProvider = Provider<GoRouter>((ref) {
   // Build router using explicit list (manual typed mapping for now).
   final r = GoRouter(
     routes: [
-      GoRoute(
-        path: '/',
-        name: 'home',
-        pageBuilder: (ctx, state) =>
-            const NoTransitionPage(child: HomeScreen()),
+      ShellRoute(
+        builder: (context, state, child) => AppShell(child: child),
         routes: [
           GoRoute(
-            path: 'log/:id',
-            name: 'log-detail',
-            pageBuilder: (ctx, state) {
-              final id = state.pathParameters['id']!;
-              return NoTransitionPage(child: LogDetailScreen(logId: id));
-            },
+            path: '/',
+            name: 'home',
+            pageBuilder: (ctx, state) =>
+                const NoTransitionPage(child: HomeScreen()),
+            routes: [
+              GoRoute(
+                path: 'log/:id',
+                name: 'log-detail',
+                pageBuilder: (ctx, state) {
+                  final id = state.pathParameters['id']!;
+                  return NoTransitionPage(child: LogDetailScreen(logId: id));
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/logs',
+            name: 'logs',
+            pageBuilder: (ctx, state) =>
+                const NoTransitionPage(child: LogsScreen()),
+          ),
+          GoRoute(
+            path: '/settings',
+            name: 'settings',
+            pageBuilder: (ctx, state) =>
+                const NoTransitionPage(child: SettingsScreen()),
           ),
         ],
       ),
@@ -93,6 +104,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           'route_unknown', {'location': initial, 'reason': f.displayMessage}),
       (ri) => switch (ri) {
         RouteIntentHome() => r.go('/'),
+        RouteIntentLogsTab() => r.go('/logs'),
         RouteIntentLogDetail(:final id) => r.go('/log/$id'),
       },
     );

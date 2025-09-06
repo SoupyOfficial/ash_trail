@@ -24,6 +24,11 @@ final resolveDeepLinkUseCaseProvider = Provider<ResolveDeepLinkUseCase>((ref) {
 
     final hostIsApp = host.isEmpty || host == 'ashtrail.app';
 
+    // /logs => logs tab
+    if (hostIsApp && segments.length == 1 && segments.first == 'logs') {
+      return right(const RouteIntentLogsTab());
+    }
+
     // Pattern A: /log/<id> (optionally with supported host)
     if (hostIsApp && segments.length == 2 && segments.first == 'log') {
       final id = segments[1];

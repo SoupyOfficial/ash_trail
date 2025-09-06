@@ -12,7 +12,7 @@ import 'package:ash_trail/main.dart';
 void main() {
   testWidgets('Home screen renders', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: MyApp()));
-    expect(find.text('AshTrail'), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
+    // Shell no longer has explicit AppBar title; just ensure home content present.
+    expect(find.text('Home'), findsWidgets); // label + body text
   });
 }

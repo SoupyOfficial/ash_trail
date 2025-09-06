@@ -671,7 +671,7 @@ features:
 - id: ui.app_shell
   order: 1
   title: App Shell & Navigation Scaffold
-  status: in_progress
+  status: done
   priority: P0
   epic: ui
   rationale: Establish consistent structure for all screens and enable future features.

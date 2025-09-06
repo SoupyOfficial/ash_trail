@@ -15,3 +15,9 @@ class RouteIntentLogDetail extends RouteIntent {
   @override
   String toString() => 'RouteIntent.logDetail(id: $id)';
 }
+
+class RouteIntentLogsTab extends RouteIntent {
+  const RouteIntentLogsTab();
+  @override
+  String toString() => 'RouteIntent.logs';
+}

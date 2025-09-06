@@ -712,7 +712,7 @@ features:
 - id: ui.routing
   order: 2
   title: Typed Routing & Deep Link Handling
-  status: planned
+  status: done
   priority: P0
   epic: ui
   acceptance:

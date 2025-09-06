@@ -7,11 +7,25 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ash_trail/main.dart';
+import 'package:ash_trail/features/theming/presentation/providers/theme_provider.dart';
 
 void main() {
   testWidgets('Home screen renders', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: MyApp()));
+    // Initialize SharedPreferences for testing
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          createThemeRepositoryOverride(prefs),
+        ],
+        child: const MyApp(),
+      ),
+    );
+
     // Shell no longer has explicit AppBar title; just ensure home content present.
     expect(find.text('Home'), findsWidgets); // label + body text
   });

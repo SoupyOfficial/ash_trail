@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Resolves an incoming deep link [Uri] into a domain [RouteIntent].
 /// Supported forms:
 /// - / (home)
-/// - /log/<id>
-/// - ashtrail://log/<id>
-/// - https://ashtrail.app/log/<id> (future custom domain)
+/// - /log/{id}
+/// - ashtrail://log/{id}
+/// - https://ashtrail.app/log/{id} (future custom domain)
 typedef ResolveDeepLinkUseCase = Either<AppFailure, RouteIntent> Function(
     Uri uri);
 

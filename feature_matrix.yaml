@@ -734,7 +734,7 @@ features:
 - id: ui.theming
   order: 3
   title: Theming System & Dark Mode
-  status: planned
+  status: done
   priority: P0
   epic: ui
   acceptance:

@@ -585,6 +585,7 @@ def _generate_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run
     "If any false: add/adjust tests, raise coverage, or complete checklist (AI_PROMPT). Re-run dry-run.",
     "Only when all pass: run without --dry-run to auto-stage + commit (optionally add --push).",
     "Never commit partial feature via finalize-feature; use normal git commits for intermediate work.",
+    "Always run all tests locally before finalize-feature.",
     "",
     "## Implementation Guidance",
     "1. Maintain feature-first folder structure (domain, data, presentation).",

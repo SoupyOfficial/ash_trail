@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../domain/entities/app_tab.dart';
 import '../domain/usecases/get_last_active_tab_use_case.dart';
 import '../domain/usecases/set_last_active_tab_use_case.dart';
-import '../../logging/presentation/logs_screen.dart';
 import '../data/app_shell_repository_prefs.dart';
 
 // Providers wiring use cases

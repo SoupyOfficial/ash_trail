@@ -1,93 +1,45 @@
-# AshTrail Development Assistant - Quick Reference
+# AshTrail Automation Quick Reference (Generated)
 
-## 🚀 Essential Commands
+This file is auto-generated from the canonical instruction prompt. Do not edit manually.
 
-### Daily Workflow
-```bash
-# Morning health check
-python scripts/dev_assistant.py health
+## Output Contract Summary
+1. Plan
+2. Files to Change
+3. Code (full files)
+4. Tests
+5. Docs diffs / ADR
+6. Manual QA steps
+7. Performance & Accessibility check
+8. Commit Message (conventional)
+## Architectural Rules (Abbrev)
+1. Layer separation:
+	- Domain: entities + pure use cases (no Flutter, no I/O side effects beyond abstractions).
+	- Data: repositories, DTOs, mappers, local (Isar) & remote (Firestore/Dio) implementations.
+	- Presentation: widgets, controllers/providers, navigation, formatting.
+2. No UI → data imports; depend upward by abstractions only.
+3. All external effects behind interfaces injected via Riverpod providers.
+4. Errors: use sealed `AppFailure` hierarchy – never expose raw exceptions to UI.
+5. Serialization only through DTO + mapper; never expose Firestore docs directly to domain/UI.
+6. Feature directory pattern: `lib/features/<feature>/{domain,data,presentation,widgets}`.
+7. Provider naming: `<Thing>Provider`; keep scopes minimal; avoid provider pyramids by composing use cases.
+## Coverage Policy
+## Coverage Policy (Consolidated)
+Global project (enforced): ≥80% line coverage.
+Patch / new or changed lines (enforced): ≥85% line coverage.
+Domain layer (aspirational): ≥90% line coverage (flag if below, do not block unless <80%).
+Core shared modules (core, telemetry, critical services) target: ≥85%.
+Fail fast if patch coverage below threshold or global coverage drops >2% versus previous main baseline (future automation hook).
 
-# Check project status
-python scripts/dev_assistant.py status
 
-# Run complete development cycle (test + coverage + upload)
-python scripts/dev_assistant.py dev-cycle
-```
+## Governance Additions
+- Instruction hash posted on PRs (automation-governance workflow)
+- Docs integrity check blocks drift
+- SBOM + license scan (non-strict) produced as artifacts
 
-### Coverage & Testing
-```bash
-# Generate and analyze coverage
-python scripts/dev_assistant.py test-coverage
-
-# Test Codecov integration
-python scripts/dev_assistant.py test-codecov
-
-# Upload coverage to Codecov
-python scripts/dev_assistant.py upload-codecov
-```
-
-### Setup & Configuration
-```bash
-# Setup Codecov token (one-time)
-python scripts/dev_assistant.py setup-token
-
-# Comprehensive environment check
-python scripts/dev_assistant.py full-check
-
-# View feature matrix status
-python scripts/dev_assistant.py features
-```
-
-## 📊 Coverage Targets
-
-| Component | Target | Status |
-|-----------|--------|--------|
-| Overall Project | 80% | 🎯 Enforced |
-| Domain Layer | 90% | 🎯 Enforced |
-| Core Features | 85% | 📊 Tracked |
-| New Code | 85% | 🔍 Monitored |
-
-## 🔧 Setup Checklist
-
-- [ ] Flutter SDK installed and in PATH
-- [ ] Python 3.11+ installed
-- [ ] Codecov CLI installed (`npm install -g codecov`)
-- [ ] CODECOV_TOKEN environment variable set (optional)
-- [ ] Repository cloned and dependencies installed
-
-## ⚡ Quick Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| "Flutter not found" | Add Flutter to PATH or reinstall |
-| "Codecov CLI not found" | Run `npm install -g codecov` |
-| "Coverage file missing" | Run `flutter test --coverage` first |
-| "Upload failed" | Check token with `setup-token` command |
-| "Tests failing" | Run `flutter analyze` and fix issues |
-
-## 🎯 AI Development Triggers
-
-Use in commit messages to trigger AI assistance:
-
-```bash
-#github-pull-request_copilot-coding-agent
-
-Title: [FEATURE] Your Feature Name
-Epic: Epic Name
-Priority: P0|P1|P2|P3
-```
-
-## 📈 Performance Tips
-
-- Use `health` for quick checks (2-5s)
-- Use `dev-cycle` for comprehensive validation (60-120s)
-- Run `full-check` before major commits
-- Cache Flutter dependencies for faster testing
-
-## 🔗 Key Files
-
-- `scripts/dev_assistant.py` - Main automation script
-- `docs/local-automation-guide.md` - Detailed documentation
-- `.github/instructions/development-workflow.md` - AI workflow guide
-- `codecov.yml` - Coverage configuration
-- `feature_matrix.yaml` - Feature definitions
+## Regeneration
+python scripts/docs_integrity.py --update-quick-reference
+<!-- canonical-section-hashes: json -->
+{
+  "Architectural Rules": "88869c0f90873f77b890c378efc99cb1efc5eb0ebd3286219e13dafc9cdefcfa",
+  "Error Handling Pattern": "3e548abc49517f72d7e520c3695db0b698ee8a89f8ef4353635cdce03780d778"
+}

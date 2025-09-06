@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPT_PATH = ROOT / 'scripts' / 'generate_from_feature_matrix.py'
 
 # Exec the script in a temp module namespace to access validate
-module_globals = {}
+module_globals = {'__file__': str(SCRIPT_PATH)}
 with open(SCRIPT_PATH, 'r', encoding='utf-8') as f:
     code = compile(f.read(), str(SCRIPT_PATH), 'exec')
 exec(code, module_globals)

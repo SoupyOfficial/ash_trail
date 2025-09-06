@@ -1,13 +1,8 @@
 @echo off
-echo Running pre-commit checks...
-flutter format --set-exit-if-changed .
-IF %ERRORLEVEL% NEQ 0 EXIT /B 1
-flutter analyze
-IF %ERRORLEVEL% NEQ 0 EXIT /B 1
-flutter test --tags=fast
+echo Running pre-commit quality gate...
+call scripts\quality_gate.bat
 IF %ERRORLEVEL% NEQ 0 (
-  echo Fast tests failed, running full test suite...
-  flutter test
-  IF %ERRORLEVEL% NEQ 0 EXIT /B 1
+  echo Quality gate failed.
+  EXIT /B 1
 )
-echo Pre-commit checks passed.
+echo Pre-commit checks passed (quality gate).

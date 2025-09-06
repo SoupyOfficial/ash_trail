@@ -152,8 +152,6 @@ python scripts/dev_assistant.py status
 # Just health check
 python scripts/dev_assistant.py health
 
-# GitHub issues summary
-python scripts/dev_assistant.py issues
 ```
 
 ### Key Metrics

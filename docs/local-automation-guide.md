@@ -19,27 +19,20 @@ python --version
 npm install -g codecov
 ```
 
-### 2. Codecov Token Setup (Optional but Recommended)
+### 2. (Optional) Codecov Token Setup
 
-For authenticated uploads and enhanced features:
+If you want authenticated uploads (not required for local gating), set the environment variable manually:
 
 ```bash
-# Run the guided setup
-python scripts/dev_assistant.py setup-token
-
-# Or manually set the token
-# Windows:
+# Windows (cmd)
 set CODECOV_TOKEN=your_token_here
-
-# Linux/Mac:
+# PowerShell
+$Env:CODECOV_TOKEN="your_token_here"
+# Linux / macOS
 export CODECOV_TOKEN=your_token_here
 ```
 
-**To get your token:**
-1. Visit https://codecov.io/gh/SoupyOfficial/ash_trail
-2. Navigate to Settings > General
-3. Copy the Repository Upload Token
-4. Set the environment variable as shown above
+Retrieve token from your repository page on Codecov (Settings > General).
 
 ## Available Commands
 
@@ -195,8 +188,8 @@ python scripts/dev_assistant.py features
 
 ### Environment Variables
 
-- `CODECOV_TOKEN`: Repository upload token for authenticated uploads
-- `COVERAGE_MIN`: Minimum coverage percentage (default: 80)
+- `CODECOV_TOKEN`: Repository upload token for authenticated uploads (optional)
+- `COVERAGE_MIN`: Minimum global coverage percentage (default: 80)
 - `FLUTTER_VERSION`: Preferred Flutter version for consistency
 
 ### Customization Options
@@ -244,10 +237,7 @@ The assistant reads from several sources:
    ```
 
 4. **"Upload failed"**
-   ```bash
-   # Check token configuration
-   python scripts/dev_assistant.py setup-token
-   ```
+   - Verify `CODECOV_TOKEN` (if using private/auth uploads) and network connectivity.
 
 ### Debug Mode
 

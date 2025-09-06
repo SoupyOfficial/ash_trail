@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo 'Running pre-commit checks...'
-flutter format --set-exit-if-changed .
-flutter analyze
-flutter test --tags=fast || flutter test
-echo 'Pre-commit checks passed.'
+echo 'Running pre-commit quality gate...'
+bash scripts/quality_gate.sh
+echo 'Pre-commit checks passed (quality gate).'

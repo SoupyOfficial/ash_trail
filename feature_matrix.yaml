@@ -754,7 +754,7 @@ features:
 - id: ui.responsive
   order: 4
   title: Responsive & Adaptive Layout
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:

@@ -5,6 +5,7 @@ import '../domain/entities/app_tab.dart';
 import '../domain/usecases/get_last_active_tab_use_case.dart';
 import '../domain/usecases/set_last_active_tab_use_case.dart';
 import '../data/app_shell_repository_prefs.dart';
+import '../../responsive/presentation/widgets/min_tap_target.dart';
 
 // Providers wiring use cases
 final getLastActiveTabUseCaseProvider =
@@ -169,7 +170,8 @@ class AppShell extends ConsumerWidget {
         },
         icon: const Icon(Icons.add),
         label: const Text('Log'),
-      ),
+      ).withMinTapTarget(
+          minSize: 56.0), // Enhanced tap target for accessibility
     );
   }
 }

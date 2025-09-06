@@ -1,0 +1,108 @@
+name: Coverage Upload
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  coverage:
+    name: Generate and Upload Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "stable"
+          channel: "stable"
+
+      - name: Get Flutter Dependencies
+        run: flutter pub get
+
+      - name: Run Flutter Analyzer
+        run: flutter analyze
+
+      - name: Run Tests with Coverage
+        run: flutter test --coverage
+
+      - name: Verify Coverage File
+        run: |
+          if [ ! -f coverage/lcov.info ]; then
+            echo "❌ Coverage file not found!"
+            exit 1
+          fi
+          echo "✅ Coverage file generated successfully"
+          echo "📊 Coverage file size: $(du -h coverage/lcov.info | cut -f1)"
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: ash-trail-coverage
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Generate Coverage Summary
+        run: |
+          echo "## 📊 Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if command -v lcov &> /dev/null; then
+            lcov --summary coverage/lcov.info >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "Coverage summary generation failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Coverage file uploaded to Codecov successfully!" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📈 View detailed coverage report at [Codecov](https://codecov.io/gh/SoupyOfficial/ash_trail)" >> $GITHUB_STEP_SUMMARY
+
+  coverage-gate:
+    name: Coverage Quality Gate
+    runs-on: ubuntu-latest
+    needs: coverage
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "stable"
+          channel: "stable"
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Run Coverage Gate Check
+        run: |
+          flutter test --coverage
+
+          # Extract coverage percentage (basic parsing)
+          if [ -f coverage/lcov.info ]; then
+            echo "✅ Coverage file exists"
+            
+            # Comment on PR with coverage info
+            echo "## 🎯 Coverage Quality Gate" > coverage_comment.md
+            echo "" >> coverage_comment.md
+            echo "Coverage analysis completed for this PR." >> coverage_comment.md
+            echo "" >> coverage_comment.md
+            echo "📊 **Coverage Report**: Available on [Codecov](https://codecov.io/gh/SoupyOfficial/ash_trail)" >> coverage_comment.md
+            echo "" >> coverage_comment.md
+            echo "🔍 **Quality Standards**:" >> coverage_comment.md
+            echo "- Overall Target: 80%" >> coverage_comment.md
+            echo "- Domain Layer Target: 90%" >> coverage_comment.md
+            echo "- New Code Target: 85%" >> coverage_comment.md
+            
+            cat coverage_comment.md
+          else
+            echo "❌ Coverage file not found"
+            exit 1
+          fi

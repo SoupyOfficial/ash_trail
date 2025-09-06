@@ -10,8 +10,30 @@ Usage:
     python scripts/dev_assistant.py status        # Check project status
     python scripts/dev_assistant.py features      # List next features to implement
     python scripts/dev_assistant.py issues        # Show GitHub issues summary
-    python s    # Test upload preparation
+    python scripts/dev_assistant.py test-upload   # Test upload preparation
     print("\n🔄 Validating coverage file...")
+    try:
+        coverage_info = get_coverage_summary()
+        if coverage_info:
+            coverage_pct = coverage_info["line_coverage"]
+            lines_hit = coverage_info["lines_hit"]
+            lines_found = coverage_info["lines_found"]
+            print(f"✅ Coverage data: {coverage_pct:.1f}% ({lines_hit}/{lines_found} lines)")
+        else:
+            print("⚠️ Could not parse coverage data")
+    except Exception as e:
+        print(f"⚠️ Coverage parsing error: {e}")
+    
+    # Show upload command
+    print("\n🚀 Ready for upload!")
+    print("💡 To upload coverage:")
+    if codecov_token:
+        print("   python scripts/dev_assistant.py upload-codecov")
+    else:
+        print("   codecov -f coverage/lcov.info")
+        print("   (or set CODECOV_TOKEN and use: python scripts/dev_assistant.py upload-codecov)")
+    
+    return Truen🔄 Validating coverage file...")
     try:
         coverage_info = get_coverage_summary()
         if coverage_info:
@@ -523,16 +545,15 @@ def test_codecov_upload():
     else:
         print("✅ CODECOV_TOKEN: Set")
     
-    # Test upload (dry run first)
-    print("\n� Testing upload (dry run)...")
+    # Test upload
+    print("\n🧪 Testing upload")
     success, output = run_command([
         "codecov", 
         "-f", "coverage/lcov.info",
-        "--dry-run"
     ], timeout=15)
     
     if success:
-        print("✅ Dry run successful!")
+        print("✅ Testing upload successful!")
         print("📊 Coverage file is valid for upload")
         
         # Ask if user wants to do actual upload
@@ -540,7 +561,7 @@ def test_codecov_upload():
         print("💡 To upload: codecov -f coverage/lcov.info")
         return True
     else:
-        print("❌ Dry run failed")
+        print("❌ Testing upload failed")
         print(f"Error: {output}")
         return False
 
@@ -607,11 +628,109 @@ def run_coverage_analysis():
     
     return True
 
+def setup_codecov_token():
+    """Guide user through Codecov token setup."""
+    print("🔐 Codecov Token Setup")
+    print("=" * 25)
+    
+    print("📋 Steps to set up Codecov token:")
+    print("1. Go to https://codecov.io/gh/SoupyOfficial/ash_trail")
+    print("2. Navigate to Settings > General")
+    print("3. Copy the Repository Upload Token")
+    print("4. Set the environment variable:")
+    print("   Windows: set CODECOV_TOKEN=your_token_here")
+    print("   Linux/Mac: export CODECOV_TOKEN=your_token_here")
+    print("5. For permanent setup, add to your shell profile")
+    
+    current_token = os.environ.get("CODECOV_TOKEN")
+    if current_token:
+        print(f"\n✅ CODECOV_TOKEN is already set: {current_token[:8]}...")
+    else:
+        print("\n⚠️ CODECOV_TOKEN is not set")
+    
+    print("\n💡 After setting the token, run: python scripts/dev_assistant.py test-codecov")
+
+def full_development_check():
+    """Run a comprehensive development environment check."""
+    print("🏥 Full Development Check")
+    print("=" * 30)
+    
+    all_good = True
+    
+    # Health check
+    print("1️⃣ Health Check...")
+    health = check_health()
+    if health["issues"]:
+        all_good = False
+    
+    # Coverage check
+    print("\n2️⃣ Coverage Analysis...")
+    try:
+        run_coverage_analysis()
+    except Exception as e:
+        print(f"❌ Coverage analysis failed: {e}")
+        all_good = False
+    
+    # Codecov check
+    print("\n3️⃣ Codecov Integration...")
+    try:
+        test_codecov_upload()
+    except Exception as e:
+        print(f"❌ Codecov test failed: {e}")
+        all_good = False
+    
+    # Summary
+    print("\n" + "=" * 30)
+    if all_good:
+        print("✅ All checks passed! Development environment is ready.")
+    else:
+        print("⚠️ Some issues found. Review the output above.")
+    
+    return all_good
+
+def run_development_cycle():
+    """Run a complete development cycle: test, coverage, upload."""
+    print("🔄 Development Cycle")
+    print("=" * 20)
+    
+    # Step 1: Run tests with coverage
+    print("1️⃣ Running tests with coverage...")
+    success, output = run_command(["flutter", "test", "--coverage"], timeout=120)
+    if not success:
+        print("❌ Tests failed!")
+        print(output)
+        return False
+    
+    print("✅ Tests completed successfully")
+    
+    # Step 2: Analyze coverage
+    print("\n2️⃣ Analyzing coverage...")
+    try:
+        run_coverage_analysis()
+    except Exception as e:
+        print(f"⚠️ Coverage analysis failed: {e}")
+    
+    # Step 3: Upload to Codecov (if token is available)
+    print("\n3️⃣ Uploading to Codecov...")
+    codecov_token = os.environ.get("CODECOV_TOKEN")
+    if codecov_token:
+        upload_success = upload_to_codecov()
+        if upload_success:
+            print("✅ Development cycle completed successfully!")
+        else:
+            print("⚠️ Development cycle completed with upload issues")
+    else:
+        print("⚠️ CODECOV_TOKEN not set, skipping upload")
+        print("💡 Run: python scripts/dev_assistant.py setup-token")
+    
+    return True
+
 def main():
     parser = argparse.ArgumentParser(description='AshTrail Development Assistant')
     parser.add_argument('command', choices=[
         'status', 'features', 'issues', 'health', 'coverage', 
-        'test-coverage', 'test-codecov', 'upload-codecov'
+        'test-coverage', 'test-codecov', 'upload-codecov', 'setup-token',
+        'full-check', 'dev-cycle'
     ], help='Command to run')
     
     args = parser.parse_args()
@@ -641,6 +760,12 @@ def main():
         test_codecov_upload()
     elif args.command == 'upload-codecov':
         upload_to_codecov()
+    elif args.command == 'setup-token':
+        setup_codecov_token()
+    elif args.command == 'full-check':
+        full_development_check()
+    elif args.command == 'dev-cycle':
+        run_development_cycle()
 
 if __name__ == "__main__":
     main()

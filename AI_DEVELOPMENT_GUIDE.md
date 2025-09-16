@@ -107,12 +107,15 @@ When you provide the trigger, I will:
 python scripts/dev_assistant.py features
 
 # 2. Request feature using trigger format above
+python scripts/dev_assistant.py start-next-feature
 
 # 3. Review and approve the AI's implementation plan
 
 # 4. Monitor progress and provide feedback
+python scripts/dev_assistant.py status
 
 # 5. Test and merge when ready
+python scripts/dev_assistant.py finalize-feature
 ```
 
 ### Bug Fixes

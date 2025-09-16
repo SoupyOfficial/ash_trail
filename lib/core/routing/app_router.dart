@@ -17,13 +17,79 @@ import '../../features/app_shell/presentation/app_shell.dart';
 import '../../features/logging/presentation/logs_screen.dart';
 import '../telemetry/telemetry_service.dart';
 
+import '../../features/loading_skeletons/presentation/widgets/widgets.dart';
+
 // -----------------------------
 // Screens (temporary minimal home; real feature screen will replace later)
 // -----------------------------
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
-  Widget build(BuildContext context) => const Center(child: Text('Home'));
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _isLoading = true;
+  Timer? _loadingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Simulate data loading
+    _loadingTimer = Timer(const Duration(milliseconds: 800), () {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _loadingTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+        centerTitle: true,
+      ),
+      body: LoadingStateHandler(
+        isLoading: _isLoading,
+        loadingWidget: const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 200,
+                child: SkeletonChart(height: 200),
+              ),
+              SizedBox(height: 24),
+              SizedBox(
+                height: 200,
+                child: SkeletonList(itemCount: 3),
+              ),
+            ],
+          ),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Welcome to AshTrail'),
+              SizedBox(height: 16),
+              Text('Your smoking insights dashboard'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class SettingsScreen extends StatelessWidget {

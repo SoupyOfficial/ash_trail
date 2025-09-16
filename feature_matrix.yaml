@@ -786,7 +786,7 @@ features:
 - id: ui.loading_skeletons
   order: 6
   title: Skeleton & Shimmer States
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:

@@ -8,8 +8,10 @@ void main() {
   group('AppRouter', () {
     testWidgets('HomeScreen should display home text', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: HomeScreen(),
+        ProviderScope(
+          child: const MaterialApp(
+            home: HomeScreen(),
+          ),
         ),
       );
 

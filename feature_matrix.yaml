@@ -855,7 +855,7 @@ features:
 - id: ui.siri_shortcuts
   order: 11
   title: Siri Shortcuts
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:

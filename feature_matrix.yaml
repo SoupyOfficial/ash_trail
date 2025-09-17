@@ -842,7 +842,7 @@ features:
 - id: ui.home_widgets
   order: 10
   title: Home Screen Widgets (iOS)
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:

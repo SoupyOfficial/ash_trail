@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../responsive/presentation/widgets/adaptive_layout.dart';
 import '../../responsive/presentation/widgets/responsive_padding.dart';
 import '../../responsive/presentation/widgets/min_tap_target.dart';
 import '../../loading_skeletons/presentation/widgets/widgets.dart';
+import '../../haptics_baseline/presentation/providers/haptics_providers.dart';
 
-class LogsScreen extends StatelessWidget {
+class LogsScreen extends ConsumerWidget {
   const LogsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AdaptiveLayout(
       mobile: const _MobileLogsView(),
       tablet: const _TabletLogsView(),
@@ -17,14 +19,14 @@ class LogsScreen extends StatelessWidget {
   }
 }
 
-class _MobileLogsView extends StatefulWidget {
+class _MobileLogsView extends ConsumerStatefulWidget {
   const _MobileLogsView();
 
   @override
-  State<_MobileLogsView> createState() => _MobileLogsViewState();
+  ConsumerState<_MobileLogsView> createState() => _MobileLogsViewState();
 }
 
-class _MobileLogsViewState extends State<_MobileLogsView> {
+class _MobileLogsViewState extends ConsumerState<_MobileLogsView> {
   bool _isLoading = true;
 
   @override
@@ -58,10 +60,16 @@ class _MobileLogsViewState extends State<_MobileLogsView> {
               const Text('Mobile Logs View'),
               const ResponsiveGap(mobile: 16.0),
               ResponsiveButton(
-                onPressed: () {
+                onPressed: () async {
+                  // Trigger impact haptic on press
+                  await ref.read(hapticTriggerProvider.notifier).impactLight();
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Add new log')),
                   );
+
+                  // Trigger success haptic on completion
+                  await ref.read(hapticTriggerProvider.notifier).success();
                 },
                 child: const Text('Add Log'),
               ),
@@ -78,14 +86,14 @@ class _MobileLogsViewState extends State<_MobileLogsView> {
   }
 }
 
-class _TabletLogsView extends StatefulWidget {
+class _TabletLogsView extends ConsumerStatefulWidget {
   const _TabletLogsView();
 
   @override
-  State<_TabletLogsView> createState() => _TabletLogsViewState();
+  ConsumerState<_TabletLogsView> createState() => _TabletLogsViewState();
 }
 
-class _TabletLogsViewState extends State<_TabletLogsView> {
+class _TabletLogsViewState extends ConsumerState<_TabletLogsView> {
   bool _isLoading = true;
 
   @override
@@ -153,16 +161,24 @@ class _TabletLogsViewState extends State<_TabletLogsView> {
               Row(
                 children: [
                   ResponsiveButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await ref
+                          .read(hapticTriggerProvider.notifier)
+                          .impactLight();
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Add new log')),
                       );
+
+                      await ref.read(hapticTriggerProvider.notifier).success();
                     },
                     child: const Text('Add Log'),
                   ),
                   const SizedBox(width: 16),
                   ResponsiveButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await ref.read(hapticTriggerProvider.notifier).tap();
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Filter logs')),
                       );
@@ -185,14 +201,14 @@ class _TabletLogsViewState extends State<_TabletLogsView> {
   }
 }
 
-class _DesktopLogsView extends StatefulWidget {
+class _DesktopLogsView extends ConsumerStatefulWidget {
   const _DesktopLogsView();
 
   @override
-  State<_DesktopLogsView> createState() => _DesktopLogsViewState();
+  ConsumerState<_DesktopLogsView> createState() => _DesktopLogsViewState();
 }
 
-class _DesktopLogsViewState extends State<_DesktopLogsView> {
+class _DesktopLogsViewState extends ConsumerState<_DesktopLogsView> {
   bool _isLoading = true;
 
   @override

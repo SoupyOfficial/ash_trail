@@ -43,6 +43,7 @@ dependencies:
   json_annotation: ^4.9.0
   fpdart: ^1.1.0 # Either type for error handling
   shared_preferences: ^2.2.2 # Lightweight key/value persistence for last active tab
+  vibration: ^1.8.4 # Haptic feedback and vibration
 
   # (Planned) Offline persistence & networking NOTE: Not yet used; kept out until first feature scaffold triggers need.
   # isar: ^3.1.0+1
@@ -58,6 +59,7 @@ dev_dependencies:
   go_router_builder: ^2.4.1
   test: ^1.25.0
   flutter_lints: ^5.0.0
+  mocktail: ^1.0.3
 
   # Coverage & tooling helpers (pure Dart parsing in scripts, so no extra deps now)
 

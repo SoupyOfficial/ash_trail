@@ -814,7 +814,7 @@ features:
 - id: ui.haptics_baseline
   order: 8
   title: Haptics Baseline
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:

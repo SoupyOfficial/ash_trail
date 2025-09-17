@@ -22,11 +22,12 @@ void main() {
     });
 
     group('Success Cases', () {
-      test('should return list of widgets when repository call succeeds', () async {
+      test('should return list of widgets when repository call succeeds',
+          () async {
         // Arrange
         const accountId = 'test_account_123';
         const params = AccountParams(accountId: accountId);
-        
+
         final expectedWidgets = [
           WidgetData(
             id: 'widget_1',
@@ -73,7 +74,7 @@ void main() {
         // Arrange
         const accountId = 'account_with_no_widgets';
         const params = AccountParams(accountId: accountId);
-        
+
         when(() => mockRepository.refreshWidgetData(accountId))
             .thenAnswer((_) async => const Right(<WidgetData>[]));
 
@@ -95,7 +96,8 @@ void main() {
     });
 
     group('Validation Cases', () {
-      test('should return validation failure when account ID is empty', () async {
+      test('should return validation failure when account ID is empty',
+          () async {
         // Arrange
         const params = AccountParams(accountId: '');
 
@@ -127,7 +129,9 @@ void main() {
     });
 
     group('Repository Failure Cases', () {
-      test('should return network failure when repository fails with network error', () async {
+      test(
+          'should return network failure when repository fails with network error',
+          () async {
         // Arrange
         const accountId = 'test_account';
         const params = AccountParams(accountId: accountId);
@@ -152,7 +156,8 @@ void main() {
         verify(() => mockRepository.refreshWidgetData(accountId)).called(1);
       });
 
-      test('should return cache failure when repository fails with cache error', () async {
+      test('should return cache failure when repository fails with cache error',
+          () async {
         // Arrange
         const accountId = 'test_account';
         const params = AccountParams(accountId: accountId);
@@ -176,7 +181,9 @@ void main() {
         verify(() => mockRepository.refreshWidgetData(accountId)).called(1);
       });
 
-      test('should return unexpected failure when repository fails unexpectedly', () async {
+      test(
+          'should return unexpected failure when repository fails unexpectedly',
+          () async {
         // Arrange
         const accountId = 'test_account';
         const params = AccountParams(accountId: accountId);
@@ -206,7 +213,7 @@ void main() {
         // Arrange
         const accountId = 'test-account_123@domain.com';
         const params = AccountParams(accountId: accountId);
-        
+
         when(() => mockRepository.refreshWidgetData(accountId))
             .thenAnswer((_) async => const Right(<WidgetData>[]));
 
@@ -222,7 +229,7 @@ void main() {
         // Arrange
         final longAccountId = 'a' * 1000; // Very long account ID
         final params = AccountParams(accountId: longAccountId);
-        
+
         when(() => mockRepository.refreshWidgetData(longAccountId))
             .thenAnswer((_) async => const Right(<WidgetData>[]));
 
@@ -238,15 +245,15 @@ void main() {
         // Arrange
         const accountId = '   '; // Whitespace only
         const params = AccountParams(accountId: accountId);
-        
+
         when(() => mockRepository.refreshWidgetData(accountId))
             .thenAnswer((_) async => const Right(<WidgetData>[]));
 
         // Act
         final result = await useCase.call(params);
 
-        // Assert  
-        // Note: Current implementation treats whitespace as valid, 
+        // Assert
+        // Note: Current implementation treats whitespace as valid,
         // this test documents existing behavior
         expect(result, isA<Right<AppFailure, List<WidgetData>>>());
         verify(() => mockRepository.refreshWidgetData(accountId)).called(1);

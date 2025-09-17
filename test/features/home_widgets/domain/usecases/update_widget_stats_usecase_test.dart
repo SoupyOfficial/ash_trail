@@ -21,7 +21,8 @@ void main() {
     });
 
     group('Success Cases', () {
-      test('should update widget stats successfully with valid parameters', () async {
+      test('should update widget stats successfully with valid parameters',
+          () async {
         // Arrange
         const params = UpdateWidgetStatsParams(
           widgetId: 'widget_123',
@@ -159,7 +160,8 @@ void main() {
     });
 
     group('Validation Cases', () {
-      test('should return validation failure when widget ID is empty', () async {
+      test('should return validation failure when widget ID is empty',
+          () async {
         // Arrange
         const params = UpdateWidgetStatsParams(
           widgetId: '',
@@ -197,7 +199,8 @@ void main() {
             ));
       });
 
-      test('should return validation failure when hit count is negative', () async {
+      test('should return validation failure when hit count is negative',
+          () async {
         // Arrange
         const params = UpdateWidgetStatsParams(
           widgetId: 'widget_123',
@@ -234,7 +237,8 @@ void main() {
             ));
       });
 
-      test('should return validation failure when streak is negative', () async {
+      test('should return validation failure when streak is negative',
+          () async {
         // Arrange
         const params = UpdateWidgetStatsParams(
           widgetId: 'widget_123',
@@ -339,7 +343,8 @@ void main() {
             )).called(1);
       });
 
-      test('should return not found failure when widget does not exist', () async {
+      test('should return not found failure when widget does not exist',
+          () async {
         // Arrange
         const params = UpdateWidgetStatsParams(
           widgetId: 'nonexistent_widget',

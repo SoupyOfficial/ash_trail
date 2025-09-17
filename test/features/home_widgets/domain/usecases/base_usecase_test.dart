@@ -176,7 +176,8 @@ void main() {
         const widgetParams = WidgetParams(widgetId: 'test');
         // These are different types, so we just verify they have different properties
         expect(accountParams.accountId, equals(widgetParams.widgetId));
-        expect(accountParams.runtimeType, isNot(equals(widgetParams.runtimeType)));
+        expect(
+            accountParams.runtimeType, isNot(equals(widgetParams.runtimeType)));
       });
     });
 

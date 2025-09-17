@@ -124,7 +124,8 @@ void main() {
         expect(WidgetSize.small.hashCode, equals(WidgetSize.small.hashCode));
         expect(WidgetSize.medium.hashCode, equals(WidgetSize.medium.hashCode));
         expect(WidgetSize.large.hashCode, equals(WidgetSize.large.hashCode));
-        expect(WidgetSize.extraLarge.hashCode, equals(WidgetSize.extraLarge.hashCode));
+        expect(WidgetSize.extraLarge.hashCode,
+            equals(WidgetSize.extraLarge.hashCode));
       });
 
       test('should not be equal to different enum values', () {
@@ -139,7 +140,8 @@ void main() {
         expect(WidgetSize.small.toString(), equals('WidgetSize.small'));
         expect(WidgetSize.medium.toString(), equals('WidgetSize.medium'));
         expect(WidgetSize.large.toString(), equals('WidgetSize.large'));
-        expect(WidgetSize.extraLarge.toString(), equals('WidgetSize.extraLarge'));
+        expect(
+            WidgetSize.extraLarge.toString(), equals('WidgetSize.extraLarge'));
       });
     });
   });

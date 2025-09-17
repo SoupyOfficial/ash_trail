@@ -100,7 +100,8 @@ void main() {
           showLastSync: true,
         );
 
-        expect(model.updatedAt, equals(fixedDateTime.add(const Duration(hours: 1))));
+        expect(model.updatedAt,
+            equals(fixedDateTime.add(const Duration(hours: 1))));
         expect(model.showStreak, isFalse);
         expect(model.showLastSync, isTrue);
       });
@@ -214,9 +215,9 @@ void main() {
           for (final size in WidgetSize.values) {
             final entity = sampleEntity.copyWith(size: size);
             final model = WidgetDataModel.fromEntity(entity);
-            
-            expect(model.size, equals(size.name), 
-                   reason: 'Failed for size: ${size.name}');
+
+            expect(model.size, equals(size.name),
+                reason: 'Failed for size: ${size.name}');
           }
         });
 
@@ -224,9 +225,9 @@ void main() {
           for (final action in WidgetTapAction.values) {
             final entity = sampleEntity.copyWith(tapAction: action);
             final model = WidgetDataModel.fromEntity(entity);
-            
-            expect(model.tapAction, equals(action.name), 
-                   reason: 'Failed for action: ${action.name}');
+
+            expect(model.tapAction, equals(action.name),
+                reason: 'Failed for action: ${action.name}');
           }
         });
 
@@ -272,9 +273,9 @@ void main() {
           for (final size in WidgetSize.values) {
             final model = sampleModel.copyWith(size: size.name);
             final entity = model.toEntity();
-            
-            expect(entity.size, equals(size), 
-                   reason: 'Failed for size: ${size.name}');
+
+            expect(entity.size, equals(size),
+                reason: 'Failed for size: ${size.name}');
           }
         });
 
@@ -282,9 +283,9 @@ void main() {
           for (final action in WidgetTapAction.values) {
             final model = sampleModel.copyWith(tapAction: action.name);
             final entity = model.toEntity();
-            
-            expect(entity.tapAction, equals(action), 
-                   reason: 'Failed for action: ${action.name}');
+
+            expect(entity.tapAction, equals(action),
+                reason: 'Failed for action: ${action.name}');
           }
         });
 
@@ -325,7 +326,9 @@ void main() {
     });
 
     group('Round-trip Conversion', () {
-      test('should maintain data integrity through entity -> model -> entity conversion', () {
+      test(
+          'should maintain data integrity through entity -> model -> entity conversion',
+          () {
         final originalEntity = sampleEntity;
         final model = WidgetDataModel.fromEntity(originalEntity);
         final convertedEntity = model.toEntity();
@@ -334,16 +337,21 @@ void main() {
         expect(convertedEntity.accountId, equals(originalEntity.accountId));
         expect(convertedEntity.size, equals(originalEntity.size));
         expect(convertedEntity.tapAction, equals(originalEntity.tapAction));
-        expect(convertedEntity.todayHitCount, equals(originalEntity.todayHitCount));
-        expect(convertedEntity.currentStreak, equals(originalEntity.currentStreak));
+        expect(convertedEntity.todayHitCount,
+            equals(originalEntity.todayHitCount));
+        expect(convertedEntity.currentStreak,
+            equals(originalEntity.currentStreak));
         expect(convertedEntity.lastSyncAt, equals(originalEntity.lastSyncAt));
         expect(convertedEntity.createdAt, equals(originalEntity.createdAt));
         expect(convertedEntity.updatedAt, equals(originalEntity.updatedAt));
         expect(convertedEntity.showStreak, equals(originalEntity.showStreak));
-        expect(convertedEntity.showLastSync, equals(originalEntity.showLastSync));
+        expect(
+            convertedEntity.showLastSync, equals(originalEntity.showLastSync));
       });
 
-      test('should maintain data integrity through JSON -> model -> JSON conversion', () {
+      test(
+          'should maintain data integrity through JSON -> model -> JSON conversion',
+          () {
         final originalJson = sampleJson;
         final model = WidgetDataModel.fromJson(originalJson);
         final convertedJson = model.toJson();
@@ -352,16 +360,23 @@ void main() {
         expect(convertedJson['account_id'], equals(originalJson['account_id']));
         expect(convertedJson['size'], equals(originalJson['size']));
         expect(convertedJson['tap_action'], equals(originalJson['tap_action']));
-        expect(convertedJson['today_hit_count'], equals(originalJson['today_hit_count']));
-        expect(convertedJson['current_streak'], equals(originalJson['current_streak']));
-        expect(convertedJson['last_sync_at'], equals(originalJson['last_sync_at']));
+        expect(convertedJson['today_hit_count'],
+            equals(originalJson['today_hit_count']));
+        expect(convertedJson['current_streak'],
+            equals(originalJson['current_streak']));
+        expect(convertedJson['last_sync_at'],
+            equals(originalJson['last_sync_at']));
         expect(convertedJson['created_at'], equals(originalJson['created_at']));
         expect(convertedJson['updated_at'], equals(originalJson['updated_at']));
-        expect(convertedJson['show_streak'], equals(originalJson['show_streak']));
-        expect(convertedJson['show_last_sync'], equals(originalJson['show_last_sync']));
+        expect(
+            convertedJson['show_streak'], equals(originalJson['show_streak']));
+        expect(convertedJson['show_last_sync'],
+            equals(originalJson['show_last_sync']));
       });
 
-      test('should handle full round-trip: entity -> model -> JSON -> model -> entity', () {
+      test(
+          'should handle full round-trip: entity -> model -> JSON -> model -> entity',
+          () {
         final originalEntity = sampleEntity;
         final model1 = WidgetDataModel.fromEntity(originalEntity);
         final json = model1.toJson();
@@ -391,8 +406,12 @@ void main() {
 
         expect(entity.id, equals(''));
         expect(entity.accountId, equals(''));
-        expect(entity.size, equals(WidgetSize.medium)); // Default for invalid size
-        expect(entity.tapAction, equals(WidgetTapAction.defaultAction)); // Default for invalid action
+        expect(
+            entity.size, equals(WidgetSize.medium)); // Default for invalid size
+        expect(
+            entity.tapAction,
+            equals(
+                WidgetTapAction.defaultAction)); // Default for invalid action
       });
 
       test('should handle extreme integer values', () {
@@ -427,7 +446,7 @@ void main() {
         );
 
         final entity = model.toEntity();
-        
+
         // Should fall back to default since case doesn't match
         expect(entity.size, equals(WidgetSize.medium));
       });

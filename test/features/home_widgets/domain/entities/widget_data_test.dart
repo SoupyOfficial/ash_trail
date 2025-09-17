@@ -66,7 +66,8 @@ void main() {
           showLastSync: false,
         );
 
-        expect(widgetData.updatedAt, equals(fixedDateTime.add(const Duration(hours: 1))));
+        expect(widgetData.updatedAt,
+            equals(fixedDateTime.add(const Duration(hours: 1))));
         expect(widgetData.showStreak, isFalse);
         expect(widgetData.showLastSync, isFalse);
       });
@@ -83,7 +84,8 @@ void main() {
         expect(widgetData.shouldShowStreak, isTrue);
       });
 
-      test('should auto-show streak for non-small widgets with positive streak', () {
+      test('should auto-show streak for non-small widgets with positive streak',
+          () {
         final widgetData = sampleWidgetData.copyWith(
           showStreak: null,
           size: WidgetSize.medium,
@@ -93,7 +95,9 @@ void main() {
         expect(widgetData.shouldShowStreak, isTrue);
       });
 
-      test('should not show streak for small widgets with positive streak when not explicitly enabled', () {
+      test(
+          'should not show streak for small widgets with positive streak when not explicitly enabled',
+          () {
         final widgetData = sampleWidgetData.copyWith(
           showStreak: null,
           size: WidgetSize.small,
@@ -113,7 +117,9 @@ void main() {
         expect(widgetData.shouldShowStreak, isFalse);
       });
 
-      test('should show streak when auto-show is true even if explicitly disabled', () {
+      test(
+          'should show streak when auto-show is true even if explicitly disabled',
+          () {
         // Note: Current business logic uses OR, so auto-show overrides explicit disable
         final widgetData = sampleWidgetData.copyWith(
           showStreak: false,
@@ -124,7 +130,9 @@ void main() {
         expect(widgetData.shouldShowStreak, isTrue);
       });
 
-      test('should not show streak when explicitly disabled and auto-show does not apply', () {
+      test(
+          'should not show streak when explicitly disabled and auto-show does not apply',
+          () {
         final widgetData = sampleWidgetData.copyWith(
           showStreak: false,
           size: WidgetSize.small, // small widgets can't auto-show
@@ -136,7 +144,8 @@ void main() {
     });
 
     group('shouldShowLastSync Logic', () {
-      test('should show last sync for large widgets when enabled (default)', () {
+      test('should show last sync for large widgets when enabled (default)',
+          () {
         final widgetData = sampleWidgetData.copyWith(
           size: WidgetSize.large,
           showLastSync: null, // defaults to true
@@ -274,13 +283,17 @@ void main() {
           expect(widgetData.isValid, isFalse);
         });
 
-        test('should return false for future sync time beyond clock skew tolerance', () {
+        test(
+            'should return false for future sync time beyond clock skew tolerance',
+            () {
           final futureTime = DateTime.now().add(const Duration(minutes: 10));
           final widgetData = sampleWidgetData.copyWith(lastSyncAt: futureTime);
           expect(widgetData.isValid, isFalse);
         });
 
-        test('should return true for future sync time within clock skew tolerance', () {
+        test(
+            'should return true for future sync time within clock skew tolerance',
+            () {
           final futureTime = DateTime.now().add(const Duration(minutes: 3));
           final widgetData = sampleWidgetData.copyWith(lastSyncAt: futureTime);
           expect(widgetData.isValid, isTrue);
@@ -289,7 +302,8 @@ void main() {
 
       group('isSyncStale', () {
         test('should return false for recent sync', () {
-          final recentSync = DateTime.now().subtract(const Duration(minutes: 30));
+          final recentSync =
+              DateTime.now().subtract(const Duration(minutes: 30));
           final widgetData = sampleWidgetData.copyWith(lastSyncAt: recentSync);
           expect(widgetData.isSyncStale, isFalse);
         });
@@ -301,8 +315,10 @@ void main() {
         });
 
         test('should return false for sync exactly 59 minutes ago', () {
-          final almostStaleSync = DateTime.now().subtract(const Duration(minutes: 59));
-          final widgetData = sampleWidgetData.copyWith(lastSyncAt: almostStaleSync);
+          final almostStaleSync =
+              DateTime.now().subtract(const Duration(minutes: 59));
+          final widgetData =
+              sampleWidgetData.copyWith(lastSyncAt: almostStaleSync);
           expect(widgetData.isSyncStale, isFalse);
         });
 
@@ -318,7 +334,7 @@ void main() {
       group('updateHitCount', () {
         test('should update hit count and sync timestamp', () {
           final originalTime = sampleWidgetData.lastSyncAt;
-          
+
           // Wait a bit to ensure timestamp changes
           final updatedData = sampleWidgetData.updateHitCount(10);
 
@@ -326,11 +342,12 @@ void main() {
           expect(updatedData.lastSyncAt.isAfter(originalTime), isTrue);
           expect(updatedData.updatedAt, isNotNull);
           expect(updatedData.updatedAt!.isAfter(originalTime), isTrue);
-          
+
           // Other fields should remain the same
           expect(updatedData.id, equals(sampleWidgetData.id));
           expect(updatedData.accountId, equals(sampleWidgetData.accountId));
-          expect(updatedData.currentStreak, equals(sampleWidgetData.currentStreak));
+          expect(updatedData.currentStreak,
+              equals(sampleWidgetData.currentStreak));
         });
 
         test('should handle zero hit count update', () {
@@ -342,18 +359,19 @@ void main() {
       group('updateStreak', () {
         test('should update streak and sync timestamp', () {
           final originalTime = sampleWidgetData.lastSyncAt;
-          
+
           final updatedData = sampleWidgetData.updateStreak(15);
 
           expect(updatedData.currentStreak, equals(15));
           expect(updatedData.lastSyncAt.isAfter(originalTime), isTrue);
           expect(updatedData.updatedAt, isNotNull);
           expect(updatedData.updatedAt!.isAfter(originalTime), isTrue);
-          
+
           // Other fields should remain the same
           expect(updatedData.id, equals(sampleWidgetData.id));
           expect(updatedData.accountId, equals(sampleWidgetData.accountId));
-          expect(updatedData.todayHitCount, equals(sampleWidgetData.todayHitCount));
+          expect(updatedData.todayHitCount,
+              equals(sampleWidgetData.todayHitCount));
         });
 
         test('should handle zero streak update', () {
@@ -374,10 +392,11 @@ void main() {
         expect(updatedData.id, equals('new_id'));
         expect(updatedData.size, equals(WidgetSize.large));
         expect(updatedData.todayHitCount, equals(99));
-        
+
         // Unchanged fields should remain the same
         expect(updatedData.accountId, equals(sampleWidgetData.accountId));
-        expect(updatedData.currentStreak, equals(sampleWidgetData.currentStreak));
+        expect(
+            updatedData.currentStreak, equals(sampleWidgetData.currentStreak));
         expect(updatedData.lastSyncAt, equals(sampleWidgetData.lastSyncAt));
       });
 

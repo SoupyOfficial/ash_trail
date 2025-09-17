@@ -1134,6 +1134,149 @@ class {snake.title().replace('_', '')}ListNotifier extends _{snake.title().repla
         "",
         f"### Test Coverage Target: ≥85% (Project minimum: {MIN_PROJECT_COV}%)",
         "",
+        "### 📊 Codecov Integration & Coverage Monitoring",
+        "",
+        "This project uses **Codecov** for comprehensive test coverage tracking and quality gates. Understanding and leveraging Codecov is essential for maintaining code quality.",
+        "",
+        "#### Codecov Configuration",
+        "The project uses component-based coverage tracking with different targets:",
+        "- **Domain Layer**: 90% (business logic requires highest coverage)",
+        "- **Core Infrastructure**: 85% (critical system components)",
+        "- **Data Layer**: 85% (data handling and persistence)",
+        "- **Use Cases**: 95% (critical business operations)",
+        "- **Presentation Layer**: 70% (UI tests can be more challenging)",
+        "- **Overall Project**: 80% minimum (with 75% patch coverage)",
+        "",
+        "#### Codecov Token & Authentication",
+        "The project includes a Codecov token stored in `.codecov_token` for direct CLI usage:",
+        code_block("""# View current token (first few characters only)
+head -c 8 .codecov_token && echo "..."
+
+# Use token for direct uploads
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests
+
+# Environment variable method (alternative)
+export CODECOV_TOKEN=$(cat .codecov_token)
+codecov -f coverage/lcov.info -F flutter_tests""", "bash"),
+        "**Note**: The dev_assistant.py script handles token authentication automatically.",
+        "",
+        "#### Development Workflow with Codecov",
+        "",
+        "**Before Implementation:**",
+        code_block("""# Check current Codecov CLI availability
+python scripts/dev_assistant.py test-codecov
+
+# Run baseline coverage check
+python scripts/dev_assistant.py test-coverage""", "bash"),
+        "",
+        "**During Development:**",
+        code_block("""# Run tests with coverage (generates coverage/lcov.info)
+flutter test --coverage
+
+# Quick development cycle with optional upload
+python scripts/dev_assistant.py dev-cycle --upload
+
+# Monitor coverage changes per file
+# The dev-cycle command shows file-level coverage deltas""", "bash"),
+        "",
+        "**For CI/Production:**",
+        code_block("""# Upload coverage to Codecov (with flutter_tests flag)
+python scripts/dev_assistant.py upload-codecov
+
+# This uploads coverage/lcov.info with proper flagging""", "bash"),
+        "",
+        "**Direct Codecov CLI Usage:**",
+        "For advanced usage or troubleshooting, you can use Codecov CLI directly:",
+        code_block("""# Using project token (stored in .codecov_token file)
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests
+
+# With verbose output for debugging
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests -v
+
+# Upload specific feature coverage
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests -n "siri_shortcuts_feature"
+
+# Upload with custom branch name
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests -B feat/ui_siri_shortcuts""", "bash"),
+        "",
+        "#### Codecov Quality Gates",
+        "- **Project Coverage**: Must maintain ≥80% overall",
+        "- **Patch Coverage**: New code must have ≥75% coverage",
+        "- **Component Targets**: Each architectural component has specific targets",
+        "- **Threshold**: 1-2% drop allowed before failure (varies by component)",
+        "",
+        "#### Using Codecov Data During Development",
+        "",
+        "**1. Coverage Analysis:**",
+        "```bash",
+        "# View current coverage status",
+        "python scripts/dev_assistant.py status",
+        "# Shows: health check, coverage summary, next features",
+        "",
+        "# Detailed coverage analysis",
+        "python scripts/dev_assistant.py test-coverage",
+        "# Shows: before/after coverage, warnings if below minimum",
+        "```",
+        "",
+        "**2. Session Tracking:**",
+        "The `dev-cycle` command creates session manifests in `automation_sessions/` containing:",
+        "- Coverage before/after with delta",
+        "- File-level coverage changes",
+        "- Test pass/fail status",
+        "- Git branch and commit info",
+        "",
+        "**3. PR Integration:**",
+        "Codecov automatically comments on PRs with:",
+        "- Coverage diff showing changes",
+        "- Component-level status",
+        "- Files with coverage changes",
+        "- Quality gate pass/fail status",
+        "",
+        "#### Coverage Best Practices",
+        "",
+        "**High-Priority Testing Areas:**",
+        "- ✅ Domain entities and use cases (aim for 90-95%)",
+        "- ✅ Repository implementations and data sources",
+        "- ✅ Error handling and edge cases",
+        "- ✅ State management providers and controllers",
+        "",
+        "**Acceptable Lower Coverage:**",
+        "- 🎯 UI widgets (focus on critical user flows)",
+        "- 🎯 Generated code (automatically excluded in codecov.yml)",
+        "- 🎯 Platform-specific code (Android/iOS directories excluded)",
+        "",
+        "#### Troubleshooting Coverage Issues",
+        "",
+        "**Coverage Too Low:**",
+        code_block("""# Identify uncovered code
+flutter test --coverage
+genhtml coverage/lcov.info -o coverage/html
+open coverage/html/index.html  # View detailed coverage report
+
+# Focus on critical paths in domain/use cases first""", "bash"),
+        "",
+        "**Coverage Upload Failing:**",
+        code_block("""# Verify Codecov CLI installation
+codecov --version
+
+# Check coverage file exists
+ls -la coverage/lcov.info
+
+# Test token authentication
+codecov -t $(cat .codecov_token) --dry-run
+
+# Manual upload with debug info
+codecov -f coverage/lcov.info -F flutter_tests -v
+
+# Direct upload with token (bypassing dev_assistant.py)
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests -v""", "bash"),
+        "",
+        "**⚠️ Coverage Requirements for This Feature:**",
+        f"- Target ≥85% overall coverage for new `{snake}` feature code",
+        "- Domain layer (entities/use cases) should achieve 90%+",
+        "- All error scenarios must be tested",
+        "- Widget tests should cover loading/error/success states",
+        "",
         "#### Unit Tests",
         code_block(f"""// test/features/{snake}/domain/usecases/get_{snake}s_usecase_test.dart
 import 'package:dartz/dartz.dart';
@@ -1200,6 +1343,10 @@ void main() {{
         "- [ ] Widget tests cover UI states (loading/error/success)",
         "- [ ] Integration tests verify critical flows",
         f"- [ ] Test coverage ≥85% for new code",
+        "- [ ] Codecov upload successful (`python scripts/dev_assistant.py upload-codecov`)",
+        "- [ ] Component-specific coverage targets met (check PR comments)",
+        "- [ ] No critical business logic left uncovered",
+        "- [ ] Coverage delta positive or within threshold limits",
         "",
         "### Performance & Accessibility",
         "- [ ] No unnecessary widget rebuilds",
@@ -1299,8 +1446,46 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
 # Check syntax and analysis
 flutter analyze
 
+# Complete dev cycle with coverage tracking
+python scripts/dev_assistant.py dev-cycle --upload
+
+# Check Codecov status and requirements
+python scripts/dev_assistant.py test-codecov
+python scripts/dev_assistant.py status
+
 # Validate feature completion
 python scripts/dev_assistant.py finalize-feature --feature-id {feature_id} --dry-run""", "bash"),
+        "",
+        "### Codecov Development Workflow",
+        code_block("""# 1. Initial setup - verify Codecov CLI
+python scripts/dev_assistant.py test-codecov
+
+# Alternative: Direct CLI check
+codecov --version
+codecov -t $(cat .codecov_token) --dry-run
+
+# 2. Development cycle - run tests, track coverage, upload
+python scripts/dev_assistant.py dev-cycle --upload
+
+# Alternative: Manual development cycle
+flutter test --coverage
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests -v
+
+# 3. Review coverage changes
+# Check automation_sessions/ for latest session manifest
+# Review file-level coverage deltas
+
+# 4. Manual coverage analysis (if needed)
+python scripts/dev_assistant.py test-coverage
+flutter test --coverage
+genhtml coverage/lcov.info -o coverage/html
+# Open coverage/html/index.html for detailed analysis
+
+# 5. Final validation before PR
+python scripts/dev_assistant.py upload-codecov
+# Alternative: Direct upload with feature naming
+codecov -f coverage/lcov.info -t $(cat .codecov_token) -F flutter_tests -n "siri_shortcuts_implementation"
+# Ensure coverage meets component targets""", "bash"),
         "",
         "### Quick Reference",
         f"- **Feature Matrix:** [`feature_matrix.yaml`](../../feature_matrix.yaml)",

@@ -1,0 +1,52 @@
+{
+  "id": "20250917T233147",
+  "started_at": "2025-09-17T23:31:47.975046+00:00",
+  "command": "dev-cycle",
+  "coverage_before": 65.54621848739495,
+  "coverage_after": 81.146408839779,
+  "coverage_delta": 15.600190352384047,
+  "tests_passed": false,
+  "uploaded": false,
+  "notes": [],
+  "branch": "feat/ui_live_activity",
+  "commit": "3d5814ca5300b62ee7fdfdfeeea03bdba31a589a",
+  "changed_files": [
+    {
+      "path": "feature_matrix.yaml",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "in",
+      "status": "warning:",
+      "type": "other"
+    }
+  ],
+  "file_coverage_deltas": [
+    {
+      "file": "lib\\core\\failures\\app_failure.dart",
+      "before": 87.5,
+      "after": 100.0,
+      "delta": 12.5
+    },
+    {
+      "file": "lib\\features\\siri_shortcuts\\domain\\entities\\siri_shortcut_type.dart",
+      "before": 0.0,
+      "after": 90.0,
+      "delta": 90.0
+    },
+    {
+      "file": "lib\\features\\siri_shortcuts\\domain\\entities\\siri_shortcuts_entity.dart",
+      "before": 0.0,
+      "after": 100.0,
+      "delta": 100.0
+    },
+    {
+      "file": "lib\\features\\siri_shortcuts\\domain\\usecases\\donate_shortcuts_use_case.dart",
+      "before": 0.0,
+      "after": 91.66666666666666,
+      "delta": 91.66666666666666
+    }
+  ],
+  "duration_ms": 66388
+}

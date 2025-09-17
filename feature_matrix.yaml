@@ -867,7 +867,7 @@ features:
 - id: ui.live_activity
   order: 12
   title: Live Activity (Recording)
-  status: planned
+  status: done
   priority: P3
   epic: ui
   acceptance:

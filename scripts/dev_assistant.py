@@ -618,12 +618,731 @@ def _generate_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run
     out["path"] = str(prompt_path.relative_to(ROOT))
     return out
 
+def _analyze_feature_complexity(feature_record: Dict[str, Any]) -> str:
+    """Analyze feature complexity based on components, acceptance criteria, and data operations."""
+    complexity_score = 0
+    
+    # Base complexity factors
+    acceptance = feature_record.get("acceptance") or []
+    components = feature_record.get("components") or []
+    screens = feature_record.get("screens") or feature_record.get("screen") or []
+    user_stories = feature_record.get("user_stories") or []
+    data_block = feature_record.get("data") or {}
+    
+    # Scoring criteria
+    complexity_score += min(len(acceptance), 5)  # Max 5 points for acceptance criteria
+    complexity_score += min(len(components), 4)  # Max 4 points for components
+    complexity_score += min(len(screens), 3)     # Max 3 points for screens
+    complexity_score += min(len(user_stories), 3) # Max 3 points for user stories
+    
+    # Data complexity
+    reads = data_block.get("reads") or []
+    writes = data_block.get("writes") or []
+    complexity_score += min(len(reads) + len(writes), 4)  # Max 4 points for data ops
+    
+    # Special complexity indicators
+    if feature_record.get("offline"):
+        complexity_score += 2  # Offline features are more complex
+    if feature_record.get("a11y"):
+        complexity_score += 1  # Accessibility adds complexity
+    if feature_record.get("perf_budget"):
+        complexity_score += 1  # Performance requirements add complexity
+    
+    # Classify complexity
+    if complexity_score <= 6:
+        return "simple"
+    elif complexity_score <= 12:
+        return "moderate"
+    else:
+        return "complex"
+
+
+def _find_related_features(feature_id: str, feature_record: Dict[str, Any]) -> List[str]:
+    """Find related features based on epic, components, and data patterns."""
+    related = []
+    current_epic = feature_record.get("epic", "")
+    current_components = set(feature_record.get("components") or [])
+    
+    fm = load_feature_matrix()
+    for f in fm.get('features', []) or []:
+        other_id = f.get('id')
+        if not other_id or other_id == feature_id:
+            continue
+            
+        # Same epic features (but not all of them)
+        if f.get("epic") == current_epic and len(related) < 3:
+            related.append(other_id)
+            continue
+            
+        # Similar components
+        other_components = set(f.get("components") or [])
+        if current_components & other_components and len(related) < 5:
+            related.append(other_id)
+    
+    return related[:5]  # Limit to 5 most relevant
+
+
+def _generate_implementation_hints(feature_record: Dict[str, Any], feature_id: str) -> List[str]:
+    """Generate context-specific implementation hints."""
+    hints = []
+    
+    priority = feature_record.get("priority", "P3")
+    epic = feature_record.get("epic", "")
+    
+    # Priority-based hints
+    if priority == "P0":
+        hints.append("Critical feature - prioritize reliability and comprehensive testing")
+    
+    # Epic-specific hints  
+    if epic == "logging":
+        hints.append("Ensure offline-first data persistence with sync queue")
+        hints.append("Focus on user experience - minimal taps and fast interactions")
+    elif epic == "insights":
+        hints.append("Optimize chart rendering performance - target <200ms render time")
+        hints.append("Consider data aggregation strategies for large datasets")
+    elif epic == "ui":
+        hints.append("Focus on responsive design and accessibility compliance")
+        hints.append("Use consistent theming and semantic colors from design system")
+    elif epic == "accounts":
+        hints.append("Maintain data isolation between accounts")
+        hints.append("Consider cached authentication state for performance")
+    elif epic == "sync":
+        hints.append("Implement exponential backoff for retry mechanisms")
+        hints.append("Handle edge cases like partial sync failures gracefully")
+    
+    # Feature-specific patterns
+    if feature_record.get("offline"):
+        hints.append("Implement proper conflict resolution strategy")
+    if feature_record.get("a11y"):
+        hints.append("Test with screen readers and high contrast themes")
+    if feature_record.get("perf_budget"):
+        hints.append("Profile performance during development with DevTools")
+    
+    # Default architectural hints
+    if not hints:
+        hints.extend([
+            "Follow Clean Architecture boundaries strictly", 
+            "Implement comprehensive error handling",
+            "Write tests first for critical business logic"
+        ])
+    
+    return hints
+
+
 def _load_feature_record(feature_id: str) -> Dict[str, Any]:
     fm = load_feature_matrix()
     for f in fm.get('features', []) or []:
         if f.get('id') == feature_id:
             return f
     return {}
+
+
+def _generate_production_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run: bool, 
+                                  related_features: List[str], complexity: str, hints: List[str]) -> Dict[str, Any]:
+    """Generate production-ready AI implementation prompt with comprehensive guidance."""
+    out: Dict[str, Any] = {"path": None}
+    if not feature_record:
+        out["error"] = "feature_record_missing"
+        return out
+    
+    snake = feature_id.split('.')[-1]
+    feature_dir = _feature_dir(feature_id)
+    prompt_path = feature_dir / "AI_IMPLEMENTATION_GUIDE.md"
+    
+    if dry_run:
+        out["path"] = str(prompt_path.relative_to(ROOT))
+        return out
+    
+    feature_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Extract comprehensive feature metadata
+    title = feature_record.get("title", feature_id)
+    epic = feature_record.get("epic", "unknown")
+    priority = feature_record.get("priority", "P3")
+    order = feature_record.get("order", "N/A")
+    rationale = feature_record.get("rationale", "")
+    acceptance = feature_record.get("acceptance") or []
+    user_stories = feature_record.get("user_stories") or []
+    components = feature_record.get("components") or []
+    screens = feature_record.get("screens") or feature_record.get("screen") or []
+    telemetry_events = feature_record.get("telemetry", {}).get("events", []) if isinstance(feature_record.get("telemetry"), dict) else []
+    data_block = feature_record.get("data") or {}
+    offline_block = feature_record.get("offline") or {}
+    a11y = feature_record.get("a11y") or {}
+    errors = feature_record.get("errors") or []
+    perf_budget = feature_record.get("perf_budget") or {}
+
+    def bullet_list(items, prefix=""):
+        if not items:
+            return "  - _(None specified)_"
+        return "\n".join(f"  - {prefix}{item}" for item in items)
+    
+    def code_block(code, lang="dart"):
+        return f"```{lang}\n{code}\n```"
+
+    # Create comprehensive AI implementation guide
+    content_lines = [
+        "# 🚀 Production AI Implementation Guide",
+        "",
+        f"## 🎯 Feature Overview",
+        f"**Feature ID:** `{feature_id}`",
+        f"**Title:** {title}",
+        f"**Epic:** {epic} ({epic.upper()}) | **Priority:** {priority} | **Order:** {order}",
+        f"**Complexity:** {complexity.title()} | **Estimated Duration:** {_estimate_duration(complexity)}",
+        "",
+        "---",
+        "",
+        "## 📝 Executive Summary",
+        "",
+        f"You are tasked with implementing **{title}** ({feature_id}) as part of the AshTrail mobile application.",
+        "This is a production-grade implementation requiring adherence to established architectural patterns,",
+        "comprehensive testing, and quality assurance measures.",
+        "",
+        "### 🎨 Rationale & Business Value",
+        rationale if rationale else "_(Refer to acceptance criteria for implementation guidance)_",
+        "",
+        "---",
+        "",
+        "## 🏗️ Architecture & Technical Context",
+        "",
+        "### Clean Architecture Overview",
+        "AshTrail follows Clean Architecture principles with strict layer separation:",
+        "",
+        code_block(f"""lib/features/{snake}/
+├── domain/                    # Pure business logic (no dependencies)
+│   ├── entities/              # Core business objects (immutable)
+│   ├── repositories/          # Abstract contracts (interfaces)
+│   └── usecases/              # Business use cases (pure functions)
+├── data/                      # External data handling
+│   ├── datasources/           # Remote (Firestore) & Local (Isar) sources
+│   ├── repositories/          # Repository implementations
+│   └── models/                # DTOs with JSON serialization
+└── presentation/              # UI and state management
+    ├── providers/             # Riverpod providers and controllers
+    ├── screens/               # Full screen implementations
+    └── widgets/               # Reusable UI components
+
+test/features/{snake}/         # Comprehensive test coverage
+├── domain/                    # Unit tests for use cases and entities
+├── data/                      # Repository and data source tests
+└── presentation/              # Widget and integration tests""", ""),
+        "",
+        "### 🔄 Data Flow Pattern",
+        code_block("""UI Widget (Consumer)
+    ↓ (user action)
+Provider/Controller (Riverpod)
+    ↓ (business operation)
+UseCase (Domain)
+    ↓ (data request)
+Repository Interface (Domain)
+    ↓ (implementation)
+Repository Impl (Data)
+    ↓ (I/O operation)
+DataSource (Local/Remote)""", ""),
+        "",
+        "### 🛡️ Error Handling Pattern",
+        code_block("""sealed class AppFailure extends Equatable {
+  const AppFailure();
+}
+
+class NetworkFailure extends AppFailure {
+  final String message;
+  const NetworkFailure({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class CacheFailure extends AppFailure {
+  final String message;
+  const CacheFailure({required this.message});
+  @override
+  List<Object> get props => [message];
+}"""),
+        "",
+        "---",
+        "",
+        "## 📋 Requirements Analysis",
+        "",
+        "### ✅ Acceptance Criteria",
+        bullet_list(acceptance, "**Must:** ") if acceptance else "  - _(Review feature matrix for implicit requirements)_",
+        "",
+    ]
+
+    # Add user stories if present
+    if user_stories:
+        content_lines.extend([
+            "### 👤 User Stories",
+            bullet_list(user_stories, "As a user, "),
+            "",
+        ])
+
+    # Technical specifications
+    content_lines.extend([
+        "### 🔧 Technical Specifications",
+        "",
+    ])
+
+    if components:
+        content_lines.extend([
+            "**Required Components:**",
+            bullet_list(components),
+            "",
+        ])
+
+    if screens:
+        content_lines.extend([
+            "**Screens/Views:**",
+            bullet_list(screens),
+            "",
+        ])
+
+    # Data operations
+    if data_block:
+        reads = data_block.get("reads") or []
+        writes = data_block.get("writes") or []
+        if reads or writes:
+            content_lines.extend([
+                "**Data Operations:**",
+                f"- **Reads:** {len(reads)} operations" if reads else "- **Reads:** None",
+                f"- **Writes:** {len(writes)} operations" if writes else "- **Writes:** None",
+                "",
+            ])
+
+    # Offline behavior
+    if offline_block:
+        content_lines.extend([
+            "**Offline Behavior:**",
+            bullet_list([f"**{k}:** {v}" for k, v in offline_block.items()]),
+            "",
+        ])
+
+    # Performance budget
+    if perf_budget:
+        content_lines.extend([
+            "**Performance Targets:**",
+            bullet_list([f"**{k}:** {v}" for k, v in perf_budget.items()]),
+            "",
+            "**Performance Implementation Guidance:**",
+            "- Profile during development with Flutter DevTools",
+            "- Use `flutter run --profile` for performance testing",
+            "- Monitor frame rendering times and memory usage",
+            "- Implement lazy loading where appropriate",
+            "",
+        ])
+
+    # Accessibility requirements
+    if a11y:
+        content_lines.extend([
+            "**Accessibility Requirements:**",
+            bullet_list([f"**{k}:** {v}" for k, v in a11y.items()]),
+            "",
+            "**Accessibility Implementation:**",
+            "- Use `Semantics` widgets with meaningful labels",
+            "- Ensure touch targets meet minimum size requirements",
+            "- Test with TalkBack/VoiceOver enabled",
+            "- Support high contrast and large text modes",
+            "",
+        ])
+
+    # Telemetry events
+    if telemetry_events:
+        content_lines.extend([
+            "**Telemetry Events:**",
+            bullet_list(telemetry_events),
+            "",
+            "**Telemetry Implementation:**",
+            code_block(f"""// Track user interactions
+await telemetryService.track('{telemetry_events[0] if telemetry_events else "feature_used"}', {{
+  'feature_id': '{feature_id}',
+  'user_id': currentUser.id,
+  'timestamp': DateTime.now().toIso8601String(),
+}});"""),
+            "",
+        ])
+
+    # Error handling
+    if errors:
+        content_lines.extend([
+            "**Feature-Specific Error Codes:**",
+            bullet_list([f"`{e.get('code')}`: {e.get('message')}" if isinstance(e, dict) else str(e) for e in errors]),
+            "",
+            "**Error Implementation Pattern:**",
+            code_block(f"""sealed class {snake.title().replace('_', '')}Failure extends AppFailure {{
+  const {snake.title().replace('_', '')}Failure();
+}}
+
+class {snake.title().replace('_', '')}RecordFailure extends {snake.title().replace('_', '')}Failure {{
+  final String message;
+  const {snake.title().replace('_', '')}RecordFailure({{required this.message}});
+  @override
+  List<Object> get props => [message];
+}}
+
+// Usage in repository:
+return Left({snake.title().replace('_', '')}RecordFailure(message: '{errors[0].get("message") if errors and isinstance(errors[0], dict) else "Operation failed"}'));"""),
+            "",
+        ])
+
+    # Related features
+    if related_features:
+        content_lines.extend([
+            "### 🔗 Related Features (Reference Patterns)",
+            bullet_list([f"`{rf}` - Study existing implementation patterns" for rf in related_features]),
+            "",
+        ])
+
+    # Implementation hints
+    if hints:
+        content_lines.extend([
+            "###  Implementation Hints",
+            bullet_list(hints),
+            "",
+        ])
+
+    content_lines.extend([
+        "---",
+        "",
+        "## 🛠️ Implementation Strategy",
+        "",
+        "### Phase 1: Domain Layer (Pure Business Logic)",
+        "",
+        "#### 1.1 Define Entities",
+        code_block(f"""// lib/features/{snake}/domain/entities/{snake}_entity.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part '{snake}_entity.freezed.dart';
+
+@freezed
+class {snake.title().replace('_', '')}Entity with _${snake.title().replace('_', '')}Entity {{
+  const factory {snake.title().replace('_', '')}Entity({{
+    required String id,
+    required DateTime createdAt,
+    DateTime? updatedAt,
+    // Add your domain fields here based on requirements
+  }}) = _{snake.title().replace('_', '')}Entity;
+  
+  // Add domain business logic methods
+  // Example: bool get isValid => /* validation logic */;
+}}"""),
+        "",
+        "#### 1.2 Define Repository Interface",
+        code_block(f"""// lib/features/{snake}/domain/repositories/{snake}_repository.dart
+import 'package:dartz/dartz.dart';
+import '../entities/{snake}_entity.dart';
+import '../../../../core/error/failures.dart';
+
+abstract class {snake.title().replace('_', '')}Repository {{
+  Future<Either<AppFailure, List<{snake.title().replace('_', '')}Entity>>> getAll();
+  Future<Either<AppFailure, {snake.title().replace('_', '')}Entity>> getById(String id);
+  Future<Either<AppFailure, {snake.title().replace('_', '')}Entity>> create({snake.title().replace('_', '')}Entity entity);
+  Future<Either<AppFailure, {snake.title().replace('_', '')}Entity>> update({snake.title().replace('_', '')}Entity entity);
+  Future<Either<AppFailure, void>> delete(String id);
+}}"""),
+        "",
+        "#### 1.3 Implement Use Cases",
+        code_block(f"""// lib/features/{snake}/domain/usecases/get_{snake}s_usecase.dart
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+import '../entities/{snake}_entity.dart';
+import '../repositories/{snake}_repository.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecases/usecase.dart';
+
+@injectable
+class Get{snake.title().replace('_', '')}sUseCase implements UseCase<List<{snake.title().replace('_', '')}Entity>, NoParams> {{
+  const Get{snake.title().replace('_', '')}sUseCase(this._repository);
+  
+  final {snake.title().replace('_', '')}Repository _repository;
+  
+  @override
+  Future<Either<AppFailure, List<{snake.title().replace('_', '')}Entity>>> call(NoParams params) {{
+    return _repository.getAll();
+  }}
+}}"""),
+        "",
+        "### Phase 2: Data Layer (External Dependencies)",
+        "",
+        "#### 2.1 Create Data Models",
+        code_block(f"""// lib/features/{snake}/data/models/{snake}_model.dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:isar/isar.dart';
+import '../../domain/entities/{snake}_entity.dart';
+
+part '{snake}_model.freezed.dart';
+part '{snake}_model.g.dart';
+
+@freezed
+@Collection()
+class {snake.title().replace('_', '')}Model with _${snake.title().replace('_', '')}Model {{
+  const factory {snake.title().replace('_', '')}Model({{
+    @JsonKey(name: 'id') required String id,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+  }}) = _{snake.title().replace('_', '')}Model;
+  
+  factory {snake.title().replace('_', '')}Model.fromJson(Map<String, dynamic> json) =>
+      _${snake.title().replace('_', '')}ModelFromJson(json);
+  
+  {snake.title().replace('_', '')}Entity toEntity() => {snake.title().replace('_', '')}Entity(
+    id: id,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+  );
+  
+  factory {snake.title().replace('_', '')}Model.fromEntity({snake.title().replace('_', '')}Entity entity) =>
+      {snake.title().replace('_', '')}Model(
+        id: entity.id,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+      );
+}}"""),
+        "",
+        "### Phase 3: Presentation Layer (UI & State)",
+        "",
+        "#### 3.1 Create Riverpod Providers",
+        code_block(f"""// lib/features/{snake}/presentation/providers/{snake}_providers.dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/{snake}_entity.dart';
+import '../../domain/usecases/get_{snake}s_usecase.dart';
+import '../../../../core/usecases/usecase.dart';
+import '../../../../core/di/injection.dart';
+
+part '{snake}_providers.g.dart';
+
+@riverpod
+class {snake.title().replace('_', '')}ListNotifier extends _{snake.title().replace('_', '')}ListNotifier {{
+  @override
+  Future<List<{snake.title().replace('_', '')}Entity>> build() async {{
+    final useCase = getIt<Get{snake.title().replace('_', '')}sUseCase>();
+    final result = await useCase(NoParams());
+    
+    return result.fold(
+      (failure) => throw failure,
+      (entities) => entities,
+    );
+  }}
+  
+  Future<void> refresh() async {{
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => build());
+  }}
+}}"""),
+        "",
+        "---",
+        "",
+        "## 🧪 Testing Requirements",
+        "",
+        f"### Test Coverage Target: ≥85% (Project minimum: {MIN_PROJECT_COV}%)",
+        "",
+        "#### Unit Tests",
+        code_block(f"""// test/features/{snake}/domain/usecases/get_{snake}s_usecase_test.dart
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+void main() {{
+  group('Get{snake.title().replace('_', '')}sUseCase', () {{
+    test('should return entities from repository', () async {{
+      // arrange
+      when(() => mockRepository.getAll())
+          .thenAnswer((_) async => Right(testEntities));
+      
+      // act  
+      final result = await useCase(NoParams());
+      
+      // assert
+      expect(result, equals(Right(testEntities)));
+      verify(() => mockRepository.getAll());
+    }});
+  }});
+}}"""),
+        "",
+        "#### Widget Tests",
+        code_block(f"""// test/features/{snake}/presentation/screens/{snake}_screen_test.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+void main() {{
+  testWidgets('displays loading state correctly', (tester) async {{
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          {snake}ListNotifierProvider.overrideWith((ref) {{
+            return const AsyncValue.loading();
+          }}),
+        ],
+        child: const MaterialApp(home: {snake.title().replace('_', '')}Screen()),
+      ),
+    );
+    
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  }});
+}}"""),
+        "",
+        "---",
+        "",
+        "## ✅ Quality Checklist",
+        "",
+        "### Architecture Compliance",
+        "- [ ] Domain layer has no external dependencies",
+        "- [ ] Repository interfaces defined in domain",
+        "- [ ] Data layer implements repository contracts",
+        "- [ ] Presentation layer uses providers for state",
+        "",
+        "### Error Handling",
+        "- [ ] All operations return `Either<AppFailure, T>`",
+        "- [ ] User-friendly error messages displayed",
+        "- [ ] Network and cache failures handled",
+        "",
+        "### Testing",
+        "- [ ] Unit tests cover use cases (happy + error paths)",
+        "- [ ] Widget tests cover UI states (loading/error/success)",
+        "- [ ] Integration tests verify critical flows",
+        f"- [ ] Test coverage ≥85% for new code",
+        "",
+        "### Performance & Accessibility",
+        "- [ ] No unnecessary widget rebuilds",
+        "- [ ] Proper provider disposal (autoDispose where needed)",
+        "- [ ] Semantic labels on interactive elements",
+        "- [ ] Touch targets ≥48dp minimum",
+        "",
+        "---",
+        "",
+        "## 🚫 Common Pitfalls & Anti-Patterns",
+        "",
+        f"### ❌ Feature-Specific Anti-Patterns for {epic.title()} Features",
+        "",
+    ])
+
+    # Add epic-specific anti-patterns
+    if epic == "logging":
+        content_lines.extend([
+            code_block("""// ❌ BAD: Synchronous logging operations
+void logHit() {
+  final log = SmokeLog(/*...*/);
+  repository.save(log); // Blocks UI thread
+}
+
+// ✅ GOOD: Async with offline queue
+Future<void> logHit() async {
+  final log = SmokeLog(/*...*/);
+  await localRepository.save(log); // Offline-first
+  syncQueue.enqueue(log); // Background sync
+}"""),
+            "",
+        ])
+    elif epic == "ui":
+        content_lines.extend([
+            code_block("""// ❌ BAD: Hardcoded accessibility
+Text('Record Hit'); // No semantic meaning
+
+// ✅ GOOD: Accessible with proper sizing
+Semantics(
+  label: 'Record smoking hit. Hold to start timing.',
+  child: GestureDetector(
+    child: Container(width: 48, height: 48),
+  ),
+);"""),
+            "",
+        ])
+    elif epic == "insights":
+        content_lines.extend([
+            code_block("""// ❌ BAD: Blocking chart rendering
+Widget build(context) {
+  final data = expensiveCalculation(); // Blocks UI
+  return LineChart(data);
+}
+
+// ✅ GOOD: Async computation
+@riverpod
+Future<ChartData> chartData(ChartDataRef ref) async {
+  return compute(processLargeDataset, rawData);
+}"""),
+            "",
+        ])
+
+    content_lines.extend([
+        "### ❌ General Architecture Violations",
+        code_block("""// ❌ BAD: Direct data import in presentation
+import '../data/models/smoke_log_model.dart'; // Domain violation
+
+// ❌ BAD: Business logic in widgets
+class LogWidget extends StatelessWidget {
+  Widget build(context) {
+    final isValid = log.duration > 0 && log.timestamp.isBefore(DateTime.now());
+    // Business logic belongs in domain layer
+  }
+}
+
+// ✅ GOOD: Use domain entities
+import '../domain/entities/smoke_log_entity.dart';
+
+class LogWidget extends StatelessWidget {
+  Widget build(context) {
+    return log.isValid ? ValidLogView() : InvalidLogView();
+    // Business logic in entity.isValid getter
+  }
+}"""),
+        "",
+        "---",
+        "",
+        "## 🚧 Development Workflow",
+        "",
+        "### Validation Commands",
+        code_block(f"""# Continuous testing during development
+flutter test --coverage test/features/{snake}/
+
+# Run code generation  
+flutter packages pub run build_runner build --delete-conflicting-outputs
+
+# Check syntax and analysis
+flutter analyze
+
+# Validate feature completion
+python scripts/dev_assistant.py finalize-feature --feature-id {feature_id} --dry-run""", "bash"),
+        "",
+        "### Quick Reference",
+        f"- **Feature Matrix:** [`feature_matrix.yaml`](../../feature_matrix.yaml)",
+        f"- **Architecture Docs:** [`docs/system-architecture.md`](../../docs/system-architecture.md)",
+        f"- **AI Instructions:** [`.github/instructions/instruction-prompt.instructions.md`](../../.github/instructions/instruction-prompt.instructions.md)",
+        "",
+        "---",
+        "",
+        "## 🎯 Success Criteria",
+        "",
+        "✅ **Implementation Complete When:**",
+        "- All acceptance criteria satisfied",
+        "- Test coverage ≥85% for new code", 
+        "- No architectural boundary violations",
+        "- All error cases handled gracefully",
+        "- Performance targets met (if specified)",
+        "- Accessibility requirements satisfied", 
+        "- Code review passes (automated + human)",
+        "",
+        "---",
+        "",
+        f"**Generated:** {datetime.now(timezone.utc).isoformat()}",
+        f"**Complexity:** {complexity.title()} | **Epic:** {epic} | **Priority:** {priority}",
+        "",
+        "🚀 **Ready to implement? Follow Clean Architecture patterns and maintain quality standards!**",
+    ])
+
+    # Write the guide to file
+    prompt_path.write_text("\n".join(content_lines), encoding="utf-8")
+    out["path"] = str(prompt_path.relative_to(ROOT))
+    return out
+
+
+def _estimate_duration(complexity: str) -> str:
+    """Estimate implementation duration based on complexity.""" 
+    estimates = {
+        "simple": "2-4 hours",
+        "moderate": "4-8 hours", 
+        "complex": "8-16 hours"
+    }
+    return estimates.get(complexity.lower(), "4-8 hours")
+
 
 # Patch original cmd_start_next_feature to append branch + prompt generation (keeping existing logic)
 original_cmd_start_next_feature = cmd_start_next_feature
@@ -639,10 +1358,30 @@ def cmd_start_next_feature_enhanced(args) -> Dict[str, Any]:
     # Branch creation
     branch_info = _create_feature_branch(feature_id, bool(base_result.get("dry_run")))
     base_result["git_branch"] = branch_info
-    # AI prompt generation
+    # AI prompt generation with intelligent analysis
     record = _load_feature_record(feature_id)
-    prompt_info = _generate_ai_prompt(record, feature_id, bool(base_result.get("dry_run")))
+    
+    # Analyze feature characteristics
+    complexity = _analyze_feature_complexity(record)
+    related_features = _find_related_features(feature_id, record)
+    implementation_hints = _generate_implementation_hints(record, feature_id)
+    
+    prompt_info = _generate_production_ai_prompt(
+        record, 
+        feature_id, 
+        bool(base_result.get("dry_run")),
+        related_features,
+        complexity,
+        implementation_hints
+    )
     base_result["prompt"] = prompt_info
+    
+    # Add analysis to result for debugging/telemetry
+    base_result["analysis"] = {
+        "complexity": complexity,
+        "related_features": related_features,
+        "implementation_hints": implementation_hints
+    }
     # Optional auto commit & push
     if not base_result.get("dry_run") and getattr(args, 'auto_commit', False):
         files_to_add: List[str] = []

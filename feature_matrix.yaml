@@ -799,7 +799,7 @@ features:
 - id: ui.accessibility_foundation
   order: 7
   title: Accessibility Foundation
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:

@@ -44,6 +44,7 @@ dependencies:
   fpdart: ^1.1.0 # Either type for error handling
   shared_preferences: ^2.2.2 # Lightweight key/value persistence for last active tab
   vibration: ^1.8.4 # Haptic feedback and vibration
+  quick_actions: ^1.0.6 # App icon quick actions for iOS/Android
 
   # (Planned) Offline persistence & networking NOTE: Not yet used; kept out until first feature scaffold triggers need.
   # isar: ^3.1.0+1

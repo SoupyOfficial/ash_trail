@@ -829,7 +829,7 @@ features:
 - id: ui.quick_actions
   order: 9
   title: Home Screen Quick Actions
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:

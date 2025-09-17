@@ -10,6 +10,8 @@ const List<String> kTelemetryEvents = [
   'filter_apply',
   'log_created',
   'log_undone',
+  'quick_action_invoked',
+  'quick_action_unknown',
   'route_navigate',
   'route_unknown',
   'sync_enqueued',

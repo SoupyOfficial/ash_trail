@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/routing/app_router.dart';
 import 'features/theming/presentation/providers/theme_provider.dart';
 import 'features/haptics_baseline/presentation/providers/haptics_providers.dart';
+import 'features/quick_actions/presentation/widgets/quick_actions_listener.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,10 +29,12 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final theme = ref.watch(currentThemeDataProvider);
 
-    return MaterialApp.router(
-      title: 'AshTrail',
-      theme: theme,
-      routerConfig: router,
+    return QuickActionsListener(
+      child: MaterialApp.router(
+        title: 'AshTrail',
+        theme: theme,
+        routerConfig: router,
+      ),
     );
   }
 }

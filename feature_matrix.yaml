@@ -881,7 +881,7 @@ features:
 - id: ui.spotlight_indexing
   order: 13
   title: Spotlight Indexing
-  status: planned
+  status: done
   priority: P3
   epic: ui
   acceptance:

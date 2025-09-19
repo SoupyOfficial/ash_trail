@@ -1,7 +1,8 @@
 codecov:
-  require_ci_to_pass: true
+  token: 8f7ececb-7d53-4c2f-add5-a21458db909d
+  require_ci_to_pass: yes
   notify:
-    wait_for_ci: true
+    wait_for_ci: yes
 
 coverage:
   precision: 2
@@ -11,66 +12,66 @@ coverage:
   status:
     project:
       default:
-        target: '80%'
-        threshold: '1%'
+        target: "80%"
+        threshold: "1%"
         if_no_uploads: error
         if_not_found: success
         if_ci_failed: error
     patch:
       default:
-        target: '75%'
-        threshold: '2%'
+        target: "75%"
+        threshold: "2%"
         if_no_uploads: error
         if_not_found: success
         if_ci_failed: error
 
 comment:
-  layout: "header,diff,flags,components"  # Add components to show in PR comments
+  layout: "header,diff,flags,components" # Add components to show in PR comments
   behavior: default
-  require_changes: false
-  require_base: false
-  require_head: true
+  require_changes: no
+  require_base: no
+  require_head: yes
 
 ignore:
-  - "lib/**/*.g.dart"           # Generated Freezed files
-  - "lib/**/*.gr.dart"          # Generated Go Router files  
-  - "lib/**/*.config.dart"      # Generated config files
-  - "lib/domain/indexes/**"     # Generated index files
+  - "lib/**/*.g.dart" # Generated Freezed files
+  - "lib/**/*.gr.dart" # Generated Go Router files
+  - "lib/**/*.config.dart" # Generated config files
+  - "lib/domain/indexes/**" # Generated index files
   - "lib/telemetry/events.dart" # Generated telemetry
-  - "tool/**"                   # Tool scripts
+  - "tool/**" # Tool scripts
   - "test/**/*_test.mocks.dart" # Generated mocks
-  - "android/**"                # Android platform code
-  - "ios/**"                    # iOS platform code
-  - "linux/**"                  # Linux platform code  
-  - "macos/**"                  # macOS platform code
-  - "web/**"                    # Web platform code
-  - "windows/**"                # Windows platform code
+  - "android/**" # Android platform code
+  - "ios/**" # iOS platform code
+  - "linux/**" # Linux platform code
+  - "macos/**" # macOS platform code
+  - "web/**" # Web platform code
+  - "windows/**" # Windows platform code
 
 flags:
   unit_tests:
     paths:
       - lib/
-    carryforward: true
+    carryforward: yes
   widget_tests:
     paths:
       - lib/
-    carryforward: true
+    carryforward: yes
   integration_tests:
     paths:
       - lib/
-    carryforward: true
+    carryforward: yes
 
 # Components for organized coverage tracking
 component_management:
   default_rules:
     statuses:
       - type: project
-        target: '75%'
-        threshold: '2%'
+        target: "75%"
+        threshold: "2%"
         if_no_uploads: error
         if_not_found: success
         if_ci_failed: error
-  
+
   individual_components:
     # Core Architecture Components
     - component_id: core_layer
@@ -79,18 +80,18 @@ component_management:
         - "lib/core/**"
       statuses:
         - type: project
-          target: '85%'  # Higher standard for core infrastructure
-          threshold: '1%'
-    
+          target: "85%" # Higher standard for core infrastructure
+          threshold: "1%"
+
     - component_id: domain_layer
       name: "Domain Logic"
       paths:
         - "lib/domain/**"
       statuses:
         - type: project
-          target: '90%'  # Highest standard for business logic
-          threshold: '1%'
-    
+          target: "90%" # Highest standard for business logic
+          threshold: "1%"
+
     # Feature Components (based on your feature matrix)
     - component_id: feature_logging
       name: "Logging Feature"
@@ -98,29 +99,29 @@ component_management:
         - "lib/features/logging/**"
       statuses:
         - type: project
-          target: '80%'
-          threshold: '2%'
+          target: "80%"
+          threshold: "2%"
         - type: patch
-          target: '75%'
-    
+          target: "75%"
+
     - component_id: feature_accounts
       name: "Accounts Feature"
       paths:
         - "lib/features/accounts/**"
       statuses:
         - type: project
-          target: '80%'
-          threshold: '2%'
-    
+          target: "80%"
+          threshold: "2%"
+
     - component_id: feature_app_shell
       name: "App Shell & Navigation"
       paths:
         - "lib/features/app_shell/**"
       statuses:
         - type: project
-          target: '75%'
-          threshold: '2%'
-    
+          target: "75%"
+          threshold: "2%"
+
     # Architecture Layer Components
     - component_id: data_layer
       name: "Data Layer"
@@ -128,9 +129,9 @@ component_management:
         - "**/data/**"
       statuses:
         - type: project
-          target: '85%'  # High coverage for data layer
-          threshold: '2%'
-    
+          target: "85%" # High coverage for data layer
+          threshold: "2%"
+
     - component_id: presentation_layer
       name: "Presentation Layer"
       paths:
@@ -138,9 +139,9 @@ component_management:
         - "**/widgets/**"
       statuses:
         - type: project
-          target: '70%'  # UI tests can be more challenging
-          threshold: '3%'
-    
+          target: "70%" # UI tests can be more challenging
+          threshold: "3%"
+
     - component_id: use_cases
       name: "Use Cases"
       paths:
@@ -148,9 +149,9 @@ component_management:
         - "**/domain/use_cases/**"
       statuses:
         - type: project
-          target: '95%'  # Critical business logic
-          threshold: '1%'
-    
+          target: "95%" # Critical business logic
+          threshold: "1%"
+
     # Utility Components
     - component_id: telemetry
       name: "Telemetry"
@@ -158,5 +159,5 @@ component_management:
         - "lib/telemetry/**"
       statuses:
         - type: project
-          target: '70%'
-          threshold: '5%'  # More lenient for telemetry
+          target: "70%"
+          threshold: "5%" # More lenient for telemetry

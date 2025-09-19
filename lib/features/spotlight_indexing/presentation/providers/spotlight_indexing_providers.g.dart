@@ -389,7 +389,7 @@ class _IndexedItemsByTypeProviderElement
 }
 
 String _$spotlightIndexingControllerHash() =>
-    r'e2d3ee81a26207aad713fd7f89bf6bc38fe133a5';
+    r'72b10c58e3bce1daf3f7b4492370c8e0943243cf';
 
 /// Controller for managing spotlight indexing operations
 ///

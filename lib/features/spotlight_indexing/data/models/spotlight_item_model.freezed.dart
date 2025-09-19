@@ -20,25 +20,15 @@ SpotlightItemModel _$SpotlightItemModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$SpotlightItemModel {
-  @JsonKey(name: 'id')
   String get id => throw _privateConstructorUsedError;
-  @JsonKey(name: 'type')
   String get type => throw _privateConstructorUsedError;
-  @JsonKey(name: 'title')
   String get title => throw _privateConstructorUsedError;
-  @JsonKey(name: 'description')
   String? get description => throw _privateConstructorUsedError;
-  @JsonKey(name: 'keywords')
   List<String>? get keywords => throw _privateConstructorUsedError;
-  @JsonKey(name: 'deep_link')
   String get deepLink => throw _privateConstructorUsedError;
-  @JsonKey(name: 'account_id')
   String get accountId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'content_id')
   String get contentId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'last_updated')
   DateTime get lastUpdated => throw _privateConstructorUsedError;
-  @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
 
   /// Serializes this SpotlightItemModel to a JSON map.
@@ -58,16 +48,16 @@ abstract class $SpotlightItemModelCopyWith<$Res> {
       _$SpotlightItemModelCopyWithImpl<$Res, SpotlightItemModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') String id,
-      @JsonKey(name: 'type') String type,
-      @JsonKey(name: 'title') String title,
-      @JsonKey(name: 'description') String? description,
-      @JsonKey(name: 'keywords') List<String>? keywords,
-      @JsonKey(name: 'deep_link') String deepLink,
-      @JsonKey(name: 'account_id') String accountId,
-      @JsonKey(name: 'content_id') String contentId,
-      @JsonKey(name: 'last_updated') DateTime lastUpdated,
-      @JsonKey(name: 'is_active') bool isActive});
+      {String id,
+      String type,
+      String title,
+      String? description,
+      List<String>? keywords,
+      String deepLink,
+      String accountId,
+      String contentId,
+      DateTime lastUpdated,
+      bool isActive});
 }
 
 /// @nodoc
@@ -150,16 +140,16 @@ abstract class _$$SpotlightItemModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') String id,
-      @JsonKey(name: 'type') String type,
-      @JsonKey(name: 'title') String title,
-      @JsonKey(name: 'description') String? description,
-      @JsonKey(name: 'keywords') List<String>? keywords,
-      @JsonKey(name: 'deep_link') String deepLink,
-      @JsonKey(name: 'account_id') String accountId,
-      @JsonKey(name: 'content_id') String contentId,
-      @JsonKey(name: 'last_updated') DateTime lastUpdated,
-      @JsonKey(name: 'is_active') bool isActive});
+      {String id,
+      String type,
+      String title,
+      String? description,
+      List<String>? keywords,
+      String deepLink,
+      String accountId,
+      String contentId,
+      DateTime lastUpdated,
+      bool isActive});
 }
 
 /// @nodoc
@@ -232,19 +222,20 @@ class __$$SpotlightItemModelImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class _$SpotlightItemModelImpl extends _SpotlightItemModel {
   const _$SpotlightItemModelImpl(
-      {@JsonKey(name: 'id') required this.id,
-      @JsonKey(name: 'type') required this.type,
-      @JsonKey(name: 'title') required this.title,
-      @JsonKey(name: 'description') this.description,
-      @JsonKey(name: 'keywords') final List<String>? keywords,
-      @JsonKey(name: 'deep_link') required this.deepLink,
-      @JsonKey(name: 'account_id') required this.accountId,
-      @JsonKey(name: 'content_id') required this.contentId,
-      @JsonKey(name: 'last_updated') required this.lastUpdated,
-      @JsonKey(name: 'is_active') this.isActive = true})
+      {required this.id,
+      required this.type,
+      required this.title,
+      this.description,
+      final List<String>? keywords,
+      required this.deepLink,
+      required this.accountId,
+      required this.contentId,
+      required this.lastUpdated,
+      this.isActive = true})
       : _keywords = keywords,
         super._();
 
@@ -252,20 +243,15 @@ class _$SpotlightItemModelImpl extends _SpotlightItemModel {
       _$$SpotlightItemModelImplFromJson(json);
 
   @override
-  @JsonKey(name: 'id')
   final String id;
   @override
-  @JsonKey(name: 'type')
   final String type;
   @override
-  @JsonKey(name: 'title')
   final String title;
   @override
-  @JsonKey(name: 'description')
   final String? description;
   final List<String>? _keywords;
   @override
-  @JsonKey(name: 'keywords')
   List<String>? get keywords {
     final value = _keywords;
     if (value == null) return null;
@@ -275,19 +261,15 @@ class _$SpotlightItemModelImpl extends _SpotlightItemModel {
   }
 
   @override
-  @JsonKey(name: 'deep_link')
   final String deepLink;
   @override
-  @JsonKey(name: 'account_id')
   final String accountId;
   @override
-  @JsonKey(name: 'content_id')
   final String contentId;
   @override
-  @JsonKey(name: 'last_updated')
   final DateTime lastUpdated;
   @override
-  @JsonKey(name: 'is_active')
+  @JsonKey()
   final bool isActive;
 
   @override
@@ -352,51 +334,40 @@ class _$SpotlightItemModelImpl extends _SpotlightItemModel {
 
 abstract class _SpotlightItemModel extends SpotlightItemModel {
   const factory _SpotlightItemModel(
-          {@JsonKey(name: 'id') required final String id,
-          @JsonKey(name: 'type') required final String type,
-          @JsonKey(name: 'title') required final String title,
-          @JsonKey(name: 'description') final String? description,
-          @JsonKey(name: 'keywords') final List<String>? keywords,
-          @JsonKey(name: 'deep_link') required final String deepLink,
-          @JsonKey(name: 'account_id') required final String accountId,
-          @JsonKey(name: 'content_id') required final String contentId,
-          @JsonKey(name: 'last_updated') required final DateTime lastUpdated,
-          @JsonKey(name: 'is_active') final bool isActive}) =
-      _$SpotlightItemModelImpl;
+      {required final String id,
+      required final String type,
+      required final String title,
+      final String? description,
+      final List<String>? keywords,
+      required final String deepLink,
+      required final String accountId,
+      required final String contentId,
+      required final DateTime lastUpdated,
+      final bool isActive}) = _$SpotlightItemModelImpl;
   const _SpotlightItemModel._() : super._();
 
   factory _SpotlightItemModel.fromJson(Map<String, dynamic> json) =
       _$SpotlightItemModelImpl.fromJson;
 
   @override
-  @JsonKey(name: 'id')
   String get id;
   @override
-  @JsonKey(name: 'type')
   String get type;
   @override
-  @JsonKey(name: 'title')
   String get title;
   @override
-  @JsonKey(name: 'description')
   String? get description;
   @override
-  @JsonKey(name: 'keywords')
   List<String>? get keywords;
   @override
-  @JsonKey(name: 'deep_link')
   String get deepLink;
   @override
-  @JsonKey(name: 'account_id')
   String get accountId;
   @override
-  @JsonKey(name: 'content_id')
   String get contentId;
   @override
-  @JsonKey(name: 'last_updated')
   DateTime get lastUpdated;
   @override
-  @JsonKey(name: 'is_active')
   bool get isActive;
 
   /// Create a copy of SpotlightItemModel

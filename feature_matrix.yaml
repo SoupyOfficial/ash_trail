@@ -892,7 +892,7 @@ features:
 - id: ui.reachability
   order: 14
   title: Reachability & Ergonomics Audit
-  status: planned
+  status: in_progress
   priority: P1
   epic: ui
   acceptance:
@@ -904,7 +904,7 @@ features:
 - id: logging.capture_hit
   order: 1
   title: Hold-to-Record Hit Duration
-  status: planned
+  status: in_progress
   priority: P0
   epic: logging
   rationale: Fast logging with minimal taps.
@@ -960,7 +960,7 @@ features:
 - id: logging.undo_last
   order: 2
   title: Undo Last Log
-  status: planned
+  status: done
   priority: P0
   epic: logging
   acceptance:

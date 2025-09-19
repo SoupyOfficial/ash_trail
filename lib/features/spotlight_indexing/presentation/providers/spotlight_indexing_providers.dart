@@ -92,9 +92,9 @@ GetIndexedItemsByTypeUseCase getIndexedItemsByTypeUseCase(
 
 /// Controller for managing spotlight indexing operations
 @riverpod
-class SpotlightIndexingController extends _SpotlightIndexingController {
+class SpotlightIndexingController extends _$SpotlightIndexingController {
   @override
-  Future<void> build() async {
+  FutureOr<void> build() async {
     // Initialize - this controller doesn't need to return data
     // It's primarily for managing state and operations
   }

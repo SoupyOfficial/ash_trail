@@ -12,21 +12,24 @@ part 'spotlight_item_model.g.dart';
 class SpotlightItemModel with _$SpotlightItemModel {
   const SpotlightItemModel._();
 
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory SpotlightItemModel({
-    @JsonKey(name: 'id') required String id,
-    @JsonKey(name: 'type') required String type,
-    @JsonKey(name: 'title') required String title,
-    @JsonKey(name: 'description') String? description,
-    @JsonKey(name: 'keywords') List<String>? keywords,
-    @JsonKey(name: 'deep_link') required String deepLink,
-    @JsonKey(name: 'account_id') required String accountId,
-    @JsonKey(name: 'content_id') required String contentId,
-    @JsonKey(name: 'last_updated') required DateTime lastUpdated,
-    @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    required String id,
+    required String type,
+    required String title,
+    String? description,
+    List<String>? keywords,
+    required String deepLink,
+    required String accountId,
+    required String contentId,
+    required DateTime lastUpdated,
+    @Default(true) bool isActive,
   }) = _SpotlightItemModel;
 
   factory SpotlightItemModel.fromJson(Map<String, dynamic> json) =>
       _$SpotlightItemModelFromJson(json);
+
+  // fromJson/toJson are generated via json_serializable
 
   /// Convert from domain entity to data model
   factory SpotlightItemModel.fromEntity(SpotlightItemEntity entity) {

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sample-python-project"
+version = "0.1.0"
+description = "Sample Python project for automation template testing"
+authors = [
+    {name = "Dev Automation Template", email = "test@example.com"},
+]
+dependencies = [
+    "requests>=2.25.0",
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=22.0",
+    "ruff>=0.1.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.ruff]
+select = ["E", "F", "W", "C", "I"]
+ignore = []
+line-length = 88
+target-version = "py39"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=lcov:coverage/lcov.info --cov-report=term"

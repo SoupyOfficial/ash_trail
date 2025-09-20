@@ -671,7 +671,7 @@ features:
 - id: ui.app_shell
   order: 1
   title: App Shell & Navigation Scaffold
-  status: in_progress
+  status: done
   priority: P0
   epic: ui
   rationale: Establish consistent structure for all screens and enable future features.
@@ -712,7 +712,7 @@ features:
 - id: ui.routing
   order: 2
   title: Typed Routing & Deep Link Handling
-  status: planned
+  status: done
   priority: P0
   epic: ui
   acceptance:
@@ -734,7 +734,7 @@ features:
 - id: ui.theming
   order: 3
   title: Theming System & Dark Mode
-  status: planned
+  status: done
   priority: P0
   epic: ui
   acceptance:
@@ -754,7 +754,7 @@ features:
 - id: ui.responsive
   order: 4
   title: Responsive & Adaptive Layout
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:
@@ -773,7 +773,7 @@ features:
 - id: ui.error_boundary
   order: 5
   title: Global Error Boundary & Retry Surface
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:
@@ -786,7 +786,7 @@ features:
 - id: ui.loading_skeletons
   order: 6
   title: Skeleton & Shimmer States
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:
@@ -799,7 +799,7 @@ features:
 - id: ui.accessibility_foundation
   order: 7
   title: Accessibility Foundation
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:
@@ -814,7 +814,7 @@ features:
 - id: ui.haptics_baseline
   order: 8
   title: Haptics Baseline
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:
@@ -829,7 +829,7 @@ features:
 - id: ui.quick_actions
   order: 9
   title: Home Screen Quick Actions
-  status: planned
+  status: done
   priority: P1
   epic: ui
   acceptance:
@@ -842,7 +842,7 @@ features:
 - id: ui.home_widgets
   order: 10
   title: Home Screen Widgets (iOS)
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:
@@ -855,7 +855,7 @@ features:
 - id: ui.siri_shortcuts
   order: 11
   title: Siri Shortcuts
-  status: planned
+  status: done
   priority: P2
   epic: ui
   acceptance:
@@ -867,7 +867,7 @@ features:
 - id: ui.live_activity
   order: 12
   title: Live Activity (Recording)
-  status: planned
+  status: done
   priority: P3
   epic: ui
   acceptance:
@@ -881,7 +881,7 @@ features:
 - id: ui.spotlight_indexing
   order: 13
   title: Spotlight Indexing
-  status: planned
+  status: done
   priority: P3
   epic: ui
   acceptance:
@@ -892,7 +892,7 @@ features:
 - id: ui.reachability
   order: 14
   title: Reachability & Ergonomics Audit
-  status: planned
+  status: in_progress
   priority: P1
   epic: ui
   acceptance:
@@ -904,7 +904,7 @@ features:
 - id: logging.capture_hit
   order: 1
   title: Hold-to-Record Hit Duration
-  status: planned
+  status: in_progress
   priority: P0
   epic: logging
   rationale: Fast logging with minimal taps.
@@ -960,7 +960,7 @@ features:
 - id: logging.undo_last
   order: 2
   title: Undo Last Log
-  status: planned
+  status: done
   priority: P0
   epic: logging
   acceptance:
@@ -979,7 +979,7 @@ features:
 - id: logs.table_browse_edit
   order: 3
   title: Logs Table Browse + Edit
-  status: planned
+  status: done
   priority: P0
   epic: logging
   rationale: Review and correct logs quickly.
@@ -1011,7 +1011,7 @@ features:
 - id: logging.quick_tagging
   order: 4
   title: Quick Tagging Chips
-  status: planned
+  status: done
   priority: P1
   epic: logging
   rationale: Reduce friction adding frequent tags to a log at capture time.

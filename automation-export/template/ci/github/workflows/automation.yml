@@ -1,0 +1,367 @@
+name: automation
+on:
+  pull_request:
+  push:
+    branches: [main, master, develop]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly on Monday at 6 AM UTC
+
+env:
+  # Coverage thresholds
+  COVERAGE_GLOBAL_THRESHOLD: "80"
+  COVERAGE_PATCH_THRESHOLD: "85"
+
+jobs:
+  # Language detection and matrix preparation
+  detect:
+    name: Detect Project Language
+    runs-on: ubuntu-latest
+    outputs:
+      language: ${{ steps.detect.outputs.language }}
+      os-matrix: ${{ steps.matrix.outputs.os-matrix }}
+      language-versions: ${{ steps.matrix.outputs.language-versions }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Detect Language
+        id: detect
+        run: |
+          if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ] || [ -f "setup.py" ]; then
+            echo "language=python" >> $GITHUB_OUTPUT
+          elif [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+            echo "language=java" >> $GITHUB_OUTPUT
+          elif [ -f "package.json" ]; then
+            echo "language=node" >> $GITHUB_OUTPUT
+          elif [ -f "go.mod" ]; then
+            echo "language=go" >> $GITHUB_OUTPUT
+          elif [ -f "pubspec.yaml" ]; then
+            echo "language=flutter" >> $GITHUB_OUTPUT
+          elif [ -f "Cargo.toml" ]; then
+            echo "language=rust" >> $GITHUB_OUTPUT
+          elif find . -maxdepth 2 -name "*.csproj" -o -name "*.sln" -o -name "*.fsproj" | head -1 | grep -q .; then
+            echo "language=csharp" >> $GITHUB_OUTPUT
+          else
+            echo "language=unknown" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup Matrix
+        id: matrix
+        run: |
+          # Default OS matrix
+          echo 'os-matrix=["ubuntu-latest", "windows-latest"]' >> $GITHUB_OUTPUT
+          
+          # Language version matrix based on detected language
+          case "${{ steps.detect.outputs.language }}" in
+            python)
+              echo 'language-versions=["3.9", "3.10", "3.11"]' >> $GITHUB_OUTPUT
+              ;;
+            java)
+              echo 'language-versions=["11", "17", "21"]' >> $GITHUB_OUTPUT
+              ;;
+            node)
+              echo 'language-versions=["16", "18", "20"]' >> $GITHUB_OUTPUT
+              ;;
+            go)
+              echo 'language-versions=["1.19", "1.20", "1.21"]' >> $GITHUB_OUTPUT
+              ;;
+            flutter)
+              echo 'language-versions=["stable"]' >> $GITHUB_OUTPUT
+              ;;
+            rust)
+              echo 'language-versions=["stable"]' >> $GITHUB_OUTPUT
+              ;;
+            csharp)
+              echo 'language-versions=["6.0", "7.0", "8.0"]' >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo 'language-versions=["default"]' >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  # Environment health check
+  doctor:
+    name: Health Check
+    needs: detect
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.detect.outputs.os-matrix) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Language Environment
+        uses: ./.github/actions/setup-language
+        with:
+          language: ${{ needs.detect.outputs.language }}
+          version: ${{ fromJson(needs.detect.outputs.language-versions)[0] }}
+      
+      - name: Run Doctor (Unix)
+        if: runner.os != 'Windows'
+        run: ./scripts/doctor.sh
+        
+      - name: Run Doctor (Windows)  
+        if: runner.os == 'Windows'
+        run: .\scripts\doctor.ps1
+
+  # Code linting and formatting
+  lint:
+    name: Lint & Format
+    needs: detect
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.detect.outputs.os-matrix) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Language Environment
+        uses: ./.github/actions/setup-language
+        with:
+          language: ${{ needs.detect.outputs.language }}
+          version: ${{ fromJson(needs.detect.outputs.language-versions)[0] }}
+      
+      - name: Run Linting (Unix)
+        if: runner.os != 'Windows'
+        run: ./scripts/lint.sh
+        
+      - name: Run Linting (Windows)
+        if: runner.os == 'Windows'
+        run: .\scripts\lint.ps1
+
+  # Test execution with coverage
+  test:
+    name: Test
+    needs: detect
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.detect.outputs.os-matrix) }}
+        language-version: ${{ fromJson(needs.detect.outputs.language-versions) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for coverage comparison
+      
+      - name: Setup Language Environment
+        uses: ./.github/actions/setup-language
+        with:
+          language: ${{ needs.detect.outputs.language }}
+          version: ${{ matrix.language-version }}
+      
+      - name: Run Tests with Coverage (Unix)
+        if: runner.os != 'Windows'
+        run: ./scripts/test.sh --coverage
+        
+      - name: Run Tests with Coverage (Windows)
+        if: runner.os == 'Windows'
+        run: .\scripts\test.ps1 -Coverage
+      
+      - name: Check Coverage Threshold
+        run: |
+          # Find coverage file
+          if [ -f "coverage/lcov.info" ]; then
+            COVERAGE_FILE="coverage/lcov.info"
+          elif [ -f "coverage/coverage-final.json" ]; then
+            COVERAGE_FILE="coverage/coverage-final.json"
+          else
+            echo "No coverage file found, skipping threshold check"
+            exit 0
+          fi
+          
+          # Extract coverage percentage (simplified)
+          if [[ "$COVERAGE_FILE" == *.lcov* ]]; then
+            HIT_LINES=$(grep -c "^DA:.*,1$" "$COVERAGE_FILE" || echo "0")
+            TOTAL_LINES=$(grep -c "^DA:" "$COVERAGE_FILE" || echo "1")
+            COVERAGE_PCT=$(awk -v h="$HIT_LINES" -v t="$TOTAL_LINES" 'BEGIN { printf("%.1f", (h/t)*100) }')
+          else
+            echo "Coverage format not supported for threshold check"
+            exit 0
+          fi
+          
+          echo "coverage_pct=$COVERAGE_PCT" >> $GITHUB_ENV
+          echo "Coverage: $COVERAGE_PCT%"
+          
+          # Check threshold
+          if awk -v p="$COVERAGE_PCT" -v t="$COVERAGE_GLOBAL_THRESHOLD" 'BEGIN { exit (p+0>=t)?0:1 }'; then
+            echo "✅ Coverage $COVERAGE_PCT% meets threshold of $COVERAGE_GLOBAL_THRESHOLD%"
+          else
+            echo "❌ Coverage $COVERAGE_PCT% below threshold of $COVERAGE_GLOBAL_THRESHOLD%"
+            exit 1
+          fi
+        shell: bash
+      
+      - name: Upload Coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.language-version == fromJson(needs.detect.outputs.language-versions)[0]
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info,coverage/coverage-final.json
+          flags: unittests
+          name: ${{ needs.detect.outputs.language }}-${{ matrix.language-version }}
+          fail_ci_if_error: false
+      
+      - name: Comment Coverage on PR
+        if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest' && matrix.language-version == fromJson(needs.detect.outputs.language-versions)[0]
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- coverage-report -->';
+            const pct = process.env.coverage_pct || 'n/a';
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            
+            // Find existing coverage comment
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100
+            });
+            
+            for (const c of comments) {
+              if (c.user.type === 'Bot' && c.body && c.body.includes(marker)) {
+                await github.rest.issues.deleteComment({owner, repo, comment_id: c.id});
+              }
+            }
+            
+            // Create new coverage comment
+            const body = `${marker}
+            **🧪 Test Coverage Report**
+            
+            **Overall Coverage:** ${pct}% (minimum: ${process.env.COVERAGE_GLOBAL_THRESHOLD}%)
+            **Language:** ${{ needs.detect.outputs.language }}
+            **OS:** ${{ matrix.os }}
+            **Version:** ${{ matrix.language-version }}
+            `;
+            
+            await github.rest.issues.createComment({owner, repo, issue_number, body});
+
+  # Build verification
+  build:
+    name: Build
+    needs: [detect, lint, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(needs.detect.outputs.os-matrix) }}
+        include:
+          - os: ubuntu-latest
+            build-mode: debug
+          - os: ubuntu-latest  
+            build-mode: release
+          - os: windows-latest
+            build-mode: debug
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Language Environment
+        uses: ./.github/actions/setup-language
+        with:
+          language: ${{ needs.detect.outputs.language }}
+          version: ${{ fromJson(needs.detect.outputs.language-versions)[0] }}
+      
+      - name: Run Build (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          if [ "${{ matrix.build-mode }}" = "release" ]; then
+            ./scripts/build.sh --release
+          else
+            ./scripts/build.sh
+          fi
+        
+      - name: Run Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if ("${{ matrix.build-mode }}" -eq "release") {
+            .\scripts\build.ps1 -Release
+          } else {
+            .\scripts\build.ps1
+          }
+        shell: pwsh
+      
+      - name: Upload Build Artifacts
+        if: matrix.build-mode == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ needs.detect.outputs.language }}-${{ matrix.os }}
+          path: |
+            build/
+            dist/
+            target/
+            out/
+          retention-days: 7
+
+  # Security scanning
+  security:
+    name: Security Scan
+    needs: detect
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Language Environment
+        uses: ./.github/actions/setup-language
+        with:
+          language: ${{ needs.detect.outputs.language }}
+          version: ${{ fromJson(needs.detect.outputs.language-versions)[0] }}
+      
+      - name: Run Security Scan
+        run: |
+          case "${{ needs.detect.outputs.language }}" in
+            python)
+              if command -v safety >/dev/null 2>&1; then
+                safety check
+              elif command -v pip-audit >/dev/null 2>&1; then
+                pip-audit
+              fi
+              ;;
+            java)
+              if command -v mvn >/dev/null 2>&1; then
+                mvn dependency-check:check || true
+              elif command -v gradle >/dev/null 2>&1; then
+                gradle dependencyCheckAnalyze || true
+              fi
+              ;;
+            node)
+              npm audit || true
+              ;;
+            go)
+              if command -v govulncheck >/dev/null 2>&1; then
+                govulncheck ./...
+              fi
+              ;;
+            rust)
+              if command -v cargo-audit >/dev/null 2>&1; then
+                cargo audit
+              fi
+              ;;
+            *)
+              echo "No security scanning configured for ${{ needs.detect.outputs.language }}"
+              ;;
+          esac
+
+  # Final summary
+  summary:
+    name: Summary
+    needs: [detect, doctor, lint, test, build, security]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## 🚀 Automation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Language:** ${{ needs.detect.outputs.language }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Doctor:** ${{ needs.doctor.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Lint:** ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Test:** ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build:** ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Security:** ${{ needs.security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.doctor.result }}" = "success" ] && [ "${{ needs.lint.result }}" = "success" ] && [ "${{ needs.test.result }}" = "success" ] && [ "${{ needs.build.result }}" = "success" ]; then
+            echo "✅ **All checks passed!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Some checks failed. Please review the logs above.**" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -2,6 +2,17 @@
 
 This file is auto-generated from the canonical instruction prompt. Do not edit manually.
 
+## Enhanced AI Prompt Generation
+The `start-next-feature` command now generates **production-grade AI Implementation Guides** with:
+- 🏗️ **Complete Architecture Context** - Clean Architecture patterns, data flow, tech stack
+- 📋 **Comprehensive Requirements** - Acceptance criteria, user stories, technical specs
+- 🛠️ **Implementation Strategy** - Phase-by-phase development with code examples
+- 🧪 **Testing Templates** - Unit, widget, integration test patterns with >85% coverage
+- 🔍 **Quality Checklists** - Pre/post implementation validation, accessibility, performance
+- 🚫 **Anti-Pattern Warnings** - Common mistakes and architectural violations
+- 📚 **Reference Resources** - Related features, documentation, existing patterns
+- ⏱️ **Development Workflow** - Step-by-step process with time estimates and validation
+
 ## Output Contract Summary
 1. Plan
 2. Files to Change

@@ -2,7 +2,7 @@ name: ash_trail
 description: "An application for logging and analyzing smoking habits."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -20,7 +20,7 @@ version: 1.0.0+1
 
 environment:
   # Assumption: We align to a newer stable Flutter (3.24.x) that ships Dart >=3.5 needed by flutter_lints ^5.0.0.
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: ">=3.5.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -42,6 +42,9 @@ dependencies:
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0
   fpdart: ^1.1.0 # Either type for error handling
+  shared_preferences: ^2.2.2 # Lightweight key/value persistence for last active tab
+  vibration: ^1.8.4 # Haptic feedback and vibration
+  quick_actions: ^1.0.6 # App icon quick actions for iOS/Android
 
   # (Planned) Offline persistence & networking NOTE: Not yet used; kept out until first feature scaffold triggers need.
   # isar: ^3.1.0+1
@@ -57,16 +60,15 @@ dev_dependencies:
   go_router_builder: ^2.4.1
   test: ^1.25.0
   flutter_lints: ^5.0.0
+  mocktail: ^1.0.3
 
   # Coverage & tooling helpers (pure Dart parsing in scripts, so no extra deps now)
-
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

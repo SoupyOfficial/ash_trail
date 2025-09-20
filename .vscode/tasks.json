@@ -1,0 +1,773 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dev Assistant: Status",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "status"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Status (JSON)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "status", "--json"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Features",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "features"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Features (Limit 20)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "features", "--limit", "20"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Health Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "health"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Test Coverage",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "test-coverage"],
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Test Codecov",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "test-codecov"],
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Upload Codecov",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "upload-codecov"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Dev Cycle",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "dev-cycle"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Dev Cycle (Upload)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "dev-cycle", "--upload"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Dev Cycle (Skip Tests)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "dev-cycle", "--skip-tests"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Full Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "full-check"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Cache Features",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "cache-features"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: ADR Index",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "adr-index"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Start Next Feature",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "start-next-feature"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Start Next Feature (Dry Run)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "start-next-feature", "--dry-run"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Start Next Feature (Auto Commit)",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "scripts/dev_assistant.py",
+        "start-next-feature",
+        "--auto-commit"
+      ],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Start Next Feature (Auto Commit & Push)",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "scripts/dev_assistant.py",
+        "start-next-feature",
+        "--auto-commit",
+        "--push"
+      ],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Finalize Feature",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "finalize-feature"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev Assistant: Finalize Feature (Dry Run)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "finalize-feature", "--dry-run"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Analyze Coverage",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/analyze_coverage.py"],
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Detect Feature Status: Suggest Next",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/detect_feature_status.py", "--suggest-next"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Detect Feature Status: Analyze All",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/detect_feature_status.py", "--analyze-all"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Detect Feature Status: Check Gaps",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/detect_feature_status.py", "--check-gaps"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Detect Feature Status: Check Blocked",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/detect_feature_status.py", "--check-blocked"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Detect Feature Status: Top 5",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/detect_feature_status.py", "--top-5"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patch Coverage Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/patch_coverage.py"],
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Patch Coverage Check (vs main)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/patch_coverage.py", "--base", "main"],
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate From Feature Matrix",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/generate_from_feature_matrix.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Simple Feature Scaffold",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/simple_feature_scaffold.py", "${input:featureName}"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Pre-commit Hook",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/pre_commit_hook.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Setup Development Environment",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/setup_dev_env.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "License Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/license_check.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docs Integrity Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/docs_integrity.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Branch Policy Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/branch_policy.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Instruction Hash Guard",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/instruction_hash_guard.py"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Development Scripts",
+      "type": "shell",
+      "command": "scripts\\dev_generate.bat",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Health Check",
+      "type": "shell",
+      "command": "scripts\\health_check.bat",
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Quality Gate",
+      "type": "shell",
+      "command": "scripts\\quality_gate.bat",
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Pre-commit",
+      "type": "shell",
+      "command": "scripts\\precommit.bat",
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter Test with Coverage",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["test", "--coverage"],
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter Clean",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["clean"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter Pub Get",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["pub", "get"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flutter Build Runner",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "packages",
+        "pub",
+        "run",
+        "build_runner",
+        "build",
+        "--delete-conflicting-outputs"
+      ],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "featureName",
+      "description": "Enter the feature name:",
+      "default": "new_feature",
+      "type": "promptString"
+    }
+  ]
+}

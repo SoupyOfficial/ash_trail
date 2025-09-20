@@ -1,0 +1,222 @@
+schema: 1
+meta:
+  name: "Development Automation Template"
+  version: "1.0.0"
+  description: "Framework-agnostic development automation extracted from ash_trail"
+  author: "AshTrail Project"
+  
+# Language detection patterns
+detect:
+  python: 
+    - "pyproject.toml"
+    - "requirements.txt"
+    - "setup.py"
+    - "setup.cfg"
+  java: 
+    - "pom.xml"
+    - "build.gradle"
+    - "build.gradle.kts"
+    - "gradle.properties"
+  node: 
+    - "package.json"
+    - "package-lock.json"
+    - "yarn.lock"
+  go: 
+    - "go.mod"
+    - "go.sum"
+  flutter: 
+    - "pubspec.yaml"
+    - "pubspec.lock"
+  rust:
+    - "Cargo.toml"
+    - "Cargo.lock"
+  csharp:
+    - "*.csproj"
+    - "*.sln"
+    - "*.fsproj"
+
+# Core automation tasks mapped per language
+tasks:
+  # Health check - validate environment and dependencies
+  doctor:
+    python: "python --version && pip --version && python -c 'import sys; print(f\"Python {sys.version}\")"
+    java: "java --version && mvn --version || gradle --version"
+    node: "node --version && npm --version"
+    go: "go version"
+    flutter: "flutter doctor"
+    rust: "rustc --version && cargo --version"
+    csharp: "dotnet --version"
+    
+  # Linting and formatting
+  lint:
+    python: "ruff check . && black --check ."
+    java: "mvn spotless:check || gradle spotlessCheck"
+    node: "npm run lint || npx eslint ."
+    go: "go vet ./... && golangci-lint run"
+    flutter: "dart format --set-exit-if-changed . && flutter analyze"
+    rust: "cargo fmt --check && cargo clippy -- -D warnings"
+    csharp: "dotnet format --verify-no-changes"
+    
+  # Fix linting issues
+  lint-fix:
+    python: "ruff check --fix . && black ."
+    java: "mvn spotless:apply || gradle spotlessApply"
+    node: "npm run lint:fix || npx eslint --fix ."
+    go: "go fmt ./... && golangci-lint run --fix"
+    flutter: "dart format . && flutter analyze"
+    rust: "cargo fmt && cargo clippy --fix --allow-dirty"
+    csharp: "dotnet format"
+    
+  # Run tests
+  test:
+    python: "pytest -v"
+    java: "mvn test || gradle test"
+    node: "npm test"
+    go: "go test ./..."
+    flutter: "flutter test --coverage"
+    rust: "cargo test"
+    csharp: "dotnet test"
+    
+  # Run tests with coverage
+  test-coverage:
+    python: "pytest --cov=. --cov-report=lcov:coverage/lcov.info"
+    java: "mvn test jacoco:report || gradle test jacocoTestReport"
+    node: "npm run test:coverage || nyc npm test"
+    go: "go test -coverprofile=coverage.out ./..."
+    flutter: "flutter test --coverage"
+    rust: "cargo tarpaulin --out lcov --output-dir coverage"
+    csharp: "dotnet test --collect:'XPlat Code Coverage'"
+    
+  # Build the project
+  build:
+    python: "python -m build"
+    java: "mvn package || gradle build"
+    node: "npm run build"
+    go: "go build ./..."
+    flutter: "flutter build apk"
+    rust: "cargo build --release"
+    csharp: "dotnet build"
+    
+  # Install/update dependencies
+  deps:
+    python: "pip install -r requirements.txt"
+    java: "mvn dependency:resolve || gradle build --refresh-dependencies"
+    node: "npm install"
+    go: "go mod tidy && go mod download"
+    flutter: "flutter pub get"
+    rust: "cargo fetch"
+    csharp: "dotnet restore"
+
+# Coverage configuration
+coverage:
+  global_threshold: 80  # Minimum global coverage percentage
+  patch_threshold: 85   # Minimum coverage for changed lines
+  lcov_file: "coverage/lcov.info"  # Standard location for LCOV files
+  
+  # Per-language coverage file patterns
+  files:
+    python: ["coverage/lcov.info", ".coverage"]
+    java: ["target/site/jacoco/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"]
+    node: ["coverage/lcov.info", "coverage/coverage-final.json"]
+    go: ["coverage.out"]
+    flutter: ["coverage/lcov.info"]
+    rust: ["coverage/lcov.info"]
+    csharp: ["**/coverage.cobertura.xml"]
+
+# CI/CD configuration
+ci:
+  # Operating systems to test on
+  os_matrix:
+    - "ubuntu-latest"
+    - "windows-latest"
+    
+  # Language versions to test (when applicable)
+  versions:
+    python: ["3.9", "3.10", "3.11"]
+    java: ["11", "17", "21"]
+    node: ["16", "18", "20"]
+    go: ["1.19", "1.20", "1.21"]
+    flutter: ["stable"]
+    rust: ["stable"]
+    csharp: ["6.0", "7.0", "8.0"]
+
+# Development workflow configuration
+workflow:
+  # Pre-commit hooks to enable
+  pre_commit:
+    - "trailing-whitespace"
+    - "end-of-file-fixer" 
+    - "check-yaml"
+    - "check-json"
+    - "mixed-line-ending"
+    - "format-check"  # Language-specific formatting
+    - "lint-check"    # Language-specific linting
+    
+  # Quality gates - all must pass
+  quality_gates:
+    - "lint"
+    - "test"
+    - "coverage-check"
+    - "security-check"  # Basic security scanning
+
+# Security configuration
+security:
+  # Dependency vulnerability scanning
+  vuln_scan:
+    python: "safety check || pip-audit"
+    java: "mvn dependency-check:check || gradle dependencyCheckAnalyze"
+    node: "npm audit || yarn audit"
+    go: "govulncheck ./..."
+    flutter: "flutter pub deps --json | dart pub global activate pana && pana --json"
+    rust: "cargo audit"
+    csharp: "dotnet list package --vulnerable"
+    
+  # License compliance checking  
+  license_scan:
+    python: "pip-licenses --format=json --output-file=licenses.json"
+    java: "mvn license:aggregate-third-party-report || gradle generateLicenseReport"
+    node: "npx license-checker --onlyAllow 'MIT;Apache-2.0;BSD-3-Clause;ISC'"
+    go: "go-licenses csv ./... > licenses.csv"
+    flutter: "flutter pub deps --json > deps.json"
+    rust: "cargo-license --json > licenses.json"
+    csharp: "dotnet list package --include-transitive > packages.txt"
+
+# Editor configuration
+editors:
+  vscode:
+    # Recommended extensions per language
+    extensions:
+      python: ["ms-python.python", "ms-python.black-formatter", "charliermarsh.ruff"]
+      java: ["redhat.java", "vscjava.vscode-java-pack"]
+      node: ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+      go: ["golang.go"]
+      flutter: ["dart-code.dart-code", "dart-code.flutter"]
+      rust: ["rust-lang.rust-analyzer"]
+      csharp: ["ms-dotnettools.csharp"]
+      
+    # Common tasks that will be generated
+    tasks:
+      - "doctor"
+      - "lint" 
+      - "lint-fix"
+      - "test"
+      - "test-coverage"
+      - "build"
+      - "deps"
+
+# Optional features that can be enabled
+features:
+  # Advanced monitoring and dashboards
+  monitoring: false
+  
+  # Semantic versioning and changelog generation
+  semantic_release: false
+  
+  # Docker containerization
+  docker: false
+  
+  # Documentation generation
+  docs_generation: false
+  
+  # Performance benchmarking
+  benchmarking: false

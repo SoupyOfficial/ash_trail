@@ -30,6 +30,7 @@ FEATURE_CACHE = CACHE_DIR / "feature_matrix_cache.json"
 SESSIONS_DIR = ROOT / "automation_sessions"
 ADR_DIR = ROOT / "docs" / "adr"
 ADR_INDEX = ADR_DIR / "ADR-000-index.md"
+INSTRUCTIONS_DIR = ROOT / ".github" / "instructions"
 
 MIN_PROJECT_COV = float(os.environ.get("COVERAGE_MIN", "80"))
 
@@ -149,6 +150,58 @@ def regenerate_adr_index() -> Dict[str, Any]:
     ADR_INDEX.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return {"count": len(entries), "index_path": str(ADR_INDEX.relative_to(ROOT))}
 
+def ensure_instructions_dir() -> None:
+    """Ensure the .github/instructions directory exists."""
+    INSTRUCTIONS_DIR.mkdir(parents=True, exist_ok=True)
+
+def copy_coverage_to_instructions() -> Dict[str, Any]:
+    """Copy coverage results to .github/instructions folder for AI reference."""
+    ensure_instructions_dir()
+    copied_files = []
+    
+    # Copy lcov.info if it exists
+    if COVERAGE_FILE.exists():
+        dest = INSTRUCTIONS_DIR / "latest_coverage.lcov"
+        try:
+            import shutil
+            shutil.copy2(COVERAGE_FILE, dest)
+            copied_files.append(str(dest.relative_to(ROOT)))
+        except Exception as e:
+            pass
+    
+    # Generate a human-readable coverage summary
+    cov = parse_lcov(COVERAGE_FILE)
+    if cov:
+        summary_lines = [
+            f"# Test Coverage Summary",
+            f"",
+            f"Generated: {datetime.now(timezone.utc).isoformat()}",
+            f"",
+            f"## Overall Coverage",
+            f"- **Line Coverage**: {cov.get('line_coverage', 0):.1f}%",
+            f"- **Lines Hit**: {cov.get('lines_hit', 0):,}",
+            f"- **Total Lines**: {cov.get('lines_found', 0):,}",
+            f"",
+            f"## File Coverage Details",
+            f"",
+        ]
+        
+        for file_info in cov.get("files", [])[:20]:  # Top 20 files
+            file_path = file_info.get("file", "unknown")
+            hit = file_info.get("lines_hit", 0)
+            total = file_info.get("lines_found", 0)
+            pct = (hit / total * 100) if total > 0 else 0
+            summary_lines.append(f"- `{file_path}`: {pct:.1f}% ({hit}/{total})")
+        
+        if len(cov.get("files", [])) > 20:
+            summary_lines.append(f"- ... and {len(cov.get('files', [])) - 20} more files")
+        
+        summary_path = INSTRUCTIONS_DIR / "latest_coverage_summary.md"
+        summary_path.write_text("\n".join(summary_lines), encoding="utf-8")
+        copied_files.append(str(summary_path.relative_to(ROOT)))
+    
+    return {"copied_files": copied_files, "instructions_dir": str(INSTRUCTIONS_DIR.relative_to(ROOT))}
+
 @dataclass
 class SessionManifest:
     id: str
@@ -202,7 +255,18 @@ def cmd_test_coverage(args) -> Dict[str, Any]:
     warn = None
     if after and after["line_coverage"] < MIN_PROJECT_COV:
         warn = f"coverage_below_min:{after['line_coverage']:.1f}%<{MIN_PROJECT_COV:.0f}%"  # type: ignore
-    return {"tests_passed": ok, "coverage_before": before, "coverage_after": after, "warning": warn, "output_tail": out[-2000:] if out else ""}
+    
+    # Copy coverage results to instructions folder
+    copy_result = copy_coverage_to_instructions()
+    
+    return {
+        "tests_passed": ok, 
+        "coverage_before": before, 
+        "coverage_after": after, 
+        "warning": warn, 
+        "output_tail": out[-2000:] if out else "",
+        "copied_to_instructions": copy_result
+    }
 
 def cmd_test_codecov(args) -> Dict[str, Any]:
     if not COVERAGE_FILE.exists():
@@ -213,7 +277,37 @@ def cmd_test_codecov(args) -> Dict[str, Any]:
 def cmd_upload_codecov(args) -> Dict[str, Any]:
     if not COVERAGE_FILE.exists():
         return {"error": "coverage_missing"}
-    ok, out = run(["codecov", "-f", str(COVERAGE_FILE.relative_to(ROOT)), "-F", "flutter_tests"], timeout=120)
+    
+    # Read token from codecov.yml
+    codecov_config = ROOT / "codecov.yml"
+    token = None
+    if codecov_config.exists():
+        try:
+            with open(codecov_config, 'r') as f:
+                config = yaml.safe_load(f)
+                token = config.get('codecov', {}).get('token')
+        except Exception:
+            pass  # Fallback to env var or no token
+    
+    # Get current branch info
+    branch, commit = _git_info()
+    
+    # Build codecov command with explicit branch and commit
+    cmd = [
+        "codecov", 
+        "-f", str(COVERAGE_FILE.relative_to(ROOT)),
+        "--flag", "flutter_tests",
+        "--verbose"
+    ]
+    
+    if token:
+        cmd.extend(["--token", token])
+    if branch:
+        cmd.extend(["--branch", branch])
+    if commit:
+        cmd.extend(["--sha", commit])
+        
+    ok, out = run(cmd, timeout=120)
     return {"uploaded": ok, "output_tail": out[-4000:] if out else ""}
 
 def _git_info() -> Tuple[Optional[str], Optional[str]]:
@@ -291,7 +385,23 @@ def cmd_dev_cycle(args) -> Dict[str, Any]:
         duration_ms=int((time.time() - start_ts) * 1000),
     )
     path = write_session_manifest(manifest)
-    return {"tests_passed": ok, "coverage": end_cov, "uploaded": uploaded, "manifest": str(path.relative_to(ROOT)), "notes": notes, "branch": branch, "commit": commit, "file_coverage_deltas": file_deltas}
+    
+    # Copy coverage results to instructions folder if tests were run
+    copy_result = None
+    if not args.skip_tests and end_cov:
+        copy_result = copy_coverage_to_instructions()
+    
+    return {
+        "tests_passed": ok, 
+        "coverage": end_cov, 
+        "uploaded": uploaded, 
+        "manifest": str(path.relative_to(ROOT)), 
+        "notes": notes, 
+        "branch": branch, 
+        "commit": commit, 
+        "file_coverage_deltas": file_deltas,
+        "copied_to_instructions": copy_result
+    }
 
 def cmd_full_check(args) -> Dict[str, Any]:
     hc = health_check()
@@ -499,10 +609,10 @@ def _create_feature_branch(feature_id: str, dry_run: bool) -> Dict[str, Any]:
         result["error"] = f"branch_create_failed:{create_out[:160]}"
     return result
 
-def _generate_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run: bool) -> Dict[str, Any]:
+def _generate_ai_implementation_guide(feature_record: Dict[str, Any], feature_id: str, dry_run: bool) -> Dict[str, Any]:
     """Generate an AI assistant implementation prompt inside the feature folder.
 
-    File path: lib/features/<snake>/AI_PROMPT.md
+    File path: lib/features/<snake>/AI_IMPLEMENTATION_GUIDE.md
     Content includes: summary, rationale, acceptance, components, data/offline/telemetry/a11y/errors.
     """
     out: Dict[str, Any] = {"path": None}
@@ -511,7 +621,7 @@ def _generate_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run
         return out
     snake = feature_id.split('.')[-1]
     feature_dir = _feature_dir(feature_id)
-    prompt_path = feature_dir / "AI_PROMPT.md"
+    prompt_path = feature_dir / "AI_IMPLEMENTATION_GUIDE.md"
     if dry_run:
         out["path"] = str(prompt_path.relative_to(ROOT))
         return out
@@ -582,7 +692,7 @@ def _generate_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run
     "Before requesting a PR: repeatedly run the dry-run finalize until all validations pass.",
     "Command: python scripts/dev_assistant.py finalize-feature --feature-id {feature_id} --dry-run --json",
     "Check JSON: validations.tests_ok, validations.coverage_ok (>= ${MIN_PROJECT_COV}% line), validations.todos_ok all true.",
-    "If any false: add/adjust tests, raise coverage, or complete checklist (AI_PROMPT). Re-run dry-run.",
+    "If any false: add/adjust tests, raise coverage, or complete checklist (AI_IMPLEMENTATION_GUIDE). Re-run dry-run.",
     "Only when all pass: run without --dry-run to auto-stage + commit (optionally add --push).",
     "Never commit partial feature via finalize-feature; use normal git commits for intermediate work.",
     "Always run all tests locally before finalize-feature.",
@@ -737,7 +847,7 @@ def _load_feature_record(feature_id: str) -> Dict[str, Any]:
     return {}
 
 
-def _generate_production_ai_prompt(feature_record: Dict[str, Any], feature_id: str, dry_run: bool, 
+def _generate_production_ai_implementation_guide(feature_record: Dict[str, Any], feature_id: str, dry_run: bool, 
                                   related_features: List[str], complexity: str, hints: List[str]) -> Dict[str, Any]:
     """Generate production-ready AI implementation prompt with comprehensive guidance."""
     out: Dict[str, Any] = {"path": None}
@@ -746,14 +856,13 @@ def _generate_production_ai_prompt(feature_record: Dict[str, Any], feature_id: s
         return out
     
     snake = feature_id.split('.')[-1]
-    feature_dir = _feature_dir(feature_id)
-    prompt_path = feature_dir / "AI_IMPLEMENTATION_GUIDE.md"
+    prompt_path = INSTRUCTIONS_DIR / f"AI_IMPLEMENTATION_GUIDE_{snake}.md"
     
     if dry_run:
         out["path"] = str(prompt_path.relative_to(ROOT))
         return out
     
-    feature_dir.mkdir(parents=True, exist_ok=True)
+    ensure_instructions_dir()
     
     # Extract comprehensive feature metadata
     title = feature_record.get("title", feature_id)
@@ -1551,7 +1660,7 @@ def cmd_start_next_feature_enhanced(args) -> Dict[str, Any]:
     related_features = _find_related_features(feature_id, record)
     implementation_hints = _generate_implementation_hints(record, feature_id)
     
-    prompt_info = _generate_production_ai_prompt(
+    prompt_info = _generate_production_ai_implementation_guide(
         record, 
         feature_id, 
         bool(base_result.get("dry_run")),
@@ -1640,7 +1749,7 @@ def _finalize_feature_matrix_status(feature_id: str, dry_run: bool) -> Tuple[boo
     return (prev is not None, prev, new)
 
 def _scan_prompt_todos(feature_id: str) -> Dict[str, Any]:
-    path = _feature_dir(feature_id) / 'AI_PROMPT.md'
+    path = _feature_dir(feature_id) / 'AI_IMPLEMENTATION_GUIDE.md'
     if not path.exists():
         return {"error": "prompt_missing"}
     text = path.read_text(encoding='utf-8')

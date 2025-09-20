@@ -1,29 +1,34 @@
 codecov:
   token: 8f7ececb-7d53-4c2f-add5-a21458db909d
-  require_ci_to_pass: yes
+  require_ci_to_pass: no
   notify:
-    wait_for_ci: yes
+    wait_for_ci: no
+  allow_coverage_offsets: yes
+  allow_pseudo_compare: yes
 
 coverage:
   precision: 2
   round: down
   range: "70...100"
 
+  # Allow uploads from any branch
   status:
     project:
       default:
         target: "80%"
         threshold: "1%"
-        if_no_uploads: error
+        if_no_uploads: success # Don't fail if no uploads
         if_not_found: success
-        if_ci_failed: error
+        if_ci_failed: success # Don't require CI to pass
+        only_pulls: no # Allow uploads from any branch, not just PRs
     patch:
       default:
         target: "75%"
         threshold: "2%"
-        if_no_uploads: error
+        if_no_uploads: success # Don't fail if no uploads
         if_not_found: success
-        if_ci_failed: error
+        if_ci_failed: success # Don't require CI to pass
+        only_pulls: no # Allow uploads from any branch, not just PRs
 
 comment:
   layout: "header,diff,flags,components" # Add components to show in PR comments

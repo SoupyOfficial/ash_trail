@@ -979,7 +979,7 @@ features:
 - id: logs.table_browse_edit
   order: 3
   title: Logs Table Browse + Edit
-  status: planned
+  status: done
   priority: P0
   epic: logging
   rationale: Review and correct logs quickly.

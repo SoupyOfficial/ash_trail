@@ -57,14 +57,22 @@ class LayoutState {
 }
 
 /// Provider for combined layout state
-final layoutStateProvider = Provider<LayoutState>((ref) {
-  final breakpoint = ref.watch(breakpointProvider);
-  final config = ref.watch(layoutConfigProvider);
-  final screenSize = ref.watch(screenSizeProvider);
+final layoutStateProvider = Provider<LayoutState>(
+  (ref) {
+    final breakpoint = ref.watch(breakpointProvider);
+    final config = ref.watch(layoutConfigProvider);
+    final screenSize = ref.watch(screenSizeProvider);
 
-  return LayoutState(
-    breakpoint: breakpoint,
-    config: config,
-    screenSize: screenSize,
-  );
-});
+    return LayoutState(
+      breakpoint: breakpoint,
+      config: config,
+      screenSize: screenSize,
+    );
+  },
+  // Declare dependencies to allow overrides across nested ProviderScopes
+  dependencies: [
+    breakpointProvider,
+    layoutConfigProvider,
+    screenSizeProvider,
+  ],
+);

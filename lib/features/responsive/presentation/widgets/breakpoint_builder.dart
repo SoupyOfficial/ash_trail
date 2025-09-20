@@ -19,6 +19,8 @@ class BreakpointBuilder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.sizeOf(context);
     final breakpoint = Breakpoint.fromWidth(size.width);
+    // Read size and compute breakpoint; dependent providers (layoutStateProvider)
+    // will pick these up via ref.watch in their own implementations.
 
     // Override providers with current values
     return ProviderScope(

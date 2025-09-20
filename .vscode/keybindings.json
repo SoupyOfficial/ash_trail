@@ -1,0 +1,87 @@
+[
+  {
+    "key": "ctrl+alt+s",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Status"
+  },
+  {
+    "key": "ctrl+alt+h",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Health Check"
+  },
+  {
+    "key": "ctrl+alt+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Test Coverage"
+  },
+  {
+    "key": "ctrl+alt+d",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Dev Cycle"
+  },
+  {
+    "key": "ctrl+alt+f",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Full Check"
+  },
+  {
+    "key": "ctrl+alt+n",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Start Next Feature"
+  },
+  {
+    "key": "ctrl+alt+shift+n",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Start Next Feature (Dry Run)"
+  },
+  {
+    "key": "ctrl+alt+shift+f",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Finalize Feature (Dry Run)"
+  },
+  {
+    "key": "ctrl+alt+c",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Analyze Coverage"
+  },
+  {
+    "key": "ctrl+alt+p",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Patch Coverage Check"
+  },
+  {
+    "key": "ctrl+alt+g",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Generate Development Scripts"
+  },
+  {
+    "key": "f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Flutter Test with Coverage"
+  },
+  {
+    "key": "ctrl+f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Flutter Clean"
+  },
+  {
+    "key": "shift+f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Flutter Pub Get"
+  },
+  {
+    "key": "ctrl+shift+f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Flutter Build Runner"
+  },
+  {
+    "key": "ctrl+alt+q",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Quality Gate"
+  },
+  {
+    "key": "ctrl+alt+r",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Pre-commit"
+  }
+]

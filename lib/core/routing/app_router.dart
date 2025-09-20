@@ -15,6 +15,7 @@ import '../../features/routing/domain/resolve_deep_link_use_case.dart';
 import '../../features/routing/presentation/log_detail_screen.dart';
 import '../../features/app_shell/presentation/app_shell.dart';
 import '../../features/logging/presentation/logs_screen.dart';
+import '../../features/table_browse_edit/presentation/screens/logs_table_screen.dart';
 import '../telemetry/telemetry_service.dart';
 
 import '../../features/loading_skeletons/presentation/widgets/widgets.dart';
@@ -136,6 +137,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'logs',
             pageBuilder: (ctx, state) =>
                 const NoTransitionPage(child: LogsScreen()),
+            routes: [
+              GoRoute(
+                path: 'table/:accountId',
+                name: 'logs-table',
+                pageBuilder: (ctx, state) {
+                  final accountId = state.pathParameters['accountId']!;
+                  return NoTransitionPage(
+                      child: LogsTableScreen(accountId: accountId));
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: '/settings',

@@ -41,12 +41,19 @@ AshTrail contains comprehensive development automation spanning CI/CD, local too
 | `scripts/precommit.bat` | Batch script | Windows pre-commit hook | `scripts/precommit.ps1` | PowerShell pre-commit |
 | `scripts/dev_generate.sh` | Bash script | Code generation pipeline | `scripts/build.sh` | Generic build script |
 | `scripts/dev_generate.bat` | Batch script | Windows code generation | `scripts/build.ps1` | PowerShell build |
-| **Local Scripts (Analysis)** | | | | |
+| **Local Scripts (Analysis & Security)** | | | | |
 | `scripts/analyze_coverage.py` | Python analysis | Coverage analysis and reporting | `scripts/coverage.py` | Language-agnostic coverage |
 | `scripts/patch_coverage.py` | Python analysis | Patch coverage enforcement | `scripts/coverage.py` (patch mode) | Part of coverage tooling |
 | `scripts/license_check.py` | Python security | License compliance checking | `scripts/security.py` (license check) | Security tooling |
+| `scripts/sbom_generate.py` | Python security | Software Bill of Materials generation | `scripts/security.py` (sbom mode) | Supply chain security |
 | `scripts/docs_integrity.py` | Python quality | Documentation validation | `scripts/doctor.py` (docs check) | Health check component |
 | `scripts/branch_policy.py` | Python policy | Branch protection validation | `scripts/policy.py` | Generic policy enforcement |
+| `scripts/instruction_hash_guard.py` | Python security | Instruction tampering detection | `scripts/security.py` (hash guard) | Security validation |
+| **Local Scripts (Feature Management)** | | | | |
+| `scripts/auto_implement_feature.py` | Python automation | Automated feature implementation with PR creation | Template example | AI-assisted development pattern |
+| `scripts/new_feature_scaffold.py` | Python generator | Advanced feature scaffolding (1214 lines) | Template example | Complex scaffolding pattern |
+| `scripts/simple_feature_scaffold.py` | Python generator | Basic feature scaffolding | Template example | Simple scaffolding pattern |
+| `scripts/health_check.bat` | Batch script | Windows health check wrapper | `scripts/doctor.ps1` | Integrated into doctor script |
 | **Configuration Files** | | | | |
 | `.pre-commit-config.yaml` | pre-commit config | Git hooks configuration | `hooks/pre-commit-config.yaml` | Generic hooks |
 | `codecov.yml` | Codecov config | Sophisticated coverage configuration | `config/codecov.yml` | Coverage settings |
@@ -101,7 +108,7 @@ Transform ash_trail's Flutter-specific automation into a **declarative, config-d
 
 The framework-agnostic automation template has been successfully extracted and implemented with the following deliverables:
 
-### ✅ Completed Components
+### ✅ Completed Components - UPDATED COMPLETE INVENTORY
 
 **1. Core Template Structure (`/automation-export/template/`)**
 - `automation.config.yaml` - Declarative configuration supporting 7 languages
@@ -111,6 +118,8 @@ The framework-agnostic automation template has been successfully extracted and i
   - `lint` - Code quality with auto-fix capabilities
   - `test` - Test execution with coverage reporting and thresholds
   - `build` - Multi-language build automation
+  - `security` - Vulnerability scanning, license compliance, SBOM generation
+  - `coverage` - Advanced coverage analysis with patch coverage calculation
 
 **2. CI/CD Templates (`/automation-export/template/ci/`)**
 - `github/workflows/automation.yml` - Matrix builds with language detection

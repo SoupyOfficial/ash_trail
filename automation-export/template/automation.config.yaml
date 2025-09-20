@@ -97,8 +97,25 @@ tasks:
     rust: "cargo build --release"
     csharp: "dotnet build"
     
-  # Install/update dependencies
-  deps:
+  # Security and compliance
+  security:
+    python: "safety check && pip-audit"
+    java: "mvn dependency-check:check || gradle dependencyCheckAnalyze"
+    node: "npm audit --audit-level=moderate"
+    go: "govulncheck ./..."
+    flutter: "echo 'Manual security review recommended for Flutter'"
+    rust: "cargo audit"
+    csharp: "dotnet list package --vulnerable"
+    
+  # Coverage analysis  
+  coverage-analysis:
+    python: "python -m coverage report"
+    java: "mvn jacoco:report || gradle jacocoTestReport"
+    node: "nyc report"
+    go: "go tool cover -func=coverage/coverage.out"
+    flutter: "genhtml coverage/lcov.info -o coverage/html"
+    rust: "cargo tarpaulin --out Html"
+    csharp: "reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage"
     python: "pip install -r requirements.txt"
     java: "mvn dependency:resolve || gradle build --refresh-dependencies"
     node: "npm install"

@@ -15,6 +15,8 @@ import 'package:ash_trail/features/table_browse_edit/domain/usecases/delete_smok
 import 'package:ash_trail/features/table_browse_edit/domain/usecases/get_filtered_sorted_logs_usecase.dart';
 import 'package:ash_trail/features/table_browse_edit/domain/usecases/get_logs_count_usecase.dart';
 import 'package:ash_trail/features/table_browse_edit/domain/usecases/get_filter_options_usecase.dart';
+import 'package:ash_trail/features/table_browse_edit/domain/usecases/add_tags_to_logs_batch_usecase.dart';
+import 'package:ash_trail/features/table_browse_edit/domain/usecases/remove_tags_from_logs_batch_usecase.dart';
 import 'package:ash_trail/domain/models/smoke_log.dart';
 import 'package:ash_trail/core/failures/app_failure.dart';
 
@@ -36,6 +38,12 @@ class MockGetUsedMethodIdsUseCase extends Mock
 
 class MockGetUsedTagIdsUseCase extends Mock implements GetUsedTagIdsUseCase {}
 
+class MockAddTagsToLogsBatchUseCase extends Mock
+    implements AddTagsToLogsBatchUseCase {}
+
+class MockRemoveTagsFromLogsBatchUseCase extends Mock
+    implements RemoveTagsFromLogsBatchUseCase {}
+
 // Fake classes for fallback values
 class SmokeLogFake extends Fake implements SmokeLog {}
 
@@ -47,6 +55,8 @@ void main() {
   late MockGetLogsCountUseCase mockGetCountUseCase;
   late MockGetUsedMethodIdsUseCase mockGetMethodsUseCase;
   late MockGetUsedTagIdsUseCase mockGetTagsUseCase;
+  late MockAddTagsToLogsBatchUseCase mockAddTagsUseCase;
+  late MockRemoveTagsFromLogsBatchUseCase mockRemoveTagsUseCase;
 
   setUpAll(() {
     registerFallbackValue(SmokeLogFake());
@@ -60,6 +70,8 @@ void main() {
     mockGetCountUseCase = MockGetLogsCountUseCase();
     mockGetMethodsUseCase = MockGetUsedMethodIdsUseCase();
     mockGetTagsUseCase = MockGetUsedTagIdsUseCase();
+    mockAddTagsUseCase = MockAddTagsToLogsBatchUseCase();
+    mockRemoveTagsUseCase = MockRemoveTagsFromLogsBatchUseCase();
   });
 
   ProviderContainer createContainer() {
@@ -75,6 +87,9 @@ void main() {
         getUsedMethodIdsUseCaseProvider
             .overrideWithValue(mockGetMethodsUseCase),
         getUsedTagIdsUseCaseProvider.overrideWithValue(mockGetTagsUseCase),
+        addTagsToLogsBatchUseCaseProvider.overrideWithValue(mockAddTagsUseCase),
+        removeTagsFromLogsBatchUseCaseProvider
+            .overrideWithValue(mockRemoveTagsUseCase),
       ],
     );
   }
@@ -634,6 +649,199 @@ void main() {
       // Assert - no exceptions thrown, state properly updated
       expect(container.read(logsTableStateProvider(accountId)).isRefreshing,
           false);
+
+      container.dispose();
+    });
+
+    test('should provide convenient add tags method', () async {
+      // Arrange
+      final container = createContainer();
+      const accountId = 'test-account-id';
+      const smokeLogIds = ['log1', 'log2'];
+      const tagIds = ['tag1', 'tag2'];
+      const updatedCount = 2;
+
+      when(() => mockAddTagsUseCase.call(
+            accountId: any(named: 'accountId'),
+            smokeLogIds: any(named: 'smokeLogIds'),
+            tagIds: any(named: 'tagIds'),
+          )).thenAnswer((_) async => const Right(updatedCount));
+
+      // Act
+      final tableActions = container.read(tableActionsProvider(accountId));
+      final result = await tableActions.addTagsToLogs(
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+
+      // Assert
+      expect(result, equals(updatedCount));
+      verify(() => mockAddTagsUseCase.call(
+            accountId: accountId,
+            smokeLogIds: smokeLogIds,
+            tagIds: tagIds,
+          )).called(1);
+
+      container.dispose();
+    });
+
+    test('should provide convenient remove tags method', () async {
+      // Arrange
+      final container = createContainer();
+      const accountId = 'test-account-id';
+      const smokeLogIds = ['log1', 'log2'];
+      const tagIds = ['tag1'];
+      const updatedCount = 2;
+
+      when(() => mockRemoveTagsUseCase.call(
+            accountId: any(named: 'accountId'),
+            smokeLogIds: any(named: 'smokeLogIds'),
+            tagIds: any(named: 'tagIds'),
+          )).thenAnswer((_) async => const Right(updatedCount));
+
+      // Act
+      final tableActions = container.read(tableActionsProvider(accountId));
+      final result = await tableActions.removeTagsFromLogs(
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+
+      // Assert
+      expect(result, equals(updatedCount));
+      verify(() => mockRemoveTagsUseCase.call(
+            accountId: accountId,
+            smokeLogIds: smokeLogIds,
+            tagIds: tagIds,
+          )).called(1);
+
+      container.dispose();
+    });
+  });
+
+  group('AddTagsToLogsBatchNotifier', () {
+    const accountId = 'test-account-id';
+    const smokeLogIds = ['log1', 'log2'];
+    const tagIds = ['tag1', 'tag2'];
+
+    test('should successfully add tags to logs', () async {
+      // Arrange
+      final container = createContainer();
+      const updatedCount = 2;
+
+      when(() => mockAddTagsUseCase.call(
+            accountId: any(named: 'accountId'),
+            smokeLogIds: any(named: 'smokeLogIds'),
+            tagIds: any(named: 'tagIds'),
+          )).thenAnswer((_) async => const Right(updatedCount));
+
+      // Act
+      final notifier =
+          container.read(addTagsToLogsBatchProvider(accountId).notifier);
+      final result = await notifier.addTagsToLogs(
+        accountId: accountId,
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+
+      // Assert
+      expect(result, equals(updatedCount));
+      expect(container.read(addTagsToLogsBatchProvider(accountId)).value,
+          equals(updatedCount));
+
+      container.dispose();
+    });
+
+    test('should handle add tags failure', () async {
+      // Arrange
+      final container = createContainer();
+      const failure = AppFailure.validation(message: 'Invalid tags');
+      when(() => mockAddTagsUseCase.call(
+            accountId: any(named: 'accountId'),
+            smokeLogIds: any(named: 'smokeLogIds'),
+            tagIds: any(named: 'tagIds'),
+          )).thenAnswer((_) async => const Left(failure));
+
+      // Act & Assert
+      final notifier =
+          container.read(addTagsToLogsBatchProvider(accountId).notifier);
+      await expectLater(
+        notifier.addTagsToLogs(
+          accountId: accountId,
+          smokeLogIds: smokeLogIds,
+          tagIds: tagIds,
+        ),
+        throwsA(isA<AppFailure>()),
+      );
+
+      expect(
+          container.read(addTagsToLogsBatchProvider(accountId)).hasError, true);
+
+      container.dispose();
+    });
+  });
+
+  group('RemoveTagsFromLogsBatchNotifier', () {
+    const accountId = 'test-account-id';
+    const smokeLogIds = ['log1'];
+    const tagIds = ['tag1'];
+
+    test('should successfully remove tags from logs', () async {
+      // Arrange
+      final container = createContainer();
+      const updatedCount = 1;
+
+      when(() => mockRemoveTagsUseCase.call(
+            accountId: any(named: 'accountId'),
+            smokeLogIds: any(named: 'smokeLogIds'),
+            tagIds: any(named: 'tagIds'),
+          )).thenAnswer((_) async => const Right(updatedCount));
+
+      // Act
+      final notifier =
+          container.read(removeTagsFromLogsBatchProvider(accountId).notifier);
+      final result = await notifier.removeTagsFromLogs(
+        accountId: accountId,
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+
+      // Assert
+      expect(result, equals(updatedCount));
+      expect(
+        container.read(removeTagsFromLogsBatchProvider(accountId)).value,
+        equals(updatedCount),
+      );
+
+      container.dispose();
+    });
+
+    test('should handle remove tags failure', () async {
+      // Arrange
+      final container = createContainer();
+      const failure = AppFailure.validation(message: 'Cannot remove tags');
+      when(() => mockRemoveTagsUseCase.call(
+            accountId: any(named: 'accountId'),
+            smokeLogIds: any(named: 'smokeLogIds'),
+            tagIds: any(named: 'tagIds'),
+          )).thenAnswer((_) async => const Left(failure));
+
+      // Act & Assert
+      final notifier =
+          container.read(removeTagsFromLogsBatchProvider(accountId).notifier);
+
+      await expectLater(
+        notifier.removeTagsFromLogs(
+          accountId: accountId,
+          smokeLogIds: smokeLogIds,
+          tagIds: tagIds,
+        ),
+        throwsA(isA<AppFailure>()),
+      );
+
+      expect(
+        container.read(removeTagsFromLogsBatchProvider(accountId)).hasError,
+        true,
+      );
 
       container.dispose();
     });

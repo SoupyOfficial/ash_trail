@@ -126,4 +126,38 @@ abstract class LogsTableRepository {
   Future<Either<AppFailure, List<String>>> getUsedTagIds({
     required String accountId,
   });
+
+  /// Batch add tags to multiple smoke logs
+  /// Creates SmokeLogTag edges offline-first and enqueues remote sync
+  ///
+  /// Parameters:
+  /// - [accountId]: Account ID for verification
+  /// - [smokeLogIds]: List of log IDs to attach tags to
+  /// - [tagIds]: List of tag IDs to attach
+  ///
+  /// Returns:
+  /// - Count of created edges (logId x tagId minus existing duplicates)
+  /// - AppFailure if error occurs
+  Future<Either<AppFailure, int>> addTagsToLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  });
+
+  /// Batch remove tags from multiple smoke logs
+  /// Deletes SmokeLogTag edges offline-first and enqueues remote sync
+  ///
+  /// Parameters:
+  /// - [accountId]: Account ID for verification
+  /// - [smokeLogIds]: List of log IDs to detach tags from
+  /// - [tagIds]: List of tag IDs to remove
+  ///
+  /// Returns:
+  /// - Count of deleted edges
+  /// - AppFailure if error occurs
+  Future<Either<AppFailure, int>> removeTagsFromLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  });
 }

@@ -204,6 +204,96 @@ final refreshLogsTableProvider = AutoDisposeAsyncNotifierProviderFamily<
   return RefreshLogsTableNotifier();
 });
 
+/// Provider for batch adding tags to logs
+class AddTagsToLogsBatchNotifier
+    extends AutoDisposeFamilyAsyncNotifier<int, String> {
+  @override
+  Future<int> build(String arg) {
+    return Future<int>(() => throw UnimplementedError());
+  }
+
+  Future<int> addTagsToLogs({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  }) async {
+    state = const AsyncLoading();
+
+    final useCase = ref.read(addTagsToLogsBatchUseCaseProvider);
+    final result = await useCase(
+      accountId: accountId,
+      smokeLogIds: smokeLogIds,
+      tagIds: tagIds,
+    );
+
+    return result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        throw failure;
+      },
+      (count) {
+        state = AsyncData(count);
+
+        // Refresh table and used tags
+        ref.invalidate(filteredSortedLogsProvider);
+        ref.invalidate(usedTagIdsProvider);
+
+        return count;
+      },
+    );
+  }
+}
+
+final addTagsToLogsBatchProvider = AutoDisposeAsyncNotifierProviderFamily<
+    AddTagsToLogsBatchNotifier, int, String>(() {
+  return AddTagsToLogsBatchNotifier();
+});
+
+/// Provider for batch removing tags from logs
+class RemoveTagsFromLogsBatchNotifier
+    extends AutoDisposeFamilyAsyncNotifier<int, String> {
+  @override
+  Future<int> build(String arg) {
+    return Future<int>(() => throw UnimplementedError());
+  }
+
+  Future<int> removeTagsFromLogs({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  }) async {
+    state = const AsyncLoading();
+
+    final useCase = ref.read(removeTagsFromLogsBatchUseCaseProvider);
+    final result = await useCase(
+      accountId: accountId,
+      smokeLogIds: smokeLogIds,
+      tagIds: tagIds,
+    );
+
+    return result.fold(
+      (failure) {
+        state = AsyncError(failure, StackTrace.current);
+        throw failure;
+      },
+      (count) {
+        state = AsyncData(count);
+
+        // Refresh table and used tags
+        ref.invalidate(filteredSortedLogsProvider);
+        ref.invalidate(usedTagIdsProvider);
+
+        return count;
+      },
+    );
+  }
+}
+
+final removeTagsFromLogsBatchProvider = AutoDisposeAsyncNotifierProviderFamily<
+    RemoveTagsFromLogsBatchNotifier, int, String>(() {
+  return RemoveTagsFromLogsBatchNotifier();
+});
+
 /// Convenience provider for table operations
 /// Provides a unified interface for common table actions
 final tableActionsProvider = Provider.family<TableActions, String>(
@@ -250,5 +340,33 @@ class TableActions {
     return _ref
         .read(refreshLogsTableProvider(_accountId).notifier)
         .refresh(accountId: _accountId);
+  }
+
+  /// Add tags to logs in batch
+  Future<int> addTagsToLogs({
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  }) {
+    return _ref
+        .read(addTagsToLogsBatchProvider(_accountId).notifier)
+        .addTagsToLogs(
+          accountId: _accountId,
+          smokeLogIds: smokeLogIds,
+          tagIds: tagIds,
+        );
+  }
+
+  /// Remove tags from logs in batch
+  Future<int> removeTagsFromLogs({
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  }) {
+    return _ref
+        .read(removeTagsFromLogsBatchProvider(_accountId).notifier)
+        .removeTagsFromLogs(
+          accountId: _accountId,
+          smokeLogIds: smokeLogIds,
+          tagIds: tagIds,
+        );
   }
 }

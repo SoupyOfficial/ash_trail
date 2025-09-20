@@ -61,4 +61,20 @@ abstract class LogsTableLocalDataSource {
   Future<List<String>> getUsedTagIds({
     required String accountId,
   });
+
+  /// Batch attach tags to multiple smoke logs locally (offline-first)
+  /// Returns number of created edges (deduplicated)
+  Future<int> addTagsToLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  });
+
+  /// Batch remove tags from multiple smoke logs locally
+  /// Returns number of deleted edges
+  Future<int> removeTagsFromLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  });
 }

@@ -10,6 +10,8 @@ import '../../domain/entities/log_filter.dart';
 import '../../domain/entities/log_sort.dart';
 import '../../domain/repositories/logs_table_repository.dart';
 import '../../domain/usecases/delete_smoke_log_usecase.dart';
+import '../../domain/usecases/add_tags_to_logs_batch_usecase.dart';
+import '../../domain/usecases/remove_tags_from_logs_batch_usecase.dart';
 import '../../domain/usecases/get_filter_options_usecase.dart';
 import '../../domain/usecases/get_filtered_sorted_logs_usecase.dart';
 import '../../domain/usecases/get_logs_count_usecase.dart';
@@ -69,6 +71,20 @@ final deleteSmokeLogUseCaseProvider = Provider<DeleteSmokeLogUseCase>((ref) {
 final deleteSmokeLogsBatchUseCaseProvider =
     Provider<DeleteSmokeLogsBatchUseCase>((ref) {
   return DeleteSmokeLogsBatchUseCase(
+    repository: ref.watch(logsTableRepositoryProvider),
+  );
+});
+
+final addTagsToLogsBatchUseCaseProvider =
+    Provider<AddTagsToLogsBatchUseCase>((ref) {
+  return AddTagsToLogsBatchUseCase(
+    repository: ref.watch(logsTableRepositoryProvider),
+  );
+});
+
+final removeTagsFromLogsBatchUseCaseProvider =
+    Provider<RemoveTagsFromLogsBatchUseCase>((ref) {
+  return RemoveTagsFromLogsBatchUseCase(
     repository: ref.watch(logsTableRepositoryProvider),
   );
 });

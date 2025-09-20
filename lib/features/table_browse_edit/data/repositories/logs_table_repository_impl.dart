@@ -194,6 +194,54 @@ class LogsTableRepositoryImpl implements LogsTableRepository {
     }
   }
 
+  @override
+  Future<Either<AppFailure, int>> addTagsToLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  }) async {
+    try {
+      // Write to local first
+      final created = await _localDataSource.addTagsToLogsBatch(
+        accountId: accountId,
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+
+      // Fire-and-forget remote sync
+      _syncBatchAddTagsToRemote(accountId, smokeLogIds, tagIds).ignore();
+
+      return Right(created);
+    } catch (e) {
+      return Left(AppFailure.cache(
+        message: 'Failed to batch add tags: ${e.toString()}',
+      ));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, int>> removeTagsFromLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  }) async {
+    try {
+      final deleted = await _localDataSource.removeTagsFromLogsBatch(
+        accountId: accountId,
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+
+      _syncBatchRemoveTagsFromRemote(accountId, smokeLogIds, tagIds).ignore();
+
+      return Right(deleted);
+    } catch (e) {
+      return Left(AppFailure.cache(
+        message: 'Failed to batch remove tags: ${e.toString()}',
+      ));
+    }
+  }
+
   /// Background sync operation for updates
   Future<void> _syncUpdateToRemote(SmokeLogDto dto) async {
     try {
@@ -234,6 +282,40 @@ class LogsTableRepositoryImpl implements LogsTableRepository {
     }
   }
 
+  /// Background sync operation for batch tag add
+  Future<void> _syncBatchAddTagsToRemote(
+    String accountId,
+    List<String> smokeLogIds,
+    List<String> tagIds,
+  ) async {
+    try {
+      await _remoteDataSource.addTagsToLogsBatch(
+        accountId: accountId,
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+    } catch (e) {
+      // Leave pending sync flags for retry
+    }
+  }
+
+  /// Background sync operation for batch tag removal
+  Future<void> _syncBatchRemoveTagsFromRemote(
+    String accountId,
+    List<String> smokeLogIds,
+    List<String> tagIds,
+  ) async {
+    try {
+      await _remoteDataSource.removeTagsFromLogsBatch(
+        accountId: accountId,
+        smokeLogIds: smokeLogIds,
+        tagIds: tagIds,
+      );
+    } catch (e) {
+      // Leave pending sync flags for retry
+    }
+  }
+
   /// Public method for manual sync operations
   /// Used by background sync service or pull-to-refresh
   Future<Either<AppFailure, void>> syncWithRemote({
@@ -244,11 +326,11 @@ class LogsTableRepositoryImpl implements LogsTableRepository {
     try {
       if (forceFullSync) {
         // Full sync: fetch all data from remote and merge with local
-        final remoteLogs = await _remoteDataSource.getFilteredSortedLogs(
+        await _remoteDataSource.getFilteredSortedLogs(
           accountId: accountId,
           filter: filter,
         );
-        
+
         // TODO: Implement merge logic with conflict resolution
         // This would involve comparing timestamps and applying merge rules
       }

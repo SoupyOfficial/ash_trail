@@ -5,6 +5,7 @@ import 'core/routing/app_router.dart';
 import 'features/theming/presentation/providers/theme_provider.dart';
 import 'features/haptics_baseline/presentation/providers/haptics_providers.dart';
 import 'features/quick_actions/presentation/widgets/quick_actions_listener.dart';
+import 'core/feature_flags/feature_flags.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,15 @@ void main() async {
     overrides: [
       createThemeRepositoryOverride(prefs),
       sharedPreferencesProvider.overrideWithValue(prefs),
+      // Runtime feature flags override
+      // Use compile-time environment variables to enable gated features in specific builds
+      // Example: flutter run --dart-define=ENABLE_BATCH_EDIT=true
+      featureFlagsProvider.overrideWithValue(const {
+        if (bool.fromEnvironment('ENABLE_BATCH_EDIT', defaultValue: false))
+          'logging.batch_edit_delete': true,
+        if (bool.fromEnvironment('ENABLE_INLINE_EDIT', defaultValue: false))
+          'logging.edit_inline_snackbar': true,
+      }),
     ],
     child: const MyApp(),
   ));

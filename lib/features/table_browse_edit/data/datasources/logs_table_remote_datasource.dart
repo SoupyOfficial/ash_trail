@@ -68,4 +68,20 @@ abstract class LogsTableRemoteDataSource {
     required String accountId,
     required List<SmokeLogDto> logs,
   });
+
+  /// Batch attach tags to multiple smoke logs in Firestore
+  /// Returns number of created edges
+  Future<int> addTagsToLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  });
+
+  /// Batch remove tags from multiple smoke logs in Firestore
+  /// Returns number of deleted edges
+  Future<int> removeTagsFromLogsBatch({
+    required String accountId,
+    required List<String> smokeLogIds,
+    required List<String> tagIds,
+  });
 }

@@ -1011,7 +1011,7 @@ features:
 - id: logging.quick_tagging
   order: 4
   title: Quick Tagging Chips
-  status: planned
+  status: done
   priority: P1
   epic: logging
   rationale: Reduce friction adding frequent tags to a log at capture time.

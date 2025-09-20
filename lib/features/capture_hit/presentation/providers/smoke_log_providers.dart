@@ -11,6 +11,8 @@ import '../../domain/usecases/create_smoke_log_usecase.dart';
 import '../../domain/usecases/undo_last_smoke_log_usecase.dart';
 import '../../domain/usecases/get_last_smoke_log_usecase.dart';
 import '../../domain/usecases/delete_smoke_log_usecase.dart';
+// Optional: integrate with quick tagging to attach selected tags after creation
+import '../../../quick_tagging/presentation/providers/quick_tagging_providers.dart';
 
 /// Repository providers - Abstract interfaces
 /// These should be overridden in main.dart with concrete implementations
@@ -111,7 +113,7 @@ class CreateSmokeLogNotifier
       notes: notes,
     );
 
-    return result.fold(
+    final created = result.fold(
       (failure) {
         state = AsyncError(failure, StackTrace.current);
         throw failure;
@@ -121,6 +123,20 @@ class CreateSmokeLogNotifier
         return smokeLog;
       },
     );
+
+    // Best-effort: attach any selected quick tags
+    try {
+      final controller =
+          ref.read(quickTaggingControllerProvider(accountId).notifier);
+      await controller.attachSelectedToLog(
+        smokeLogId: created.id,
+        ts: created.ts,
+      );
+    } catch (_) {
+      // If provider not set or fails, ignore; tagging is optional
+    }
+
+    return created;
   }
 }
 

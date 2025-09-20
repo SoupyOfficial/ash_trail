@@ -1036,7 +1036,7 @@ features:
 - id: logging.edit_inline_snackbar
   order: 5
   title: Inline Edit From Snackbar
-  status: planned
+  status: done
   priority: P2
   epic: logging
   rationale: Fix minor mistakes immediately after creation.

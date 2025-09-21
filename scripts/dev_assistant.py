@@ -1827,11 +1827,50 @@ def cmd_finalize_feature(args) -> Dict[str, Any]:
         commit_msg = f"feat({feature_id.split('.')[-1]}): finalize {feature_id}"
         ok_commit, out_commit = run(["git", "commit", "-m", commit_msg], timeout=50)
         commit_info = {"attempted": True, "committed": ok_commit, "message": commit_msg, "staged": staged_list, "errors": [], "output": out_commit[-400:] if out_commit else ""}
-        if ok_commit and getattr(args, 'push', False):
+        
+        # Push by default (unless --no-push is specified)
+        no_push = getattr(args, 'no_push', False)
+        if ok_commit and not no_push:
             branch = _current_branch()
             if branch:
                 ok_push, out_push = run(["git", "push", "origin", branch], timeout=70)
                 commit_info['push'] = {"pushed": ok_push, "output": out_push[-400:] if out_push else ""}
+                
+                # Merge into main after successful push (unless --no-merge is specified)
+                no_merge = getattr(args, 'no_merge', False)
+                if ok_push and not no_merge and branch != "main":
+                    # Switch to main
+                    ok_switch, out_switch = run(["git", "checkout", "main"], timeout=30)
+                    if ok_switch:
+                        # Pull latest changes
+                        ok_pull, out_pull = run(["git", "pull", "origin", "main"], timeout=60)
+                        if ok_pull:
+                            # Merge feature branch
+                            merge_msg = f"Merge branch '{branch}' into main - {feature_id}"
+                            ok_merge, out_merge = run(["git", "merge", branch, "-m", merge_msg], timeout=60)
+                            if ok_merge:
+                                # Push the merged changes to main
+                                ok_push_main, out_push_main = run(["git", "push", "origin", "main"], timeout=70)
+                                if ok_push_main:
+                                    # Delete the merged feature branch
+                                    run(["git", "branch", "-d", branch], timeout=30)
+                                    run(["git", "push", "origin", "--delete", branch], timeout=60)
+                                commit_info['merge'] = {
+                                    "attempted": True,
+                                    "switched_to_main": ok_switch,
+                                    "pulled_main": ok_pull,
+                                    "merged": ok_merge,
+                                    "pushed_main": ok_push_main,
+                                    "branch_deleted": ok_push_main,  # Only delete if push to main succeeded
+                                    "merge_message": merge_msg,
+                                    "output": f"Switch: {out_switch[-200:] if out_switch else ''}\nPull: {out_pull[-200:] if out_pull else ''}\nMerge: {out_merge[-200:] if out_merge else ''}\nPush: {out_push_main[-200:] if out_push_main else ''}"
+                                }
+                            else:
+                                commit_info['merge'] = {"attempted": True, "merged": False, "error": "merge_failed", "output": out_merge[-400:] if out_merge else ""}
+                        else:
+                            commit_info['merge'] = {"attempted": True, "merged": False, "error": "pull_failed", "output": out_pull[-400:] if out_pull else ""}
+                    else:
+                        commit_info['merge'] = {"attempted": True, "merged": False, "error": "switch_failed", "output": out_switch[-400:] if out_switch else ""}
     return {"feature_id": feature_id, "validations": validations, "all_pass": all_pass, "status": status_change, "commit": commit_info, "dry_run": dry_run}
 
 # Register finalize command
@@ -1851,7 +1890,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dry-run", action="store_true", help="Show actions without modifying files")
     p.add_argument("--auto-commit", action="store_true", help="Automatically git add + commit scaffold & prompt")
     p.add_argument("--push", action="store_true", help="Push newly created branch after committing (implies --auto-commit)")
-    # finalize-feature options reuse --feature-id, --dry-run, --skip-tests, --push
+    # finalize-feature options reuse --feature-id, --dry-run, --skip-tests, plus new merge control options
+    p.add_argument("--no-push", action="store_true", help="Skip pushing branch changes (finalize-feature only)")
+    p.add_argument("--no-merge", action="store_true", help="Skip merging into main after push (finalize-feature only)")
     return p
 
 def main(argv: Optional[List[str]] = None) -> int:

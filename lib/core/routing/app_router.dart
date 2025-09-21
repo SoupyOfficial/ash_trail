@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/routing/domain/route_intent.dart';
 import '../../features/routing/domain/resolve_deep_link_use_case.dart';
-import '../../features/routing/presentation/log_detail_screen.dart';
+import '../../features/detail_view/presentation/screens/log_detail_screen.dart';
 import '../../features/app_shell/presentation/app_shell.dart';
 import '../../features/logging/presentation/logs_screen.dart';
 import '../../features/table_browse_edit/presentation/screens/logs_table_screen.dart';

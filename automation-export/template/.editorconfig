@@ -1,0 +1,62 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Specific file types
+[*.{py,pyx,pyi}]
+indent_size = 4
+
+[*.{java,kt,scala}]
+indent_size = 4
+
+[*.{cs,fs}]
+indent_size = 4
+
+[*.{go}]
+indent_style = tab
+indent_size = 4
+
+[*.{js,ts,jsx,tsx,vue,svelte}]
+indent_size = 2
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.{json,jsonc}]
+indent_size = 2
+
+[*.{toml}]
+indent_size = 2
+
+[*.{sh,bash,zsh,fish}]
+indent_size = 2
+
+[*.{ps1,psm1,psd1}]
+indent_size = 2
+
+[*.{bat,cmd}]
+end_of_line = crlf
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{sln,csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
+indent_size = 2
+end_of_line = crlf
+
+[*.{xml,config,props,targets,nuspec,resx,ruleset,vsixmanifest,vsct}]
+indent_size = 2

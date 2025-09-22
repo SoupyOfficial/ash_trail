@@ -1,0 +1,151 @@
+name: "Setup Language Environment"
+description: "Setup language-specific tools and dependencies"
+inputs:
+  language:
+    description: "Programming language (python, java, node, go, flutter, rust, csharp)"
+    required: true
+  version:
+    description: "Language version to install"
+    required: false
+    default: "default"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Python
+      if: inputs.language == 'python'
+      uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+      with:
+        python-version: ${{ inputs.version }}
+
+    - name: Cache Python dependencies
+      if: inputs.language == 'python'
+      uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install Python dependencies
+      if: inputs.language == 'python'
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f pyproject.toml ]; then pip install -e .; fi
+        # Common dev tools
+        pip install ruff black pytest coverage
+
+    - name: Setup Java
+      if: inputs.language == 'java'
+      uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+      with:
+        distribution: "temurin"
+        java-version: ${{ inputs.version }}
+
+    - name: Cache Maven dependencies
+      if: inputs.language == 'java' && hashFiles('**/pom.xml') != ''
+      uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Cache Gradle dependencies
+      if: inputs.language == 'java' && hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') != ''
+      uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Setup Node.js
+      if: inputs.language == 'node'
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+      with:
+        node-version: ${{ inputs.version }}
+        cache: "npm"
+        cache-dependency-path: "**/package-lock.json"
+
+    - name: Install Node.js dependencies
+      if: inputs.language == 'node'
+      shell: bash
+      run: npm ci
+
+    - name: Setup Go
+      if: inputs.language == 'go'
+      uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+      with:
+        go-version: ${{ inputs.version }}
+        cache: true
+        cache-dependency-path: go.sum
+
+    - name: Install Go tools
+      if: inputs.language == 'go'
+      shell: bash
+      run: |
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+    - name: Setup Flutter
+      if: inputs.language == 'flutter'
+      uses: subosito/flutter-action@44ac965b96f18d999802d4b807e3256d5a3f9fa1 # v2.12.0
+      with:
+        flutter-version: ${{ inputs.version }}
+        cache: true
+
+    - name: Install Flutter dependencies
+      if: inputs.language == 'flutter'
+      shell: bash
+      run: flutter pub get
+
+    - name: Setup Rust
+      if: inputs.language == 'rust'
+      uses: dtolnay/rust-toolchain@1482605bfc5719782e1267fd0c0cc350aa60bc59 # stable as of 2024-01-01
+      with:
+        toolchain: ${{ inputs.version }}
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      if: inputs.language == 'rust'
+      uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Install Rust tools
+      if: inputs.language == 'rust'
+      shell: bash
+      run: |
+        cargo install cargo-audit --locked
+        cargo install cargo-tarpaulin --locked
+
+    - name: Setup .NET
+      if: inputs.language == 'csharp'
+      uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+      with:
+        dotnet-version: ${{ inputs.version }}
+
+    - name: Cache NuGet packages
+      if: inputs.language == 'csharp'
+      uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.fsproj', '**/*.sln') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore .NET dependencies
+      if: inputs.language == 'csharp'
+      shell: bash
+      run: dotnet restore

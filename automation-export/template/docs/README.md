@@ -133,6 +133,41 @@ coverage:
   patch_threshold: 85
 ```
 
+## 🤖 AI-Assisted Documentation
+
+The template includes comprehensive AI assistance for generating project documentation:
+
+### Quick AI Documentation
+```bash
+# Interactive AI assistant for documentation generation
+python scripts/ai_docs_assistant.py --interactive
+
+# Generate specific documentation types
+python scripts/ai_docs_assistant.py --template feature-matrix
+python scripts/ai_docs_assistant.py --template api-docs
+python scripts/ai_docs_assistant.py --template system-architecture
+```
+
+### Available Documentation Templates
+- **Feature Matrix** - Complete project roadmap with dependencies and estimates
+- **API Documentation** - OpenAPI/GraphQL specifications with examples
+- **Domain Models** - Entity relationships and business logic documentation
+- **System Architecture** - High-level design with component diagrams
+- **UI/UX Design** - User flows, wireframes, and component specifications
+
+### AI Documentation Resources
+- **[AI Assistance Guide](ai-assistance-guide.md)** - Comprehensive examples and domain-specific prompts
+- **[AI Quick Prompts](ai-quick-prompts.md)** - Ready-to-use templates for common documentation needs
+- **[AI Prompt Templates](ai-prompt-templates.md)** - Copy-paste templates for different project types
+
+### Domain-Specific Examples
+The template includes AI prompts for various domains:
+- **E-commerce** - Product catalogs, shopping carts, payment processing
+- **Healthcare** - Patient records, HIPAA compliance, medical workflows  
+- **SaaS** - Multi-tenancy, subscription management, analytics
+- **Finance** - Transaction processing, regulatory compliance
+- **Education** - Learning management, student tracking, content delivery
+
 ## 🔄 CI/CD Integration
 
 ### GitHub Actions

@@ -4,29 +4,26 @@ meta:
   version: "1.0.0"
   description: "Framework-agnostic development automation extracted from ash_trail"
   author: "AshTrail Project"
-  
+
 # Language detection patterns
 detect:
-  python: 
+  python:
     - "pyproject.toml"
     - "requirements.txt"
     - "setup.py"
     - "setup.cfg"
-  java: 
+  java:
     - "pom.xml"
     - "build.gradle"
     - "build.gradle.kts"
     - "gradle.properties"
-  node: 
+  node:
     - "package.json"
     - "package-lock.json"
     - "yarn.lock"
-  go: 
+  go:
     - "go.mod"
     - "go.sum"
-  flutter: 
-    - "pubspec.yaml"
-    - "pubspec.lock"
   rust:
     - "Cargo.toml"
     - "Cargo.lock"
@@ -39,75 +36,75 @@ detect:
 tasks:
   # Health check - validate environment and dependencies
   doctor:
-    python: "python --version && pip --version && python -c 'import sys; print(f\"Python {sys.version}\")"
+    python: 'python --version && pip --version && python -c ''import sys; print(f"Python {sys.version}")'''
     java: "java --version && mvn --version || gradle --version"
     node: "node --version && npm --version"
     go: "go version"
-    flutter: "flutter doctor"
     rust: "rustc --version && cargo --version"
     csharp: "dotnet --version"
-    
+    default: "echo 'No language-specific health check available'"
+
   # Linting and formatting
   lint:
     python: "ruff check . && black --check ."
     java: "mvn spotless:check || gradle spotlessCheck"
     node: "npm run lint || npx eslint ."
     go: "go vet ./... && golangci-lint run"
-    flutter: "dart format --set-exit-if-changed . && flutter analyze"
     rust: "cargo fmt --check && cargo clippy -- -D warnings"
     csharp: "dotnet format --verify-no-changes"
-    
+    default: "echo 'No language-specific linting available'"
+
   # Fix linting issues
   lint-fix:
     python: "ruff check --fix . && black ."
     java: "mvn spotless:apply || gradle spotlessApply"
     node: "npm run lint:fix || npx eslint --fix ."
     go: "go fmt ./... && golangci-lint run --fix"
-    flutter: "dart format . && flutter analyze"
     rust: "cargo fmt && cargo clippy --fix --allow-dirty"
     csharp: "dotnet format"
-    
+    default: "echo 'No language-specific lint fixing available'"
+
   # Run tests
   test:
     python: "pytest -v"
     java: "mvn test || gradle test"
     node: "npm test"
     go: "go test ./..."
-    flutter: "flutter test --coverage"
     rust: "cargo test"
     csharp: "dotnet test"
-    
+    default: "echo 'No language-specific tests available'"
+
   # Run tests with coverage
   test-coverage:
     python: "pytest --cov=. --cov-report=lcov:coverage/lcov.info"
     java: "mvn test jacoco:report || gradle test jacocoTestReport"
     node: "npm run test:coverage || nyc npm test"
     go: "go test -coverprofile=coverage.out ./..."
-    flutter: "flutter test --coverage"
     rust: "cargo tarpaulin --out lcov --output-dir coverage"
     csharp: "dotnet test --collect:'XPlat Code Coverage'"
-    
+    default: "echo 'No language-specific coverage available'"
+
   # Build the project
   build:
     python: "python -m build"
     java: "mvn package || gradle build"
     node: "npm run build"
     go: "go build ./..."
-    flutter: "flutter build apk"
     rust: "cargo build --release"
     csharp: "dotnet build"
-    
+    default: "echo 'No language-specific build available'"
+
   # Security and compliance
   security:
     python: "safety check && pip-audit"
     java: "mvn dependency-check:check || gradle dependencyCheckAnalyze"
     node: "npm audit --audit-level=moderate"
     go: "govulncheck ./..."
-    flutter: "echo 'Manual security review recommended for Flutter'"
     rust: "cargo audit"
     csharp: "dotnet list package --vulnerable"
-    
-  # Coverage analysis  
+    default: "echo 'No language-specific security scanning available'"
+
+  # Coverage analysis
   coverage-analysis:
     python: "python -m coverage report"
     java: "mvn jacoco:report || gradle jacocoTestReport"
@@ -116,6 +113,10 @@ tasks:
     flutter: "genhtml coverage/lcov.info -o coverage/html"
     rust: "cargo tarpaulin --out Html"
     csharp: "reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage"
+    default: "echo 'No language-specific coverage analysis available'"
+
+  # Install dependencies
+  deps:
     python: "pip install -r requirements.txt"
     java: "mvn dependency:resolve || gradle build --refresh-dependencies"
     node: "npm install"
@@ -123,20 +124,24 @@ tasks:
     flutter: "flutter pub get"
     rust: "cargo fetch"
     csharp: "dotnet restore"
+    default: "echo 'No language-specific dependency management available'"
 
 # Coverage configuration
 coverage:
-  global_threshold: 80  # Minimum global coverage percentage
-  patch_threshold: 85   # Minimum coverage for changed lines
-  lcov_file: "coverage/lcov.info"  # Standard location for LCOV files
-  
+  global_threshold: 80 # Minimum global coverage percentage
+  patch_threshold: 85 # Minimum coverage for changed lines
+  lcov_file: "coverage/lcov.info" # Standard location for LCOV files
+
   # Per-language coverage file patterns
   files:
     python: ["coverage/lcov.info", ".coverage"]
-    java: ["target/site/jacoco/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"]
+    java:
+      [
+        "target/site/jacoco/jacoco.xml",
+        "build/reports/jacoco/test/jacocoTestReport.xml",
+      ]
     node: ["coverage/lcov.info", "coverage/coverage-final.json"]
     go: ["coverage.out"]
-    flutter: ["coverage/lcov.info"]
     rust: ["coverage/lcov.info"]
     csharp: ["**/coverage.cobertura.xml"]
 
@@ -146,35 +151,263 @@ ci:
   os_matrix:
     - "ubuntu-latest"
     - "windows-latest"
-    
+
   # Language versions to test (when applicable)
   versions:
     python: ["3.9", "3.10", "3.11"]
     java: ["11", "17", "21"]
     node: ["16", "18", "20"]
     go: ["1.19", "1.20", "1.21"]
-    flutter: ["stable"]
     rust: ["stable"]
     csharp: ["6.0", "7.0", "8.0"]
+
+# File patterns for CI path filtering
+filesChanged:
+  python:
+    - "**/*.py"
+    - "pyproject.toml"
+    - "requirements*.txt"
+    - "setup.py"
+    - "setup.cfg"
+    - "tox.ini"
+  java:
+    - "**/*.java"
+    - "**/*.kt"
+    - "**/*.scala"
+    - "pom.xml"
+    - "build.gradle*"
+    - "gradle.properties"
+  node:
+    - "**/*.js"
+    - "**/*.ts"
+    - "**/*.jsx"
+    - "**/*.tsx"
+    - "**/*.vue"
+    - "**/*.svelte"
+    - "package*.json"
+    - "yarn.lock"
+    - "tsconfig*.json"
+    - "*.config.js"
+  go:
+    - "**/*.go"
+    - "go.mod"
+    - "go.sum"
+  rust:
+    - "**/*.rs"
+    - "Cargo.toml"
+    - "Cargo.lock"
+  csharp:
+    - "**/*.cs"
+    - "**/*.fs"
+    - "**/*.vb"
+    - "**/*.csproj"
+    - "**/*.sln"
+    - "**/*.fsproj"
+    - "**/*.props"
+    - "**/*.targets"
+  common:
+    - ".github/workflows/**"
+    - "scripts/**"
+    - "automation.config.yaml"
+    - "Dockerfile*"
+    - "docker-compose*.yml"
+
+# Dev Assistant Configuration
+dev_assistant:
+  # Feature matrix file location
+  feature_matrix: "feature_matrix.yaml"
+
+  # Commands and their configurations
+  commands:
+    status:
+      description: "Show project and feature status overview"
+      enabled: true
+
+    health:
+      description: "Comprehensive environment health check"
+      enabled: true
+      checks:
+        - "dependencies"
+        - "git_status"
+        - "environment"
+        - "coverage_tools"
+
+    coverage:
+      description: "Multi-format coverage analysis and reporting"
+      enabled: true
+      formats: ["lcov", "json", "xml", "go", "rust"]
+      thresholds:
+        global: 80
+        patch: 85
+      generate_html: true
+      save_history: true
+
+    upload_coverage:
+      description: "Upload coverage reports to Codecov"
+      enabled: true
+      auto_install_cli: true
+      timeout: 120
+      retry_attempts: 3
+      default_flags: ["unit"]
+      coverage_patterns:
+        - "coverage/lcov.info"
+        - "coverage.xml"
+        - "coverage.json"
+        - "coverage.out"
+        - "**/target/site/jacoco/jacoco.xml"
+        - "**/build/reports/jacoco/test/jacocoTestReport.xml"
+        - "cobertura.xml"
+
+    start_next_feature:
+      description: "Automatically start development of next planned feature"
+      enabled: true
+      auto_commit: false
+      auto_push: false
+      create_branch: true
+      branch_prefix: "feature/"
+
+    finalize_feature:
+      description: "Complete feature development with validation"
+      enabled: true
+      checks:
+        - "coverage_threshold"
+        - "tests_passing"
+        - "linting_clean"
+        - "dependencies_resolved"
+      auto_merge: false
+      cleanup_branch: false
+      upload_coverage_on_complete: true
+
+    features:
+      description: "List and manage features from feature matrix"
+      enabled: true
+      limit_default: 10
+
+    dev_cycle:
+      description: "Complete development cycle validation"
+      enabled: true
+      steps:
+        - "lint_fix"
+        - "test_coverage"
+        - "security_check"
+        - "build_check"
+      upload_coverage: true
+
+    full_check:
+      description: "Comprehensive project validation"
+      enabled: true
+      parallel: true
+      timeout: 600 # 10 minutes
+      upload_coverage: true
+
+# Codecov Integration Configuration
+codecov:
+  # Token configuration (use CODECOV_TOKEN env var)
+  token_env_var: "CODECOV_TOKEN"
+
+  # Upload settings
+  upload:
+    fail_on_error: true
+    auto_retry: true
+    retry_count: 3
+    timeout: 120
+
+  # Default flags for different scenarios
+  flags:
+    unit: ["unit"]
+    integration: ["integration", "e2e"]
+    python: ["python", "unit"]
+    java: ["java", "unit"]
+    node: ["javascript", "unit"]
+    go: ["go", "unit"]
+    rust: ["rust", "unit"]
+    csharp: ["csharp", "unit"]
+    flutter: ["dart", "flutter", "unit"]
+
+  # Coverage file patterns by language
+  coverage_files:
+    python:
+      - "coverage/lcov.info"
+      - ".coverage"
+      - "coverage.xml"
+      - "htmlcov/**/*"
+    java:
+      - "target/site/jacoco/jacoco.xml"
+      - "build/reports/jacoco/test/jacocoTestReport.xml"
+      - "**/jacoco*.xml"
+    node:
+      - "coverage/lcov.info"
+      - "coverage/coverage-final.json"
+      - "coverage/clover.xml"
+    go:
+      - "coverage.out"
+      - "c.out"
+    rust:
+      - "coverage/lcov.info"
+      - "tarpaulin-report.html"
+    csharp:
+      - "**/coverage.cobertura.xml"
+      - "**/coverage.opencover.xml"
+    flutter:
+      - "coverage/lcov.info"
+      - "coverage/coverage_badge.svg"
+
+  # Project setup
+  setup:
+    repo_discovery: true
+    branch_discovery: true
+    commit_discovery: true
+
+# Environment variables
+env:
+  # Coverage settings
+  COVERAGE_GLOBAL_THRESHOLD: "80"
+  COVERAGE_PATCH_THRESHOLD: "85"
+
+  # Codecov settings
+  CODECOV_TOKEN: "" # Set this in your CI/CD environment or locally
+  CODECOV_URL: "https://codecov.io"
+  CODECOV_SLUG: "" # Optional: owner/repo format for private repos
+
+  # Common paths
+  CACHE_DIR: ".cache"
+  BUILD_DIR: "build"
+  COVERAGE_DIR: "coverage"
+  ARTIFACTS_DIR: "artifacts"
+
+  # CI/CD settings
+  CI: "false" # Will be overridden in CI environments
+  SKIP_SLOW_TESTS: "false"
+  PARALLEL_JOBS: "auto"
+
+  # Security settings
+  SECURITY_SCAN_ENABLED: "true"
+  DEPENDENCY_SCAN_ENABLED: "true"
+
+  # Language-specific
+  PYTHON_VERSION: "3.10"
+  NODE_VERSION: "18"
+  GO_VERSION: "1.20"
+  JAVA_VERSION: "17"
 
 # Development workflow configuration
 workflow:
   # Pre-commit hooks to enable
   pre_commit:
     - "trailing-whitespace"
-    - "end-of-file-fixer" 
+    - "end-of-file-fixer"
     - "check-yaml"
     - "check-json"
     - "mixed-line-ending"
-    - "format-check"  # Language-specific formatting
-    - "lint-check"    # Language-specific linting
-    
+    - "format-check" # Language-specific formatting
+    - "lint-check" # Language-specific linting
+
   # Quality gates - all must pass
   quality_gates:
     - "lint"
     - "test"
     - "coverage-check"
-    - "security-check"  # Basic security scanning
+    - "security-check" # Basic security scanning
 
 # Security configuration
 security:
@@ -187,8 +420,8 @@ security:
     flutter: "flutter pub deps --json | dart pub global activate pana && pana --json"
     rust: "cargo audit"
     csharp: "dotnet list package --vulnerable"
-    
-  # License compliance checking  
+
+  # License compliance checking
   license_scan:
     python: "pip-licenses --format=json --output-file=licenses.json"
     java: "mvn license:aggregate-third-party-report || gradle generateLicenseReport"
@@ -203,18 +436,19 @@ editors:
   vscode:
     # Recommended extensions per language
     extensions:
-      python: ["ms-python.python", "ms-python.black-formatter", "charliermarsh.ruff"]
+      python:
+        ["ms-python.python", "ms-python.black-formatter", "charliermarsh.ruff"]
       java: ["redhat.java", "vscjava.vscode-java-pack"]
       node: ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
       go: ["golang.go"]
       flutter: ["dart-code.dart-code", "dart-code.flutter"]
       rust: ["rust-lang.rust-analyzer"]
       csharp: ["ms-dotnettools.csharp"]
-      
+
     # Common tasks that will be generated
     tasks:
       - "doctor"
-      - "lint" 
+      - "lint"
       - "lint-fix"
       - "test"
       - "test-coverage"
@@ -225,15 +459,71 @@ editors:
 features:
   # Advanced monitoring and dashboards
   monitoring: false
-  
+
   # Semantic versioning and changelog generation
   semantic_release: false
-  
+
   # Docker containerization
   docker: false
-  
+
   # Documentation generation
   docs_generation: false
-  
+
   # Performance benchmarking
   benchmarking: false
+
+# =============================================================================
+# EXAMPLES SECTION
+# =============================================================================
+# Language-specific examples and patterns
+# These are kept separate from the main configuration to avoid coupling
+
+examples:
+  # Flutter example configuration
+  flutter:
+    # Detection patterns
+    detect:
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
+
+    # Task commands
+    tasks:
+      doctor: "flutter doctor"
+      lint: "dart format --set-exit-if-changed . && flutter analyze"
+      lint-fix: "dart format . && flutter analyze"
+      test: "flutter test"
+      test-coverage: "flutter test --coverage"
+      build: "flutter build apk"
+      deps: "flutter pub get"
+      security: "echo 'Manual security review recommended for Flutter'"
+      coverage-analysis: "genhtml coverage/lcov.info -o coverage/html"
+
+    # CI configuration
+    versions: ["stable", "beta"]
+
+    # File patterns
+    filesChanged:
+      - "**/*.dart"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - "analysis_options.yaml"
+      - "lib/**"
+      - "test/**"
+
+    # Coverage files
+    coverage_files: ["coverage/lcov.info"]
+
+    # VS Code extensions
+    vscode_extensions:
+      - "dart-code.dart-code"
+      - "dart-code.flutter"
+
+    # Development notes
+    notes: |
+      Flutter requires additional setup:
+      1. Install Flutter SDK from https://flutter.dev/docs/get-started/install
+      2. Run 'flutter doctor' to verify setup
+      3. For mobile development, install Android Studio or Xcode
+      4. Use 'flutter create' for new projects
+      5. Consider using 'flutter_lints' package for consistent linting

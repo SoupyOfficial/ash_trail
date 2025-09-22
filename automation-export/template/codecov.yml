@@ -1,0 +1,249 @@
+# Codecov Configuration for Development Automation Template
+#
+# This configuration provides comprehensive coverage analysis and reporting
+# for multi-language projects using the dev assistant workflow.
+#
+# Documentation: https://docs.codecov.io/docs/codecov-yaml
+
+# Coverage calculation and parsing
+coverage:
+  precision: 2
+  round: nearest
+  range: 70..100
+
+  # Status check settings for PR/commit comments
+  status:
+    # Project-wide coverage status
+    project:
+      default:
+        target: 80% # Global coverage threshold
+        threshold: 2% # Allow 2% drop from base
+        base: auto # Compare against merge base
+        if_no_uploads: error # Fail if no coverage uploaded
+        if_not_found: success # Don't fail if base not found
+        if_ci_failed: error # Fail if CI tests failed
+
+    # Patch (changed lines) coverage status
+    patch:
+      default:
+        target: 85% # Higher threshold for new code
+        threshold: 5% # Allow 5% variance for patches
+        base: auto
+        if_no_uploads: error
+        if_not_found: success
+
+# Language-specific coverage processing
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+  # JavaScript/TypeScript (NYC/Istanbul)
+  javascript:
+    enable_partials: yes
+
+  # Python (coverage.py/pytest-cov)
+  python:
+    enable_partials: yes
+
+  # Java (JaCoCo)
+  jacoco:
+    enable_partials: no
+
+  # Go
+  go:
+    enable_partials: yes
+
+# Coverage report configuration
+codecov:
+  # Notifications
+  notify:
+    # GitHub PR comments
+    after_n_builds: 1
+    countdown: 30
+    delay: 60
+    wait_for_ci: yes
+
+  # Archive coverage data
+  archive:
+    uploads: yes
+
+  # Maximum report age (30 days)
+  max_report_age: 720
+
+  # Disable Codecov patch coverage annotations in GitHub
+  require_ci_to_pass: yes
+  allow_pseudo_compare: no
+
+# Comment configuration for PR/commit comments
+comment:
+  # GitHub PR comment settings
+  layout: "reach,diff,flags,tree,reach"
+  behavior: default
+  require_changes: no
+  require_base: no
+  require_head: yes
+  branches:
+    - "main"
+    - "master"
+    - "develop"
+    - "feature/*"
+    - "hotfix/*"
+    - "release/*"
+
+# Ignore paths from coverage calculation
+ignore:
+  # Build outputs
+  - "build/**/*"
+  - "dist/**/*"
+  - "target/**/*"
+  - "out/**/*"
+  - "artifacts/**/*"
+
+  # Dependencies
+  - "node_modules/**/*"
+  - "vendor/**/*"
+  - "venv/**/*"
+  - "env/**/*"
+
+  # Test files (typically not counted in coverage)
+  - "**/*test*"
+  - "**/*spec*"
+  - "tests/**/*"
+  - "test/**/*"
+  - "spec/**/*"
+  - "**/__tests__/**/*"
+  - "**/__mocks__/**/*"
+  - "**/testdata/**/*"
+  - "**/*_test.go"
+  - "**/*_test.py"
+  - "**/*.test.js"
+  - "**/*.test.ts"
+  - "**/*.spec.js"
+  - "**/*.spec.ts"
+  - "src/test/**/*"
+  - "src/spec/**/*"
+  - "src/**/*.test.*"
+  - "src/**/*.spec.*"
+
+  # Generated files
+  - "**/*generated*"
+  - "**/*gen.go"
+  - "**/*.pb.go"
+  - "**/*.pb.cc"
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "**/*.chopper.dart"
+  - "lib/**/*.g.dart"
+  - "lib/**/*.freezed.dart"
+
+  # Configuration and tooling
+  - "scripts/**/*"
+  - "tools/**/*"
+  - ".github/**/*"
+  - "ci/**/*"
+  - "automation/**/*"
+  - "**/docker/**/*"
+  - "**/Dockerfile*"
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "**/*.json"
+  - "**/*.toml"
+  - "**/*.cfg"
+  - "**/*.ini"
+
+  # Documentation
+  - "docs/**/*"
+  - "documentation/**/*"
+  - "**/*.md"
+  - "**/*.rst"
+  - "**/*.txt"
+
+  # Examples and samples
+  - "examples/**/*"
+  - "samples/**/*"
+  - "demo/**/*"
+
+# Flag configuration for multi-language projects
+flags:
+  # Python coverage
+  python:
+    paths:
+      - "src/"
+      - "lib/"
+      - "app/"
+    carryforward: yes
+
+  # JavaScript/TypeScript coverage
+  javascript:
+    paths:
+      - "src/"
+      - "lib/"
+      - "app/"
+    carryforward: yes
+
+  typescript:
+    paths:
+      - "src/"
+      - "lib/"
+      - "app/"
+    carryforward: yes
+
+  # Java coverage
+  java:
+    paths:
+      - "src/main/"
+      - "lib/"
+    carryforward: yes
+
+  # Go coverage
+  go:
+    paths:
+      - "."
+    carryforward: yes
+
+  # Rust coverage
+  rust:
+    paths:
+      - "src/"
+      - "lib/"
+    carryforward: yes
+
+  # C# coverage
+  csharp:
+    paths:
+      - "src/"
+      - "lib/"
+    carryforward: yes
+
+  # Integration tests flag
+  integration:
+    paths:
+      - "."
+    carryforward: no
+
+  # Unit tests flag
+  unit:
+    paths:
+      - "."
+    carryforward: yes
+
+  # End-to-end tests flag
+  e2e:
+    paths:
+      - "."
+    carryforward: no
+
+# Advanced configuration for GitHub integration
+github_checks:
+  annotations: yes
+
+# Profiling configuration (for performance insights)
+profiling:
+  critical_files:
+    - "src/core/**/*"
+    - "lib/core/**/*"
+    - "app/core/**/*"

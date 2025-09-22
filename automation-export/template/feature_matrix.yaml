@@ -1,0 +1,426 @@
+# Feature Matrix Template
+#
+# This file defines the feature roadmap and dependency structure for the project.
+# It serves as the single source of truth for feature planning, status tracking,
+# and automated workflow management.
+#
+# Adapted from AshTrail project for multi-language use.
+
+# Project metadata
+project:
+  name: "Project Name"
+  version: "1.0.0"
+  language: "auto-detect" # auto-detect, python, javascript, typescript, java, go, rust, dart
+  framework: "" # flask, fastapi, react, vue, angular, spring-boot, gin, actix-web, flutter
+
+# Epic definitions - high-level feature groupings
+epics:
+  core:
+    name: "Core Functionality"
+    description: "Essential features for basic application functionality"
+    priority: 1
+    status: "active"
+
+  ui:
+    name: "User Interface"
+    description: "User-facing features and interface improvements"
+    priority: 2
+    status: "planned"
+
+  integration:
+    name: "External Integrations"
+    description: "Third-party service integrations and APIs"
+    priority: 3
+    status: "planned"
+
+  performance:
+    name: "Performance & Optimization"
+    description: "Performance improvements and optimizations"
+    priority: 4
+    status: "backlog"
+
+  infrastructure:
+    name: "Infrastructure & DevOps"
+    description: "Deployment, monitoring, and operational features"
+    priority: 5
+    status: "backlog"
+
+# Feature definitions
+features:
+  # Core Features
+  user_authentication:
+    name: "User Authentication"
+    epic: "core"
+    description: "User login, registration, and session management"
+    priority: 1
+    status: "implemented"
+    complexity: "medium"
+    effort_points: 8
+    tags: ["security", "backend"]
+    dependencies: []
+    blocked_by: []
+    implementation:
+      files:
+        - "src/auth/models.py" # Python example
+        - "src/auth/views.py"
+        - "src/auth/serializers.py"
+        - "tests/test_auth.py"
+      endpoints:
+        - "POST /auth/login"
+        - "POST /auth/register"
+        - "POST /auth/logout"
+      database_tables:
+        - "users"
+        - "sessions"
+    acceptance_criteria:
+      - "Users can register with email and password"
+      - "Users can login and logout"
+      - "Sessions are properly managed"
+      - "Password validation enforced"
+      - "Email verification required"
+    test_coverage:
+      target: 90
+      current: 85
+
+  data_persistence:
+    name: "Data Persistence Layer"
+    epic: "core"
+    description: "Database models, migrations, and data access layer"
+    priority: 2
+    status: "in_progress"
+    complexity: "high"
+    effort_points: 13
+    tags: ["backend", "database"]
+    dependencies: []
+    blocked_by: []
+    implementation:
+      files:
+        - "src/models/"
+        - "src/repositories/"
+        - "migrations/"
+        - "tests/test_models.py"
+      database_tables:
+        - "users"
+        - "projects"
+        - "tasks"
+        - "audit_log"
+    acceptance_criteria:
+      - "Database schema properly defined"
+      - "CRUD operations implemented"
+      - "Data validation enforced"
+      - "Audit logging in place"
+    test_coverage:
+      target: 85
+      current: 72
+
+  api_endpoints:
+    name: "REST API Endpoints"
+    epic: "core"
+    description: "RESTful API for core business operations"
+    priority: 3
+    status: "planned"
+    complexity: "medium"
+    effort_points: 10
+    tags: ["backend", "api"]
+    dependencies: ["user_authentication", "data_persistence"]
+    blocked_by: []
+    implementation:
+      files:
+        - "src/api/"
+        - "src/serializers/"
+        - "tests/test_api.py"
+      endpoints:
+        - "GET /api/v1/users"
+        - "POST /api/v1/users"
+        - "GET /api/v1/projects"
+        - "POST /api/v1/projects"
+    acceptance_criteria:
+      - "All CRUD endpoints implemented"
+      - "Proper HTTP status codes"
+      - "Request/response validation"
+      - "API documentation available"
+      - "Rate limiting implemented"
+    test_coverage:
+      target: 80
+      current: 0
+
+  # UI Features
+  dashboard:
+    name: "User Dashboard"
+    epic: "ui"
+    description: "Main dashboard showing user data and key metrics"
+    priority: 4
+    status: "designed"
+    complexity: "medium"
+    effort_points: 8
+    tags: ["frontend", "ui"]
+    dependencies: ["user_authentication", "api_endpoints"]
+    blocked_by: []
+    implementation:
+      files:
+        - "src/components/Dashboard.tsx" # TypeScript React example
+        - "src/components/MetricsCard.tsx"
+        - "src/hooks/useDashboardData.ts"
+        - "tests/Dashboard.test.tsx"
+    acceptance_criteria:
+      - "Dashboard loads user-specific data"
+      - "Key metrics displayed prominently"
+      - "Responsive design works on mobile"
+      - "Loading and error states handled"
+    test_coverage:
+      target: 75
+      current: 0
+
+  user_settings:
+    name: "User Settings"
+    epic: "ui"
+    description: "User profile and preferences management"
+    priority: 8
+    status: "backlog"
+    complexity: "low"
+    effort_points: 5
+    tags: ["frontend", "ui"]
+    dependencies: ["user_authentication"]
+    blocked_by: []
+    implementation:
+      files:
+        - "src/components/UserSettings.tsx"
+        - "src/components/ProfileForm.tsx"
+        - "tests/UserSettings.test.tsx"
+    acceptance_criteria:
+      - "Users can update profile information"
+      - "Password change functionality"
+      - "Notification preferences"
+      - "Data export capability"
+    test_coverage:
+      target: 70
+      current: 0
+
+  # Integration Features
+  email_notifications:
+    name: "Email Notifications"
+    epic: "integration"
+    description: "Email notification system for user events"
+    priority: 10
+    status: "backlog"
+    complexity: "medium"
+    effort_points: 6
+    tags: ["backend", "integration"]
+    dependencies: ["user_authentication"]
+    blocked_by: ["email_service_selection"]
+    implementation:
+      files:
+        - "src/notifications/"
+        - "src/email_templates/"
+        - "tests/test_notifications.py"
+    acceptance_criteria:
+      - "Welcome email sent on registration"
+      - "Password reset emails"
+      - "Activity notifications"
+      - "Unsubscribe functionality"
+    test_coverage:
+      target: 80
+      current: 0
+
+  analytics_integration:
+    name: "Analytics Integration"
+    epic: "integration"
+    description: "Integration with analytics service for user tracking"
+    priority: 15
+    status: "research"
+    complexity: "low"
+    effort_points: 3
+    tags: ["frontend", "backend", "analytics"]
+    dependencies: []
+    blocked_by: ["analytics_service_selection"]
+    implementation:
+      files:
+        - "src/analytics/"
+        - "src/tracking/"
+    acceptance_criteria:
+      - "User events tracked"
+      - "Privacy compliance ensured"
+      - "Dashboard with basic metrics"
+    test_coverage:
+      target: 60
+      current: 0
+
+# Blockers - issues preventing feature development
+blockers:
+  email_service_selection:
+    name: "Email Service Selection"
+    description: "Need to select and configure email service provider"
+    category: "technical_decision"
+    status: "open"
+    created_date: "2024-01-15"
+    assigned_to: "tech_lead"
+    blocking:
+      - "email_notifications"
+
+  analytics_service_selection:
+    name: "Analytics Service Selection"
+    description: "Evaluate and select analytics service (Google Analytics, Mixpanel, etc.)"
+    category: "vendor_evaluation"
+    status: "in_progress"
+    created_date: "2024-01-10"
+    assigned_to: "product_manager"
+    blocking:
+      - "analytics_integration"
+
+# Milestones - major project phases
+milestones:
+  mvp:
+    name: "Minimum Viable Product"
+    description: "Basic functionality for initial release"
+    target_date: "2024-03-01"
+    status: "planned"
+    features:
+      - "user_authentication"
+      - "data_persistence"
+      - "api_endpoints"
+      - "dashboard"
+
+  beta:
+    name: "Beta Release"
+    description: "Feature-complete beta for testing"
+    target_date: "2024-04-15"
+    status: "planned"
+    features:
+      - "user_settings"
+      - "email_notifications"
+      - "analytics_integration"
+
+  v1_0:
+    name: "Version 1.0 Release"
+    description: "Production-ready first release"
+    target_date: "2024-06-01"
+    status: "planned"
+    features: [] # TBD based on beta feedback
+
+# Development workflow configuration
+workflow:
+  # Feature status progression
+  status_flow:
+    - "research" # Investigation and planning
+    - "designed" # Design and architecture complete
+    - "planned" # Ready for development
+    - "in_progress" # Currently being developed
+    - "implemented" # Code complete, needs testing
+    - "testing" # In QA/testing phase
+    - "done" # Complete and deployed
+    - "backlog" # Not scheduled
+    - "blocked" # Cannot proceed due to blockers
+    - "cancelled" # No longer needed
+
+  # Complexity levels for estimation
+  complexity_levels:
+    - "trivial" # 1-2 effort points
+    - "low" # 3-5 effort points
+    - "medium" # 6-10 effort points
+    - "high" # 11-20 effort points
+    - "epic" # 20+ effort points
+
+  # Effort point scale (Fibonacci-based)
+  effort_scale: [1, 2, 3, 5, 8, 13, 21, 34]
+
+  # Coverage targets by feature type
+  coverage_targets:
+    core: 85
+    ui: 75
+    integration: 70
+    performance: 80
+    infrastructure: 70
+
+  # Automation rules
+  automation:
+    # Auto-move to 'in_progress' when branch created
+    start_development_on_branch: true
+
+    # Auto-move to 'testing' when PR opened
+    start_testing_on_pr: true
+
+    # Auto-move to 'done' when merged to main
+    complete_on_merge: true
+
+    # Require coverage threshold before completion
+    enforce_coverage_targets: true
+
+    # Block merge if dependencies not complete
+    check_dependencies: true
+
+# Language-specific templates and examples
+templates:
+  python:
+    feature_structure:
+      - "src/{feature_name}/"
+      - "src/{feature_name}/__init__.py"
+      - "src/{feature_name}/models.py"
+      - "src/{feature_name}/views.py"
+      - "src/{feature_name}/serializers.py"
+      - "tests/test_{feature_name}.py"
+    dependencies:
+      - "requirements.txt"
+      - "requirements-dev.txt"
+    test_command: "python -m pytest"
+    coverage_command: "python -m pytest --cov=src"
+
+  javascript:
+    feature_structure:
+      - "src/features/{feature_name}/"
+      - "src/features/{feature_name}/index.js"
+      - "src/features/{feature_name}/components/"
+      - "src/features/{feature_name}/hooks/"
+      - "src/features/{feature_name}/__tests__/"
+    dependencies:
+      - "package.json"
+    test_command: "npm test"
+    coverage_command: "npm run test:coverage"
+
+  typescript:
+    feature_structure:
+      - "src/features/{feature_name}/"
+      - "src/features/{feature_name}/index.ts"
+      - "src/features/{feature_name}/types.ts"
+      - "src/features/{feature_name}/components/"
+      - "src/features/{feature_name}/__tests__/"
+    dependencies:
+      - "package.json"
+      - "tsconfig.json"
+    test_command: "npm test"
+    coverage_command: "npm run test:coverage"
+
+  java:
+    feature_structure:
+      - "src/main/java/com/company/{feature_name}/"
+      - "src/main/java/com/company/{feature_name}/controller/"
+      - "src/main/java/com/company/{feature_name}/service/"
+      - "src/main/java/com/company/{feature_name}/repository/"
+      - "src/test/java/com/company/{feature_name}/"
+    dependencies:
+      - "pom.xml" # or build.gradle
+    test_command: "mvn test"
+    coverage_command: "mvn jacoco:report"
+
+  go:
+    feature_structure:
+      - "internal/{feature_name}/"
+      - "internal/{feature_name}/handler.go"
+      - "internal/{feature_name}/service.go"
+      - "internal/{feature_name}/repository.go"
+      - "internal/{feature_name}/{feature_name}_test.go"
+    dependencies:
+      - "go.mod"
+    test_command: "go test ./..."
+    coverage_command: "go test -coverprofile=coverage.out ./..."
+
+  rust:
+    feature_structure:
+      - "src/{feature_name}/"
+      - "src/{feature_name}/mod.rs"
+      - "src/{feature_name}/handlers.rs"
+      - "src/{feature_name}/models.rs"
+      - "tests/{feature_name}_tests.rs"
+    dependencies:
+      - "Cargo.toml"
+    test_command: "cargo test"
+    coverage_command: "cargo tarpaulin"

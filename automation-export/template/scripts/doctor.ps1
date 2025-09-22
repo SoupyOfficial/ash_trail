@@ -39,13 +39,13 @@ $Script:Errors = 0
 # Utility functions
 function Write-Info { param($Message) Write-Host "ℹ️  $Message" -ForegroundColor Cyan }
 function Write-Success { param($Message) Write-Host "✅ $Message" -ForegroundColor Green }
-function Write-Warning { 
-    param($Message) 
+function Write-Warning {
+    param($Message)
     Write-Host "⚠️  $Message" -ForegroundColor Yellow
     $Script:Warnings++
 }
-function Write-Error-Custom { 
-    param($Message) 
+function Write-Error-Custom {
+    param($Message)
     Write-Host "❌ $Message" -ForegroundColor Red
     $Script:Errors++
     $Script:OverallStatus = 1
@@ -78,7 +78,7 @@ function Get-DetectedLanguage {
 
 function Test-SystemTools {
     Write-Info "Checking system tools..."
-    
+
     $tools = @("git", "curl", "python")
     foreach ($tool in $tools) {
         if (Test-CommandExists $tool) {
@@ -100,18 +100,18 @@ function Test-SystemTools {
 
 function Test-GitConfig {
     Write-Info "Checking Git configuration..."
-    
+
     if ((Test-CommandExists git) -and (Test-Path ".git")) {
         try {
             $userName = git config user.name 2>$null
             $userEmail = git config user.email 2>$null
-            
+
             if ($userName -and $userEmail) {
                 Write-Success "Git user configured: $userName <$userEmail>"
             } else {
                 Write-Warning "Git user not configured. Run: git config --global user.name 'Your Name' ; git config --global user.email 'your.email@example.com'"
             }
-            
+
             # Check pre-commit
             if (Test-CommandExists pre-commit) {
                 if (Test-Path ".pre-commit-config.yaml") {
@@ -127,6 +127,27 @@ function Test-GitConfig {
             } else {
                 Write-Warning "pre-commit not installed"
             }
+
+            # Check gitleaks security scanning
+            if (Test-CommandExists gitleaks) {
+                if (Test-Path "gitleaks.toml") {
+                    try {
+                        gitleaks detect --config gitleaks.toml --no-git --quiet 2>$null | Out-Null
+                        Write-Success "Gitleaks security scan passed"
+                    } catch {
+                        $exitCode = $LASTEXITCODE
+                        if ($exitCode -eq 1) {
+                            Write-Error-Custom "Gitleaks found potential secrets in code"
+                        } else {
+                            Write-Warning "Gitleaks scan failed (config or tool issue)"
+                        }
+                    }
+                } else {
+                    Write-Warning "No gitleaks.toml configuration found"
+                }
+            } else {
+                Write-Warning "gitleaks not installed (recommended for security scanning)"
+            }
         } catch {
             Write-Warning "Git configuration check failed"
         }
@@ -138,14 +159,14 @@ function Test-GitConfig {
 function Test-LanguageTools {
     param($Language)
     Write-Info "Checking $Language tools..."
-    
+
     switch ($Language) {
         "python" {
             if (Test-CommandExists python) {
                 try {
                     $pythonVersion = (python --version) -replace "Python ", ""
                     Write-Success "Python $pythonVersion"
-                    
+
                     # Check pip
                     try {
                         python -m pip --version | Out-Null
@@ -154,7 +175,7 @@ function Test-LanguageTools {
                     } catch {
                         Write-Error-Custom "pip not available"
                     }
-                    
+
                     # Check common dev tools
                     $devTools = @("ruff", "black", "pytest")
                     foreach ($tool in $devTools) {
@@ -169,7 +190,7 @@ function Test-LanguageTools {
                             }
                         }
                     }
-                    
+
                     # Check project dependencies
                     if (Test-Path "requirements.txt") {
                         try {
@@ -186,7 +207,7 @@ function Test-LanguageTools {
                 Write-Error-Custom "Python not found"
             }
         }
-        
+
         "java" {
             $javaFound = $false
             if (Test-CommandExists java) {
@@ -199,7 +220,7 @@ function Test-LanguageTools {
                     $javaFound = $true
                 }
             }
-            
+
             if (Test-CommandExists mvn) {
                 try {
                     $mvnVersion = (mvn --version | Select-String "Apache Maven").ToString().Split()[2]
@@ -219,22 +240,22 @@ function Test-LanguageTools {
                     $javaFound = $true
                 }
             }
-            
+
             if (-not $javaFound) {
                 Write-Error-Custom "Java development tools not found"
             }
         }
-        
+
         "node" {
             if (Test-CommandExists node) {
                 try {
                     $nodeVersion = node --version
                     Write-Success "Node.js $nodeVersion"
-                    
+
                     if (Test-CommandExists npm) {
                         $npmVersion = npm --version
                         Write-Success "npm $npmVersion"
-                        
+
                         if (Test-Path "node_modules") {
                             Write-Success "Dependencies installed"
                         } else {
@@ -250,13 +271,13 @@ function Test-LanguageTools {
                 Write-Error-Custom "Node.js not found"
             }
         }
-        
+
         "go" {
             if (Test-CommandExists go) {
                 try {
                     $goVersion = (go version).Split()[2]
                     Write-Success "Go $goVersion"
-                    
+
                     if (Test-Path "go.mod") {
                         try {
                             go list -m 2>$null | Out-Null
@@ -265,7 +286,7 @@ function Test-LanguageTools {
                             Write-Warning "Go module issues. Run: go mod tidy"
                         }
                     }
-                    
+
                     if (Test-CommandExists golangci-lint) {
                         Write-Success "golangci-lint available"
                     } else {
@@ -278,13 +299,13 @@ function Test-LanguageTools {
                 Write-Error-Custom "Go not found"
             }
         }
-        
+
         "flutter" {
             if (Test-CommandExists flutter) {
                 try {
                     $flutterVersion = (flutter --version | Select-Object -First 1).Split()[1]
                     Write-Success "Flutter $flutterVersion"
-                    
+
                     Write-Info "Running flutter doctor..."
                     try {
                         flutter doctor 2>$null | Out-Null
@@ -299,14 +320,14 @@ function Test-LanguageTools {
                 Write-Error-Custom "Flutter not found"
             }
         }
-        
+
         "rust" {
             if ((Test-CommandExists rustc) -and (Test-CommandExists cargo)) {
                 try {
                     $rustVersion = (rustc --version).Split()[1]
                     $cargoVersion = (cargo --version).Split()[1]
                     Write-Success "Rust $rustVersion, Cargo $cargoVersion"
-                    
+
                     if (Test-Path "Cargo.toml") {
                         try {
                             cargo check --quiet 2>$null | Out-Null
@@ -322,13 +343,13 @@ function Test-LanguageTools {
                 Write-Error-Custom "Rust toolchain not found"
             }
         }
-        
+
         "csharp" {
             if (Test-CommandExists dotnet) {
                 try {
                     $dotnetVersion = dotnet --version
                     Write-Success ".NET SDK $dotnetVersion"
-                    
+
                     if ((Get-ChildItem -Path . -Recurse -Include "*.csproj","*.sln","*.fsproj" -Depth 2).Count -gt 0) {
                         try {
                             dotnet restore --verbosity quiet 2>$null | Out-Null
@@ -344,7 +365,7 @@ function Test-LanguageTools {
                 Write-Error-Custom ".NET SDK not found"
             }
         }
-        
+
         "unknown" {
             Write-Warning "Unknown project type - skipping language-specific checks"
         }
@@ -353,7 +374,7 @@ function Test-LanguageTools {
 
 function Test-ProjectStructure {
     Write-Info "Checking project structure..."
-    
+
     $requiredDirs = @("coverage", "build", ".vscode")
     foreach ($dir in $requiredDirs) {
         if (Test-Path $dir) {
@@ -362,7 +383,7 @@ function Test-ProjectStructure {
             Write-Warning "Directory $dir missing (will be created automatically)"
         }
     }
-    
+
     if (Test-Path "automation.config.yaml") {
         Write-Success "Automation config found"
     } else {
@@ -372,14 +393,14 @@ function Test-ProjectStructure {
 
 function Test-ScriptPermissions {
     Write-Info "Checking script permissions..."
-    
+
     $scriptsDir = "scripts"
     if (Test-Path $scriptsDir) {
         $psScripts = Get-ChildItem -Path $scriptsDir -Filter "*.ps1" -ErrorAction SilentlyContinue
         if ($psScripts.Count -gt 0) {
             Write-Success "Found $($psScripts.Count) PowerShell scripts"
         }
-        
+
         $bashScripts = Get-ChildItem -Path $scriptsDir -Filter "*.sh" -ErrorAction SilentlyContinue
         if ($bashScripts.Count -gt 0) {
             Write-Success "Found $($bashScripts.Count) shell scripts (for WSL/Git Bash)"
@@ -390,11 +411,11 @@ function Test-ScriptPermissions {
 function Invoke-Main {
     try {
         $language = Get-DetectedLanguage
-        
+
         Write-Info "Project root: $ProjectRoot"
         Write-Info "Detected language: $language"
         Write-Host ""
-        
+
         Test-SystemTools
         Write-Host ""
         Test-GitConfig
@@ -405,11 +426,11 @@ function Invoke-Main {
         Write-Host ""
         Test-ScriptPermissions
         Write-Host ""
-        
+
         # Summary
         Write-Host "📊 Health Check Summary" -ForegroundColor Blue
         Write-Host "========================" -ForegroundColor Blue
-        
+
         if ($Script:Errors -eq 0 -and $Script:Warnings -eq 0) {
             Write-Success "All checks passed! Your development environment is ready."
         } elseif ($Script:Errors -eq 0) {
@@ -419,7 +440,7 @@ function Invoke-Main {
             Write-Host "❌ $($Script:Errors) error(s) and $($Script:Warnings) warning(s) found." -ForegroundColor Red
             Write-Host "💡 Please resolve the errors before proceeding." -ForegroundColor Cyan
         }
-        
+
         Write-Host ""
         if ($Script:OverallStatus -eq 0) {
             Write-Host "🚀 Ready to start development!" -ForegroundColor Green
@@ -430,7 +451,7 @@ function Invoke-Main {
         } else {
             Write-Host "⚡ Run '.\scripts\bootstrap.ps1' to set up missing tools" -ForegroundColor Yellow
         }
-        
+
         exit $Script:OverallStatus
     } catch {
         Write-Host "❌ Health check failed: $($_.Exception.Message)" -ForegroundColor Red

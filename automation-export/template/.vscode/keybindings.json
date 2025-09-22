@@ -1,0 +1,190 @@
+[
+  // Dev Assistant Workflow Shortcuts
+  {
+    "key": "ctrl+shift+d s",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Status",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d h",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Health Check",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d n",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Start Next Feature",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d f",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Finalize Feature",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d c",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Dev Cycle",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d l",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Features List",
+    "when": "!terminalFocus"
+  },
+
+  // Coverage Analysis Shortcuts
+  {
+    "key": "ctrl+shift+c a",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Coverage Analysis",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+c t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Coverage Trends",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+c h",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Coverage: Generate HTML Report",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+c o",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Open Coverage Report",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+c i",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Coverage: Check Thresholds (CI)",
+    "when": "!terminalFocus"
+  },
+
+  // Language-Agnostic Testing
+  {
+    "key": "ctrl+shift+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Language: Run Tests",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+t c",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Language: Run Tests with Coverage",
+    "when": "!terminalFocus"
+  },
+
+  // Code Quality
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Language: Lint and Format",
+    "when": "!terminalFocus"
+  },
+
+  // Git Workflow
+  {
+    "key": "ctrl+shift+g b",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Git: Create Feature Branch",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+g p",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Git: Push Current Branch",
+    "when": "!terminalFocus"
+  },
+
+  // Quick Access to Key Files
+  {
+    "key": "ctrl+shift+f m",
+    "command": "workbench.action.quickOpen",
+    "args": "feature_matrix.yaml"
+  },
+  {
+    "key": "ctrl+shift+f a",
+    "command": "workbench.action.quickOpen",
+    "args": "automation.config.yaml"
+  },
+
+  // Terminal Integration
+  {
+    "key": "ctrl+shift+`",
+    "command": "workbench.action.terminal.new",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d t",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "python scripts/dev_assistant.py status\n"
+    },
+    "when": "terminalFocus"
+  },
+
+  // File Navigation for Coverage
+  {
+    "key": "ctrl+k c",
+    "command": "workbench.action.quickOpen",
+    "args": "coverage/"
+  },
+
+  // Enhanced Editor Actions
+  {
+    "key": "ctrl+shift+r",
+    "command": "workbench.action.reloadWindow",
+    "when": "isDevelopment"
+  },
+
+  // Multi-cursor for test writing
+  {
+    "key": "ctrl+shift+alt+t",
+    "command": "editor.action.addSelectionToNextFindMatch",
+    "when": "editorFocus && editorTextFocus"
+  },
+
+  // Custom Commands for Feature Development
+  {
+    "key": "f6",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Dev Cycle"
+  },
+  {
+    "key": "f7",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Language: Run Tests with Coverage"
+  },
+  {
+    "key": "f8",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Coverage Analysis"
+  },
+
+  // Quick Feature Management
+  {
+    "key": "ctrl+alt+n",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Start Specific Feature"
+  },
+
+  // Debugging and Diagnostics
+  {
+    "key": "ctrl+shift+d d",
+    "command": "workbench.action.showErrorsWarnings"
+  },
+  {
+    "key": "ctrl+shift+d x",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Dev Assistant: Full Check"
+  }
+]

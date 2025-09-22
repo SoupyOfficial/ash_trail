@@ -1,0 +1,445 @@
+stages:
+  - detect
+  - doctor
+  - lint
+  - test
+  - build
+  - security
+  - deploy
+
+# Global variables
+variables:
+  COVERAGE_GLOBAL_THRESHOLD: "80"
+  COVERAGE_PATCH_THRESHOLD: "85"
+  CACHE_DIR: ".cache"
+  BUILD_DIR: "build"
+  ARTIFACTS_DIR: "artifacts"
+
+# Cache configuration
+.cache_template: &cache_template
+  cache:
+    key:
+      files:
+        - "requirements*.txt"
+        - "package*.json"
+        - "pom.xml"
+        - "build.gradle*"
+        - "go.sum"
+        - "Cargo.lock"
+        - "pubspec.lock"
+    paths:
+      - .cache/
+      - node_modules/
+      - ~/.cache/pip
+      - ~/.m2/repository
+      - ~/.gradle/caches
+      - ~/.cargo/registry
+      - ~/.pub-cache
+
+# Language detection job
+detect_language:
+  stage: detect
+  image: alpine:latest
+  script:
+    - |
+      if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ] || [ -f "setup.py" ]; then
+        echo "python" > .detected_language
+      elif [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+        echo "java" > .detected_language
+      elif [ -f "package.json" ]; then
+        echo "node" > .detected_language
+      elif [ -f "go.mod" ]; then
+        echo "go" > .detected_language
+      elif [ -f "pubspec.yaml" ]; then
+        echo "flutter" > .detected_language
+      elif [ -f "Cargo.toml" ]; then
+        echo "rust" > .detected_language
+      elif find . -maxdepth 2 -name "*.csproj" -o -name "*.sln" -o -name "*.fsproj" | head -1 | grep -q .; then
+        echo "csharp" > .detected_language
+      else
+        echo "unknown" > .detected_language
+      fi
+      echo "Detected language: $(cat .detected_language)"
+  artifacts:
+    paths:
+      - .detected_language
+    expire_in: 1 hour
+  only:
+    changes:
+      - "**/*.py"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.java"
+      - "**/*.kt"
+      - "**/*.go"
+      - "**/*.rs"
+      - "**/*.cs"
+      - "**/*.dart"
+      - "pyproject.toml"
+      - "requirements*.txt"
+      - "package*.json"
+      - "pom.xml"
+      - "build.gradle*"
+      - "go.mod"
+      - "Cargo.toml"
+      - "pubspec.yaml"
+      - "*.csproj"
+      - "*.sln"
+      - "automation.config.yaml"
+      - "scripts/**/*"
+      - ".gitlab-ci.yml"
+
+# Health check job
+doctor_check:
+  stage: doctor
+  <<: *cache_template
+  script:
+    - DETECTED_LANG=$(cat .detected_language)
+    - echo "Running health check for $DETECTED_LANG"
+    - |
+      case "$DETECTED_LANG" in
+        python)
+          docker run --rm -v "$PWD:/app" -w /app python:3.11-slim bash -c "
+            apt-get update && apt-get install -y git curl
+            pip install --upgrade pip
+            ./scripts/doctor.sh
+          "
+          ;;
+        java)
+          docker run --rm -v "$PWD:/app" -w /app openjdk:17-slim bash -c "
+            apt-get update && apt-get install -y git curl maven
+            ./scripts/doctor.sh
+          "
+          ;;
+        node)
+          docker run --rm -v "$PWD:/app" -w /app node:18-slim bash -c "
+            apt-get update && apt-get install -y git curl
+            ./scripts/doctor.sh
+          "
+          ;;
+        go)
+          docker run --rm -v "$PWD:/app" -w /app golang:1.21-alpine sh -c "
+            apk add --no-cache git curl bash
+            ./scripts/doctor.sh
+          "
+          ;;
+        *)
+          echo "Health check not implemented for $DETECTED_LANG"
+          ./scripts/doctor.sh || true
+          ;;
+      esac
+  dependencies:
+    - detect_language
+  only:
+    changes:
+      - "**/*.py"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.java"
+      - "**/*.kt"
+      - "**/*.go"
+      - "**/*.rs"
+      - "**/*.cs"
+      - "**/*.dart"
+      - "scripts/**/*"
+      - "automation.config.yaml"
+
+# Linting job
+lint_check:
+  stage: lint
+  <<: *cache_template
+  parallel:
+    matrix:
+      - DETECTED_LANG: ["python", "java", "node", "go", "rust", "csharp"]
+  script:
+    - |
+      if [ ! -f ".detected_language" ] || [ "$(cat .detected_language)" != "$DETECTED_LANG" ]; then
+        echo "Skipping lint for $DETECTED_LANG (not detected)"
+        exit 0
+      fi
+    - echo "Running linting for $DETECTED_LANG"
+    - |
+      case "$DETECTED_LANG" in
+        python)
+          docker run --rm -v "$PWD:/app" -w /app python:3.11-slim bash -c "
+            pip install ruff black
+            ./scripts/lint.sh
+          "
+          ;;
+        java)
+          docker run --rm -v "$PWD:/app" -w /app openjdk:17-slim bash -c "
+            apt-get update && apt-get install -y maven
+            ./scripts/lint.sh
+          "
+          ;;
+        node)
+          docker run --rm -v "$PWD:/app" -w /app node:18-slim bash -c "
+            npm install -g eslint prettier
+            ./scripts/lint.sh
+          "
+          ;;
+        go)
+          docker run --rm -v "$PWD:/app" -w /app golang:1.21-alpine sh -c "
+            apk add --no-cache git bash
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+            ./scripts/lint.sh
+          "
+          ;;
+        rust)
+          docker run --rm -v "$PWD:/app" -w /app rust:1.75-slim bash -c "
+            rustup component add rustfmt clippy
+            ./scripts/lint.sh
+          "
+          ;;
+        csharp)
+          docker run --rm -v "$PWD:/app" -w /app mcr.microsoft.com/dotnet/sdk:7.0-alpine sh -c "
+            apk add --no-cache bash
+            ./scripts/lint.sh
+          "
+          ;;
+      esac
+  dependencies:
+    - detect_language
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.py"
+        - "**/*.js"
+        - "**/*.ts"
+        - "**/*.java"
+        - "**/*.kt"
+        - "**/*.go"
+        - "**/*.rs"
+        - "**/*.cs"
+        - "scripts/**/*"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Test job with matrix for multiple versions
+test_matrix:
+  stage: test
+  <<: *cache_template
+  parallel:
+    matrix:
+      - DETECTED_LANG: "python"
+        LANG_VERSION: ["3.9", "3.10", "3.11"]
+      - DETECTED_LANG: "java"
+        LANG_VERSION: ["11", "17", "21"]
+      - DETECTED_LANG: "node"
+        LANG_VERSION: ["16", "18", "20"]
+      - DETECTED_LANG: "go"
+        LANG_VERSION: ["1.19", "1.20", "1.21"]
+  script:
+    - |
+      if [ ! -f ".detected_language" ] || [ "$(cat .detected_language)" != "$DETECTED_LANG" ]; then
+        echo "Skipping tests for $DETECTED_LANG (not detected)"
+        exit 0
+      fi
+    - echo "Running tests for $DETECTED_LANG version $LANG_VERSION"
+    - |
+      case "$DETECTED_LANG" in
+        python)
+          docker run --rm -v "$PWD:/app" -w /app python:${LANG_VERSION}-slim bash -c "
+            pip install pytest coverage pytest-cov
+            ./scripts/test.sh --coverage
+            if [ -f coverage/lcov.info ]; then
+              # Check coverage threshold
+              hits=\$(grep -c '^DA:.*,[1-9]' coverage/lcov.info || echo '0')
+              total=\$(grep -c '^DA:' coverage/lcov.info || echo '1')
+              pct=\$(awk \"BEGIN { printf(\\\"%.1f\\\", (\$hits/\$total)*100) }\")
+              echo \"Coverage: \$pct%\"
+              if awk -v p=\"\$pct\" -v t=\"$COVERAGE_GLOBAL_THRESHOLD\" 'BEGIN { exit (p+0>=t)?0:1 }'; then
+                echo \"✅ Coverage \$pct% meets threshold of $COVERAGE_GLOBAL_THRESHOLD%\"
+              else
+                echo \"❌ Coverage \$pct% below threshold of $COVERAGE_GLOBAL_THRESHOLD%\"
+                exit 1
+              fi
+            fi
+          "
+          ;;
+        java)
+          docker run --rm -v "$PWD:/app" -w /app openjdk:${LANG_VERSION}-slim bash -c "
+            apt-get update && apt-get install -y maven
+            ./scripts/test.sh --coverage
+          "
+          ;;
+        node)
+          docker run --rm -v "$PWD:/app" -w /app node:${LANG_VERSION}-slim bash -c "
+            npm install
+            ./scripts/test.sh --coverage
+          "
+          ;;
+        go)
+          docker run --rm -v "$PWD:/app" -w /app golang:${LANG_VERSION}-alpine sh -c "
+            apk add --no-cache bash
+            ./scripts/test.sh --coverage
+          "
+          ;;
+      esac
+  artifacts:
+    paths:
+      - coverage/
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.xml
+    expire_in: 1 week
+  coverage: '/Coverage: \d+\.\d+%/'
+  dependencies:
+    - detect_language
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.py"
+        - "**/*.js"
+        - "**/*.ts"
+        - "**/*.java"
+        - "**/*.kt"
+        - "**/*.go"
+        - "**/*.rs"
+        - "**/*.cs"
+        - "tests/**/*"
+        - "test/**/*"
+        - "spec/**/*"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Build job
+build_project:
+  stage: build
+  <<: *cache_template
+  script:
+    - DETECTED_LANG=$(cat .detected_language)
+    - echo "Building project for $DETECTED_LANG"
+    - |
+      case "$DETECTED_LANG" in
+        python)
+          docker run --rm -v "$PWD:/app" -w /app python:3.11-slim bash -c "
+            pip install build
+            ./scripts/build.sh --release
+          "
+          ;;
+        java)
+          docker run --rm -v "$PWD:/app" -w /app openjdk:17-slim bash -c "
+            apt-get update && apt-get install -y maven
+            ./scripts/build.sh --release
+          "
+          ;;
+        node)
+          docker run --rm -v "$PWD:/app" -w /app node:18-slim bash -c "
+            npm install
+            ./scripts/build.sh --release
+          "
+          ;;
+        go)
+          docker run --rm -v "$PWD:/app" -w /app golang:1.21-alpine sh -c "
+            apk add --no-cache bash
+            ./scripts/build.sh --release
+          "
+          ;;
+        *)
+          echo "Build not implemented for $DETECTED_LANG"
+          ./scripts/build.sh || true
+          ;;
+      esac
+  artifacts:
+    paths:
+      - build/
+      - dist/
+      - target/
+      - out/
+    expire_in: 1 week
+  dependencies:
+    - detect_language
+    - test_matrix
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+# Security scanning
+security_scan:
+  stage: security
+  image: alpine:latest
+  script:
+    - DETECTED_LANG=$(cat .detected_language)
+    - echo "Running security scan for $DETECTED_LANG"
+    - |
+      case "$DETECTED_LANG" in
+        python)
+          docker run --rm -v "$PWD:/app" -w /app python:3.11-slim bash -c "
+            pip install safety pip-audit
+            ./scripts/security.sh
+          "
+          ;;
+        java)
+          docker run --rm -v "$PWD:/app" -w /app openjdk:17-slim bash -c "
+            apt-get update && apt-get install -y maven
+            ./scripts/security.sh
+          "
+          ;;
+        node)
+          docker run --rm -v "$PWD:/app" -w /app node:18-slim bash -c "
+            ./scripts/security.sh
+          "
+          ;;
+        go)
+          docker run --rm -v "$PWD:/app" -w /app golang:1.21-alpine sh -c "
+            apk add --no-cache bash
+            go install golang.org/x/vuln/cmd/govulncheck@latest
+            ./scripts/security.sh
+          "
+          ;;
+        *)
+          echo "Security scan not implemented for $DETECTED_LANG"
+          ;;
+      esac
+  dependencies:
+    - detect_language
+  allow_failure: true # Don't block pipeline on security warnings
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Deploy job (conditional)
+deploy_artifacts:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploying artifacts..."
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        echo "Deploying to staging..."
+        # Add staging deployment logic
+      elif [ -n "$CI_COMMIT_TAG" ]; then
+        echo "Deploying to production..."
+        # Add production deployment logic
+      else
+        echo "No deployment configured for this branch"
+      fi
+  dependencies:
+    - build_project
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_COMMIT_TAG
+      when: manual
+  environment:
+    name: staging
+    url: https://staging.example.com
+
+# Cleanup job
+cleanup:
+  stage: .post
+  image: alpine:latest
+  script:
+    - echo "Cleaning up temporary files..."
+    - rm -f .detected_language
+  when: always
+  allow_failure: true
+
+# Include additional pipeline configurations
+include:
+  - local: ".gitlab/ci/security.yml"
+    rules:
+      - if: $SECURITY_SCAN_ENABLED == "true"
+  - local: ".gitlab/ci/performance.yml"
+    rules:
+      - if: $PERFORMANCE_TEST_ENABLED == "true"

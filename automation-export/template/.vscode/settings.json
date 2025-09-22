@@ -1,0 +1,208 @@
+{
+  // Dev Assistant Workflow Settings
+  "dev_assistant": {
+    "feature_matrix_file": "feature_matrix.yaml",
+    "automation_config_file": "automation.config.yaml"
+  },
+
+  // Coverage Configuration
+  "coverage": {
+    "global_threshold": 80,
+    "patch_threshold": 85,
+    "html_report_path": "coverage/html/index.html"
+  },
+
+  // Language Detection Priority
+  "language_detection": {
+    "priority": ["python", "javascript", "typescript", "java", "go", "rust"]
+  },
+
+  // Terminal Integration
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "${workspaceFolder}",
+    "PROJECT_ROOT": "${workspaceFolder}"
+  },
+  "terminal.integrated.env.linux": {
+    "PYTHONPATH": "${workspaceFolder}",
+    "PROJECT_ROOT": "${workspaceFolder}"
+  },
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}",
+    "PROJECT_ROOT": "${workspaceFolder}"
+  },
+
+  // File Associations
+  "files.associations": {
+    "feature_matrix.yaml": "yaml",
+    "automation.config.yaml": "yaml",
+    "*.lcov": "plaintext",
+    "coverage.out": "plaintext"
+  },
+
+  // File Watching for Auto-Tasks
+  "files.watcherExclude": {
+    "**/coverage/**": true,
+    "**/build/**": true,
+    "**/.cache/**": true,
+    "**/artifacts/**": true,
+    "**/node_modules/**": true,
+    "**/__pycache__/**": true,
+    "**/target/**": true
+  },
+
+  // Tasks Configuration
+  "tasks": {
+    "version": "2.0.0",
+    "options": {
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PROJECT_ROOT": "${workspaceFolder}"
+      }
+    }
+  },
+
+  // Language-Specific Settings
+
+  // Python
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "tests",
+    "--cov=src",
+    "--cov-report=lcov:coverage/lcov.info"
+  ],
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.formatting.provider": "black",
+
+  // TypeScript/JavaScript
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "javascript.preferences.includePackageJsonAutoImports": "auto",
+  "eslint.workingDirectories": ["."],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Go
+  "go.toolsManagement.checkForUpdates": "local",
+  "go.useCodeSnippetsOnFunctionSuggest": true,
+  "go.coverOnSave": true,
+  "go.coverageDecorator": {
+    "type": "gutter",
+    "coveredHighlightColor": "rgba(64,128,64,0.5)",
+    "uncoveredHighlightColor": "rgba(128,64,64,0.25)"
+  },
+
+  // Rust
+  "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.cargo.features": "all",
+
+  // Java
+  "java.test.report.position": "sideView",
+  "java.coverage.report.position": "sideView",
+
+  // Git Integration
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.showProgress": true,
+
+  // Search and Discovery
+  "search.exclude": {
+    "**/coverage": true,
+    "**/build": true,
+    "**/.cache": true,
+    "**/artifacts": true,
+    "**/node_modules": true,
+    "**/__pycache__": true,
+    "**/target": true,
+    "**/*.lcov": true,
+    "**/coverage.out": true
+  },
+
+  // Explorer File Nesting
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "feature_matrix.yaml": "automation.config.yaml",
+    "package.json": "package-lock.json, yarn.lock, tsconfig.json, *.config.js",
+    "pyproject.toml": "requirements*.txt, setup.py, setup.cfg",
+    "Cargo.toml": "Cargo.lock",
+    "go.mod": "go.sum",
+    "pom.xml": "*.gradle, *.gradle.kts"
+  },
+
+  // Status Bar Integration
+  "statusbar": {
+    "coverage": {
+      "enabled": true,
+      "format": "Coverage: {percentage}%",
+      "threshold": 80
+    }
+  },
+
+  // Problem Matchers
+  "problemMatchers": {
+    "dev-assistant": {
+      "owner": "dev-assistant",
+      "fileLocation": ["relative", "${workspaceFolder}"],
+      "pattern": {
+        "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error|info):\\s+(.*)$",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "severity": 4,
+        "message": 5
+      }
+    }
+  },
+
+  // Auto-Save for Workflow
+  "files.autoSave": "onWindowChange",
+  "files.autoSaveDelay": 1000,
+
+  // Editor Settings for Code Quality
+  "editor.rulers": [80, 100, 120],
+  "editor.showFoldingControls": "always",
+  "editor.foldingImportsByDefault": true,
+
+  // Recommended Extensions per Language
+  "extensions.recommendations": [
+    // Universal
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.test-adapter-converter",
+
+    // Python
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "charliermarsh.ruff",
+    "ms-python.coverage-gutters",
+
+    // JavaScript/TypeScript
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+
+    // Java
+    "redhat.java",
+    "vscjava.vscode-java-pack",
+
+    // Go
+    "golang.go",
+
+    // Rust
+    "rust-lang.rust-analyzer",
+
+    // Git
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+
+    // Testing
+    "hbenl.vscode-test-explorer",
+    "ms-vscode.test-adapter-converter"
+  ]
+}

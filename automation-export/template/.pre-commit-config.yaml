@@ -1,0 +1,182 @@
+# Pre-commit hooks configuration
+# https://pre-commit.com/
+
+repos:
+  # Built-in hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, master]
+
+  # Security scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        args: [-c=.yamllint.yml]
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: [--config=.markdownlint.yml]
+
+  # Shell script linting
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.9.0
+    hooks:
+      - id: shellcheck
+        args: [--severity=warning]
+
+  # Shell script formatting
+  - repo: https://github.com/mvdan/sh
+    rev: v3.7.0
+    hooks:
+      - id: shfmt
+        args: [-w, -s, -i, "2"]
+
+  # Python hooks (only if Python files detected)
+  - repo: local
+    hooks:
+      - id: python-black
+        name: black (python formatter)
+        entry: black
+        language: system
+        types: [python]
+        require_serial: true
+        files: '\.py$'
+
+      - id: python-ruff
+        name: ruff (python linter)
+        entry: ruff check --fix
+        language: system
+        types: [python]
+        require_serial: true
+        files: '\.py$'
+
+  # JavaScript/TypeScript hooks (only if Node.js files detected)
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint (javascript/typescript linter)
+        entry: npx eslint --fix
+        language: system
+        types_or: [javascript, jsx, ts, tsx]
+        files: '\.(js|jsx|ts|tsx|vue|svelte)$'
+
+      - id: prettier
+        name: prettier (code formatter)
+        entry: npx prettier --write
+        language: system
+        types_or:
+          [javascript, jsx, ts, tsx, json, yaml, markdown, css, scss, html]
+        files: '\.(js|jsx|ts|tsx|json|ya?ml|md|css|scss|html|vue|svelte)$'
+
+  # Go hooks (only if Go files detected)
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: go fmt
+        entry: gofmt -w
+        language: system
+        types: [go]
+
+      - id: go-vet
+        name: go vet
+        entry: go vet
+        language: system
+        types: [go]
+        pass_filenames: false
+
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint run --fix
+        language: system
+        types: [go]
+        pass_filenames: false
+
+  # Java hooks (only if Java files detected)
+  - repo: local
+    hooks:
+      - id: spotless-apply
+        name: spotless apply (java formatter)
+        entry: mvn spotless:apply
+        language: system
+        types: [java]
+        pass_filenames: false
+
+  # C# hooks (only if C# files detected)
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format
+        entry: dotnet format
+        language: system
+        types: [c#]
+        pass_filenames: false
+
+  # Rust hooks (only if Rust files detected)
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt
+        language: system
+        types: [rust]
+
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy --fix --allow-dirty
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  # Flutter/Dart hooks (only if Flutter/Dart files detected)
+  - repo: local
+    hooks:
+      - id: dart-format
+        name: dart format
+        entry: dart format
+        language: system
+        types: [dart]
+
+      - id: flutter-analyze
+        name: flutter analyze
+        entry: flutter analyze
+        language: system
+        types: [dart]
+        pass_filenames: false
+
+# Default language version
+default_language_version:
+  python: python3
+  node: system
+
+# Default stages
+default_stages: [commit, push]
+
+# Fail fast on first error
+fail_fast: false
+
+# Minimum pre-commit version
+minimum_pre_commit_version: "2.20.0"

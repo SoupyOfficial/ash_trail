@@ -1,0 +1,105 @@
+# Markdownlint configuration
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+default: true
+
+# Header style
+MD003:
+  style: "atx"
+
+# Unordered list style
+MD004:
+  style: "dash"
+
+# List indent
+MD007:
+  indent: 2
+
+# Line length
+MD013:
+  line_length: 120
+  headings: false
+  tables: false
+  code_blocks: false
+
+# Multiple headers with the same content
+MD024:
+  siblings_only: true
+
+# Multiple top level headers in the same document
+MD025: false
+
+# Ordered list item prefix
+MD029:
+  style: "ordered"
+
+# Fenced code blocks should be surrounded by blank lines
+MD031: false
+
+# Lists should be surrounded by blank lines
+MD032: false
+
+# Inline HTML
+MD033:
+  allowed_elements: ["br", "sub", "sup", "kbd", "details", "summary"]
+
+# Bare URL used
+MD034: false
+
+# Horizontal rule style
+MD035:
+  style: "---"
+
+# Emphasis used instead of a header
+MD036:
+  punctuation: ".,;:!?"
+
+# Spaces inside emphasis markers
+MD037: true
+
+# Spaces inside code span elements
+MD038: true
+
+# Spaces inside link text
+MD039: true
+
+# Fenced code blocks should specify a language
+MD040: false
+
+# First line in file should be a top level header
+MD041: false
+
+# No empty links
+MD042: true
+
+# Required headers
+MD043: false
+
+# Proper names should have the correct capitalization
+MD044:
+  names:
+    [
+      "JavaScript",
+      "TypeScript",
+      "PowerShell",
+      "GitHub",
+      "GitLab",
+      "VS Code",
+      "Docker",
+      "Kubernetes",
+    ]
+  code_blocks: false
+
+# Images should have alternate text (alt text)
+MD045: true
+
+# Code block style
+MD046:
+  style: "fenced"
+
+# Files should end with a single newline character
+MD047: true
+
+# Code fence style
+MD048:
+  style: "backtick"

@@ -1,0 +1,391 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dev Assistant: Status",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "status"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Show project and feature status overview"
+    },
+    {
+      "label": "Dev Assistant: Health Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "health"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Comprehensive environment health check"
+    },
+    {
+      "label": "Dev Assistant: Start Next Feature",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "start-next-feature"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Start development of next planned feature"
+    },
+    {
+      "label": "Dev Assistant: Start Specific Feature",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "scripts/dev_assistant.py",
+        "start-next-feature",
+        "--feature",
+        "${input:featureName}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Start development of a specific feature"
+    },
+    {
+      "label": "Dev Assistant: Finalize Feature",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "finalize-feature"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Complete feature development with validation"
+    },
+    {
+      "label": "Dev Assistant: Dev Cycle",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "dev-cycle"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Complete development cycle (lint, test, coverage)"
+    },
+    {
+      "label": "Dev Assistant: Coverage Analysis",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "coverage", "--html"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Analyze test coverage with HTML report"
+    },
+    {
+      "label": "Dev Assistant: Coverage Trends",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "scripts/analyze_coverage.py",
+        "--trends",
+        "--save-history",
+        "--html"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Analyze coverage trends over time"
+    },
+    {
+      "label": "Dev Assistant: Features List",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "features"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "List all features from feature matrix"
+    },
+    {
+      "label": "Dev Assistant: Full Check",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/dev_assistant.py", "full-check"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Comprehensive project validation",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Coverage: Generate HTML Report",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/analyze_coverage.py", "--html", "--format", "auto"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Generate HTML coverage report from any format"
+    },
+    {
+      "label": "Coverage: Check Thresholds (CI)",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "scripts/analyze_coverage.py",
+        "--ci",
+        "--threshold",
+        "${config:coverage.global_threshold}",
+        "--patch-threshold",
+        "${config:coverage.patch_threshold}"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Validate coverage against configured thresholds"
+    },
+    {
+      "label": "Language: Run Tests",
+      "type": "shell",
+      "command": "${command:workbench.action.tasks.runTask}",
+      "args": ["Test"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "dependsOrder": "sequence",
+      "dependsOn": ["Auto: Detect Language"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Run language-specific tests"
+    },
+    {
+      "label": "Language: Run Tests with Coverage",
+      "type": "shell",
+      "command": "${command:workbench.action.tasks.runTask}",
+      "args": ["Test Coverage"],
+      "group": "test",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Auto: Detect Language"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Run tests with coverage analysis"
+    },
+    {
+      "label": "Language: Lint and Format",
+      "type": "shell",
+      "command": "${command:workbench.action.tasks.runTask}",
+      "args": ["Lint Fix"],
+      "group": "build",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Auto: Detect Language"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Run language-specific linting and formatting"
+    },
+    {
+      "label": "Auto: Detect Language",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "-c",
+        "import sys, os; sys.path.append('scripts'); from dev_assistant import detect_project_language; print(f'PROJECT_LANGUAGE={detect_project_language()}')"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": false,
+        "reveal": "never",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Auto-detect project language for other tasks"
+    },
+    {
+      "label": "Git: Create Feature Branch",
+      "type": "shell",
+      "command": "git",
+      "args": ["checkout", "-b", "feature/${input:featureName}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Create a new feature branch"
+    },
+    {
+      "label": "Git: Push Current Branch",
+      "type": "shell",
+      "command": "git",
+      "args": ["push", "-u", "origin", "${command:git.branchName}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Push current branch to remote"
+    },
+    {
+      "label": "Open Coverage Report",
+      "type": "shell",
+      "command": "${input:openCommand}",
+      "args": ["coverage/html/index.html"],
+      "group": "test",
+      "presentation": {
+        "echo": false,
+        "reveal": "never",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "Open HTML coverage report in default browser"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "featureName",
+      "description": "Feature name (will be converted to branch format)",
+      "default": "",
+      "type": "promptString"
+    },
+    {
+      "id": "openCommand",
+      "description": "Command to open files",
+      "default": "open",
+      "type": "pickString",
+      "options": [
+        {
+          "label": "macOS",
+          "value": "open"
+        },
+        {
+          "label": "Windows",
+          "value": "start"
+        },
+        {
+          "label": "Linux",
+          "value": "xdg-open"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+MIT License
+
+Copyright (c) 2025 AshTrail Development Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Third-Party Licenses
+
+This project incorporates or references several third-party tools and libraries:
+
+### GitHub Actions
+- **actions/checkout**: MIT License
+- **actions/setup-python**: MIT License
+- **actions/setup-java**: MIT License
+- **actions/setup-node**: MIT License
+- **actions/setup-go**: MIT License
+- **actions/upload-artifact**: MIT License
+- **actions/download-artifact**: MIT License
+
+### Development Tools
+- **Gitleaks**: MIT License
+- **Pre-commit**: MIT License
+- **yamllint**: GPLv3 License
+- **markdownlint**: MIT License
+- **golangci-lint**: GPLv3 License
+
+### Language-Specific Tools
+
+#### Python
+- **flake8**: MIT License
+- **black**: MIT License
+- **pytest**: MIT License
+- **coverage**: Apache License 2.0
+
+#### Node.js
+- **ESLint**: MIT License
+- **Prettier**: MIT License
+- **Jest**: MIT License
+
+#### Java
+- **Maven**: Apache License 2.0
+- **JUnit**: Eclipse Public License 2.0
+- **Spotless**: Apache License 2.0
+
+#### Go
+- **go fmt**: BSD-3-Clause License
+- **go test**: BSD-3-Clause License
+
+#### Rust
+- **rustfmt**: Apache License 2.0 / MIT License
+- **cargo test**: Apache License 2.0 / MIT License
+
+#### C#
+- **dotnet format**: MIT License
+- **xUnit**: Apache License 2.0
+
+## License Compatibility
+
+This template is designed to be compatible with projects using any of the following licenses:
+- MIT License
+- Apache License 2.0
+- BSD 2-Clause License
+- BSD 3-Clause License
+- ISC License
+
+## Attribution Requirements
+
+When using this automation template in your projects:
+
+1. **Required**: Include this license file in your project root
+2. **Recommended**: Add attribution in your README.md:
+   ```markdown
+   This project uses the AshTrail Development Automation Template, licensed under MIT.
+   ```
+3. **Optional**: Link back to the original template repository
+
+## Contribution License Agreement
+
+By contributing to this template, you agree that your contributions will be licensed under the same MIT License that covers the project.
+
+## Commercial Use
+
+This template is freely available for commercial use without any restrictions. You may:
+- Use it in commercial projects
+- Modify it for your organization's needs
+- Distribute modified versions
+- Sell products that incorporate this template
+
+## Template Usage License
+
+Projects created using this template are not required to:
+- Use the same license as this template
+- Include attribution to this template (though appreciated)
+- Share modifications made to the template
+
+However, any direct distribution of the template itself (modified or unmodified) must include this license notice.
+
+## Disclaimer
+
+THE AUTHORS OR COPYRIGHT HOLDERS ARE NOT LIABLE FOR ANY SECURITY VULNERABILITIES, DATA LOSS, OR OTHER DAMAGES THAT MAY RESULT FROM USING THIS AUTOMATION TEMPLATE. USERS ARE RESPONSIBLE FOR REVIEWING AND TESTING ALL GENERATED CODE AND CONFIGURATIONS BEFORE USE IN PRODUCTION ENVIRONMENTS.
+
+## Questions
+
+For licensing questions, contact: [legal@yourproject.com](mailto:legal@yourproject.com)

@@ -57,7 +57,7 @@ detect_language() {
 # Check basic system tools
 check_system_tools() {
     log_info "Checking system tools..."
-    
+
     local tools=("git" "curl" "python3")
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
@@ -74,21 +74,52 @@ check_system_tools() {
     done
 }
 
+# Check static analysis tools
+check_static_analysis_tools() {
+    log_info "Checking static analysis tools..."
+
+    # Universal tools
+    local universal_tools=("pre-commit" "yamllint" "markdownlint-cli")
+    for tool in "${universal_tools[@]}"; do
+        if command_exists "$tool"; then
+            log_success "$tool available"
+        else
+            log_warning "$tool not installed (recommended for quality checks)"
+        fi
+    done
+
+    # Gitleaks for secret scanning
+    if command_exists "gitleaks"; then
+        local gitleaks_version
+        gitleaks_version=$(gitleaks version 2>/dev/null | head -1 || echo "unknown")
+        log_success "gitleaks $gitleaks_version"
+    else
+        log_warning "gitleaks not installed (recommended for security scanning)"
+    fi
+
+    # Shellcheck for shell scripts
+    if command_exists "shellcheck"; then
+        log_success "shellcheck available"
+    else
+        log_warning "shellcheck not installed (recommended for shell script quality)"
+    fi
+}
+
 # Check git configuration
 check_git_config() {
     log_info "Checking Git configuration..."
-    
+
     if command_exists git && [ -d ".git" ]; then
         local user_name user_email
         user_name=$(git config user.name 2>/dev/null || echo "")
         user_email=$(git config user.email 2>/dev/null || echo "")
-        
+
         if [ -n "$user_name" ] && [ -n "$user_email" ]; then
             log_success "Git user configured: $user_name <$user_email>"
         else
             log_warning "Git user not configured. Run: git config --global user.name 'Your Name' && git config --global user.email 'your.email@example.com'"
         fi
-        
+
         # Check if pre-commit is installed and configured
         if command_exists pre-commit; then
             if [ -f ".pre-commit-config.yaml" ]; then
@@ -112,14 +143,14 @@ check_git_config() {
 check_language_tools() {
     local language="$1"
     log_info "Checking $language tools..."
-    
+
     case "$language" in
         python)
             if command_exists python3; then
                 local python_version
                 python_version=$(python3 --version | cut -d' ' -f2)
                 log_success "Python $python_version"
-                
+
                 # Check pip
                 if python3 -m pip --version >/dev/null 2>&1; then
                     local pip_version
@@ -128,7 +159,7 @@ check_language_tools() {
                 else
                     log_error "pip not available"
                 fi
-                
+
                 # Check common dev tools
                 local dev_tools=("ruff" "black" "pytest")
                 for tool in "${dev_tools[@]}"; do
@@ -138,7 +169,7 @@ check_language_tools() {
                         log_warning "$tool not installed (install with: pip install $tool)"
                     fi
                 done
-                
+
                 # Check project dependencies
                 if [ -f "requirements.txt" ]; then
                     if python3 -m pip check >/dev/null 2>&1; then
@@ -151,7 +182,7 @@ check_language_tools() {
                 log_error "Python 3 not found"
             fi
             ;;
-            
+
         java)
             local java_found=false
             if command_exists java; then
@@ -160,7 +191,7 @@ check_language_tools() {
                 log_success "Java $java_version"
                 java_found=true
             fi
-            
+
             if command_exists mvn; then
                 local mvn_version
                 mvn_version=$(mvn --version | head -1 | cut -d' ' -f3)
@@ -172,22 +203,22 @@ check_language_tools() {
                 log_success "Gradle $gradle_version"
                 java_found=true
             fi
-            
+
             if [ "$java_found" = false ]; then
                 log_error "Java development tools not found"
             fi
             ;;
-            
+
         node)
             if command_exists node; then
                 local node_version npm_version
                 node_version=$(node --version)
                 log_success "Node.js $node_version"
-                
+
                 if command_exists npm; then
                     npm_version=$(npm --version)
                     log_success "npm $npm_version"
-                    
+
                     # Check if node_modules exists
                     if [ -d "node_modules" ]; then
                         log_success "Dependencies installed"
@@ -201,13 +232,13 @@ check_language_tools() {
                 log_error "Node.js not found"
             fi
             ;;
-            
+
         go)
             if command_exists go; then
                 local go_version
                 go_version=$(go version | cut -d' ' -f3)
                 log_success "Go $go_version"
-                
+
                 # Check if go.mod exists and is valid
                 if [ -f "go.mod" ]; then
                     if go list -m >/dev/null 2>&1; then
@@ -216,7 +247,7 @@ check_language_tools() {
                         log_warning "Go module issues. Run: go mod tidy"
                     fi
                 fi
-                
+
                 # Check golangci-lint
                 if command_exists golangci-lint; then
                     log_success "golangci-lint available"
@@ -227,13 +258,13 @@ check_language_tools() {
                 log_error "Go not found"
             fi
             ;;
-            
+
         flutter)
             if command_exists flutter; then
                 local flutter_version
                 flutter_version=$(flutter --version | head -1 | cut -d' ' -f2)
                 log_success "Flutter $flutter_version"
-                
+
                 # Run flutter doctor
                 log_info "Running flutter doctor..."
                 if flutter doctor >/dev/null 2>&1; then
@@ -245,14 +276,14 @@ check_language_tools() {
                 log_error "Flutter not found"
             fi
             ;;
-            
+
         rust)
             if command_exists rustc && command_exists cargo; then
                 local rust_version cargo_version
                 rust_version=$(rustc --version | cut -d' ' -f2)
                 cargo_version=$(cargo --version | cut -d' ' -f2)
                 log_success "Rust $rust_version, Cargo $cargo_version"
-                
+
                 if [ -f "Cargo.toml" ]; then
                     if cargo check --quiet >/dev/null 2>&1; then
                         log_success "Cargo project valid"
@@ -264,13 +295,13 @@ check_language_tools() {
                 log_error "Rust toolchain not found"
             fi
             ;;
-            
+
         csharp)
             if command_exists dotnet; then
                 local dotnet_version
                 dotnet_version=$(dotnet --version)
                 log_success ".NET SDK $dotnet_version"
-                
+
                 # Check if solution/project files exist
                 if find . -maxdepth 2 -name "*.csproj" -o -name "*.sln" -o -name "*.fsproj" | head -1 | grep -q .; then
                     if dotnet restore --verbosity quiet >/dev/null 2>&1; then
@@ -283,7 +314,7 @@ check_language_tools() {
                 log_error ".NET SDK not found"
             fi
             ;;
-            
+
         unknown)
             log_warning "Unknown project type - skipping language-specific checks"
             ;;
@@ -293,7 +324,7 @@ check_language_tools() {
 # Check project structure
 check_project_structure() {
     log_info "Checking project structure..."
-    
+
     local required_dirs=("coverage" "build" ".vscode")
     for dir in "${required_dirs[@]}"; do
         if [ -d "$dir" ]; then
@@ -302,7 +333,7 @@ check_project_structure() {
             log_warning "Directory $dir missing (will be created automatically)"
         fi
     done
-    
+
     # Check automation config
     if [ -f "automation.config.yaml" ]; then
         log_success "Automation config found"
@@ -314,12 +345,12 @@ check_project_structure() {
 # Check file permissions
 check_permissions() {
     log_info "Checking script permissions..."
-    
+
     local scripts_dir="scripts"
     if [ -d "$scripts_dir" ]; then
         local script_count=0
         local executable_count=0
-        
+
         for script in "$scripts_dir"/*.sh; do
             if [ -f "$script" ]; then
                 ((script_count++))
@@ -328,7 +359,7 @@ check_permissions() {
                 fi
             fi
         done
-        
+
         if [ $script_count -eq $executable_count ]; then
             log_success "All $script_count shell scripts are executable"
         else
@@ -341,12 +372,14 @@ check_permissions() {
 main() {
     local language
     language=$(detect_language)
-    
+
     log_info "Project root: $PROJECT_ROOT"
     log_info "Detected language: $language"
     echo ""
-    
+
     check_system_tools
+    echo ""
+    check_static_analysis_tools
     echo ""
     check_git_config
     echo ""
@@ -356,11 +389,11 @@ main() {
     echo ""
     check_permissions
     echo ""
-    
+
     # Summary
     echo -e "${BLUE}📊 Health Check Summary${NC}"
     echo "========================"
-    
+
     if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
         log_success "All checks passed! Your development environment is ready."
     elif [ $ERRORS -eq 0 ]; then
@@ -370,7 +403,7 @@ main() {
         echo -e "${RED}❌ $ERRORS error(s) and $WARNINGS warning(s) found.${NC}"
         echo -e "${CYAN}💡 Please resolve the errors before proceeding.${NC}"
     fi
-    
+
     echo ""
     if [ "$OVERALL_STATUS" -eq 0 ]; then
         echo -e "${GREEN}🚀 Ready to start development!${NC}"

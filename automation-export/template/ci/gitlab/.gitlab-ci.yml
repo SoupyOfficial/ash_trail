@@ -1,0 +1,267 @@
+# GitLab CI/CD Configuration for Development Automation Template
+# Automatically detects project language and runs appropriate tasks
+
+image: ubuntu:22.04
+
+variables:
+  COVERAGE_GLOBAL_THRESHOLD: "80"
+  COVERAGE_PATCH_THRESHOLD: "85"
+  DEBIAN_FRONTEND: noninteractive
+
+stages:
+  - detect
+  - doctor
+  - lint
+  - test
+  - build
+  - security
+
+# Language detection job
+detect-language:
+  stage: detect
+  script:
+    - |
+      if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ] || [ -f "setup.py" ]; then
+        echo "DETECTED_LANGUAGE=python" > detect.env
+      elif [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+        echo "DETECTED_LANGUAGE=java" > detect.env
+      elif [ -f "package.json" ]; then
+        echo "DETECTED_LANGUAGE=node" > detect.env
+      elif [ -f "go.mod" ]; then
+        echo "DETECTED_LANGUAGE=go" > detect.env
+      elif [ -f "pubspec.yaml" ]; then
+        echo "DETECTED_LANGUAGE=flutter" > detect.env
+      elif [ -f "Cargo.toml" ]; then
+        echo "DETECTED_LANGUAGE=rust" > detect.env
+      elif find . -maxdepth 2 -name "*.csproj" -o -name "*.sln" -o -name "*.fsproj" | head -1 | grep -q .; then
+        echo "DETECTED_LANGUAGE=csharp" > detect.env
+      else
+        echo "DETECTED_LANGUAGE=unknown" > detect.env
+      fi
+      cat detect.env
+  artifacts:
+    reports:
+      dotenv: detect.env
+    expire_in: 1 hour
+
+# Health check job
+doctor:
+  stage: doctor
+  needs: ["detect-language"]
+  parallel:
+    matrix:
+      - RUNNER: [ubuntu-latest]
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq curl wget git build-essential
+    - chmod +x scripts/*.sh
+  script:
+    - echo "Detected language: $DETECTED_LANGUAGE"
+    - ./scripts/bootstrap.sh --skip-hooks
+    - ./scripts/doctor.sh
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
+
+# Linting job
+lint:
+  stage: lint
+  needs: ["detect-language"]
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq curl wget git build-essential
+    - chmod +x scripts/*.sh
+    - ./scripts/bootstrap.sh --skip-hooks
+  script:
+    - ./scripts/lint.sh
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
+    - changes:
+        - "**/*.py"
+        - "**/*.java"
+        - "**/*.js"
+        - "**/*.ts"
+        - "**/*.go"
+        - "**/*.dart"
+        - "**/*.rs"
+        - "**/*.cs"
+        - "scripts/**/*"
+
+# Test job with coverage
+test:
+  stage: test
+  needs: ["detect-language"]
+  parallel:
+    matrix:
+      - LANGUAGE_VERSION:
+          - "default"
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq curl wget git build-essential
+    - chmod +x scripts/*.sh
+    - ./scripts/bootstrap.sh --skip-hooks
+  script:
+    - ./scripts/test.sh --coverage
+    - |
+      # Check coverage threshold
+      if [ -f "coverage/lcov.info" ]; then
+        COVERAGE_FILE="coverage/lcov.info"
+      elif [ -f "coverage/coverage-final.json" ]; then
+        COVERAGE_FILE="coverage/coverage-final.json"
+      else
+        echo "No coverage file found, skipping threshold check"
+        exit 0
+      fi
+
+      # Extract coverage percentage (simplified)
+      if [[ "$COVERAGE_FILE" == *.lcov* ]]; then
+        HIT_LINES=$(grep -c "^DA:.*,1$" "$COVERAGE_FILE" || echo "0")
+        TOTAL_LINES=$(grep -c "^DA:" "$COVERAGE_FILE" || echo "1")
+        COVERAGE_PCT=$(awk -v h="$HIT_LINES" -v t="$TOTAL_LINES" 'BEGIN { printf("%.1f", (h/t)*100) }')
+      else
+        echo "Coverage format not supported for threshold check"
+        exit 0
+      fi
+
+      echo "Coverage: $COVERAGE_PCT%"
+
+      # Check threshold
+      if awk -v p="$COVERAGE_PCT" -v t="$COVERAGE_GLOBAL_THRESHOLD" 'BEGIN { exit (p+0>=t)?0:1 }'; then
+        echo "✅ Coverage $COVERAGE_PCT% meets threshold of $COVERAGE_GLOBAL_THRESHOLD%"
+      else
+        echo "❌ Coverage $COVERAGE_PCT% below threshold of $COVERAGE_GLOBAL_THRESHOLD%"
+        exit 1
+      fi
+  coverage: '/Coverage: (\d+\.?\d*)%/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.xml
+    paths:
+      - coverage/
+    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
+
+# Build job
+build:
+  stage: build
+  needs: ["detect-language", "lint", "test"]
+  parallel:
+    matrix:
+      - BUILD_MODE: ["debug", "release"]
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq curl wget git build-essential
+    - chmod +x scripts/*.sh
+    - ./scripts/bootstrap.sh --skip-hooks
+  script:
+    - |
+      if [ "$BUILD_MODE" = "release" ]; then
+        ./scripts/build.sh --release
+      else
+        ./scripts/build.sh
+      fi
+  artifacts:
+    when: on_success
+    paths:
+      - build/
+      - dist/
+      - target/
+      - out/
+    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
+
+# Security scanning job
+security:
+  stage: security
+  needs: ["detect-language"]
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq curl wget git build-essential
+    - chmod +x scripts/*.sh
+    - ./scripts/bootstrap.sh --skip-hooks
+  script:
+    - ./scripts/security.sh
+  allow_failure: true
+  artifacts:
+    when: always
+    reports:
+      sast: security-report.json
+    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
+
+# Language-specific optimizations
+.python-before-script: &python-before-script
+  - apt-get install -y python3 python3-pip python3-venv
+  - python3 -m pip install --upgrade pip
+
+.java-before-script: &java-before-script
+  - apt-get install -y openjdk-17-jdk maven
+  - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+.node-before-script: &node-before-script
+  - curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+  - apt-get install -y nodejs
+
+.go-before-script: &go-before-script
+  - wget -q https://go.dev/dl/go1.20.linux-amd64.tar.gz
+  - tar -C /usr/local -xzf go1.20.linux-amd64.tar.gz
+  - export PATH=$PATH:/usr/local/go/bin
+
+.rust-before-script: &rust-before-script
+  - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  - source ~/.cargo/env
+
+.dotnet-before-script: &dotnet-before-script
+  - wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+  - dpkg -i packages-microsoft-prod.deb
+  - apt-get update
+  - apt-get install -y dotnet-sdk-7.0
+
+# Cache configuration for better performance
+.cache-python: &cache-python
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-python"
+    paths:
+      - ~/.cache/pip/
+      - venv/
+
+.cache-node: &cache-node
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-node"
+    paths:
+      - node_modules/
+      - ~/.npm/
+
+.cache-go: &cache-go
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-go"
+    paths:
+      - ~/go/pkg/mod/
+
+.cache-rust: &cache-rust
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-rust"
+    paths:
+      - ~/.cargo/
+      - target/
+
+.cache-dotnet: &cache-dotnet
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-dotnet"
+    paths:
+      - ~/.nuget/packages/

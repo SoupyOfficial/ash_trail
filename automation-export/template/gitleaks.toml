@@ -1,0 +1,166 @@
+title = "gitleaks config"
+
+# Gitleaks rules for common secrets
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(?:key|api[_-]?key|auth[_-]?key|access[_-]?key)['"\"=:\s]+([\w\-\.=]{20,})'''
+keywords = [
+    "key",
+    "api",
+    "apikey",
+    "api_key",
+    "auth_key",
+    "authkey",
+    "access_key",
+    "accesskey",
+]
+
+[[rules]]
+id = "jwt-token"
+description = "JWT Token"
+regex = '''eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'''
+
+[[rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = '''(?i)aws[_-]?secret[_-]?access[_-]?key['"=:\s]+([A-Za-z0-9/+=]{40})'''
+secretGroup = 1
+keywords = [
+    "aws_secret_access_key",
+    "aws-secret-access-key",
+    "awssecretaccesskey",
+]
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''(?i)aws[_-]?access[_-]?key[_-]?id['"=:\s]+([A-Z0-9]{20})'''
+secretGroup = 1
+keywords = [
+    "aws_access_key_id",
+    "aws-access-key-id",
+    "awsaccesskeyid",
+]
+
+[[rules]]
+id = "github-token"
+description = "GitHub Token"
+regex = '''gh[pousr]_[A-Za-z0-9_]{36,255}'''
+
+[[rules]]
+id = "github-pat"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[A-Za-z0-9]{36}'''
+
+[[rules]]
+id = "github-oauth"
+description = "GitHub OAuth Token"
+regex = '''gho_[A-Za-z0-9]{36}'''
+
+[[rules]]
+id = "github-app"
+description = "GitHub App Token"
+regex = '''ghs_[A-Za-z0-9]{36}'''
+
+[[rules]]
+id = "google-api-key"
+description = "Google API Key"
+regex = '''AIza[0-9A-Za-z_-]{35}'''
+
+[[rules]]
+id = "google-oauth-id"
+description = "Google OAuth Client ID"
+regex = '''[0-9]+-[A-Za-z0-9_]{32}\.apps\.googleusercontent\.com'''
+
+[[rules]]
+id = "heroku-api-key"
+description = "Heroku API Key"
+regex = '''(?i)heroku[_-]?api[_-]?key['"=:\s]+([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})'''
+secretGroup = 1
+
+[[rules]]
+id = "stripe-api-key"
+description = "Stripe API Key"
+regex = '''(?i)sk_live_[a-zA-Z0-9]{24,}'''
+
+[[rules]]
+id = "slack-webhook"
+description = "Slack Webhook"
+regex = '''https://hooks\.slack\.com/services/[A-Za-z0-9+/]{44,46}'''
+
+[[rules]]
+id = "slack-token"
+description = "Slack Token"
+regex = '''xox[baprs]-[A-Za-z0-9-]{10,48}'''
+
+[[rules]]
+id = "discord-webhook"
+description = "Discord Webhook"
+regex = '''https://discord(app)?\.com/api/webhooks/[0-9]{18}/[A-Za-z0-9_-]{68}'''
+
+[[rules]]
+id = "private-key"
+description = "Private Key"
+regex = '''-----BEGIN [A-Z]+ PRIVATE KEY-----'''
+
+[[rules]]
+id = "password-field"
+description = "Password in configuration"
+regex = '''(?i)(?:password|pass|pwd)['"=:\s]+([\w\-\.=@]{8,})'''
+keywords = [
+    "password",
+    "pass",
+    "pwd",
+]
+
+[[rules]]
+id = "database-url"
+description = "Database URL with credentials"
+regex = '''(?i)(?:database[_-]?url|db[_-]?url|connection[_-]?string)['"=:\s]+[a-z]+://[^:\s]+:[^@\s]+@[^\s]+'''
+
+[[rules]]
+id = "codecov-token"
+description = "Codecov Token"
+regex = '''(?i)codecov[_-]?token['"=:\s]+([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})'''
+secretGroup = 1
+
+# Allowlist patterns to avoid false positives
+[allowlist]
+description = "Global allowlist"
+regexes = [
+    '''(?i)(?:fake|test|mock|dummy|sample|example|placeholder|template)[_-]?(?:key|token|secret|password)''',
+    '''(?i)(?:key|token|secret|password)[_-]?(?:fake|test|mock|dummy|sample|example|placeholder|template)''',
+    '''(?i)your[_-]?(?:key|token|secret|password|api[_-]?key)''',
+    '''(?i)(?:insert|add|put|replace|enter)[_-]?(?:key|token|secret|password|api[_-]?key)''',
+    '''(?i)(?:key|token|secret|password|api[_-]?key)[_-]?(?:here|placeholder)''',
+    '''REPLACE_WITH_''',
+    '''YOUR_.*_HERE''',
+    '''<.*>''',
+    '''{{.*}}''',
+    '''\$\{.*\}''',
+    '''(?i)xxxxxxxx''',
+    '''(?i)00000000''',
+    '''(?i)12345678''',
+]
+
+paths = [
+    '''.*_test\.go''',
+    '''.*_test\.py''',
+    '''.*\.test\.js''',
+    '''.*\.spec\.js''',
+    '''.*\.test\.ts''',
+    '''.*\.spec\.ts''',
+    '''test/.*''',
+    '''tests/.*''',
+    '''spec/.*''',
+    '''specs/.*''',
+    '''.*\.example\..*''',
+    '''.*\.sample\..*''',
+    '''.*\.template\..*''',
+    '''example.*''',
+    '''sample.*''',
+    '''template.*''',
+    '''docs/.*''',
+    '''documentation/.*''',
+]

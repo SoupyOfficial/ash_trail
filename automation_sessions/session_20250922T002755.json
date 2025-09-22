@@ -1,0 +1,142 @@
+{
+  "id": "20250922T002755",
+  "started_at": "2025-09-22T00:27:55.168498+00:00",
+  "command": "dev-cycle",
+  "coverage_before": 80.98548038307074,
+  "coverage_after": 80.52383127760012,
+  "coverage_delta": -0.4616491054706131,
+  "tests_passed": false,
+  "uploaded": false,
+  "notes": [],
+  "branch": "feat/insights_goal_progress",
+  "commit": "76be6177a48d3d9d5f736fb797793d0bb103b68f",
+  "changed_files": [
+    {
+      "path": ".github/instructions/latest_coverage.lcov",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": ".github/instructions/latest_coverage_summary.md",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "feature_matrix.yaml",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/edit_inline_snackbar/presentation/widgets/inline_edit_snackbar.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/reachability/data/models/reachability_audit_report_model.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/reachability/data/repositories/reachability_repository_impl.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/reachability/domain/entities/ui_element.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/siri_shortcuts/data/models/siri_shortcuts_model.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/spotlight_indexing/data/models/spotlight_item_model.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/spotlight_indexing/presentation/providers/spotlight_indexing_providers.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/table_browse_edit/presentation/demo/logs_table_demo.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/table_browse_edit/presentation/screens/logs_table_screen.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/table_browse_edit/presentation/widgets/logs_table_content.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/table_browse_edit/presentation/widgets/logs_table_filter_bar.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/detail_view/data/datasources/mock_log_detail_datasource_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/edit_inline_snackbar/presentation/inline_edit_controller_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/home_widgets/data/repositories/home_widgets_repository_impl_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/home_widgets/integration/widget_configuration_integration_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/reachability/data/datasources/reachability_local_datasource_impl_test_clean.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/reachability/domain/usecases/reachability_usecases_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/siri_shortcuts/integration/widget_provider_integration_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/table_browse_edit/domain/usecases/get_smoke_log_by_id_usecase_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/table_browse_edit/presentation/providers/logs_table_actions_provider_test.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "tool/feature_flags.g.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "in",
+      "status": "warning:",
+      "type": "other"
+    }
+  ],
+  "file_coverage_deltas": null,
+  "duration_ms": 156624
+}

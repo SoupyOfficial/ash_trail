@@ -1,7 +1,6 @@
 // Table content widget for logs table
 // Displays the main data rows with editing and iOS swipe actions
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/models/smoke_log.dart';
@@ -44,7 +43,7 @@ class LogsTableContent extends ConsumerWidget {
 
 /// Loading state view
 class _LoadingView extends StatelessWidget {
-  const _LoadingView({super.key});
+  const _LoadingView();
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +66,6 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
 
   const _ErrorView({
-    super.key,
     required this.error,
     required this.onRetry,
   });
@@ -113,7 +111,6 @@ class _TableView extends ConsumerWidget {
   final LogsTableState state;
 
   const _TableView({
-    super.key,
     required this.accountId,
     required this.logs,
     required this.state,

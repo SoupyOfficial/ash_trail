@@ -1089,7 +1089,7 @@ features:
 - id: insights.charts_time_series
   order: 1
   title: 'Charts: Daily | Weekly | Monthly | Cumulative | Moving Avg'
-  status: planned
+  status: in_progress
   priority: P0
   epic: insights
   screens:
@@ -1114,7 +1114,7 @@ features:
 - id: insights.goal_progress
   order: 2
   title: Goal Progress Dashboard
-  status: planned
+  status: done
   priority: P0
   epic: insights
   acceptance:

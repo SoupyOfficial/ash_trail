@@ -11,7 +11,6 @@ import '../../domain/usecases/get_indexed_items_usecase.dart';
 import '../../data/repositories/spotlight_indexing_repository_impl.dart';
 import '../../data/datasources/content_data_source.dart';
 import '../../data/datasources/spotlight_service.dart';
-import '../../../../core/failures/app_failure.dart';
 
 part 'spotlight_indexing_providers.g.dart';
 

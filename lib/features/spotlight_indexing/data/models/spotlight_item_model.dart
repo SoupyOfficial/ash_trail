@@ -2,7 +2,6 @@
 // Handles conversion between domain entities and data transfer objects.
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/spotlight_item_entity.dart';
 
 part 'spotlight_item_model.freezed.dart';

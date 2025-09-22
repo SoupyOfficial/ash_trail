@@ -35,7 +35,7 @@ const Map<String, bool> kFeatureFlags = {
   'logging.edit_inline_snackbar': true,
   'logging.quick_tagging': true,
   'logging.undo_last': true,
-  'logs.detail_view': false,
+  'logs.detail_view': true,
   'logs.table_browse_edit': true,
   'notifications.daily_summary': false,
   'notifications.goal_milestone': false,

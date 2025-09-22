@@ -2,7 +2,6 @@
 // Maps between domain entities and storage format
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:flutter/painting.dart';
 import '../../domain/entities/reachability_audit_report.dart';
 import 'reachability_zone_model.dart';

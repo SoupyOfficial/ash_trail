@@ -30,7 +30,7 @@ class ReachabilityRepositoryImpl implements ReachabilityRepository {
       final models = await _localDataSource.getAllAuditReports();
       final entities = models.map((model) => model.toEntity()).toList();
       return Right(entities);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(AppFailure.cache(message: 'Failed to load audit reports'));
     }
   }
@@ -45,7 +45,7 @@ class ReachabilityRepositoryImpl implements ReachabilityRepository {
             message: 'Audit report not found', resourceId: id));
       }
       return Right(model.toEntity());
-    } catch (e, stack) {
+    } catch (e) {
       return Left(AppFailure.cache(message: 'Failed to load audit report'));
     }
   }
@@ -57,7 +57,7 @@ class ReachabilityRepositoryImpl implements ReachabilityRepository {
       final model = ReachabilityAuditReportModel.fromEntity(report);
       final savedModel = await _localDataSource.saveAuditReport(model);
       return Right(savedModel.toEntity());
-    } catch (e, stack) {
+    } catch (e) {
       return Left(AppFailure.cache(message: 'Failed to save audit report'));
     }
   }
@@ -67,7 +67,7 @@ class ReachabilityRepositoryImpl implements ReachabilityRepository {
     try {
       await _localDataSource.deleteAuditReport(id);
       return const Right(null);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(AppFailure.cache(message: 'Failed to delete audit report'));
     }
   }
@@ -78,7 +78,7 @@ class ReachabilityRepositoryImpl implements ReachabilityRepository {
     try {
       final zones = _zoneFactory.createZonesForScreen(screenSize);
       return Right(zones);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(AppFailure.unexpected(
           message: 'Failed to generate reachability zones'));
     }
@@ -90,7 +90,7 @@ class ReachabilityRepositoryImpl implements ReachabilityRepository {
     try {
       await _localDataSource.saveZoneConfiguration(screenSize, zones);
       return const Right(null);
-    } catch (e, stack) {
+    } catch (e) {
       return Left(
           AppFailure.cache(message: 'Failed to save zone configuration'));
     }

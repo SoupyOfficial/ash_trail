@@ -2,7 +2,6 @@
 // Maps between domain entities and data transfer objects.
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/siri_shortcuts_entity.dart';
 import '../../domain/entities/siri_shortcut_type.dart';
 

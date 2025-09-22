@@ -3,7 +3,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:ash_trail/features/table_browse_edit/domain/usecases/get_smoke_log_by_id_usecase.dart';
 import 'package:ash_trail/features/table_browse_edit/domain/repositories/logs_table_repository.dart';
-import 'package:ash_trail/core/failures/app_failure.dart';
 import 'package:ash_trail/domain/models/smoke_log.dart';
 
 class _MockRepo extends Mock implements LogsTableRepository {}

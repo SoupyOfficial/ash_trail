@@ -38,10 +38,12 @@ class UiElement with _$UiElement {
 
     // Return the most accessible level found
     if (levels.contains(ReachabilityLevel.easy)) return ReachabilityLevel.easy;
-    if (levels.contains(ReachabilityLevel.moderate))
+    if (levels.contains(ReachabilityLevel.moderate)) {
       return ReachabilityLevel.moderate;
-    if (levels.contains(ReachabilityLevel.difficult))
+    }
+    if (levels.contains(ReachabilityLevel.difficult)) {
       return ReachabilityLevel.difficult;
+    }
     return ReachabilityLevel.unreachable;
   }
 

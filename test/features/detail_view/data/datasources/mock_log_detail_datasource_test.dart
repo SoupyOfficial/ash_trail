@@ -7,9 +7,6 @@ import 'package:ash_trail/features/detail_view/data/datasources/mock_log_detail_
 import 'package:ash_trail/features/detail_view/data/models/log_detail_model.dart';
 import 'package:ash_trail/core/failures/app_failure.dart';
 import 'package:ash_trail/domain/models/smoke_log.dart';
-import 'package:ash_trail/domain/models/tag.dart';
-import 'package:ash_trail/domain/models/reason.dart';
-import 'package:ash_trail/domain/models/method.dart';
 
 void main() {
   group('MockLogDetailLocalDataSource', () {

@@ -21,8 +21,9 @@ class MockRepository implements SiriShortcutsRepository {
 
   @override
   Future<Either<AppFailure, bool>> isSiriShortcutsSupported() async {
-    if (shouldFail)
+    if (shouldFail) {
       return const Left(AppFailure.unexpected(message: 'Mock error'));
+    }
     return const Right(true);
   }
 
@@ -80,8 +81,9 @@ class MockRepository implements SiriShortcutsRepository {
   Future<Either<AppFailure, void>> donateShortcut(
     SiriShortcutsEntity shortcut,
   ) async {
-    if (shouldFail)
+    if (shouldFail) {
       return const Left(AppFailure.network(message: 'Mock error'));
+    }
     return const Right(null);
   }
 
@@ -89,8 +91,9 @@ class MockRepository implements SiriShortcutsRepository {
   Future<Either<AppFailure, void>> donateShortcuts(
     List<SiriShortcutsEntity> shortcuts,
   ) async {
-    if (shouldFail)
+    if (shouldFail) {
       return const Left(AppFailure.network(message: 'Mock error'));
+    }
     return const Right(null);
   }
 
@@ -100,8 +103,9 @@ class MockRepository implements SiriShortcutsRepository {
     required SiriShortcutType type,
     required DateTime invokedAt,
   }) async {
-    if (shouldFail)
+    if (shouldFail) {
       return const Left(AppFailure.network(message: 'Mock error'));
+    }
     return const Right(null);
   }
 

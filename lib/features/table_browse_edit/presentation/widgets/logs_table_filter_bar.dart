@@ -250,7 +250,6 @@ class _FilterModal extends StatefulWidget {
   final ValueChanged<LogFilter> onFilterChanged;
 
   const _FilterModal({
-    super.key,
     required this.currentFilter,
     required this.onFilterChanged,
   });

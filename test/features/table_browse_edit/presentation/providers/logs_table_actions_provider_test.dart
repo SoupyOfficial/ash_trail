@@ -1,7 +1,6 @@
 // Unit tests for logs table actions provider
 // Tests CRUD operations, batch operations, refresh functionality with Riverpod patterns
 
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';

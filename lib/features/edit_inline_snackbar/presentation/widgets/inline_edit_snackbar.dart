@@ -147,9 +147,10 @@ class _InlineEditSnackbarState extends ConsumerState<InlineEditSnackbar>
                             final saved = await controller.save();
                             if (saved != null) {
                               widget.onSaved?.call();
-                              if (mounted)
+                              if (mounted) {
                                 ScaffoldMessenger.of(context)
                                     .hideCurrentSnackBar();
+                              }
                             }
                           },
                     icon: editState.isSaving

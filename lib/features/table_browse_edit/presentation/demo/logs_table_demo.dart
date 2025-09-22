@@ -106,7 +106,6 @@ class _FeatureList extends StatelessWidget {
   final List<String> features;
 
   const _FeatureList({
-    super.key,
     required this.features,
   });
 

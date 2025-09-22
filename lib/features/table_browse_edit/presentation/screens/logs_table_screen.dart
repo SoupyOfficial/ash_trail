@@ -126,7 +126,6 @@ class _BatchActionsSheet extends ConsumerWidget {
   final int selectedCount;
 
   const _BatchActionsSheet({
-    super.key,
     required this.accountId,
     required this.selectedCount,
   });

@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ash_trail/features/home_widgets/domain/entities/widget_size.dart';
-import 'package:ash_trail/features/home_widgets/domain/entities/widget_tap_action.dart';
 import 'package:ash_trail/features/home_widgets/presentation/screens/widget_config_screen.dart';
 import 'package:ash_trail/features/home_widgets/presentation/providers/home_widgets_providers.dart';
 

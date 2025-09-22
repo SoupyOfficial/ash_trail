@@ -8,7 +8,6 @@ import 'package:ash_trail/features/reachability/domain/usecases/get_reachability
 import 'package:ash_trail/features/reachability/domain/repositories/reachability_repository.dart';
 import 'package:ash_trail/features/reachability/domain/entities/reachability_audit_report.dart';
 import 'package:ash_trail/features/reachability/domain/entities/reachability_zone.dart';
-import 'package:ash_trail/core/failures/app_failure.dart';
 
 class _MockRepo extends Mock implements ReachabilityRepository {}
 

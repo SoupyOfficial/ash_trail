@@ -10,9 +10,6 @@ import 'package:ash_trail/features/reachability/data/models/audit_summary_model.
 import 'package:ash_trail/features/reachability/data/models/ui_element_model.dart';
 import 'package:ash_trail/features/reachability/data/models/reachability_zone_model.dart';
 import 'package:ash_trail/features/reachability/data/models/audit_recommendation_model.dart';
-import 'package:ash_trail/features/reachability/domain/entities/reachability_zone.dart';
-import 'package:ash_trail/features/reachability/domain/entities/ui_element.dart';
-import 'package:ash_trail/features/reachability/domain/entities/reachability_audit_report.dart';
 
 void main() {
   group('ReachabilityLocalDataSourceImpl', () {

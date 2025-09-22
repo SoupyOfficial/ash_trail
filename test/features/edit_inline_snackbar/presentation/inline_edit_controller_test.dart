@@ -9,7 +9,7 @@ import 'package:ash_trail/features/capture_hit/presentation/providers/smoke_log_
 import 'package:ash_trail/features/edit_inline_snackbar/presentation/providers/edit_inline_snackbar_providers.dart';
 
 class _FakeRepo implements SmokeLogRepository {
-  _FakeRepo({this.onUpdate});
+  _FakeRepo();
   Future<Either<AppFailure, SmokeLog>> Function(SmokeLog log)? onUpdate;
   int updateCalls = 0;
 

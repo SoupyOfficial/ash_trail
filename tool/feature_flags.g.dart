@@ -27,7 +27,7 @@ const Map<String, bool> kFeatureFlags = {
   'insights.charts_time_series': false,
   'insights.custom_views': false,
   'insights.filter_presets': false,
-  'insights.goal_progress': false,
+  'insights.goal_progress': true,
   'insights.streaks': false,
   'insights.tag_breakdown': false,
   'logging.batch_edit_delete': true,

@@ -1,11 +1,11 @@
 # Test Coverage Summary
 
-Generated: 2025-09-22T00:27:55.176522+00:00
+Generated: 2025-09-23T01:06:59.908321+00:00
 
 ## Overall Coverage
-- **Line Coverage**: 80.5%
-- **Lines Hit**: 5,288
-- **Total Lines**: 6,567
+- **Line Coverage**: 75.5%
+- **Lines Hit**: 5,833
+- **Total Lines**: 7,726
 
 ## File Coverage Details
 
@@ -29,4 +29,4 @@ Generated: 2025-09-22T00:27:55.176522+00:00
 - `lib\features\app_shell\data\app_shell_repository_prefs.dart`: 0.0% (0/0)
 - `lib\features\app_shell\domain\entities\app_tab.dart`: 0.0% (0/0)
 - `lib\features\app_shell\domain\usecases\get_last_active_tab_use_case.dart`: 0.0% (0/0)
-- ... and 171 more files
+- ... and 196 more files

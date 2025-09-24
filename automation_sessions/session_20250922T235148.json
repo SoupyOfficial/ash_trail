@@ -1,0 +1,44 @@
+{
+  "id": "20250922T235148",
+  "started_at": "2025-09-22T23:51:48.264180+00:00",
+  "command": "dev-cycle",
+  "coverage_before": 79.40806924472986,
+  "coverage_after": 79.40806924472986,
+  "coverage_delta": 0.0,
+  "tests_passed": true,
+  "uploaded": false,
+  "notes": [
+    "coverage_below_target"
+  ],
+  "branch": "main",
+  "commit": "53af499e90a44702505c976a8174a659afbb1ccb",
+  "changed_files": [
+    {
+      "path": ".github/instructions/latest_coverage.lcov",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": ".github/instructions/latest_coverage_summary.md",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "pubspec.lock",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "pubspec.yaml",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "in",
+      "status": "warning:",
+      "type": "other"
+    }
+  ],
+  "file_coverage_deltas": null,
+  "duration_ms": 97297
+}

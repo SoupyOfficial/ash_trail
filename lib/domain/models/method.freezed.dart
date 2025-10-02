@@ -29,12 +29,8 @@ mixin _$Method {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Method to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Method
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $MethodCopyWith<Method> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -62,8 +58,6 @@ class _$MethodCopyWithImpl<$Res, $Val extends Method>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Method
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -127,8 +121,6 @@ class __$$MethodImplCopyWithImpl<$Res>
       _$MethodImpl _value, $Res Function(_$MethodImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Method
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -219,14 +211,12 @@ class _$MethodImpl implements _Method {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType, id, accountId, name, category, createdAt, updatedAt);
 
-  /// Create a copy of Method
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$MethodImplCopyWith<_$MethodImpl> get copyWith =>
@@ -254,20 +244,17 @@ abstract class _Method implements Method {
   @override
   String get id;
   @override
-  String? get accountId; // TODO: FK to Account
-  @override
+  String? get accountId;
+  @override // TODO: FK to Account
   String get name;
   @override
-  String get category; // TODO: constrain to enum values
-  @override
+  String get category;
+  @override // TODO: constrain to enum values
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of Method
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$MethodImplCopyWith<_$MethodImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -28,12 +28,8 @@ mixin _$Device {
   String? get model => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Device to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Device
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $DeviceCopyWith<Device> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -61,8 +57,6 @@ class _$DeviceCopyWithImpl<$Res, $Val extends Device>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Device
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -126,8 +120,6 @@ class __$$DeviceImplCopyWithImpl<$Res>
       _$DeviceImpl _value, $Res Function(_$DeviceImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Device
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -217,14 +209,12 @@ class _$DeviceImpl implements _Device {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType, id, platform, appVersion, osVersion, model, createdAt);
 
-  /// Create a copy of Device
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$DeviceImplCopyWith<_$DeviceImpl> get copyWith =>
@@ -252,8 +242,8 @@ abstract class _Device implements Device {
   @override
   String get id;
   @override
-  String get platform; // TODO: constrain to enum values
-  @override
+  String get platform;
+  @override // TODO: constrain to enum values
   String get appVersion;
   @override
   String? get osVersion;
@@ -261,11 +251,8 @@ abstract class _Device implements Device {
   String? get model;
   @override
   DateTime get createdAt;
-
-  /// Create a copy of Device
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$DeviceImplCopyWith<_$DeviceImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

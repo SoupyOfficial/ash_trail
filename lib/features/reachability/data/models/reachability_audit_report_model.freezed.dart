@@ -32,12 +32,8 @@ mixin _$ReachabilityAuditReportModel {
   List<AuditRecommendationModel>? get recommendations =>
       throw _privateConstructorUsedError;
 
-  /// Serializes this ReachabilityAuditReportModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ReachabilityAuditReportModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ReachabilityAuditReportModelCopyWith<ReachabilityAuditReportModel>
       get copyWith => throw _privateConstructorUsedError;
 }
@@ -75,8 +71,6 @@ class _$ReachabilityAuditReportModelCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ReachabilityAuditReportModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -130,8 +124,6 @@ class _$ReachabilityAuditReportModelCopyWithImpl<$Res,
     ) as $Val);
   }
 
-  /// Create a copy of ReachabilityAuditReportModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $AuditSummaryModelCopyWith<$Res> get summary {
@@ -175,8 +167,6 @@ class __$$ReachabilityAuditReportModelImplCopyWithImpl<$Res>
       $Res Function(_$ReachabilityAuditReportModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ReachabilityAuditReportModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -317,7 +307,7 @@ class _$ReachabilityAuditReportModelImpl extends _ReachabilityAuditReportModel {
                 .equals(other._recommendations, _recommendations));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -331,9 +321,7 @@ class _$ReachabilityAuditReportModelImpl extends _ReachabilityAuditReportModel {
       summary,
       const DeepCollectionEquality().hash(_recommendations));
 
-  /// Create a copy of ReachabilityAuditReportModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ReachabilityAuditReportModelImplCopyWith<
@@ -385,11 +373,8 @@ abstract class _ReachabilityAuditReportModel
   AuditSummaryModel get summary;
   @override
   List<AuditRecommendationModel>? get recommendations;
-
-  /// Create a copy of ReachabilityAuditReportModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ReachabilityAuditReportModelImplCopyWith<
           _$ReachabilityAuditReportModelImpl>
       get copyWith => throw _privateConstructorUsedError;

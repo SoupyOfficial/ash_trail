@@ -56,12 +56,8 @@ mixin _$TimeSeriesChart {
   /// When this chart was generated
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this TimeSeriesChart to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of TimeSeriesChart
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $TimeSeriesChartCopyWith<TimeSeriesChart> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -97,8 +93,6 @@ class _$TimeSeriesChartCopyWithImpl<$Res, $Val extends TimeSeriesChart>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of TimeSeriesChart
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -199,8 +193,6 @@ class __$$TimeSeriesChartImplCopyWithImpl<$Res>
       _$TimeSeriesChartImpl _value, $Res Function(_$TimeSeriesChartImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of TimeSeriesChart
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -389,7 +381,7 @@ class _$TimeSeriesChartImpl extends _TimeSeriesChart {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -406,9 +398,7 @@ class _$TimeSeriesChartImpl extends _TimeSeriesChart {
       const DeepCollectionEquality().hash(_visibleTags),
       createdAt);
 
-  /// Create a copy of TimeSeriesChart
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$TimeSeriesChartImplCopyWith<_$TimeSeriesChartImpl> get copyWith =>
@@ -442,58 +432,56 @@ abstract class _TimeSeriesChart extends TimeSeriesChart {
   factory _TimeSeriesChart.fromJson(Map<String, dynamic> json) =
       _$TimeSeriesChartImpl.fromJson;
 
-  /// Unique identifier for this chart
   @override
+
+  /// Unique identifier for this chart
   String get id;
+  @override
 
   /// Account this chart belongs to
-  @override
   String get accountId;
+  @override
 
   /// Human-readable title for the chart
-  @override
   String get title;
+  @override
 
   /// Time range start (inclusive)
-  @override
   DateTime get startDate;
+  @override
 
   /// Time range end (inclusive)
-  @override
   DateTime get endDate;
+  @override
 
   /// Aggregation level for data points
-  @override
   ChartAggregation get aggregation;
+  @override
 
   /// Metric being displayed
-  @override
   ChartMetric get metric;
+  @override
 
   /// Smoothing applied to the data
-  @override
   ChartSmoothing get smoothing;
+  @override
 
   /// Data points for the chart
-  @override
   List<ChartDataPoint> get dataPoints;
+  @override
 
   /// Window size for moving average (if applicable)
-  @override
   int? get smoothingWindow;
+  @override
 
   /// Tags to filter by (null means all tags)
-  @override
   List<String>? get visibleTags;
+  @override
 
   /// When this chart was generated
-  @override
   DateTime get createdAt;
-
-  /// Create a copy of TimeSeriesChart
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$TimeSeriesChartImplCopyWith<_$TimeSeriesChartImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -528,12 +516,8 @@ mixin _$ChartConfig {
   /// Filter by specific tags (null = all tags)
   List<String>? get visibleTags => throw _privateConstructorUsedError;
 
-  /// Serializes this ChartConfig to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ChartConfig
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ChartConfigCopyWith<ChartConfig> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -565,8 +549,6 @@ class _$ChartConfigCopyWithImpl<$Res, $Val extends ChartConfig>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ChartConfig
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -643,8 +625,6 @@ class __$$ChartConfigImplCopyWithImpl<$Res>
       _$ChartConfigImpl _value, $Res Function(_$ChartConfigImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ChartConfig
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -780,7 +760,7 @@ class _$ChartConfigImpl extends _ChartConfig {
                 .equals(other._visibleTags, _visibleTags));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -793,9 +773,7 @@ class _$ChartConfigImpl extends _ChartConfig {
       smoothingWindow,
       const DeepCollectionEquality().hash(_visibleTags));
 
-  /// Create a copy of ChartConfig
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ChartConfigImplCopyWith<_$ChartConfigImpl> get copyWith =>
@@ -824,42 +802,40 @@ abstract class _ChartConfig extends ChartConfig {
   factory _ChartConfig.fromJson(Map<String, dynamic> json) =
       _$ChartConfigImpl.fromJson;
 
-  /// Account to fetch data for
   @override
+
+  /// Account to fetch data for
   String get accountId;
+  @override
 
   /// Time range start
-  @override
   DateTime get startDate;
+  @override
 
   /// Time range end
-  @override
   DateTime get endDate;
+  @override
 
   /// How to aggregate the data
-  @override
   ChartAggregation get aggregation;
+  @override
 
   /// Which metric to display
-  @override
   ChartMetric get metric;
+  @override
 
   /// How to smooth the data
-  @override
   ChartSmoothing get smoothing;
+  @override
 
   /// Moving average window size
-  @override
   int get smoothingWindow;
+  @override
 
   /// Filter by specific tags (null = all tags)
-  @override
   List<String>? get visibleTags;
-
-  /// Create a copy of ChartConfig
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ChartConfigImplCopyWith<_$ChartConfigImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

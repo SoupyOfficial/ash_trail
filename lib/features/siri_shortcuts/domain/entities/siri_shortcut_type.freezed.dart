@@ -72,9 +72,6 @@ class _$SiriShortcutTypeCopyWithImpl<$Res, $Val extends SiriShortcutType>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
-
-  /// Create a copy of SiriShortcutType
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -91,9 +88,6 @@ class __$$AddLogImplCopyWithImpl<$Res>
   __$$AddLogImplCopyWithImpl(
       _$AddLogImpl _value, $Res Function(_$AddLogImpl) _then)
       : super(_value, _then);
-
-  /// Create a copy of SiriShortcutType
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -197,9 +191,6 @@ class __$$StartTimedLogImplCopyWithImpl<$Res>
   __$$StartTimedLogImplCopyWithImpl(
       _$StartTimedLogImpl _value, $Res Function(_$StartTimedLogImpl) _then)
       : super(_value, _then);
-
-  /// Create a copy of SiriShortcutType
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc

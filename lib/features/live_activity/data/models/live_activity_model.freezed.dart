@@ -26,12 +26,8 @@ mixin _$LiveActivityModel {
   String get status => throw _privateConstructorUsedError;
   String? get cancelReason => throw _privateConstructorUsedError;
 
-  /// Serializes this LiveActivityModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LiveActivityModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LiveActivityModelCopyWith<LiveActivityModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -60,8 +56,6 @@ class _$LiveActivityModelCopyWithImpl<$Res, $Val extends LiveActivityModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LiveActivityModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -120,8 +114,6 @@ class __$$LiveActivityModelImplCopyWithImpl<$Res>
       $Res Function(_$LiveActivityModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LiveActivityModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -200,14 +192,12 @@ class _$LiveActivityModelImpl extends _LiveActivityModel {
                 other.cancelReason == cancelReason));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode =>
       Object.hash(runtimeType, id, startedAt, endedAt, status, cancelReason);
 
-  /// Create a copy of LiveActivityModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LiveActivityModelImplCopyWith<_$LiveActivityModelImpl> get copyWith =>
@@ -244,11 +234,8 @@ abstract class _LiveActivityModel extends LiveActivityModel {
   String get status;
   @override
   String? get cancelReason;
-
-  /// Create a copy of LiveActivityModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LiveActivityModelImplCopyWith<_$LiveActivityModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

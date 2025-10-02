@@ -3,10 +3,10 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/models/smoke_log.dart';
+import '../../../../data/repositories/smoke_log_repository_isar.dart';
+import '../../../../data/services/isar_service.dart';
+import '../../data/datasources/smoke_log_local_datasource_impl.dart';
 import '../../data/datasources/smoke_log_local_datasource.dart';
-import '../../data/datasources/smoke_log_remote_datasource.dart';
-import '../../data/repositories/smoke_log_repository_impl.dart';
-import '../../domain/repositories/smoke_log_repository.dart';
 import '../../domain/usecases/create_smoke_log_usecase.dart';
 import '../../domain/usecases/undo_last_smoke_log_usecase.dart';
 import '../../domain/usecases/get_last_smoke_log_usecase.dart';
@@ -14,54 +14,40 @@ import '../../domain/usecases/delete_smoke_log_usecase.dart';
 // Optional: integrate with quick tagging to attach selected tags after creation
 import '../../../quick_tagging/presentation/providers/quick_tagging_providers.dart';
 
-/// Repository providers - Abstract interfaces
-/// These should be overridden in main.dart with concrete implementations
+// Export the repository provider from the Isar implementation
+export '../../../../data/repositories/smoke_log_repository_isar.dart'
+    show smokeLogRepositoryProvider;
+
+/// Local data source provider
 final smokeLogLocalDataSourceProvider =
-    Provider<SmokeLogLocalDataSource>((ref) {
-  throw UnimplementedError(
-    'smokeLogLocalDataSourceProvider must be overridden with Isar implementation',
-  );
+    FutureProvider<SmokeLogLocalDataSource>((ref) async {
+  final isarService = await ref.watch(isarSmokeLogServiceProvider.future);
+  return SmokeLogLocalDataSourceImpl(isarService);
 });
 
-final smokeLogRemoteDataSourceProvider =
-    Provider<SmokeLogRemoteDataSource>((ref) {
-  throw UnimplementedError(
-    'smokeLogRemoteDataSourceProvider must be overridden with Firestore implementation',
-  );
-});
-
-/// Repository implementation provider
-final smokeLogRepositoryProvider = Provider<SmokeLogRepository>((ref) {
-  return SmokeLogRepositoryImpl(
-    localDataSource: ref.watch(smokeLogLocalDataSourceProvider),
-    remoteDataSource: ref.watch(smokeLogRemoteDataSourceProvider),
-  );
-});
-
-/// Use case providers
-final createSmokeLogUseCaseProvider = Provider<CreateSmokeLogUseCase>((ref) {
-  return CreateSmokeLogUseCase(
-    repository: ref.watch(smokeLogRepositoryProvider),
-  );
+/// Use case providers - now using async repository
+final createSmokeLogUseCaseProvider =
+    FutureProvider<CreateSmokeLogUseCase>((ref) async {
+  final repository = await ref.watch(smokeLogRepositoryProvider.future);
+  return CreateSmokeLogUseCase(repository: repository);
 });
 
 final undoLastSmokeLogUseCaseProvider =
-    Provider<UndoLastSmokeLogUseCase>((ref) {
-  return UndoLastSmokeLogUseCase(
-    repository: ref.watch(smokeLogRepositoryProvider),
-  );
+    FutureProvider<UndoLastSmokeLogUseCase>((ref) async {
+  final repository = await ref.watch(smokeLogRepositoryProvider.future);
+  return UndoLastSmokeLogUseCase(repository: repository);
 });
 
-final getLastSmokeLogUseCaseProvider = Provider<GetLastSmokeLogUseCase>((ref) {
-  return GetLastSmokeLogUseCase(
-    repository: ref.watch(smokeLogRepositoryProvider),
-  );
+final getLastSmokeLogUseCaseProvider =
+    FutureProvider<GetLastSmokeLogUseCase>((ref) async {
+  final repository = await ref.watch(smokeLogRepositoryProvider.future);
+  return GetLastSmokeLogUseCase(repository: repository);
 });
 
-final deleteSmokeLogUseCaseProvider = Provider<DeleteSmokeLogUseCase>((ref) {
-  return DeleteSmokeLogUseCase(
-    repository: ref.watch(smokeLogRepositoryProvider),
-  );
+final deleteSmokeLogUseCaseProvider =
+    FutureProvider<DeleteSmokeLogUseCase>((ref) async {
+  final repository = await ref.watch(smokeLogRepositoryProvider.future);
+  return DeleteSmokeLogUseCase(repository: repository);
 });
 
 /// Async providers for fetching data
@@ -71,7 +57,7 @@ final deleteSmokeLogUseCaseProvider = Provider<DeleteSmokeLogUseCase>((ref) {
 /// Returns null if no logs exist
 final lastSmokeLogProvider =
     FutureProvider.family<SmokeLog?, String>((ref, accountId) async {
-  final useCase = ref.watch(getLastSmokeLogUseCaseProvider);
+  final useCase = await ref.watch(getLastSmokeLogUseCaseProvider.future);
   final result = await useCase(accountId: accountId);
 
   return result.fold(
@@ -102,7 +88,7 @@ class CreateSmokeLogNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(createSmokeLogUseCaseProvider);
+    final useCase = await ref.read(createSmokeLogUseCaseProvider.future);
     final result = await useCase(
       accountId: accountId,
       durationMs: durationMs,
@@ -160,7 +146,7 @@ class UndoSmokeLogNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(undoLastSmokeLogUseCaseProvider);
+    final useCase = await ref.read(undoLastSmokeLogUseCaseProvider.future);
     final result = await useCase(
       accountId: accountId,
       undoWindowSeconds: undoWindowSeconds,

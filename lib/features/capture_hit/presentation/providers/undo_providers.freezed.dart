@@ -90,9 +90,6 @@ class _$UndoStateCopyWithImpl<$Res, $Val extends UndoState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
-
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -109,9 +106,6 @@ class __$$UndoIdleStateImplCopyWithImpl<$Res>
   __$$UndoIdleStateImplCopyWithImpl(
       _$UndoIdleStateImpl _value, $Res Function(_$UndoIdleStateImpl) _then)
       : super(_value, _then);
-
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -238,8 +232,6 @@ class __$$UndoPendingStateImplCopyWithImpl<$Res>
       $Res Function(_$UndoPendingStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -258,8 +250,6 @@ class __$$UndoPendingStateImplCopyWithImpl<$Res>
     ));
   }
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $SmokeLogCopyWith<$Res> get undoableLog {
@@ -299,9 +289,7 @@ class _$UndoPendingStateImpl implements UndoPendingState {
   @override
   int get hashCode => Object.hash(runtimeType, undoableLog, remainingSeconds);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UndoPendingStateImplCopyWith<_$UndoPendingStateImpl> get copyWith =>
@@ -397,10 +385,7 @@ abstract class UndoPendingState implements UndoState {
 
   SmokeLog get undoableLog;
   int get remainingSeconds;
-
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$UndoPendingStateImplCopyWith<_$UndoPendingStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -424,8 +409,6 @@ class __$$UndoInProgressStateImplCopyWithImpl<$Res>
       $Res Function(_$UndoInProgressStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -439,8 +422,6 @@ class __$$UndoInProgressStateImplCopyWithImpl<$Res>
     ));
   }
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $SmokeLogCopyWith<$Res> get targetLog {
@@ -475,9 +456,7 @@ class _$UndoInProgressStateImpl implements UndoInProgressState {
   @override
   int get hashCode => Object.hash(runtimeType, targetLog);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UndoInProgressStateImplCopyWith<_$UndoInProgressStateImpl> get copyWith =>
@@ -571,10 +550,7 @@ abstract class UndoInProgressState implements UndoState {
       _$UndoInProgressStateImpl;
 
   SmokeLog get targetLog;
-
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$UndoInProgressStateImplCopyWith<_$UndoInProgressStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -598,8 +574,6 @@ class __$$UndoCompletedStateImplCopyWithImpl<$Res>
       $Res Function(_$UndoCompletedStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -613,8 +587,6 @@ class __$$UndoCompletedStateImplCopyWithImpl<$Res>
     ));
   }
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $SmokeLogCopyWith<$Res> get undoneLog {
@@ -649,9 +621,7 @@ class _$UndoCompletedStateImpl implements UndoCompletedState {
   @override
   int get hashCode => Object.hash(runtimeType, undoneLog);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UndoCompletedStateImplCopyWith<_$UndoCompletedStateImpl> get copyWith =>
@@ -745,10 +715,7 @@ abstract class UndoCompletedState implements UndoState {
       _$UndoCompletedStateImpl;
 
   SmokeLog get undoneLog;
-
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$UndoCompletedStateImplCopyWith<_$UndoCompletedStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -770,8 +737,6 @@ class __$$UndoFailedStateImplCopyWithImpl<$Res>
       _$UndoFailedStateImpl _value, $Res Function(_$UndoFailedStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -810,9 +775,7 @@ class _$UndoFailedStateImpl implements UndoFailedState {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UndoFailedStateImplCopyWith<_$UndoFailedStateImpl> get copyWith =>
@@ -906,10 +869,7 @@ abstract class UndoFailedState implements UndoState {
       _$UndoFailedStateImpl;
 
   String get message;
-
-  /// Create a copy of UndoState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$UndoFailedStateImplCopyWith<_$UndoFailedStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -66,7 +66,7 @@ void main() {
     );
 
     container = ProviderContainer(overrides: [
-      smokeLogRepositoryProvider.overrideWithValue(repo),
+      smokeLogRepositoryProvider.overrideWith((ref) => Future.value(repo)),
     ]);
     addTearDown(container.dispose);
   });

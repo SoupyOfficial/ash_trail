@@ -28,12 +28,8 @@ mixin _$StatsDaily {
   int get totalDurationMs => throw _privateConstructorUsedError;
   int get avgDurationMs => throw _privateConstructorUsedError;
 
-  /// Serializes this StatsDaily to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of StatsDaily
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $StatsDailyCopyWith<StatsDaily> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -63,8 +59,6 @@ class _$StatsDailyCopyWithImpl<$Res, $Val extends StatsDaily>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of StatsDaily
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -129,8 +123,6 @@ class __$$StatsDailyImplCopyWithImpl<$Res>
       _$StatsDailyImpl _value, $Res Function(_$StatsDailyImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of StatsDaily
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -220,14 +212,12 @@ class _$StatsDailyImpl implements _StatsDaily {
                 other.avgDurationMs == avgDurationMs));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, date, hitCount,
       totalDurationMs, avgDurationMs);
 
-  /// Create a copy of StatsDaily
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$StatsDailyImplCopyWith<_$StatsDailyImpl> get copyWith =>
@@ -256,8 +246,8 @@ abstract class _StatsDaily implements StatsDaily {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
   DateTime get date;
   @override
   int get hitCount;
@@ -265,11 +255,8 @@ abstract class _StatsDaily implements StatsDaily {
   int get totalDurationMs;
   @override
   int get avgDurationMs;
-
-  /// Create a copy of StatsDaily
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$StatsDailyImplCopyWith<_$StatsDailyImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

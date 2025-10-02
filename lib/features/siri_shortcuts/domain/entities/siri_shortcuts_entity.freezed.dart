@@ -40,9 +40,7 @@ mixin _$SiriShortcutsEntity {
   /// When this shortcut was last successfully invoked
   DateTime? get lastInvokedAt => throw _privateConstructorUsedError;
 
-  /// Create a copy of SiriShortcutsEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SiriShortcutsEntityCopyWith<SiriShortcutsEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -76,8 +74,6 @@ class _$SiriShortcutsEntityCopyWithImpl<$Res, $Val extends SiriShortcutsEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SiriShortcutsEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -126,8 +122,6 @@ class _$SiriShortcutsEntityCopyWithImpl<$Res, $Val extends SiriShortcutsEntity>
     ) as $Val);
   }
 
-  /// Create a copy of SiriShortcutsEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $SiriShortcutTypeCopyWith<$Res> get type {
@@ -167,8 +161,6 @@ class __$$SiriShortcutsEntityImplCopyWithImpl<$Res>
       $Res Function(_$SiriShortcutsEntityImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SiriShortcutsEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -296,9 +288,7 @@ class _$SiriShortcutsEntityImpl extends _SiriShortcutsEntity {
   int get hashCode => Object.hash(runtimeType, id, type, createdAt,
       lastDonatedAt, invocationCount, isDonated, customPhrase, lastInvokedAt);
 
-  /// Create a copy of SiriShortcutsEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SiriShortcutsEntityImplCopyWith<_$SiriShortcutsEntityImpl> get copyWith =>
@@ -318,42 +308,40 @@ abstract class _SiriShortcutsEntity extends SiriShortcutsEntity {
       final DateTime? lastInvokedAt}) = _$SiriShortcutsEntityImpl;
   const _SiriShortcutsEntity._() : super._();
 
-  /// Unique identifier for this shortcut configuration
   @override
+
+  /// Unique identifier for this shortcut configuration
   String get id;
+  @override
 
   /// The type of shortcut (add log, start timed log, etc.)
-  @override
   SiriShortcutType get type;
+  @override
 
   /// When this shortcut configuration was created
-  @override
   DateTime get createdAt;
+  @override
 
   /// When this shortcut was last donated to Siri
-  @override
   DateTime? get lastDonatedAt;
+  @override
 
   /// Number of times this shortcut has been invoked
-  @override
   int get invocationCount;
+  @override
 
   /// Whether this shortcut is currently active/donated
-  @override
   bool get isDonated;
+  @override
 
   /// Custom user phrase for this shortcut (optional)
-  @override
   String? get customPhrase;
+  @override
 
   /// When this shortcut was last successfully invoked
-  @override
   DateTime? get lastInvokedAt;
-
-  /// Create a copy of SiriShortcutsEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SiriShortcutsEntityImplCopyWith<_$SiriShortcutsEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

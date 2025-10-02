@@ -66,7 +66,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          smokeLogRepositoryProvider.overrideWithValue(repo),
+          smokeLogRepositoryProvider.overrideWith((ref) => Future.value(repo)),
         ],
         child: MaterialApp(
           home: Scaffold(

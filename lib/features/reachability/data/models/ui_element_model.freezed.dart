@@ -31,12 +31,8 @@ mixin _$UiElementModel {
   String? get semanticLabel => throw _privateConstructorUsedError;
   bool? get hasAlternativeAccess => throw _privateConstructorUsedError;
 
-  /// Serializes this UiElementModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of UiElementModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $UiElementModelCopyWith<UiElementModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -70,8 +66,6 @@ class _$UiElementModelCopyWithImpl<$Res, $Val extends UiElementModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of UiElementModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -160,8 +154,6 @@ class __$$UiElementModelImplCopyWithImpl<$Res>
       _$UiElementModelImpl _value, $Res Function(_$UiElementModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of UiElementModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -286,14 +278,12 @@ class _$UiElementModelImpl extends _UiElementModel {
                 other.hasAlternativeAccess == hasAlternativeAccess));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, label, left, top, width,
       height, type, isInteractive, semanticLabel, hasAlternativeAccess);
 
-  /// Create a copy of UiElementModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UiElementModelImplCopyWith<_$UiElementModelImpl> get copyWith =>
@@ -345,11 +335,8 @@ abstract class _UiElementModel extends UiElementModel {
   String? get semanticLabel;
   @override
   bool? get hasAlternativeAccess;
-
-  /// Create a copy of UiElementModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$UiElementModelImplCopyWith<_$UiElementModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

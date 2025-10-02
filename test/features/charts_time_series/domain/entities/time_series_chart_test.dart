@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/features/charts_time_series/domain/entities/time_series_chart.dart';
 import 'package:ash_trail/features/charts_time_series/domain/entities/chart_data_point.dart';
 

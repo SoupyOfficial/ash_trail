@@ -27,12 +27,8 @@ mixin _$AuditSummaryModel {
   double get avgTouchTargetSize => throw _privateConstructorUsedError;
   int get accessibilityIssues => throw _privateConstructorUsedError;
 
-  /// Serializes this AuditSummaryModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AuditSummaryModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AuditSummaryModelCopyWith<AuditSummaryModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -62,8 +58,6 @@ class _$AuditSummaryModelCopyWithImpl<$Res, $Val extends AuditSummaryModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AuditSummaryModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,8 +122,6 @@ class __$$AuditSummaryModelImplCopyWithImpl<$Res>
       $Res Function(_$AuditSummaryModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AuditSummaryModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -221,7 +213,7 @@ class _$AuditSummaryModelImpl extends _AuditSummaryModel {
                 other.accessibilityIssues == accessibilityIssues));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -232,9 +224,7 @@ class _$AuditSummaryModelImpl extends _AuditSummaryModel {
       avgTouchTargetSize,
       accessibilityIssues);
 
-  /// Create a copy of AuditSummaryModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AuditSummaryModelImplCopyWith<_$AuditSummaryModelImpl> get copyWith =>
@@ -274,11 +264,8 @@ abstract class _AuditSummaryModel extends AuditSummaryModel {
   double get avgTouchTargetSize;
   @override
   int get accessibilityIssues;
-
-  /// Create a copy of AuditSummaryModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AuditSummaryModelImplCopyWith<_$AuditSummaryModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

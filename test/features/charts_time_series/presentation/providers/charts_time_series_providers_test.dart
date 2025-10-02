@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fpdart/fpdart.dart';
@@ -39,7 +39,8 @@ void main() {
 
       container = ProviderContainer(
         overrides: [
-          chartsTimeSeriesRepositoryProvider.overrideWithValue(mockRepository),
+          chartsTimeSeriesRepositoryProvider
+              .overrideWith((ref) => Future.value(mockRepository)),
         ],
       );
     });
@@ -49,25 +50,29 @@ void main() {
     });
 
     group('Repository Provider', () {
-      test('should provide charts time series repository', () {
-        final repository = container.read(chartsTimeSeriesRepositoryProvider);
+      test('should provide charts time series repository', () async {
+        final repository =
+            await container.read(chartsTimeSeriesRepositoryProvider.future);
         expect(repository, isA<repo.ChartsTimeSeriesRepository>());
       });
     });
 
     group('Use Case Providers', () {
-      test('should provide get chart data points use case', () {
-        final useCase = container.read(getChartDataPointsUseCaseProvider);
+      test('should provide get chart data points use case', () async {
+        final useCase =
+            await container.read(getChartDataPointsUseCaseProvider.future);
         expect(useCase, isA<GetChartDataPointsUseCase>());
       });
 
-      test('should provide generate chart use case', () {
-        final useCase = container.read(generateChartUseCaseProvider);
+      test('should provide generate chart use case', () async {
+        final useCase =
+            await container.read(generateChartUseCaseProvider.future);
         expect(useCase, isA<GenerateChartUseCase>());
       });
 
-      test('should provide check data availability use case', () {
-        final useCase = container.read(checkDataAvailabilityUseCaseProvider);
+      test('should provide check data availability use case', () async {
+        final useCase =
+            await container.read(checkDataAvailabilityUseCaseProvider.future);
         expect(useCase, isA<CheckDataAvailabilityUseCase>());
       });
     });
@@ -435,7 +440,7 @@ void main() {
       });
 
       test('should copy with updated properties', () {
-        final originalState = ChartUIState(
+        const originalState = ChartUIState(
           selectedDataPoint: null,
           isZoomed: false,
           panOffset: 0.0,

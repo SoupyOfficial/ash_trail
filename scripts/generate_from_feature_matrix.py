@@ -313,7 +313,7 @@ def generate_acceptance_tests(data: Dict[str, Any]) -> List[Path]:
             continue
         fid = feat["id"]
         file_path = ACCEPTANCE_DIR / f"{fid}_test.dart"
-        lines = [BANNER, "", "import 'package:test/test.dart';", "", f"void main() {{", f"  group('Feature {fid}', () {{"]
+        lines = [BANNER, "", "import 'package:flutter_test/flutter_test.dart';", "", f"void main() {{", f"  group('Feature {fid}', () {{"]
         for idx, line in enumerate(acceptance, start=1):
             name = truncate(line.strip())
             name = sanitize_test_name(name)

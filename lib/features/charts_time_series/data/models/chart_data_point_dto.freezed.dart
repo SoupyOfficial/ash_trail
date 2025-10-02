@@ -27,12 +27,8 @@ mixin _$ChartDataPointDto {
   double? get averageMoodScore => throw _privateConstructorUsedError;
   double? get averagePhysicalScore => throw _privateConstructorUsedError;
 
-  /// Serializes this ChartDataPointDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ChartDataPointDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ChartDataPointDtoCopyWith<ChartDataPointDto> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -62,8 +58,6 @@ class _$ChartDataPointDtoCopyWithImpl<$Res, $Val extends ChartDataPointDto>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ChartDataPointDto
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,8 +122,6 @@ class __$$ChartDataPointDtoImplCopyWithImpl<$Res>
       $Res Function(_$ChartDataPointDtoImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ChartDataPointDto
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -218,14 +210,12 @@ class _$ChartDataPointDtoImpl implements _ChartDataPointDto {
                 other.averagePhysicalScore == averagePhysicalScore));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, timestamp, value, count,
       totalDurationMs, averageMoodScore, averagePhysicalScore);
 
-  /// Create a copy of ChartDataPointDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ChartDataPointDtoImplCopyWith<_$ChartDataPointDtoImpl> get copyWith =>
@@ -264,11 +254,8 @@ abstract class _ChartDataPointDto implements ChartDataPointDto {
   double? get averageMoodScore;
   @override
   double? get averagePhysicalScore;
-
-  /// Create a copy of ChartDataPointDto
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ChartDataPointDtoImplCopyWith<_$ChartDataPointDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

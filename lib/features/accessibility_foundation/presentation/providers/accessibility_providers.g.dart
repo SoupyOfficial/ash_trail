@@ -159,8 +159,6 @@ class AccessibilityCapabilitiesProvider
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin AccessibilityCapabilitiesRef
     on AutoDisposeProviderRef<AccessibilityCapabilities> {
   /// The parameter `context` of this provider.
@@ -317,8 +315,6 @@ class EffectiveMinTapTargetProvider extends AutoDisposeProvider<double> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin EffectiveMinTapTargetRef on AutoDisposeProviderRef<double> {
   /// The parameter `context` of this provider.
   BuildContext get context;
@@ -465,8 +461,6 @@ class IsScreenReaderActiveProvider extends AutoDisposeProvider<bool> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin IsScreenReaderActiveRef on AutoDisposeProviderRef<bool> {
   /// The parameter `context` of this provider.
   BuildContext get context;
@@ -608,8 +602,6 @@ class ShouldReduceMotionProvider extends AutoDisposeProvider<bool> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin ShouldReduceMotionRef on AutoDisposeProviderRef<bool> {
   /// The parameter `context` of this provider.
   BuildContext get context;
@@ -641,8 +633,6 @@ final platformAccessibilityFeaturesProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef PlatformAccessibilityFeaturesRef
     = AutoDisposeFutureProviderRef<Map<String, dynamic>>;
 String _$shouldAnnounceImmediatelyHash() =>
@@ -785,8 +775,6 @@ class ShouldAnnounceImmediatelyProvider extends AutoDisposeProvider<bool> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin ShouldAnnounceImmediatelyRef on AutoDisposeProviderRef<bool> {
   /// The parameter `isError` of this provider.
   bool get isError;
@@ -935,8 +923,6 @@ class IsAccessibilityModeActiveProvider extends AutoDisposeProvider<bool> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin IsAccessibilityModeActiveRef on AutoDisposeProviderRef<bool> {
   /// The parameter `context` of this provider.
   BuildContext get context;
@@ -1079,8 +1065,6 @@ class NeedsLargerTapTargetsProvider extends AutoDisposeProvider<bool> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin NeedsLargerTapTargetsRef on AutoDisposeProviderRef<bool> {
   /// The parameter `context` of this provider.
   BuildContext get context;
@@ -1221,8 +1205,6 @@ class NeedsHighContrastProvider extends AutoDisposeProvider<bool> {
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin NeedsHighContrastRef on AutoDisposeProviderRef<bool> {
   /// The parameter `context` of this provider.
   BuildContext get context;
@@ -1236,4 +1218,4 @@ class _NeedsHighContrastProviderElement extends AutoDisposeProviderElement<bool>
   BuildContext get context => (origin as NeedsHighContrastProvider).context;
 }
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

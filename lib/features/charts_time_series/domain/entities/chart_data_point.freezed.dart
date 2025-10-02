@@ -38,12 +38,8 @@ mixin _$ChartDataPoint {
   /// Average physical score for this time period (0-10 scale)
   double? get averagePhysicalScore => throw _privateConstructorUsedError;
 
-  /// Serializes this ChartDataPoint to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ChartDataPoint
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ChartDataPointCopyWith<ChartDataPoint> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -73,8 +69,6 @@ class _$ChartDataPointCopyWithImpl<$Res, $Val extends ChartDataPoint>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ChartDataPoint
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -139,8 +133,6 @@ class __$$ChartDataPointImplCopyWithImpl<$Res>
       _$ChartDataPointImpl _value, $Res Function(_$ChartDataPointImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ChartDataPoint
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -241,14 +233,12 @@ class _$ChartDataPointImpl extends _ChartDataPoint {
                 other.averagePhysicalScore == averagePhysicalScore));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, timestamp, value, count,
       totalDurationMs, averageMoodScore, averagePhysicalScore);
 
-  /// Create a copy of ChartDataPoint
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ChartDataPointImplCopyWith<_$ChartDataPointImpl> get copyWith =>
@@ -276,34 +266,32 @@ abstract class _ChartDataPoint extends ChartDataPoint {
   factory _ChartDataPoint.fromJson(Map<String, dynamic> json) =
       _$ChartDataPointImpl.fromJson;
 
-  /// Timestamp for this data point
   @override
+
+  /// Timestamp for this data point
   DateTime get timestamp;
+  @override
 
   /// Primary metric value (e.g., count, duration, average)
-  @override
   double get value;
+  @override
 
   /// Raw count of items in this time bucket
-  @override
   int get count;
+  @override
 
   /// Sum of durations in milliseconds
-  @override
   int get totalDurationMs;
+  @override
 
   /// Average mood score for this time period (0-10 scale)
-  @override
   double? get averageMoodScore;
+  @override
 
   /// Average physical score for this time period (0-10 scale)
-  @override
   double? get averagePhysicalScore;
-
-  /// Create a copy of ChartDataPoint
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ChartDataPointImplCopyWith<_$ChartDataPointImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

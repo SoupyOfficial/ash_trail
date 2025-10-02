@@ -37,12 +37,8 @@ mixin _$SiriShortcutsModel {
   @JsonKey(name: 'last_invoked_at')
   DateTime? get lastInvokedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this SiriShortcutsModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SiriShortcutsModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SiriShortcutsModelCopyWith<SiriShortcutsModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -74,8 +70,6 @@ class _$SiriShortcutsModelCopyWithImpl<$Res, $Val extends SiriShortcutsModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SiriShortcutsModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -152,8 +146,6 @@ class __$$SiriShortcutsModelImplCopyWithImpl<$Res>
       $Res Function(_$SiriShortcutsModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SiriShortcutsModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -271,14 +263,12 @@ class _$SiriShortcutsModelImpl extends _SiriShortcutsModel {
                 other.lastInvokedAt == lastInvokedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, type, createdAt,
       lastDonatedAt, invocationCount, isDonated, customPhrase, lastInvokedAt);
 
-  /// Create a copy of SiriShortcutsModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SiriShortcutsModelImplCopyWith<_$SiriShortcutsModelImpl> get copyWith =>
@@ -333,11 +323,8 @@ abstract class _SiriShortcutsModel extends SiriShortcutsModel {
   @override
   @JsonKey(name: 'last_invoked_at')
   DateTime? get lastInvokedAt;
-
-  /// Create a copy of SiriShortcutsModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SiriShortcutsModelImplCopyWith<_$SiriShortcutsModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

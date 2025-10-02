@@ -33,12 +33,8 @@ mixin _$LogFilterDto {
   int? get maxDurationMs => throw _privateConstructorUsedError;
   String? get searchText => throw _privateConstructorUsedError;
 
-  /// Serializes this LogFilterDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LogFilterDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LogFilterDtoCopyWith<LogFilterDto> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -74,8 +70,6 @@ class _$LogFilterDtoCopyWithImpl<$Res, $Val extends LogFilterDto>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LogFilterDto
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -176,8 +170,6 @@ class __$$LogFilterDtoImplCopyWithImpl<$Res>
       _$LogFilterDtoImpl _value, $Res Function(_$LogFilterDtoImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LogFilterDto
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -354,7 +346,7 @@ class _$LogFilterDtoImpl implements _LogFilterDto {
                 other.searchText == searchText));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -371,9 +363,7 @@ class _$LogFilterDtoImpl implements _LogFilterDto {
       maxDurationMs,
       searchText);
 
-  /// Create a copy of LogFilterDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LogFilterDtoImplCopyWith<_$LogFilterDtoImpl> get copyWith =>
@@ -429,11 +419,8 @@ abstract class _LogFilterDto implements LogFilterDto {
   int? get maxDurationMs;
   @override
   String? get searchText;
-
-  /// Create a copy of LogFilterDto
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LogFilterDtoImplCopyWith<_$LogFilterDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -448,12 +435,8 @@ mixin _$LogSortDto {
       throw _privateConstructorUsedError; // Serialized enum value
   String get order => throw _privateConstructorUsedError;
 
-  /// Serializes this LogSortDto to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of LogSortDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LogSortDtoCopyWith<LogSortDto> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -477,8 +460,6 @@ class _$LogSortDtoCopyWithImpl<$Res, $Val extends LogSortDto>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LogSortDto
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -517,8 +498,6 @@ class __$$LogSortDtoImplCopyWithImpl<$Res>
       _$LogSortDtoImpl _value, $Res Function(_$LogSortDtoImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LogSortDto
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -566,13 +545,11 @@ class _$LogSortDtoImpl implements _LogSortDto {
             (identical(other.order, order) || other.order == order));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, field, order);
 
-  /// Create a copy of LogSortDto
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LogSortDtoImplCopyWith<_$LogSortDtoImpl> get copyWith =>
@@ -595,14 +572,11 @@ abstract class _LogSortDto implements LogSortDto {
       _$LogSortDtoImpl.fromJson;
 
   @override
-  String get field; // Serialized enum value
-  @override
+  String get field;
+  @override // Serialized enum value
   String get order;
-
-  /// Create a copy of LogSortDto
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LogSortDtoImplCopyWith<_$LogSortDtoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

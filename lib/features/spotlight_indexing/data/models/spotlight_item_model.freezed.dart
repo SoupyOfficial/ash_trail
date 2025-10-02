@@ -31,12 +31,8 @@ mixin _$SpotlightItemModel {
   DateTime get lastUpdated => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
 
-  /// Serializes this SpotlightItemModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SpotlightItemModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SpotlightItemModelCopyWith<SpotlightItemModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -70,8 +66,6 @@ class _$SpotlightItemModelCopyWithImpl<$Res, $Val extends SpotlightItemModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SpotlightItemModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -160,8 +154,6 @@ class __$$SpotlightItemModelImplCopyWithImpl<$Res>
       $Res Function(_$SpotlightItemModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SpotlightItemModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -300,7 +292,7 @@ class _$SpotlightItemModelImpl extends _SpotlightItemModel {
                 other.isActive == isActive));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -315,9 +307,7 @@ class _$SpotlightItemModelImpl extends _SpotlightItemModel {
       lastUpdated,
       isActive);
 
-  /// Create a copy of SpotlightItemModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SpotlightItemModelImplCopyWith<_$SpotlightItemModelImpl> get copyWith =>
@@ -369,11 +359,8 @@ abstract class _SpotlightItemModel extends SpotlightItemModel {
   DateTime get lastUpdated;
   @override
   bool get isActive;
-
-  /// Create a copy of SpotlightItemModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SpotlightItemModelImplCopyWith<_$SpotlightItemModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

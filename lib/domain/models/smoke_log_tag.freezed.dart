@@ -29,12 +29,8 @@ mixin _$SmokeLogTag {
   DateTime get ts => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
-  /// Serializes this SmokeLogTag to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SmokeLogTag
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SmokeLogTagCopyWith<SmokeLogTag> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -64,8 +60,6 @@ class _$SmokeLogTagCopyWithImpl<$Res, $Val extends SmokeLogTag>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SmokeLogTag
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -130,8 +124,6 @@ class __$$SmokeLogTagImplCopyWithImpl<$Res>
       _$SmokeLogTagImpl _value, $Res Function(_$SmokeLogTagImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SmokeLogTag
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -222,14 +214,12 @@ class _$SmokeLogTagImpl implements _SmokeLogTag {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode =>
       Object.hash(runtimeType, id, smokeLogId, tagId, accountId, ts, createdAt);
 
-  /// Create a copy of SmokeLogTag
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SmokeLogTagImplCopyWith<_$SmokeLogTagImpl> get copyWith =>
@@ -258,20 +248,17 @@ abstract class _SmokeLogTag implements SmokeLogTag {
   @override
   String get id;
   @override
-  String get smokeLogId; // TODO: FK to SmokeLog
-  @override
-  String get tagId; // TODO: FK to Tag
-  @override
-  String get accountId; // TODO: FK to Account
-  @override
+  String get smokeLogId;
+  @override // TODO: FK to SmokeLog
+  String get tagId;
+  @override // TODO: FK to Tag
+  String get accountId;
+  @override // TODO: FK to Account
   DateTime get ts;
   @override
   DateTime get createdAt;
-
-  /// Create a copy of SmokeLogTag
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SmokeLogTagImplCopyWith<_$SmokeLogTagImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

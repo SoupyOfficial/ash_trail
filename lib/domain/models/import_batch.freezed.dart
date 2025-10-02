@@ -32,12 +32,8 @@ mixin _$ImportBatch {
   DateTime? get finishedAt => throw _privateConstructorUsedError;
   String? get log => throw _privateConstructorUsedError;
 
-  /// Serializes this ImportBatch to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ImportBatch
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ImportBatchCopyWith<ImportBatch> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -70,8 +66,6 @@ class _$ImportBatchCopyWithImpl<$Res, $Val extends ImportBatch>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ImportBatch
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -154,8 +148,6 @@ class __$$ImportBatchImplCopyWithImpl<$Res>
       _$ImportBatchImpl _value, $Res Function(_$ImportBatchImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ImportBatch
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -275,14 +267,12 @@ class _$ImportBatchImpl implements _ImportBatch {
             (identical(other.log, log) || other.log == log));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, source, fileName,
       countInserted, countFailed, startedAt, finishedAt, log);
 
-  /// Create a copy of ImportBatch
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ImportBatchImplCopyWith<_$ImportBatchImpl> get copyWith =>
@@ -314,10 +304,10 @@ abstract class _ImportBatch implements ImportBatch {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
-  String get source; // TODO: constrain to enum values
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
+  String get source;
+  @override // TODO: constrain to enum values
   String? get fileName;
   @override
   int get countInserted;
@@ -329,11 +319,8 @@ abstract class _ImportBatch implements ImportBatch {
   DateTime? get finishedAt;
   @override
   String? get log;
-
-  /// Create a copy of ImportBatch
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ImportBatchImplCopyWith<_$ImportBatchImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

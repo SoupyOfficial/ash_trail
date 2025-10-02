@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/providers/account_providers.dart';
 import '../../../haptics_baseline/presentation/providers/haptics_providers.dart';
 import 'smoke_log_providers.dart';
 
@@ -242,7 +243,6 @@ final recordButtonEnabledProvider = Provider.autoDispose<bool>((ref) {
 /// Provider for current account ID (to be integrated with account system)
 /// This is a placeholder - should be replaced with actual account provider
 final currentAccountIdProvider = Provider<String?>((ref) {
-  // TODO: Integrate with actual account management system
-  // For now, return a default account ID
-  return 'default_account';
+  // Phase 1: Use the mock account provider
+  return ref.watch(activeAccountProvider)?.id;
 });

@@ -28,12 +28,8 @@ mixin _$ImportItem {
   Map<String, dynamic> get raw => throw _privateConstructorUsedError;
   String? get error => throw _privateConstructorUsedError;
 
-  /// Serializes this ImportItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ImportItem
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ImportItemCopyWith<ImportItem> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -62,8 +58,6 @@ class _$ImportItemCopyWithImpl<$Res, $Val extends ImportItem>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ImportItem
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -122,8 +116,6 @@ class __$$ImportItemImplCopyWithImpl<$Res>
       _$ImportItemImpl _value, $Res Function(_$ImportItemImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ImportItem
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -209,14 +201,12 @@ class _$ImportItemImpl implements _ImportItem {
             (identical(other.error, error) || other.error == error));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, batchId, status,
       const DeepCollectionEquality().hash(_raw), error);
 
-  /// Create a copy of ImportItem
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ImportItemImplCopyWith<_$ImportItemImpl> get copyWith =>
@@ -244,18 +234,15 @@ abstract class _ImportItem implements ImportItem {
   @override
   String get id;
   @override
-  String get batchId; // TODO: FK to ImportBatch
-  @override
-  String get status; // TODO: constrain to enum values
-  @override
+  String get batchId;
+  @override // TODO: FK to ImportBatch
+  String get status;
+  @override // TODO: constrain to enum values
   Map<String, dynamic> get raw;
   @override
   String? get error;
-
-  /// Create a copy of ImportItem
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ImportItemImplCopyWith<_$ImportItemImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

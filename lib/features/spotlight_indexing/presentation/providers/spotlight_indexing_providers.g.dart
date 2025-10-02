@@ -23,8 +23,6 @@ final contentDataSourceProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef ContentDataSourceRef = AutoDisposeProviderRef<ContentDataSource>;
 String _$spotlightServiceHash() => r'16e581855a3548ea41804f261352b752588a613e';
 
@@ -42,8 +40,6 @@ final spotlightServiceProvider = AutoDisposeProvider<SpotlightService>.internal(
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef SpotlightServiceRef = AutoDisposeProviderRef<SpotlightService>;
 String _$spotlightIndexingRepositoryHash() =>
     r'69a6c26fb0a25df568981e075dccf08ef14a01a3';
@@ -63,8 +59,6 @@ final spotlightIndexingRepositoryProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef SpotlightIndexingRepositoryRef
     = AutoDisposeProviderRef<SpotlightIndexingRepository>;
 String _$syncSpotlightIndexUseCaseHash() =>
@@ -85,8 +79,6 @@ final syncSpotlightIndexUseCaseProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef SyncSpotlightIndexUseCaseRef
     = AutoDisposeProviderRef<SyncSpotlightIndexUseCase>;
 String _$indexSpotlightItemUseCaseHash() =>
@@ -107,8 +99,6 @@ final indexSpotlightItemUseCaseProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef IndexSpotlightItemUseCaseRef
     = AutoDisposeProviderRef<IndexSpotlightItemUseCase>;
 String _$deindexSpotlightItemUseCaseHash() =>
@@ -129,8 +119,6 @@ final deindexSpotlightItemUseCaseProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef DeindexSpotlightItemUseCaseRef
     = AutoDisposeProviderRef<DeindexSpotlightItemUseCase>;
 String _$deindexSpotlightItemsUseCaseHash() =>
@@ -151,8 +139,6 @@ final deindexSpotlightItemsUseCaseProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef DeindexSpotlightItemsUseCaseRef
     = AutoDisposeProviderRef<DeindexSpotlightItemsUseCase>;
 String _$getIndexedItemsUseCaseHash() =>
@@ -173,8 +159,6 @@ final getIndexedItemsUseCaseProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef GetIndexedItemsUseCaseRef
     = AutoDisposeProviderRef<GetIndexedItemsUseCase>;
 String _$getIndexedItemsByTypeUseCaseHash() =>
@@ -195,8 +179,6 @@ final getIndexedItemsByTypeUseCaseProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef GetIndexedItemsByTypeUseCaseRef
     = AutoDisposeProviderRef<GetIndexedItemsByTypeUseCase>;
 String _$indexedItemsHash() => r'266ca49a1ef8dc3c77743a84ecf8c77f5e82182d';
@@ -215,8 +197,6 @@ final indexedItemsProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef IndexedItemsRef
     = AutoDisposeFutureProviderRef<List<SpotlightItemEntity>>;
 String _$indexedItemsByTypeHash() =>
@@ -371,8 +351,6 @@ class IndexedItemsByTypeProvider
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin IndexedItemsByTypeRef
     on AutoDisposeFutureProviderRef<List<SpotlightItemEntity>> {
   /// The parameter `type` of this provider.
@@ -408,4 +386,4 @@ final spotlightIndexingControllerProvider = AutoDisposeAsyncNotifierProvider<
 
 typedef _$SpotlightIndexingController = AutoDisposeAsyncNotifier<void>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

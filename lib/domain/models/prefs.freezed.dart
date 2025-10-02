@@ -32,12 +32,8 @@ mixin _$Prefs {
       throw _privateConstructorUsedError; // TODO: constrain to enum values
   String? get accentColor => throw _privateConstructorUsedError;
 
-  /// Serializes this Prefs to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Prefs
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $PrefsCopyWith<Prefs> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -66,8 +62,6 @@ class _$PrefsCopyWithImpl<$Res, $Val extends Prefs>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Prefs
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -137,8 +131,6 @@ class __$$PrefsImplCopyWithImpl<$Res>
       _$PrefsImpl _value, $Res Function(_$PrefsImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Prefs
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -251,7 +243,7 @@ class _$PrefsImpl implements _Prefs {
                 other.accentColor == accentColor));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -263,9 +255,7 @@ class _$PrefsImpl implements _Prefs {
       preferredTheme,
       accentColor);
 
-  /// Create a copy of Prefs
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$PrefsImplCopyWith<_$PrefsImpl> get copyWith =>
@@ -292,24 +282,21 @@ abstract class _Prefs implements Prefs {
   factory _Prefs.fromJson(Map<String, dynamic> json) = _$PrefsImpl.fromJson;
 
   @override
-  String get accountId; // TODO: FK to Account
-  @override
-  String get defaultRange; // TODO: constrain to enum values
-  @override
-  String get unit; // TODO: constrain to enum values
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
+  String get defaultRange;
+  @override // TODO: constrain to enum values
+  String get unit;
+  @override // TODO: constrain to enum values
   bool get analyticsOptIn;
   @override
   List<DateTime>? get reminderTimes;
   @override
-  String get preferredTheme; // TODO: constrain to enum values
-  @override
+  String get preferredTheme;
+  @override // TODO: constrain to enum values
   String? get accentColor;
-
-  /// Create a copy of Prefs
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$PrefsImplCopyWith<_$PrefsImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

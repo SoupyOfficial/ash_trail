@@ -16,32 +16,38 @@ const _noChange = Object();
 
 // Repository dependency providers
 final chartsTimeSeriesRepositoryProvider =
-    Provider<ChartsTimeSeriesRepository>((ref) {
+    FutureProvider<ChartsTimeSeriesRepository>((ref) async {
+  final smokeLogDataSource =
+      await ref.watch(smokeLogLocalDataSourceProvider.future);
   return ChartsTimeSeriesRepositoryImpl(
     localDataSource: ChartsTimeSeriesLocalDataSourceImpl(
-      smokeLogDataSource: ref.watch(smokeLogLocalDataSourceProvider),
+      smokeLogDataSource: smokeLogDataSource,
     ),
   );
 });
 
 // Use case providers
 final getChartDataPointsUseCaseProvider =
-    Provider<GetChartDataPointsUseCase>((ref) {
+    FutureProvider<GetChartDataPointsUseCase>((ref) async {
+  final repository = await ref.watch(chartsTimeSeriesRepositoryProvider.future);
   return GetChartDataPointsUseCase(
-    repository: ref.watch(chartsTimeSeriesRepositoryProvider),
+    repository: repository,
   );
 });
 
-final generateChartUseCaseProvider = Provider<GenerateChartUseCase>((ref) {
+final generateChartUseCaseProvider =
+    FutureProvider<GenerateChartUseCase>((ref) async {
+  final repository = await ref.watch(chartsTimeSeriesRepositoryProvider.future);
   return GenerateChartUseCase(
-    repository: ref.watch(chartsTimeSeriesRepositoryProvider),
+    repository: repository,
   );
 });
 
 final checkDataAvailabilityUseCaseProvider =
-    Provider<CheckDataAvailabilityUseCase>((ref) {
+    FutureProvider<CheckDataAvailabilityUseCase>((ref) async {
+  final repository = await ref.watch(chartsTimeSeriesRepositoryProvider.future);
   return CheckDataAvailabilityUseCase(
-    repository: ref.watch(chartsTimeSeriesRepositoryProvider),
+    repository: repository,
   );
 });
 
@@ -98,7 +104,7 @@ final chartDataProvider =
     FutureProvider.family<Either<AppFailure, TimeSeriesChart>, String>(
         (ref, accountId) async {
   final config = ref.watch(chartConfigNotifierProvider(accountId));
-  final useCase = ref.watch(generateChartUseCaseProvider);
+  final useCase = await ref.watch(generateChartUseCaseProvider.future);
 
   return useCase(GenerateChartParams(config: config));
 });
@@ -107,7 +113,7 @@ final chartDataPointsProvider =
     FutureProvider.family<Either<AppFailure, List<ChartDataPoint>>, String>(
         (ref, accountId) async {
   final config = ref.watch(chartConfigNotifierProvider(accountId));
-  final useCase = ref.watch(getChartDataPointsUseCaseProvider);
+  final useCase = await ref.watch(getChartDataPointsUseCaseProvider.future);
 
   return useCase(config);
 });
@@ -115,7 +121,7 @@ final chartDataPointsProvider =
 final hasChartDataProvider =
     FutureProvider.family<bool, String>((ref, accountId) async {
   final config = ref.watch(chartConfigNotifierProvider(accountId));
-  final useCase = ref.watch(checkDataAvailabilityUseCaseProvider);
+  final useCase = await ref.watch(checkDataAvailabilityUseCaseProvider.future);
 
   final params = CheckDataAvailabilityParams(
     accountId: accountId,

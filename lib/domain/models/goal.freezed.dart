@@ -34,12 +34,8 @@ mixin _$Goal {
   int? get progress => throw _privateConstructorUsedError;
   DateTime? get achievedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Goal to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Goal
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $GoalCopyWith<Goal> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -71,8 +67,6 @@ class _$GoalCopyWithImpl<$Res, $Val extends Goal>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Goal
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -159,8 +153,6 @@ class __$$GoalImplCopyWithImpl<$Res>
   __$$GoalImplCopyWithImpl(_$GoalImpl _value, $Res Function(_$GoalImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Goal
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -288,14 +280,12 @@ class _$GoalImpl implements _Goal {
                 other.achievedAt == achievedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, type, target,
       window, startDate, endDate, active, progress, achievedAt);
 
-  /// Create a copy of Goal
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$GoalImplCopyWith<_$GoalImpl> get copyWith =>
@@ -327,14 +317,14 @@ abstract class _Goal implements Goal {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
-  String get type; // TODO: constrain to enum values
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
+  String get type;
+  @override // TODO: constrain to enum values
   int get target;
   @override
-  String get window; // TODO: constrain to enum values
-  @override
+  String get window;
+  @override // TODO: constrain to enum values
   DateTime get startDate;
   @override
   DateTime? get endDate;
@@ -344,11 +334,8 @@ abstract class _Goal implements Goal {
   int? get progress;
   @override
   DateTime? get achievedAt;
-
-  /// Create a copy of Goal
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$GoalImplCopyWith<_$GoalImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

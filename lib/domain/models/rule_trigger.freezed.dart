@@ -25,12 +25,8 @@ mixin _$RuleTrigger {
   DateTime get triggeredAt => throw _privateConstructorUsedError;
   Map<String, dynamic> get context => throw _privateConstructorUsedError;
 
-  /// Serializes this RuleTrigger to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of RuleTrigger
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $RuleTriggerCopyWith<RuleTrigger> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -58,8 +54,6 @@ class _$RuleTriggerCopyWithImpl<$Res, $Val extends RuleTrigger>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of RuleTrigger
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -112,8 +106,6 @@ class __$$RuleTriggerImplCopyWithImpl<$Res>
       _$RuleTriggerImpl _value, $Res Function(_$RuleTriggerImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of RuleTrigger
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -188,14 +180,12 @@ class _$RuleTriggerImpl implements _RuleTrigger {
             const DeepCollectionEquality().equals(other._context, _context));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, ruleId, triggeredAt,
       const DeepCollectionEquality().hash(_context));
 
-  /// Create a copy of RuleTrigger
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$RuleTriggerImplCopyWith<_$RuleTriggerImpl> get copyWith =>
@@ -222,16 +212,13 @@ abstract class _RuleTrigger implements RuleTrigger {
   @override
   String get id;
   @override
-  String get ruleId; // TODO: FK to Rule
-  @override
+  String get ruleId;
+  @override // TODO: FK to Rule
   DateTime get triggeredAt;
   @override
   Map<String, dynamic> get context;
-
-  /// Create a copy of RuleTrigger
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$RuleTriggerImplCopyWith<_$RuleTriggerImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

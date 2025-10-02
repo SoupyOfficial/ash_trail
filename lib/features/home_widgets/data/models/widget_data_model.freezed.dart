@@ -43,12 +43,8 @@ mixin _$WidgetDataModel {
   @JsonKey(name: 'show_last_sync')
   bool? get showLastSync => throw _privateConstructorUsedError;
 
-  /// Serializes this WidgetDataModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of WidgetDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $WidgetDataModelCopyWith<WidgetDataModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -83,8 +79,6 @@ class _$WidgetDataModelCopyWithImpl<$Res, $Val extends WidgetDataModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of WidgetDataModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -179,8 +173,6 @@ class __$$WidgetDataModelImplCopyWithImpl<$Res>
       _$WidgetDataModelImpl _value, $Res Function(_$WidgetDataModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of WidgetDataModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -331,7 +323,7 @@ class _$WidgetDataModelImpl extends _WidgetDataModel {
                 other.showLastSync == showLastSync));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -347,9 +339,7 @@ class _$WidgetDataModelImpl extends _WidgetDataModel {
       showStreak,
       showLastSync);
 
-  /// Create a copy of WidgetDataModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$WidgetDataModelImplCopyWith<_$WidgetDataModelImpl> get copyWith =>
@@ -416,11 +406,8 @@ abstract class _WidgetDataModel extends WidgetDataModel {
   @override
   @JsonKey(name: 'show_last_sync')
   bool? get showLastSync;
-
-  /// Create a copy of WidgetDataModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$WidgetDataModelImplCopyWith<_$WidgetDataModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

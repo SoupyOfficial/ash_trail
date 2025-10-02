@@ -2,7 +2,7 @@
 // State management for audit reports and zone configurations
 
 import 'package:flutter/painting.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/reachability_audit_report.dart';
 import '../../domain/entities/reachability_zone.dart';
 import '../../domain/entities/ui_element.dart';
@@ -15,61 +15,50 @@ import '../../data/datasources/reachability_local_datasource.dart';
 import '../../data/datasources/reachability_zone_factory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-part 'reachability_providers.g.dart';
-
 // Repository provider
-@riverpod
-Future<ReachabilityRepositoryImpl> reachabilityRepository(
-    ReachabilityRepositoryRef ref) async {
+final reachabilityRepositoryProvider =
+    FutureProvider<ReachabilityRepositoryImpl>((ref) async {
   final localDataSource =
       await ref.watch(reachabilityLocalDataSourceProvider.future);
-  final zoneFactory = const ReachabilityZoneFactory();
+  const zoneFactory = ReachabilityZoneFactory();
   return ReachabilityRepositoryImpl(localDataSource, zoneFactory);
-}
+});
 
 // Local data source provider
-@riverpod
-Future<ReachabilityLocalDataSource> reachabilityLocalDataSource(
-  ReachabilityLocalDataSourceRef ref,
-) async {
+final reachabilityLocalDataSourceProvider =
+    FutureProvider<ReachabilityLocalDataSource>((ref) async {
   final prefs = await SharedPreferences.getInstance();
   return ReachabilityLocalDataSourceImpl(prefs);
-}
+});
 
 // Use case providers
-@riverpod
-Future<PerformReachabilityAuditUseCase> performReachabilityAuditUseCase(
-  PerformReachabilityAuditUseCaseRef ref,
-) async {
+final performReachabilityAuditUseCaseProvider =
+    FutureProvider<PerformReachabilityAuditUseCase>((ref) async {
   final repository = await ref.watch(reachabilityRepositoryProvider.future);
   return PerformReachabilityAuditUseCase(repository);
-}
+});
 
-@riverpod
-Future<GetAuditReportsUseCase> getAuditReportsUseCase(
-    GetAuditReportsUseCaseRef ref) async {
+final getAuditReportsUseCaseProvider =
+    FutureProvider<GetAuditReportsUseCase>((ref) async {
   final repository = await ref.watch(reachabilityRepositoryProvider.future);
   return GetAuditReportsUseCase(repository);
-}
+});
 
-@riverpod
-Future<GetReachabilityZonesUseCase> getReachabilityZonesUseCase(
-  GetReachabilityZonesUseCaseRef ref,
-) async {
+final getReachabilityZonesUseCaseProvider =
+    FutureProvider<GetReachabilityZonesUseCase>((ref) async {
   final repository = await ref.watch(reachabilityRepositoryProvider.future);
   return GetReachabilityZonesUseCase(repository);
-}
+});
 
-@riverpod
-Future<SaveAuditReportUseCase> saveAuditReportUseCase(
-    SaveAuditReportUseCaseRef ref) async {
+final saveAuditReportUseCaseProvider =
+    FutureProvider<SaveAuditReportUseCase>((ref) async {
   final repository = await ref.watch(reachabilityRepositoryProvider.future);
   return SaveAuditReportUseCase(repository);
-}
+});
 
 // State providers for audit functionality
-@riverpod
-class AuditReportsList extends _$AuditReportsList {
+class AuditReportsListNotifier
+    extends AutoDisposeAsyncNotifier<List<ReachabilityAuditReport>> {
   @override
   Future<List<ReachabilityAuditReport>> build() async {
     final useCase = await ref.read(getAuditReportsUseCaseProvider.future);
@@ -89,22 +78,29 @@ class AuditReportsList extends _$AuditReportsList {
   Future<void> deleteReport(String reportId) async {
     state = const AsyncValue.loading();
 
-    // Delete from repository
-    final repository = await ref.read(reachabilityRepositoryProvider.future);
-    final result = await repository.deleteAuditReport(reportId);
+    try {
+      // Delete from repository
+      final repository = await ref.read(reachabilityRepositoryProvider.future);
+      final result = await repository.deleteAuditReport(reportId);
 
-    await result.fold(
-      (failure) => throw failure,
-      (_) => refresh(),
-    );
+      await result.fold(
+        (failure) => throw failure,
+        (_) => refresh(),
+      );
+    } catch (error) {
+      state = AsyncValue.error(error, StackTrace.current);
+    }
   }
 }
 
-@riverpod
-Future<List<ReachabilityZone>> reachabilityZones(
-  ReachabilityZonesRef ref,
-  Size screenSize,
-) async {
+final auditReportsListProvider = AutoDisposeAsyncNotifierProvider<
+    AuditReportsListNotifier, List<ReachabilityAuditReport>>(
+  AuditReportsListNotifier.new,
+);
+
+final reachabilityZonesProvider =
+    FutureProvider.family<List<ReachabilityZone>, Size>(
+        (ref, screenSize) async {
   final useCase = await ref.read(getReachabilityZonesUseCaseProvider.future);
   final result = await useCase(screenSize);
 
@@ -112,10 +108,10 @@ Future<List<ReachabilityZone>> reachabilityZones(
     (failure) => throw failure,
     (zones) => zones,
   );
-}
+});
 
-@riverpod
-class CurrentAuditReport extends _$CurrentAuditReport {
+class CurrentAuditReportNotifier
+    extends AutoDisposeNotifier<ReachabilityAuditReport?> {
   @override
   ReachabilityAuditReport? build() => null;
 
@@ -132,58 +128,70 @@ class CurrentAuditReport extends _$CurrentAuditReport {
     required Size screenSize,
     required List<UiElement> elements,
   }) async {
-    final useCase =
-        await ref.read(performReachabilityAuditUseCaseProvider.future);
+    try {
+      final useCase =
+          await ref.read(performReachabilityAuditUseCaseProvider.future);
 
-    final result = await useCase(
-      screenName: screenName,
-      screenSize: screenSize,
-      elements: elements,
-    );
+      final result = await useCase(
+        screenName: screenName,
+        screenSize: screenSize,
+        elements: elements,
+      );
 
-    result.fold(
-      (failure) => throw failure,
-      (report) {
-        state = report;
-        // Also refresh the reports list to include the new report
-        ref.read(auditReportsListProvider.notifier).refresh();
-      },
-    );
+      result.fold(
+        (failure) => throw failure,
+        (report) {
+          state = report;
+          // Also refresh the reports list to include the new report
+          ref.read(auditReportsListProvider.notifier).refresh();
+        },
+      );
+    } catch (error) {
+      // Handle error appropriately - could set an error state or rethrow
+      rethrow;
+    }
   }
 
   Future<void> saveCurrentReport() async {
     final currentReport = state;
     if (currentReport == null) return;
 
-    final useCase = await ref.read(saveAuditReportUseCaseProvider.future);
-    final result = await useCase(currentReport);
+    try {
+      final useCase = await ref.read(saveAuditReportUseCaseProvider.future);
+      final result = await useCase(currentReport);
 
-    result.fold(
-      (failure) => throw failure,
-      (savedReport) {
-        state = savedReport;
-        // Refresh the reports list
-        ref.read(auditReportsListProvider.notifier).refresh();
-      },
-    );
+      result.fold(
+        (failure) => throw failure,
+        (savedReport) {
+          state = savedReport;
+          // Refresh the reports list
+          ref.read(auditReportsListProvider.notifier).refresh();
+        },
+      );
+    } catch (error) {
+      // Handle error appropriately
+      rethrow;
+    }
   }
 }
 
+final currentAuditReportProvider = AutoDisposeNotifierProvider<
+    CurrentAuditReportNotifier, ReachabilityAuditReport?>(
+  CurrentAuditReportNotifier.new,
+);
+
 // Utility providers
-@riverpod
-bool isAuditInProgress(IsAuditInProgressRef ref) {
+final isAuditInProgressProvider = Provider.autoDispose<bool>((ref) {
   final currentReport = ref.watch(currentAuditReportProvider);
   return currentReport != null;
-}
+});
 
-@riverpod
-double auditComplianceScore(AuditComplianceScoreRef ref) {
+final auditComplianceScoreProvider = Provider.autoDispose<double>((ref) {
   final currentReport = ref.watch(currentAuditReportProvider);
   return currentReport?.complianceScore ?? 0.0;
-}
+});
 
-@riverpod
-bool auditPassesThreshold(AuditPassesThresholdRef ref) {
+final auditPassesThresholdProvider = Provider.autoDispose<bool>((ref) {
   final currentReport = ref.watch(currentAuditReportProvider);
   return currentReport?.passesAudit ?? false;
-}
+});

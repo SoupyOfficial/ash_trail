@@ -21,9 +21,7 @@ mixin _$GoalProgressView {
   bool get isCompleted => throw _privateConstructorUsedError;
   String get displayText => throw _privateConstructorUsedError;
 
-  /// Create a copy of GoalProgressView
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $GoalProgressViewCopyWith<GoalProgressView> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -53,8 +51,6 @@ class _$GoalProgressViewCopyWithImpl<$Res, $Val extends GoalProgressView>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of GoalProgressView
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -83,8 +79,6 @@ class _$GoalProgressViewCopyWithImpl<$Res, $Val extends GoalProgressView>
     ) as $Val);
   }
 
-  /// Create a copy of GoalProgressView
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $GoalCopyWith<$Res> get goal {
@@ -120,8 +114,6 @@ class __$$GoalProgressViewImplCopyWithImpl<$Res>
       $Res Function(_$GoalProgressViewImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of GoalProgressView
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -193,9 +185,7 @@ class _$GoalProgressViewImpl extends _GoalProgressView {
   int get hashCode => Object.hash(
       runtimeType, goal, progressPercentage, isCompleted, displayText);
 
-  /// Create a copy of GoalProgressView
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$GoalProgressViewImplCopyWith<_$GoalProgressViewImpl> get copyWith =>
@@ -219,11 +209,8 @@ abstract class _GoalProgressView extends GoalProgressView {
   bool get isCompleted;
   @override
   String get displayText;
-
-  /// Create a copy of GoalProgressView
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$GoalProgressViewImplCopyWith<_$GoalProgressViewImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

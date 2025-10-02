@@ -7,9 +7,11 @@ import '../../domain/usecases/undo_last_log_use_case.dart';
 
 /// Provider for the unified undo last log use case
 /// Uses the existing SmokeLogRepository from capture_hit
-final undoLastLogUseCaseProvider = Provider<UndoLastLogUseCase>((ref) {
+final undoLastLogUseCaseProvider =
+    FutureProvider<UndoLastLogUseCase>((ref) async {
+  final smokeLogRepository = await ref.watch(smokeLogRepositoryProvider.future);
   return UndoLastLogUseCase(
-    smokeLogRepository: ref.watch(smokeLogRepositoryProvider),
+    smokeLogRepository: smokeLogRepository,
   );
 });
 
@@ -17,7 +19,7 @@ final undoLastLogUseCaseProvider = Provider<UndoLastLogUseCase>((ref) {
 /// Returns true if there's a log that can be undone within the timeout
 final canUndoProvider =
     FutureProvider.family<bool, String>((ref, accountId) async {
-  final useCase = ref.watch(undoLastLogUseCaseProvider);
+  final useCase = await ref.watch(undoLastLogUseCaseProvider.future);
   final result = await useCase.canUndo(accountId);
 
   return result.fold(
@@ -30,7 +32,7 @@ final canUndoProvider =
 /// Returns 0 if no undo is available
 final undoTimeRemainingProvider =
     FutureProvider.family<int, String>((ref, accountId) async {
-  final useCase = ref.watch(undoLastLogUseCaseProvider);
+  final useCase = await ref.watch(undoLastLogUseCaseProvider.future);
   final result = await useCase.getUndoTimeRemaining(accountId);
 
   return result.fold(
@@ -53,24 +55,28 @@ class UndoLastLogNotifier extends AutoDisposeFamilyAsyncNotifier<void, String> {
     final accountId = arg; // Family parameter
     state = const AsyncLoading();
 
-    final useCase = ref.read(undoLastLogUseCaseProvider);
-    final result = await useCase.call(accountId);
+    try {
+      final useCase = await ref.read(undoLastLogUseCaseProvider.future);
+      final result = await useCase.call(accountId);
 
-    result.fold(
-      (failure) {
-        state = AsyncError(failure, StackTrace.current);
-      },
-      (_) {
-        state = const AsyncData(null);
+      result.fold(
+        (failure) {
+          state = AsyncError(failure, StackTrace.current);
+        },
+        (_) {
+          state = const AsyncData(null);
 
-        // Invalidate related providers to refresh UI
-        ref.invalidate(canUndoProvider(accountId));
-        ref.invalidate(undoTimeRemainingProvider(accountId));
+          // Invalidate related providers to refresh UI
+          ref.invalidate(canUndoProvider(accountId));
+          ref.invalidate(undoTimeRemainingProvider(accountId));
 
-        // Also invalidate the last smoke log provider from capture_hit
-        ref.invalidate(lastSmokeLogProvider(accountId));
-      },
-    );
+          // Also invalidate the last smoke log provider from capture_hit
+          ref.invalidate(lastSmokeLogProvider(accountId));
+        },
+      );
+    } catch (error) {
+      state = AsyncError(error, StackTrace.current);
+    }
   }
 
   /// Check if an undo operation is currently in progress

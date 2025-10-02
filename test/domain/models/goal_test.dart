@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/domain/models/goal.dart';
 
 void main() {

@@ -29,12 +29,8 @@ mixin _$Reminder {
   bool get enabled => throw _privateConstructorUsedError;
   DateTime? get lastTriggeredAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Reminder to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Reminder
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ReminderCopyWith<Reminder> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -63,8 +59,6 @@ class _$ReminderCopyWithImpl<$Res, $Val extends Reminder>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Reminder
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -129,8 +123,6 @@ class __$$ReminderImplCopyWithImpl<$Res>
       _$ReminderImpl _value, $Res Function(_$ReminderImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Reminder
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -226,14 +218,12 @@ class _$ReminderImpl implements _Reminder {
                 other.lastTriggeredAt == lastTriggeredAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, time,
       const DeepCollectionEquality().hash(_days), enabled, lastTriggeredAt);
 
-  /// Create a copy of Reminder
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ReminderImplCopyWith<_$ReminderImpl> get copyWith =>
@@ -262,20 +252,17 @@ abstract class _Reminder implements Reminder {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
   DateTime get time;
   @override
-  List<String> get days; // TODO: constrain to enum values
-  @override
+  List<String> get days;
+  @override // TODO: constrain to enum values
   bool get enabled;
   @override
   DateTime? get lastTriggeredAt;
-
-  /// Create a copy of Reminder
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ReminderImplCopyWith<_$ReminderImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

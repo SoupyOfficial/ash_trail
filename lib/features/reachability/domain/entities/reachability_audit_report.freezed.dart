@@ -26,9 +26,7 @@ mixin _$ReachabilityAuditReport {
   List<AuditRecommendation>? get recommendations =>
       throw _privateConstructorUsedError;
 
-  /// Create a copy of ReachabilityAuditReport
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ReachabilityAuditReportCopyWith<ReachabilityAuditReport> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -63,8 +61,6 @@ class _$ReachabilityAuditReportCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ReachabilityAuditReport
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -113,8 +109,6 @@ class _$ReachabilityAuditReportCopyWithImpl<$Res,
     ) as $Val);
   }
 
-  /// Create a copy of ReachabilityAuditReport
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $AuditSummaryCopyWith<$Res> get summary {
@@ -157,8 +151,6 @@ class __$$ReachabilityAuditReportImplCopyWithImpl<$Res>
       $Res Function(_$ReachabilityAuditReportImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ReachabilityAuditReport
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -297,9 +289,7 @@ class _$ReachabilityAuditReportImpl extends _ReachabilityAuditReport {
       summary,
       const DeepCollectionEquality().hash(_recommendations));
 
-  /// Create a copy of ReachabilityAuditReport
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ReachabilityAuditReportImplCopyWith<_$ReachabilityAuditReportImpl>
@@ -336,11 +326,8 @@ abstract class _ReachabilityAuditReport extends ReachabilityAuditReport {
   AuditSummary get summary;
   @override
   List<AuditRecommendation>? get recommendations;
-
-  /// Create a copy of ReachabilityAuditReport
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ReachabilityAuditReportImplCopyWith<_$ReachabilityAuditReportImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
@@ -354,9 +341,7 @@ mixin _$AuditSummary {
   double get avgTouchTargetSize => throw _privateConstructorUsedError;
   int get accessibilityIssues => throw _privateConstructorUsedError;
 
-  /// Create a copy of AuditSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AuditSummaryCopyWith<AuditSummary> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -386,8 +371,6 @@ class _$AuditSummaryCopyWithImpl<$Res, $Val extends AuditSummary>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AuditSummary
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -452,8 +435,6 @@ class __$$AuditSummaryImplCopyWithImpl<$Res>
       _$AuditSummaryImpl _value, $Res Function(_$AuditSummaryImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AuditSummary
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -551,9 +532,7 @@ class _$AuditSummaryImpl implements _AuditSummary {
       avgTouchTargetSize,
       accessibilityIssues);
 
-  /// Create a copy of AuditSummary
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AuditSummaryImplCopyWith<_$AuditSummaryImpl> get copyWith =>
@@ -581,11 +560,8 @@ abstract class _AuditSummary implements AuditSummary {
   double get avgTouchTargetSize;
   @override
   int get accessibilityIssues;
-
-  /// Create a copy of AuditSummary
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AuditSummaryImplCopyWith<_$AuditSummaryImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -598,9 +574,7 @@ mixin _$AuditRecommendation {
   int get priority => throw _privateConstructorUsedError;
   String? get suggestedFix => throw _privateConstructorUsedError;
 
-  /// Create a copy of AuditRecommendation
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AuditRecommendationCopyWith<AuditRecommendation> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -629,8 +603,6 @@ class _$AuditRecommendationCopyWithImpl<$Res, $Val extends AuditRecommendation>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AuditRecommendation
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -689,8 +661,6 @@ class __$$AuditRecommendationImplCopyWithImpl<$Res>
       $Res Function(_$AuditRecommendationImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AuditRecommendation
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -771,9 +741,7 @@ class _$AuditRecommendationImpl implements _AuditRecommendation {
   int get hashCode => Object.hash(
       runtimeType, elementId, type, description, priority, suggestedFix);
 
-  /// Create a copy of AuditRecommendation
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AuditRecommendationImplCopyWith<_$AuditRecommendationImpl> get copyWith =>
@@ -799,11 +767,8 @@ abstract class _AuditRecommendation implements AuditRecommendation {
   int get priority;
   @override
   String? get suggestedFix;
-
-  /// Create a copy of AuditRecommendation
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AuditRecommendationImplCopyWith<_$AuditRecommendationImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -36,12 +36,8 @@ mixin _$SyncOp {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this SyncOp to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SyncOp
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SyncOpCopyWith<SyncOp> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -74,8 +70,6 @@ class _$SyncOpCopyWithImpl<$Res, $Val extends SyncOp>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SyncOp
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -169,8 +163,6 @@ class __$$SyncOpImplCopyWithImpl<$Res>
       _$SyncOpImpl _value, $Res Function(_$SyncOpImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SyncOp
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -317,7 +309,7 @@ class _$SyncOpImpl implements _SyncOp {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -333,9 +325,7 @@ class _$SyncOpImpl implements _SyncOp {
       createdAt,
       updatedAt);
 
-  /// Create a copy of SyncOp
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SyncOpImplCopyWith<_$SyncOpImpl> get copyWith =>
@@ -368,18 +358,18 @@ abstract class _SyncOp implements SyncOp {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
-  String get entity; // TODO: constrain to enum values
-  @override
-  String get op; // TODO: constrain to enum values
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
+  String get entity;
+  @override // TODO: constrain to enum values
+  String get op;
+  @override // TODO: constrain to enum values
   String get recordId;
   @override
   Map<String, dynamic> get payload;
   @override
-  String get status; // TODO: constrain to enum values
-  @override
+  String get status;
+  @override // TODO: constrain to enum values
   int get attempts;
   @override
   String? get lastError;
@@ -387,11 +377,8 @@ abstract class _SyncOp implements SyncOp {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of SyncOp
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SyncOpImplCopyWith<_$SyncOpImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

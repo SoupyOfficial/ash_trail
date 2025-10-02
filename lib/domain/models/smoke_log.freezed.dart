@@ -35,12 +35,8 @@ mixin _$SmokeLog {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this SmokeLog to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SmokeLog
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SmokeLogCopyWith<SmokeLog> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -75,8 +71,6 @@ class _$SmokeLogCopyWithImpl<$Res, $Val extends SmokeLog>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SmokeLog
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -177,8 +171,6 @@ class __$$SmokeLogImplCopyWithImpl<$Res>
       _$SmokeLogImpl _value, $Res Function(_$SmokeLogImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SmokeLog
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -327,7 +319,7 @@ class _$SmokeLogImpl implements _SmokeLog {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -344,9 +336,7 @@ class _$SmokeLogImpl implements _SmokeLog {
       createdAt,
       updatedAt);
 
-  /// Create a copy of SmokeLog
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SmokeLogImplCopyWith<_$SmokeLogImpl> get copyWith =>
@@ -381,14 +371,14 @@ abstract class _SmokeLog implements SmokeLog {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
   DateTime get ts;
   @override
   int get durationMs;
   @override
-  String? get methodId; // TODO: FK to Method
-  @override
+  String? get methodId;
+  @override // TODO: FK to Method
   int? get potency;
   @override
   int get moodScore;
@@ -402,11 +392,8 @@ abstract class _SmokeLog implements SmokeLog {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of SmokeLog
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SmokeLogImplCopyWith<_$SmokeLogImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

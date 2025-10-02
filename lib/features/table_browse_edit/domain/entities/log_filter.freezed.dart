@@ -36,9 +36,7 @@ mixin _$LogFilter {
       throw _privateConstructorUsedError; // Text search in notes
   String? get searchText => throw _privateConstructorUsedError;
 
-  /// Create a copy of LogFilter
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LogFilterCopyWith<LogFilter> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -73,8 +71,6 @@ class _$LogFilterCopyWithImpl<$Res, $Val extends LogFilter>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LogFilter
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -175,8 +171,6 @@ class __$$LogFilterImplCopyWithImpl<$Res>
       _$LogFilterImpl _value, $Res Function(_$LogFilterImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LogFilter
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -376,9 +370,7 @@ class _$LogFilterImpl extends _LogFilter {
       maxDurationMs,
       searchText);
 
-  /// Create a copy of LogFilter
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LogFilterImplCopyWith<_$LogFilterImpl> get copyWith =>
@@ -401,37 +393,32 @@ abstract class _LogFilter extends LogFilter {
       final String? searchText}) = _$LogFilterImpl;
   const _LogFilter._() : super._();
 
-// Date range filtering
-  @override
+  @override // Date range filtering
   DateTime? get startDate;
   @override
-  DateTime? get endDate; // Method filtering
-  @override
-  List<String>?
-      get methodIds; // Tag filtering (using SmokeLogTag relationships)
-  @override
+  DateTime? get endDate;
+  @override // Method filtering
+  List<String>? get methodIds;
+  @override // Tag filtering (using SmokeLogTag relationships)
   List<String>? get includeTagIds;
   @override
-  List<String>? get excludeTagIds; // Mood score filtering (1-10)
-  @override
+  List<String>? get excludeTagIds;
+  @override // Mood score filtering (1-10)
   int? get minMoodScore;
   @override
-  int? get maxMoodScore; // Physical score filtering (1-10)
-  @override
+  int? get maxMoodScore;
+  @override // Physical score filtering (1-10)
   int? get minPhysicalScore;
   @override
-  int? get maxPhysicalScore; // Duration filtering (in milliseconds)
-  @override
+  int? get maxPhysicalScore;
+  @override // Duration filtering (in milliseconds)
   int? get minDurationMs;
   @override
-  int? get maxDurationMs; // Text search in notes
-  @override
+  int? get maxDurationMs;
+  @override // Text search in notes
   String? get searchText;
-
-  /// Create a copy of LogFilter
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LogFilterImplCopyWith<_$LogFilterImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

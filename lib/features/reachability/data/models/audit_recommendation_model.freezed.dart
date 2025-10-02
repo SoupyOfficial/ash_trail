@@ -27,12 +27,8 @@ mixin _$AuditRecommendationModel {
   int get priority => throw _privateConstructorUsedError;
   String? get suggestedFix => throw _privateConstructorUsedError;
 
-  /// Serializes this AuditRecommendationModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AuditRecommendationModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AuditRecommendationModelCopyWith<AuditRecommendationModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -62,8 +58,6 @@ class _$AuditRecommendationModelCopyWithImpl<$Res,
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AuditRecommendationModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -125,8 +119,6 @@ class __$$AuditRecommendationModelImplCopyWithImpl<$Res>
       $Res Function(_$AuditRecommendationModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AuditRecommendationModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -207,14 +199,12 @@ class _$AuditRecommendationModelImpl extends _AuditRecommendationModel {
                 other.suggestedFix == suggestedFix));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType, elementId, type, description, priority, suggestedFix);
 
-  /// Create a copy of AuditRecommendationModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AuditRecommendationModelImplCopyWith<_$AuditRecommendationModelImpl>
@@ -251,11 +241,8 @@ abstract class _AuditRecommendationModel extends AuditRecommendationModel {
   int get priority;
   @override
   String? get suggestedFix;
-
-  /// Create a copy of AuditRecommendationModel
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AuditRecommendationModelImplCopyWith<_$AuditRecommendationModelImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

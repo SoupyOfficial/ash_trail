@@ -30,9 +30,7 @@ mixin _$LogsTableState {
   String? get error => throw _privateConstructorUsedError; // Account context
   String get accountId => throw _privateConstructorUsedError;
 
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LogsTableStateCopyWith<LogsTableState> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -69,8 +67,6 @@ class _$LogsTableStateCopyWithImpl<$Res, $Val extends LogsTableState>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -129,8 +125,6 @@ class _$LogsTableStateCopyWithImpl<$Res, $Val extends LogsTableState>
     ) as $Val);
   }
 
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $LogFilterCopyWith<$Res> get filter {
@@ -139,8 +133,6 @@ class _$LogsTableStateCopyWithImpl<$Res, $Val extends LogsTableState>
     });
   }
 
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $LogSortCopyWith<$Res> get sort {
@@ -184,8 +176,6 @@ class __$$LogsTableStateImplCopyWithImpl<$Res>
       _$LogsTableStateImpl _value, $Res Function(_$LogsTableStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -347,9 +337,7 @@ class _$LogsTableStateImpl extends _LogsTableState {
       error,
       accountId);
 
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LogsTableStateImplCopyWith<_$LogsTableStateImpl> get copyWith =>
@@ -371,32 +359,28 @@ abstract class _LogsTableState extends LogsTableState {
       required final String accountId}) = _$LogsTableStateImpl;
   const _LogsTableState._() : super._();
 
-// Filter and sort state
-  @override
+  @override // Filter and sort state
   LogFilter get filter;
   @override
-  LogSort get sort; // Pagination state
-  @override
+  LogSort get sort;
+  @override // Pagination state
   int get pageSize;
   @override
   int get currentPage;
   @override
-  int get totalLogs; // Selection state for multi-select operations
-  @override
-  Set<String> get selectedLogIds; // Loading states
-  @override
+  int get totalLogs;
+  @override // Selection state for multi-select operations
+  Set<String> get selectedLogIds;
+  @override // Loading states
   bool get isLoading;
   @override
-  bool get isRefreshing; // Error state
-  @override
-  String? get error; // Account context
-  @override
+  bool get isRefreshing;
+  @override // Error state
+  String? get error;
+  @override // Account context
   String get accountId;
-
-  /// Create a copy of LogsTableState
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LogsTableStateImplCopyWith<_$LogsTableStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

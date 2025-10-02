@@ -33,9 +33,7 @@ mixin _$AccessibilityConfig {
   bool get enableFocusIndicators => throw _privateConstructorUsedError;
   bool get enableCustomFocusOrder => throw _privateConstructorUsedError;
 
-  /// Create a copy of AccessibilityConfig
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AccessibilityConfigCopyWith<AccessibilityConfig> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -72,8 +70,6 @@ class _$AccessibilityConfigCopyWithImpl<$Res, $Val extends AccessibilityConfig>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AccessibilityConfig
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -180,8 +176,6 @@ class __$$AccessibilityConfigImplCopyWithImpl<$Res>
       $Res Function(_$AccessibilityConfigImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AccessibilityConfig
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -369,9 +363,7 @@ class _$AccessibilityConfigImpl extends _AccessibilityConfig {
       enableFocusIndicators,
       enableCustomFocusOrder);
 
-  /// Create a copy of AccessibilityConfig
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AccessibilityConfigImplCopyWith<_$AccessibilityConfigImpl> get copyWith =>
@@ -401,8 +393,8 @@ abstract class _AccessibilityConfig extends AccessibilityConfig {
   @override
   DateTime get createdAt;
   @override
-  DateTime? get updatedAt; // System accessibility features
-  @override
+  DateTime? get updatedAt;
+  @override // System accessibility features
   bool get isScreenReaderEnabled;
   @override
   bool get isBoldTextEnabled;
@@ -411,22 +403,19 @@ abstract class _AccessibilityConfig extends AccessibilityConfig {
   @override
   bool get isHighContrastEnabled;
   @override
-  double get textScaleFactor; // User preferences
-  @override
+  double get textScaleFactor;
+  @override // User preferences
   bool get enableHapticFeedback;
   @override
   bool get enableSemanticLabels;
   @override
-  double get minTapTargetSize; // Focus and navigation preferences
-  @override
+  double get minTapTargetSize;
+  @override // Focus and navigation preferences
   bool get enableFocusIndicators;
   @override
   bool get enableCustomFocusOrder;
-
-  /// Create a copy of AccessibilityConfig
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AccessibilityConfigImplCopyWith<_$AccessibilityConfigImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -30,12 +30,8 @@ mixin _$PushToken {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get revokedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this PushToken to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of PushToken
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $PushTokenCopyWith<PushToken> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -65,8 +61,6 @@ class _$PushTokenCopyWithImpl<$Res, $Val extends PushToken>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of PushToken
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -137,8 +131,6 @@ class __$$PushTokenImplCopyWithImpl<$Res>
       _$PushTokenImpl _value, $Res Function(_$PushTokenImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of PushToken
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -238,14 +230,12 @@ class _$PushTokenImpl implements _PushToken {
                 other.revokedAt == revokedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType, id, deviceId, platform, token, active, createdAt, revokedAt);
 
-  /// Create a copy of PushToken
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$PushTokenImplCopyWith<_$PushTokenImpl> get copyWith =>
@@ -275,10 +265,10 @@ abstract class _PushToken implements PushToken {
   @override
   String get id;
   @override
-  String get deviceId; // TODO: FK to Device
-  @override
-  String get platform; // TODO: constrain to enum values
-  @override
+  String get deviceId;
+  @override // TODO: FK to Device
+  String get platform;
+  @override // TODO: constrain to enum values
   String get token;
   @override
   bool get active;
@@ -286,11 +276,8 @@ abstract class _PushToken implements PushToken {
   DateTime get createdAt;
   @override
   DateTime? get revokedAt;
-
-  /// Create a copy of PushToken
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$PushTokenImplCopyWith<_$PushTokenImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

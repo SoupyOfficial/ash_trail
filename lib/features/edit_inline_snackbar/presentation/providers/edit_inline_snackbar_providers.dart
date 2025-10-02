@@ -83,10 +83,10 @@ class InlineEditController
 
     state = stateNow.copyWith(isSaving: true, error: null);
 
-    final repo = ref.read(smokeLogRepositoryProvider);
+    final repo = await ref.read(smokeLogRepositoryProvider.future);
     final result = await repo.updateSmokeLog(updated);
 
-    return result.match(
+    return result.fold(
       (failure) {
         state = stateNow.copyWith(isSaving: false, error: failure);
         return null;

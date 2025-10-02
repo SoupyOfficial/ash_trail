@@ -28,12 +28,8 @@ mixin _$Account {
   String? get photoUrl => throw _privateConstructorUsedError;
   String get provider => throw _privateConstructorUsedError;
 
-  /// Serializes this Account to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Account
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AccountCopyWith<Account> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -62,8 +58,6 @@ class _$AccountCopyWithImpl<$Res, $Val extends Account>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Account
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -133,8 +127,6 @@ class __$$AccountImplCopyWithImpl<$Res>
       _$AccountImpl _value, $Res Function(_$AccountImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Account
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -233,14 +225,12 @@ class _$AccountImpl implements _Account {
                 other.provider == provider));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, displayName, firstName,
       lastName, email, photoUrl, provider);
 
-  /// Create a copy of Account
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AccountImplCopyWith<_$AccountImpl> get copyWith =>
@@ -280,11 +270,8 @@ abstract class _Account implements Account {
   String? get photoUrl;
   @override
   String get provider;
-
-  /// Create a copy of Account
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AccountImplCopyWith<_$AccountImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

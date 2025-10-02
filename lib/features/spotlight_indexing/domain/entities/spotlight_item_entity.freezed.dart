@@ -46,9 +46,7 @@ mixin _$SpotlightItemEntity {
   /// Whether this item should be indexed
   bool get isActive => throw _privateConstructorUsedError;
 
-  /// Create a copy of SpotlightItemEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SpotlightItemEntityCopyWith<SpotlightItemEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -82,8 +80,6 @@ class _$SpotlightItemEntityCopyWithImpl<$Res, $Val extends SpotlightItemEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SpotlightItemEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -172,8 +168,6 @@ class __$$SpotlightItemEntityImplCopyWithImpl<$Res>
       $Res Function(_$SpotlightItemEntityImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SpotlightItemEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -342,9 +336,7 @@ class _$SpotlightItemEntityImpl extends _SpotlightItemEntity {
       lastUpdated,
       isActive);
 
-  /// Create a copy of SpotlightItemEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SpotlightItemEntityImplCopyWith<_$SpotlightItemEntityImpl> get copyWith =>
@@ -366,50 +358,48 @@ abstract class _SpotlightItemEntity extends SpotlightItemEntity {
       final bool isActive}) = _$SpotlightItemEntityImpl;
   const _SpotlightItemEntity._() : super._();
 
-  /// Unique identifier for this spotlight item
   @override
+
+  /// Unique identifier for this spotlight item
   String get id;
+  @override
 
   /// The type of content being indexed
-  @override
   SpotlightItemType get type;
+  @override
 
   /// Display title for the spotlight result
-  @override
   String get title;
+  @override
 
   /// Description text shown in spotlight results
-  @override
   String? get description;
+  @override
 
   /// Keywords for improving searchability
-  @override
   List<String>? get keywords;
+  @override
 
   /// Deep link URL for navigation when item is selected
-  @override
   String get deepLink;
+  @override
 
   /// Account ID this item belongs to
-  @override
   String get accountId;
+  @override
 
   /// Original content ID (tag name, chart view id, etc.)
-  @override
   String get contentId;
+  @override
 
   /// When this item was created/last updated
-  @override
   DateTime get lastUpdated;
+  @override
 
   /// Whether this item should be indexed
-  @override
   bool get isActive;
-
-  /// Create a copy of SpotlightItemEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SpotlightItemEntityImplCopyWith<_$SpotlightItemEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -39,12 +39,8 @@ mixin _$ChartView {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this ChartView to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ChartView
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ChartViewCopyWith<ChartView> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -80,8 +76,6 @@ class _$ChartViewCopyWithImpl<$Res, $Val extends ChartView>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ChartView
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -188,8 +182,6 @@ class __$$ChartViewImplCopyWithImpl<$Res>
       _$ChartViewImpl _value, $Res Function(_$ChartViewImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ChartView
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -359,7 +351,7 @@ class _$ChartViewImpl implements _ChartView {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -377,9 +369,7 @@ class _$ChartViewImpl implements _ChartView {
       createdAt,
       updatedAt);
 
-  /// Create a copy of ChartView
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ChartViewImplCopyWith<_$ChartViewImpl> get copyWith =>
@@ -415,22 +405,22 @@ abstract class _ChartView implements ChartView {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
   String get title;
   @override
-  String get range; // TODO: constrain to enum values
-  @override
+  String get range;
+  @override // TODO: constrain to enum values
   DateTime? get customStart;
   @override
   DateTime? get customEnd;
   @override
-  String get groupBy; // TODO: constrain to enum values
-  @override
-  String get metric; // TODO: constrain to enum values
-  @override
-  String get smoothing; // TODO: constrain to enum values
-  @override
+  String get groupBy;
+  @override // TODO: constrain to enum values
+  String get metric;
+  @override // TODO: constrain to enum values
+  String get smoothing;
+  @override // TODO: constrain to enum values
   int? get smoothingWindow;
   @override
   List<String>? get visibleTags;
@@ -438,11 +428,8 @@ abstract class _ChartView implements ChartView {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of ChartView
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ChartViewImplCopyWith<_$ChartViewImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

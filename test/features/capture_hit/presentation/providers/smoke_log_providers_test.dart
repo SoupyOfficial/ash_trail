@@ -5,8 +5,6 @@ import 'package:fpdart/fpdart.dart';
 
 import 'package:ash_trail/core/failures/app_failure.dart';
 import 'package:ash_trail/domain/models/smoke_log.dart';
-import 'package:ash_trail/features/capture_hit/data/datasources/smoke_log_local_datasource.dart';
-import 'package:ash_trail/features/capture_hit/data/datasources/smoke_log_remote_datasource.dart';
 import 'package:ash_trail/features/capture_hit/domain/repositories/smoke_log_repository.dart';
 import 'package:ash_trail/features/capture_hit/domain/usecases/create_smoke_log_usecase.dart';
 import 'package:ash_trail/features/capture_hit/domain/usecases/undo_last_smoke_log_usecase.dart';
@@ -15,12 +13,6 @@ import 'package:ash_trail/features/capture_hit/domain/usecases/delete_smoke_log_
 import 'package:ash_trail/features/capture_hit/presentation/providers/smoke_log_providers.dart';
 
 // Mock classes
-class MockSmokeLogLocalDataSource extends Mock
-    implements SmokeLogLocalDataSource {}
-
-class MockSmokeLogRemoteDataSource extends Mock
-    implements SmokeLogRemoteDataSource {}
-
 class MockSmokeLogRepository extends Mock implements SmokeLogRepository {}
 
 class MockCreateSmokeLogUseCase extends Mock implements CreateSmokeLogUseCase {}
@@ -34,8 +26,6 @@ class MockGetLastSmokeLogUseCase extends Mock
 class MockDeleteSmokeLogUseCase extends Mock implements DeleteSmokeLogUseCase {}
 
 void main() {
-  late MockSmokeLogLocalDataSource mockLocalDataSource;
-  late MockSmokeLogRemoteDataSource mockRemoteDataSource;
   late MockSmokeLogRepository mockRepository;
   late MockCreateSmokeLogUseCase mockCreateUseCase;
   late MockUndoLastSmokeLogUseCase mockUndoUseCase;
@@ -60,11 +50,9 @@ void main() {
   );
 
   const testAccountId = 'test-account-id';
-  final testFailure = AppFailure.unexpected(message: 'Test error');
+  const testFailure = AppFailure.unexpected(message: 'Test error');
 
   setUp(() {
-    mockLocalDataSource = MockSmokeLogLocalDataSource();
-    mockRemoteDataSource = MockSmokeLogRemoteDataSource();
     mockRepository = MockSmokeLogRepository();
     mockCreateUseCase = MockCreateSmokeLogUseCase();
     mockUndoUseCase = MockUndoLastSmokeLogUseCase();
@@ -73,14 +61,16 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
-        smokeLogLocalDataSourceProvider.overrideWithValue(mockLocalDataSource),
-        smokeLogRemoteDataSourceProvider
-            .overrideWithValue(mockRemoteDataSource),
-        smokeLogRepositoryProvider.overrideWithValue(mockRepository),
-        createSmokeLogUseCaseProvider.overrideWithValue(mockCreateUseCase),
-        undoLastSmokeLogUseCaseProvider.overrideWithValue(mockUndoUseCase),
-        getLastSmokeLogUseCaseProvider.overrideWithValue(mockGetLastUseCase),
-        deleteSmokeLogUseCaseProvider.overrideWithValue(mockDeleteUseCase),
+        smokeLogRepositoryProvider
+            .overrideWith((ref) => Future.value(mockRepository)),
+        createSmokeLogUseCaseProvider
+            .overrideWith((ref) => Future.value(mockCreateUseCase)),
+        undoLastSmokeLogUseCaseProvider
+            .overrideWith((ref) => Future.value(mockUndoUseCase)),
+        getLastSmokeLogUseCaseProvider
+            .overrideWith((ref) => Future.value(mockGetLastUseCase)),
+        deleteSmokeLogUseCaseProvider
+            .overrideWith((ref) => Future.value(mockDeleteUseCase)),
       ],
     );
   });
@@ -89,63 +79,36 @@ void main() {
     container.dispose();
   });
 
-  group('smokeLogLocalDataSourceProvider', () {
-    test('throws UnimplementedError when not overridden', () {
-      final container = ProviderContainer();
-      expect(
-        () => container.read(smokeLogLocalDataSourceProvider),
-        throwsA(isA<UnimplementedError>()),
-      );
-      container.dispose();
-    });
-
-    test('returns correct implementation when overridden', () {
-      final dataSource = container.read(smokeLogLocalDataSourceProvider);
-      expect(dataSource, equals(mockLocalDataSource));
-    });
-  });
-
-  group('smokeLogRemoteDataSourceProvider', () {
-    test('throws UnimplementedError when not overridden', () {
-      final container = ProviderContainer();
-      expect(
-        () => container.read(smokeLogRemoteDataSourceProvider),
-        throwsA(isA<UnimplementedError>()),
-      );
-      container.dispose();
-    });
-
-    test('returns correct implementation when overridden', () {
-      final dataSource = container.read(smokeLogRemoteDataSourceProvider);
-      expect(dataSource, equals(mockRemoteDataSource));
-    });
-  });
-
   group('smokeLogRepositoryProvider', () {
-    test('creates repository with correct data sources', () {
-      final repository = container.read(smokeLogRepositoryProvider);
+    test('creates repository with correct data sources', () async {
+      final repository =
+          await container.read(smokeLogRepositoryProvider.future);
       expect(repository, equals(mockRepository));
     });
   });
 
   group('Use case providers', () {
-    test('createSmokeLogUseCaseProvider returns correct use case', () {
-      final useCase = container.read(createSmokeLogUseCaseProvider);
+    test('createSmokeLogUseCaseProvider returns correct use case', () async {
+      final useCase =
+          await container.read(createSmokeLogUseCaseProvider.future);
       expect(useCase, equals(mockCreateUseCase));
     });
 
-    test('undoLastSmokeLogUseCaseProvider returns correct use case', () {
-      final useCase = container.read(undoLastSmokeLogUseCaseProvider);
+    test('undoLastSmokeLogUseCaseProvider returns correct use case', () async {
+      final useCase =
+          await container.read(undoLastSmokeLogUseCaseProvider.future);
       expect(useCase, equals(mockUndoUseCase));
     });
 
-    test('getLastSmokeLogUseCaseProvider returns correct use case', () {
-      final useCase = container.read(getLastSmokeLogUseCaseProvider);
+    test('getLastSmokeLogUseCaseProvider returns correct use case', () async {
+      final useCase =
+          await container.read(getLastSmokeLogUseCaseProvider.future);
       expect(useCase, equals(mockGetLastUseCase));
     });
 
-    test('deleteSmokeLogUseCaseProvider returns correct use case', () {
-      final useCase = container.read(deleteSmokeLogUseCaseProvider);
+    test('deleteSmokeLogUseCaseProvider returns correct use case', () async {
+      final useCase =
+          await container.read(deleteSmokeLogUseCaseProvider.future);
       expect(useCase, equals(mockDeleteUseCase));
     });
   });
@@ -153,7 +116,7 @@ void main() {
   group('lastSmokeLogProvider', () {
     test('returns smoke log when use case succeeds', () async {
       // Arrange
-      when(() => mockGetLastUseCase(accountId: testAccountId))
+      when(() => mockGetLastUseCase.call(accountId: testAccountId))
           .thenAnswer((_) async => Right(testSmokeLog));
 
       // Act
@@ -162,25 +125,32 @@ void main() {
 
       // Assert
       expect(result, equals(testSmokeLog));
-      verify(() => mockGetLastUseCase(accountId: testAccountId)).called(1);
+      verify(() => mockGetLastUseCase.call(accountId: testAccountId)).called(1);
     });
 
     test('throws failure when use case fails', () async {
       // Arrange
-      when(() => mockGetLastUseCase(accountId: testAccountId))
-          .thenAnswer((_) async => Left(testFailure));
+      when(() => mockGetLastUseCase.call(accountId: testAccountId))
+          .thenAnswer((_) async => const Left(testFailure));
 
       // Act & Assert
       expect(
         () => container.read(lastSmokeLogProvider(testAccountId).future),
         throwsA(equals(testFailure)),
       );
-      verify(() => mockGetLastUseCase(accountId: testAccountId)).called(1);
+
+      // Try to read the provider to trigger the call, then verify
+      try {
+        await container.read(lastSmokeLogProvider(testAccountId).future);
+      } catch (_) {
+        // Expected to throw
+      }
+      verify(() => mockGetLastUseCase.call(accountId: testAccountId)).called(1);
     });
 
     test('returns null when no smoke log exists', () async {
       // Arrange
-      when(() => mockGetLastUseCase(accountId: testAccountId))
+      when(() => mockGetLastUseCase.call(accountId: testAccountId))
           .thenAnswer((_) async => const Right(null));
 
       // Act
@@ -189,7 +159,7 @@ void main() {
 
       // Assert
       expect(result, isNull);
-      verify(() => mockGetLastUseCase(accountId: testAccountId)).called(1);
+      verify(() => mockGetLastUseCase.call(accountId: testAccountId)).called(1);
     });
   });
 
@@ -207,7 +177,7 @@ void main() {
 
     test('createSmokeLog succeeds and returns smoke log', () async {
       // Arrange
-      when(() => mockCreateUseCase(
+      when(() => mockCreateUseCase.call(
             accountId: testAccountId,
             durationMs: 30000,
             methodId: 'test-method',
@@ -232,7 +202,7 @@ void main() {
 
       // Assert
       expect(result, equals(testSmokeLog));
-      verify(() => mockCreateUseCase(
+      verify(() => mockCreateUseCase.call(
             accountId: testAccountId,
             durationMs: 30000,
             methodId: 'test-method',
@@ -245,27 +215,29 @@ void main() {
 
     test('createSmokeLog fails and throws failure', () async {
       // Arrange
-      when(() => mockCreateUseCase(
+      when(() => mockCreateUseCase.call(
             accountId: testAccountId,
             durationMs: 30000,
             moodScore: 8,
             physicalScore: 6,
-          )).thenAnswer((_) async => Left(testFailure));
+          )).thenAnswer((_) async => const Left(testFailure));
 
       final notifier = container.read(createSmokeLogProvider({}).notifier);
 
-      // Act & Assert
-      expect(
-        () => notifier.createSmokeLog(
+      // Act & Assert - Try to call the method and expect it to throw
+      try {
+        await notifier.createSmokeLog(
           accountId: testAccountId,
           durationMs: 30000,
           moodScore: 8,
           physicalScore: 6,
-        ),
-        throwsA(equals(testFailure)),
-      );
+        );
+        fail('Expected createSmokeLog to throw');
+      } catch (e) {
+        expect(e, equals(testFailure));
+      }
 
-      verify(() => mockCreateUseCase(
+      verify(() => mockCreateUseCase.call(
             accountId: testAccountId,
             durationMs: 30000,
             moodScore: 8,
@@ -289,7 +261,7 @@ void main() {
 
     test('undoLast succeeds and returns smoke log', () async {
       // Arrange
-      when(() => mockUndoUseCase(
+      when(() => mockUndoUseCase.call(
             accountId: testAccountId,
             undoWindowSeconds: 6,
           )).thenAnswer((_) async => Right(testSmokeLog));
@@ -302,7 +274,7 @@ void main() {
 
       // Assert
       expect(result, equals(testSmokeLog));
-      verify(() => mockUndoUseCase(
+      verify(() => mockUndoUseCase.call(
             accountId: testAccountId,
             undoWindowSeconds: 6,
           )).called(1);
@@ -311,7 +283,7 @@ void main() {
     test('undoLast with custom undo window succeeds', () async {
       // Arrange
       const customUndoWindow = 10;
-      when(() => mockUndoUseCase(
+      when(() => mockUndoUseCase.call(
             accountId: testAccountId,
             undoWindowSeconds: customUndoWindow,
           )).thenAnswer((_) async => Right(testSmokeLog));
@@ -327,7 +299,7 @@ void main() {
 
       // Assert
       expect(result, equals(testSmokeLog));
-      verify(() => mockUndoUseCase(
+      verify(() => mockUndoUseCase.call(
             accountId: testAccountId,
             undoWindowSeconds: customUndoWindow,
           )).called(1);
@@ -335,21 +307,23 @@ void main() {
 
     test('undoLast fails and throws failure', () async {
       // Arrange
-      when(() => mockUndoUseCase(
+      when(() => mockUndoUseCase.call(
             accountId: testAccountId,
             undoWindowSeconds: 6,
-          )).thenAnswer((_) async => Left(testFailure));
+          )).thenAnswer((_) async => const Left(testFailure));
 
       final notifier =
           container.read(undoSmokeLogProvider(testAccountId).notifier);
 
-      // Act & Assert
-      expect(
-        () => notifier.undoLast(accountId: testAccountId),
-        throwsA(equals(testFailure)),
-      );
+      // Act & Assert - Try to call the method and expect it to throw
+      try {
+        await notifier.undoLast(accountId: testAccountId);
+        fail('Expected undoLast to throw');
+      } catch (e) {
+        expect(e, equals(testFailure));
+      }
 
-      verify(() => mockUndoUseCase(
+      verify(() => mockUndoUseCase.call(
             accountId: testAccountId,
             undoWindowSeconds: 6,
           )).called(1);
@@ -357,11 +331,7 @@ void main() {
   });
 
   group('Provider integration', () {
-    test('all providers can be read without throwing', () {
-      expect(() => container.read(smokeLogLocalDataSourceProvider),
-          returnsNormally);
-      expect(() => container.read(smokeLogRemoteDataSourceProvider),
-          returnsNormally);
+    test('all providers can be read without throwing', () async {
       expect(() => container.read(smokeLogRepositoryProvider), returnsNormally);
       expect(
           () => container.read(createSmokeLogUseCaseProvider), returnsNormally);

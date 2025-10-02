@@ -24,7 +24,7 @@ const Map<String, bool> kFeatureFlags = {
   'export.csv_json': false,
   'export.import_csv_json': false,
   'export.redaction_options': false,
-  'insights.charts_time_series': false,
+  'insights.charts_time_series': true,
   'insights.custom_views': false,
   'insights.filter_presets': false,
   'insights.goal_progress': true,

@@ -1,0 +1,27 @@
+{
+  "id": "20250924T012316",
+  "started_at": "2025-09-24T01:23:16.742239+00:00",
+  "command": "dev-cycle",
+  "coverage_before": 80.07751937984496,
+  "coverage_after": 80.07751937984496,
+  "coverage_delta": 0.0,
+  "tests_passed": true,
+  "uploaded": false,
+  "notes": [],
+  "branch": "main",
+  "commit": "60070117b8f35d4128f630ef0e51a54a9757af7f",
+  "changed_files": [
+    {
+      "path": "lib/core/routing/app_router.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/goal_progress/data/repositories/goal_progress_repository_impl_test.dart",
+      "status": "M",
+      "type": "modified"
+    }
+  ],
+  "file_coverage_deltas": null,
+  "duration_ms": 373
+}

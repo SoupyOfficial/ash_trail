@@ -28,12 +28,8 @@ mixin _$SyncState {
   String? get tombstoneWatermark => throw _privateConstructorUsedError;
   DateTime? get backoffUntil => throw _privateConstructorUsedError;
 
-  /// Serializes this SyncState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of SyncState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SyncStateCopyWith<SyncState> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -62,8 +58,6 @@ class _$SyncStateCopyWithImpl<$Res, $Val extends SyncState>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SyncState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -128,8 +122,6 @@ class __$$SyncStateImplCopyWithImpl<$Res>
       _$SyncStateImpl _value, $Res Function(_$SyncStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SyncState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -221,14 +213,12 @@ class _$SyncStateImpl implements _SyncState {
                 other.backoffUntil == backoffUntil));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, accountId, lastPulledAt,
       lastPushedAt, remoteVersion, tombstoneWatermark, backoffUntil);
 
-  /// Create a copy of SyncState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SyncStateImplCopyWith<_$SyncStateImpl> get copyWith =>
@@ -255,8 +245,8 @@ abstract class _SyncState implements SyncState {
       _$SyncStateImpl.fromJson;
 
   @override
-  String get accountId; // TODO: FK to Account
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
   DateTime? get lastPulledAt;
   @override
   DateTime? get lastPushedAt;
@@ -266,11 +256,8 @@ abstract class _SyncState implements SyncState {
   String? get tombstoneWatermark;
   @override
   DateTime? get backoffUntil;
-
-  /// Create a copy of SyncState
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SyncStateImplCopyWith<_$SyncStateImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

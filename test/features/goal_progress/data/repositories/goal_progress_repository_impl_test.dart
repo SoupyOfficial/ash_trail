@@ -3,7 +3,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:ash_trail/features/goal_progress/data/repositories/goal_progress_repository_impl.dart';
 import 'package:ash_trail/features/goal_progress/data/datasources/goal_progress_local_datasource.dart';
 import 'package:ash_trail/features/goal_progress/data/datasources/goal_progress_remote_datasource.dart';

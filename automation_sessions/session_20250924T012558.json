@@ -1,0 +1,37 @@
+{
+  "id": "20250924T012558",
+  "started_at": "2025-09-24T01:25:58.119128+00:00",
+  "command": "dev-cycle",
+  "coverage_before": 80.07751937984496,
+  "coverage_after": 80.07751937984496,
+  "coverage_delta": 0.0,
+  "tests_passed": true,
+  "uploaded": false,
+  "notes": [],
+  "branch": "main",
+  "commit": "60070117b8f35d4128f630ef0e51a54a9757af7f",
+  "changed_files": [
+    {
+      "path": "lib/core/routing/app_router.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/capture_hit/presentation/providers/record_button_state_provider.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "lib/features/capture_hit/presentation/providers/smoke_log_providers.dart",
+      "status": "M",
+      "type": "modified"
+    },
+    {
+      "path": "test/features/goal_progress/data/repositories/goal_progress_repository_impl_test.dart",
+      "status": "M",
+      "type": "modified"
+    }
+  ],
+  "file_coverage_deltas": null,
+  "duration_ms": 430
+}

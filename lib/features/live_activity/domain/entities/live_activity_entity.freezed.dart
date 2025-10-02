@@ -22,9 +22,7 @@ mixin _$LiveActivityEntity {
   LiveActivityStatus get status => throw _privateConstructorUsedError;
   String? get cancelReason => throw _privateConstructorUsedError;
 
-  /// Create a copy of LiveActivityEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LiveActivityEntityCopyWith<LiveActivityEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -53,8 +51,6 @@ class _$LiveActivityEntityCopyWithImpl<$Res, $Val extends LiveActivityEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LiveActivityEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -113,8 +109,6 @@ class __$$LiveActivityEntityImplCopyWithImpl<$Res>
       $Res Function(_$LiveActivityEntityImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LiveActivityEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -194,9 +188,7 @@ class _$LiveActivityEntityImpl extends _LiveActivityEntity {
   int get hashCode =>
       Object.hash(runtimeType, id, startedAt, endedAt, status, cancelReason);
 
-  /// Create a copy of LiveActivityEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LiveActivityEntityImplCopyWith<_$LiveActivityEntityImpl> get copyWith =>
@@ -223,11 +215,8 @@ abstract class _LiveActivityEntity extends LiveActivityEntity {
   LiveActivityStatus get status;
   @override
   String? get cancelReason;
-
-  /// Create a copy of LiveActivityEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LiveActivityEntityImplCopyWith<_$LiveActivityEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

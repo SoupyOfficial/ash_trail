@@ -1,18 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 
 import 'package:ash_trail/features/charts_time_series/presentation/screens/charts_time_series_screen.dart';
+import 'package:ash_trail/features/charts_time_series/presentation/providers/charts_time_series_providers.dart';
+import 'package:ash_trail/features/charts_time_series/domain/entities/time_series_chart.dart';
+import 'package:ash_trail/features/charts_time_series/domain/entities/chart_data_point.dart';
+import 'package:ash_trail/core/failures/app_failure.dart';
 
 const testAccountId = 'test-account-id';
+
+// Mock data for tests
+final mockTimeSeriesChart = TimeSeriesChart(
+  id: 'test-chart-id',
+  accountId: testAccountId,
+  title: 'Test Chart',
+  startDate: DateTime.now().subtract(const Duration(days: 7)),
+  endDate: DateTime.now(),
+  aggregation: ChartAggregation.daily,
+  metric: ChartMetric.count,
+  smoothing: ChartSmoothing.none,
+  smoothingWindow: 1,
+  createdAt: DateTime.now(),
+  dataPoints: [
+    ChartDataPoint(
+      timestamp: DateTime.now().subtract(const Duration(days: 1)),
+      value: 5.0,
+      count: 5,
+      totalDurationMs: 15000,
+      averageMoodScore: 7.5,
+      averagePhysicalScore: 8.0,
+    ),
+    ChartDataPoint(
+      timestamp: DateTime.now(),
+      value: 3.0,
+      count: 3,
+      totalDurationMs: 9000,
+      averageMoodScore: 6.5,
+      averagePhysicalScore: 7.0,
+    ),
+  ],
+);
 
 void main() {
   group('ChartsTimeSeriesScreen Widget Tests', () {
     testWidgets('renders without crashing', (WidgetTester tester) async {
-      // Build the widget with provider scope
+      // Build the widget with provider scope and mocked providers
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            // Mock the chart data provider to return immediately
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: Scaffold(
               body: ChartsTimeSeriesScreen(accountId: testAccountId),
             ),
@@ -27,7 +73,15 @@ void main() {
     testWidgets('displays app bar with title', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -41,14 +95,23 @@ void main() {
     testWidgets('has proper widget structure', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
       );
 
-      // Allow any async operations to settle
-      await tester.pumpAndSettle();
+      // Use pump with timeout to avoid infinite wait
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Verify basic structure exists
       expect(find.byType(ChartsTimeSeriesScreen), findsOneWidget);
@@ -59,13 +122,22 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Look for any tappable elements and test them
       final iconButtons = find.byType(IconButton);
@@ -83,7 +155,15 @@ void main() {
       // Build widget
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -96,7 +176,15 @@ void main() {
       // Rebuild widget
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -110,7 +198,15 @@ void main() {
     testWidgets('displays legend toggle button', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -127,6 +223,14 @@ void main() {
     testWidgets('screen can be navigated to', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [
+            chartDataProvider('another-account').overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider('another-account').overrideWith((ref) async {
+              return true;
+            }),
+          ],
           child: MaterialApp(
             home: Scaffold(
               body: Center(
@@ -135,12 +239,12 @@ void main() {
                     Navigator.of(tester.element(find.byType(ElevatedButton)))
                         .push(
                       MaterialPageRoute(
-                        builder: (context) =>
-                            ChartsTimeSeriesScreen(accountId: testAccountId),
+                        builder: (context) => const ChartsTimeSeriesScreen(
+                            accountId: 'another-account'),
                       ),
                     );
                   },
-                  child: Text('Navigate to Charts'),
+                  child: const Text('Navigate to Charts'),
                 ),
               ),
             ),
@@ -150,19 +254,29 @@ void main() {
 
       // Tap the button to navigate
       await tester.tap(find.byType(ElevatedButton));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Verify navigation succeeded
       expect(find.byType(ChartsTimeSeriesScreen), findsOneWidget);
     });
 
     testWidgets('screen handles provider updates', (WidgetTester tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          chartDataProvider(testAccountId).overrideWith((ref) async {
+            return Right(mockTimeSeriesChart);
+          }),
+          hasChartDataProvider(testAccountId).overrideWith((ref) async {
+            return true;
+          }),
+        ],
+      );
 
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -179,7 +293,16 @@ void main() {
       // Test with different account ID
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider('another-account').overrideWith((ref) async {
+              return Right(
+                  mockTimeSeriesChart.copyWith(accountId: 'another-account'));
+            }),
+            hasChartDataProvider('another-account').overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: 'another-account'),
           ),
         ),
@@ -193,7 +316,15 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -203,8 +334,8 @@ void main() {
       await tester.pump();
       expect(find.byType(ChartsTimeSeriesScreen), findsOneWidget);
 
-      // Allow providers to settle
-      await tester.pumpAndSettle();
+      // Allow providers to settle with timeout
+      await tester.pump(const Duration(milliseconds: 100));
       expect(find.byType(ChartsTimeSeriesScreen), findsOneWidget);
     });
   });
@@ -213,13 +344,22 @@ void main() {
     testWidgets('contains expected child widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Should have a Column for layout
       expect(find.byType(Column), findsAtLeastNWidgets(1));
@@ -234,7 +374,15 @@ void main() {
     testWidgets('respects account ID parameter', (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart);
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return true;
+            }),
+          ],
+          child: const MaterialApp(
             home: ChartsTimeSeriesScreen(accountId: testAccountId),
           ),
         ),
@@ -247,6 +395,31 @@ void main() {
         find.byType(ChartsTimeSeriesScreen),
       );
       expect(chartScreen.accountId, equals(testAccountId));
+    });
+
+    testWidgets('displays empty state when no data',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            chartDataProvider(testAccountId).overrideWith((ref) async {
+              return Right(mockTimeSeriesChart.copyWith(dataPoints: []));
+            }),
+            hasChartDataProvider(testAccountId).overrideWith((ref) async {
+              return false;
+            }),
+          ],
+          child: const MaterialApp(
+            home: ChartsTimeSeriesScreen(accountId: testAccountId),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Should show empty state
+      expect(find.text('No data available'), findsOneWidget);
     });
   });
 }

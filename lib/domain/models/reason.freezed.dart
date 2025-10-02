@@ -29,12 +29,8 @@ mixin _$Reason {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Reason to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Reason
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $ReasonCopyWith<Reason> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -63,8 +59,6 @@ class _$ReasonCopyWithImpl<$Res, $Val extends Reason>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Reason
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -134,8 +128,6 @@ class __$$ReasonImplCopyWithImpl<$Res>
       _$ReasonImpl _value, $Res Function(_$ReasonImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Reason
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -234,14 +226,12 @@ class _$ReasonImpl implements _Reason {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, name, enabled,
       orderIndex, createdAt, updatedAt);
 
-  /// Create a copy of Reason
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ReasonImplCopyWith<_$ReasonImpl> get copyWith =>
@@ -270,8 +260,8 @@ abstract class _Reason implements Reason {
   @override
   String get id;
   @override
-  String? get accountId; // TODO: FK to Account
-  @override
+  String? get accountId;
+  @override // TODO: FK to Account
   String get name;
   @override
   bool get enabled;
@@ -281,11 +271,8 @@ abstract class _Reason implements Reason {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of Reason
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ReasonImplCopyWith<_$ReasonImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

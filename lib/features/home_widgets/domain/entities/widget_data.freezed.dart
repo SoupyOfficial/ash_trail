@@ -28,9 +28,7 @@ mixin _$WidgetData {
   bool? get showStreak => throw _privateConstructorUsedError;
   bool? get showLastSync => throw _privateConstructorUsedError;
 
-  /// Create a copy of WidgetData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $WidgetDataCopyWith<WidgetData> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -65,8 +63,6 @@ class _$WidgetDataCopyWithImpl<$Res, $Val extends WidgetData>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of WidgetData
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -161,8 +157,6 @@ class __$$WidgetDataImplCopyWithImpl<$Res>
       _$WidgetDataImpl _value, $Res Function(_$WidgetDataImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of WidgetData
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -314,9 +308,7 @@ class _$WidgetDataImpl extends _WidgetData {
       showStreak,
       showLastSync);
 
-  /// Create a copy of WidgetData
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$WidgetDataImplCopyWith<_$WidgetDataImpl> get copyWith =>
@@ -360,11 +352,8 @@ abstract class _WidgetData extends WidgetData {
   bool? get showStreak;
   @override
   bool? get showLastSync;
-
-  /// Create a copy of WidgetData
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$WidgetDataImplCopyWith<_$WidgetDataImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

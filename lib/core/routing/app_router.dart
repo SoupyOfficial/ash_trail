@@ -6,7 +6,6 @@
 // 4. Support deep link initial location via a provider (see deepLinkInitialLocationProvider).
 // NOTE: Keep this file lightweight; feature‑specific presentation (screens) reside in feature folders.
 
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,82 +15,12 @@ import '../../features/detail_view/presentation/screens/log_detail_screen.dart';
 import '../../features/app_shell/presentation/app_shell.dart';
 import '../../features/logging/presentation/logs_screen.dart';
 import '../../features/table_browse_edit/presentation/screens/logs_table_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
 import '../telemetry/telemetry_service.dart';
 
-import '../../features/loading_skeletons/presentation/widgets/widgets.dart';
-
 // -----------------------------
-// Screens (temporary minimal home; real feature screen will replace later)
+// Screens
 // -----------------------------
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  bool _isLoading = true;
-  Timer? _loadingTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    // Simulate data loading
-    _loadingTimer = Timer(const Duration(milliseconds: 800), () {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _loadingTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        centerTitle: true,
-      ),
-      body: LoadingStateHandler(
-        isLoading: _isLoading,
-        loadingWidget: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 200,
-                child: SkeletonChart(height: 200),
-              ),
-              SizedBox(height: 24),
-              SizedBox(
-                height: 200,
-                child: SkeletonList(itemCount: 3),
-              ),
-            ],
-          ),
-        ),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Welcome to AshTrail'),
-              SizedBox(height: 16),
-              Text('Your smoking insights dashboard'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

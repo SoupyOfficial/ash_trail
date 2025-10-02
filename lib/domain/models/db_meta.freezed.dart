@@ -24,12 +24,8 @@ mixin _$DbMeta {
   int get schemaVersion => throw _privateConstructorUsedError;
   DateTime get migratedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this DbMeta to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of DbMeta
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $DbMetaCopyWith<DbMeta> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -51,8 +47,6 @@ class _$DbMetaCopyWithImpl<$Res, $Val extends DbMeta>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of DbMeta
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -95,8 +89,6 @@ class __$$DbMetaImplCopyWithImpl<$Res>
       _$DbMetaImpl _value, $Res Function(_$DbMetaImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of DbMeta
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -156,13 +148,11 @@ class _$DbMetaImpl implements _DbMeta {
                 other.migratedAt == migratedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, schemaVersion, migratedAt);
 
-  /// Create a copy of DbMeta
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$DbMetaImplCopyWith<_$DbMetaImpl> get copyWith =>
@@ -190,11 +180,8 @@ abstract class _DbMeta implements DbMeta {
   int get schemaVersion;
   @override
   DateTime get migratedAt;
-
-  /// Create a copy of DbMeta
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$DbMetaImplCopyWith<_$DbMetaImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

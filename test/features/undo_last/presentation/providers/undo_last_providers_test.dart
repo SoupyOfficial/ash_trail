@@ -19,14 +19,14 @@ void main() {
 
   // Test data
   const testAccountId = 'test-account-id';
-  final testFailure = AppFailure.unexpected(message: 'Test error');
+  const testFailure = AppFailure.unexpected(message: 'Test error');
 
   setUp(() {
     mockUseCase = MockUndoLastLogUseCase();
 
     container = ProviderContainer(
       overrides: [
-        undoLastLogUseCaseProvider.overrideWithValue(mockUseCase),
+        undoLastLogUseCaseProvider.overrideWith((ref) async => mockUseCase),
       ],
     );
   });
@@ -36,8 +36,8 @@ void main() {
   });
 
   group('undoLastLogUseCaseProvider', () {
-    test('creates use case with smoke log repository', () {
-      final useCase = container.read(undoLastLogUseCaseProvider);
+    test('creates use case with smoke log repository', () async {
+      final useCase = await container.read(undoLastLogUseCaseProvider.future);
       expect(useCase, equals(mockUseCase));
     });
   });
@@ -74,7 +74,7 @@ void main() {
     test('returns false when use case fails', () async {
       // Arrange
       when(() => mockUseCase.canUndo(testAccountId))
-          .thenAnswer((_) async => Left(testFailure));
+          .thenAnswer((_) async => const Left(testFailure));
 
       // Act
       final result =
@@ -140,7 +140,7 @@ void main() {
     test('returns 0 when use case fails', () async {
       // Arrange
       when(() => mockUseCase.getUndoTimeRemaining(testAccountId))
-          .thenAnswer((_) async => Left(testFailure));
+          .thenAnswer((_) async => const Left(testFailure));
 
       // Act
       final result =
@@ -206,7 +206,7 @@ void main() {
     test('executeUndo fails and sets error state', () async {
       // Arrange
       when(() => mockUseCase.call(testAccountId))
-          .thenAnswer((_) async => Left(testFailure));
+          .thenAnswer((_) async => const Left(testFailure));
 
       final notifier =
           container.read(undoLastLogNotifierProvider(testAccountId).notifier);
@@ -244,7 +244,7 @@ void main() {
     test('undoErrorMessage returns error string when error exists', () async {
       // Arrange
       when(() => mockUseCase.call(testAccountId))
-          .thenAnswer((_) async => Left(testFailure));
+          .thenAnswer((_) async => const Left(testFailure));
 
       final notifier =
           container.read(undoLastLogNotifierProvider(testAccountId).notifier);

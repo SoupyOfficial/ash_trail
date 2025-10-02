@@ -21,9 +21,7 @@ mixin _$LogDetailEntity {
   List<Reason> get reasons => throw _privateConstructorUsedError;
   Method? get method => throw _privateConstructorUsedError;
 
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LogDetailEntityCopyWith<LogDetailEntity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -51,8 +49,6 @@ class _$LogDetailEntityCopyWithImpl<$Res, $Val extends LogDetailEntity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -81,8 +77,6 @@ class _$LogDetailEntityCopyWithImpl<$Res, $Val extends LogDetailEntity>
     ) as $Val);
   }
 
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $SmokeLogCopyWith<$Res> get log {
@@ -91,8 +85,6 @@ class _$LogDetailEntityCopyWithImpl<$Res, $Val extends LogDetailEntity>
     });
   }
 
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
   $MethodCopyWith<$Res>? get method {
@@ -131,8 +123,6 @@ class __$$LogDetailEntityImplCopyWithImpl<$Res>
       _$LogDetailEntityImpl _value, $Res Function(_$LogDetailEntityImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -221,9 +211,7 @@ class _$LogDetailEntityImpl extends _LogDetailEntity {
       const DeepCollectionEquality().hash(_reasons),
       method);
 
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LogDetailEntityImplCopyWith<_$LogDetailEntityImpl> get copyWith =>
@@ -247,11 +235,8 @@ abstract class _LogDetailEntity extends LogDetailEntity {
   List<Reason> get reasons;
   @override
   Method? get method;
-
-  /// Create a copy of LogDetailEntity
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LogDetailEntityImplCopyWith<_$LogDetailEntityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

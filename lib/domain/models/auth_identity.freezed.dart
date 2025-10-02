@@ -30,12 +30,8 @@ mixin _$AuthIdentity {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this AuthIdentity to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AuthIdentity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AuthIdentityCopyWith<AuthIdentity> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -66,8 +62,6 @@ class _$AuthIdentityCopyWithImpl<$Res, $Val extends AuthIdentity>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AuthIdentity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -138,8 +132,6 @@ class __$$AuthIdentityImplCopyWithImpl<$Res>
       _$AuthIdentityImpl _value, $Res Function(_$AuthIdentityImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AuthIdentity
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -240,14 +232,12 @@ class _$AuthIdentityImpl implements _AuthIdentity {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, provider,
       providerUid, email, createdAt, updatedAt);
 
-  /// Create a copy of AuthIdentity
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AuthIdentityImplCopyWith<_$AuthIdentityImpl> get copyWith =>
@@ -277,10 +267,10 @@ abstract class _AuthIdentity implements AuthIdentity {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
-  String get provider; // TODO: constrain to enum values
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
+  String get provider;
+  @override // TODO: constrain to enum values
   String get providerUid;
   @override
   String? get email;
@@ -288,11 +278,8 @@ abstract class _AuthIdentity implements AuthIdentity {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of AuthIdentity
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AuthIdentityImplCopyWith<_$AuthIdentityImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

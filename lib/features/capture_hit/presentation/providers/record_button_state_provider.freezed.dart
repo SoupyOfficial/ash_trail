@@ -85,9 +85,6 @@ class _$RecordButtonStateCopyWithImpl<$Res, $Val extends RecordButtonState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
-
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -105,9 +102,6 @@ class __$$RecordButtonIdleStateImplCopyWithImpl<$Res>
   __$$RecordButtonIdleStateImplCopyWithImpl(_$RecordButtonIdleStateImpl _value,
       $Res Function(_$RecordButtonIdleStateImpl) _then)
       : super(_value, _then);
-
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -230,8 +224,6 @@ class __$$RecordButtonRecordingStateImplCopyWithImpl<$Res>
       $Res Function(_$RecordButtonRecordingStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -281,9 +273,7 @@ class _$RecordButtonRecordingStateImpl implements RecordButtonRecordingState {
   @override
   int get hashCode => Object.hash(runtimeType, startTime, currentDurationMs);
 
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$RecordButtonRecordingStateImplCopyWith<_$RecordButtonRecordingStateImpl>
@@ -373,10 +363,7 @@ abstract class RecordButtonRecordingState implements RecordButtonState {
 
   DateTime get startTime;
   int get currentDurationMs;
-
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$RecordButtonRecordingStateImplCopyWith<_$RecordButtonRecordingStateImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
@@ -401,8 +388,6 @@ class __$$RecordButtonCompletedStateImplCopyWithImpl<$Res>
       $Res Function(_$RecordButtonCompletedStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -452,9 +437,7 @@ class _$RecordButtonCompletedStateImpl implements RecordButtonCompletedState {
   @override
   int get hashCode => Object.hash(runtimeType, durationMs, smokeLogId);
 
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$RecordButtonCompletedStateImplCopyWith<_$RecordButtonCompletedStateImpl>
@@ -544,10 +527,7 @@ abstract class RecordButtonCompletedState implements RecordButtonState {
 
   int get durationMs;
   String get smokeLogId;
-
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$RecordButtonCompletedStateImplCopyWith<_$RecordButtonCompletedStateImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
@@ -571,8 +551,6 @@ class __$$RecordButtonErrorStateImplCopyWithImpl<$Res>
       $Res Function(_$RecordButtonErrorStateImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -611,9 +589,7 @@ class _$RecordButtonErrorStateImpl implements RecordButtonErrorState {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$RecordButtonErrorStateImplCopyWith<_$RecordButtonErrorStateImpl>
@@ -701,10 +677,7 @@ abstract class RecordButtonErrorState implements RecordButtonState {
       _$RecordButtonErrorStateImpl;
 
   String get message;
-
-  /// Create a copy of RecordButtonState
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$RecordButtonErrorStateImplCopyWith<_$RecordButtonErrorStateImpl>
       get copyWith => throw _privateConstructorUsedError;
 }

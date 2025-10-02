@@ -19,9 +19,7 @@ mixin _$LogSort {
   LogSortField get field => throw _privateConstructorUsedError;
   LogSortOrder get order => throw _privateConstructorUsedError;
 
-  /// Create a copy of LogSort
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $LogSortCopyWith<LogSort> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -43,8 +41,6 @@ class _$LogSortCopyWithImpl<$Res, $Val extends LogSort>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LogSort
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -82,8 +78,6 @@ class __$$LogSortImplCopyWithImpl<$Res>
       _$LogSortImpl _value, $Res Function(_$LogSortImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LogSort
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -135,9 +129,7 @@ class _$LogSortImpl extends _LogSort {
   @override
   int get hashCode => Object.hash(runtimeType, field, order);
 
-  /// Create a copy of LogSort
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$LogSortImplCopyWith<_$LogSortImpl> get copyWith =>
@@ -153,11 +145,8 @@ abstract class _LogSort extends LogSort {
   LogSortField get field;
   @override
   LogSortOrder get order;
-
-  /// Create a copy of LogSort
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$LogSortImplCopyWith<_$LogSortImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

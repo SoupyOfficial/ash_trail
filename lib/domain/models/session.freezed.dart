@@ -32,12 +32,8 @@ mixin _$Session {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Session to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of Session
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $SessionCopyWith<Session> get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -67,8 +63,6 @@ class _$SessionCopyWithImpl<$Res, $Val extends Session>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Session
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -144,8 +138,6 @@ class __$$SessionImplCopyWithImpl<$Res>
       _$SessionImpl _value, $Res Function(_$SessionImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Session
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -257,14 +249,12 @@ class _$SessionImpl implements _Session {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, accountId, deviceId, status,
       tokenHash, expiresAt, createdAt, updatedAt);
 
-  /// Create a copy of Session
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$SessionImplCopyWith<_$SessionImpl> get copyWith =>
@@ -294,12 +284,12 @@ abstract class _Session implements Session {
   @override
   String get id;
   @override
-  String get accountId; // TODO: FK to Account
-  @override
-  String? get deviceId; // TODO: FK to Device
-  @override
-  String get status; // TODO: constrain to enum values
-  @override
+  String get accountId;
+  @override // TODO: FK to Account
+  String? get deviceId;
+  @override // TODO: FK to Device
+  String get status;
+  @override // TODO: constrain to enum values
   String? get tokenHash;
   @override
   DateTime? get expiresAt;
@@ -307,11 +297,8 @@ abstract class _Session implements Session {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
-
-  /// Create a copy of Session
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$SessionImplCopyWith<_$SessionImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

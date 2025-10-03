@@ -17,13 +17,41 @@ class MockContentDataSource extends Mock implements ContentDataSource {}
 // Fallback values for mocktail
 class FakeSpotlightItemModel extends Fake implements SpotlightItemModel {}
 
+class TestableSpotlightIndexingRepository
+    extends SpotlightIndexingRepositoryImpl {
+  TestableSpotlightIndexingRepository({
+    required super.contentDataSource,
+    required super.spotlightService,
+  });
+
+  Either<AppFailure, List<SpotlightItemEntity>>?
+      getAllIndexedItemsResultOverride;
+
+  bool throwOnGetAllIndexedItems = false;
+
+  @override
+  Future<Either<AppFailure, List<SpotlightItemEntity>>>
+      getAllIndexedItems() async {
+    if (throwOnGetAllIndexedItems) {
+      throw Exception('getAllIndexedItems failure');
+    }
+
+    final overrideResult = getAllIndexedItemsResultOverride;
+    if (overrideResult != null) {
+      return overrideResult;
+    }
+
+    return super.getAllIndexedItems();
+  }
+}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(FakeSpotlightItemModel());
   });
 
   group('SpotlightIndexingRepositoryImpl', () {
-    late SpotlightIndexingRepositoryImpl repository;
+    late TestableSpotlightIndexingRepository repository;
     late MockSpotlightService mockSpotlightService;
     late MockContentDataSource mockContentDataSource;
     late SpotlightItemEntity testEntity;
@@ -31,10 +59,14 @@ void main() {
     setUp(() {
       mockSpotlightService = MockSpotlightService();
       mockContentDataSource = MockContentDataSource();
-      repository = SpotlightIndexingRepositoryImpl(
+      repository = TestableSpotlightIndexingRepository(
         contentDataSource: mockContentDataSource,
         spotlightService: mockSpotlightService,
       );
+
+      repository
+        ..getAllIndexedItemsResultOverride = null
+        ..throwOnGetAllIndexedItems = false;
 
       testEntity = SpotlightItemEntity(
         id: 'test_id',
@@ -175,6 +207,143 @@ void main() {
       });
     });
 
+    group('deindexAccountItems', () {
+      test('should no-op when account has no indexed items', () async {
+        // Arrange
+        repository.getAllIndexedItemsResultOverride = right([
+          testEntity.copyWith(accountId: 'other_account'),
+        ]);
+
+        // Act
+        final result = await repository.deindexAccountItems('account_123');
+
+        // Assert
+        expect(result, isA<Right>());
+        verifyNever(() => mockSpotlightService.deindexItems(any()));
+      });
+
+      test('should forward item ids for matching account', () async {
+        // Arrange
+        repository.getAllIndexedItemsResultOverride = right([
+          testEntity,
+          testEntity.copyWith(id: 'another', accountId: 'account_123'),
+          testEntity.copyWith(
+              id: 'different_account', accountId: 'account_999'),
+        ]);
+
+        when(() => mockSpotlightService.deindexItems(any()))
+            .thenAnswer((_) async => const Right(null));
+
+        // Act
+        final result = await repository.deindexAccountItems('account_123');
+
+        // Assert
+        expect(result, isA<Right>());
+        verify(() => mockSpotlightService.deindexItems(['test_id', 'another']))
+            .called(1);
+      });
+
+      test('should propagate failure from getAllIndexedItems', () async {
+        // Arrange
+        repository.getAllIndexedItemsResultOverride =
+            const Left(AppFailure.cache(message: 'cache miss'));
+
+        // Act
+        final result = await repository.deindexAccountItems('account_123');
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => failure.maybeWhen(
+            cache: (message) => expect(message, 'cache miss'),
+            orElse: () => fail('Expected cache failure'),
+          ),
+          (_) => fail('Expected failure to propagate'),
+        );
+        verifyNever(() => mockSpotlightService.deindexItems(any()));
+      });
+
+      test('should wrap unexpected exceptions with AppFailure', () async {
+        // Arrange
+        repository.throwOnGetAllIndexedItems = true;
+
+        // Act
+        final result = await repository.deindexAccountItems('account_123');
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => failure.maybeWhen(
+            unexpected: (message, _, __) =>
+                expect(message, contains('Failed to deindex account items')),
+            orElse: () => fail('Expected unexpected failure'),
+          ),
+          (_) => fail('Expected failure'),
+        );
+      });
+    });
+
+    group('getIndexedItemsByType & isItemIndexed', () {
+      setUp(() {
+        repository.getAllIndexedItemsResultOverride = right([
+          testEntity,
+          testEntity.copyWith(
+            id: 'chart_item',
+            type: SpotlightItemType.chartView,
+          ),
+        ]);
+      });
+
+      test('should filter items by type', () async {
+        // Act
+        final result = await repository.getIndexedItemsByType(
+          SpotlightItemType.chartView,
+        );
+
+        // Assert
+        expect(result.isRight(), true);
+        result.fold(
+          (_) => fail('Expected success'),
+          (items) {
+            expect(items.length, 1);
+            expect(items.first.type, SpotlightItemType.chartView);
+          },
+        );
+      });
+
+      test('should report item present in index', () async {
+        final result = await repository.isItemIndexed('test_id');
+
+        expect(result.isRight(), true);
+        result.fold(
+          (_) => fail('Expected success'),
+          (isIndexed) => expect(isIndexed, isTrue),
+        );
+      });
+
+      test('should report item missing from index', () async {
+        final result = await repository.isItemIndexed('missing');
+
+        expect(result.isRight(), true);
+        result.fold(
+          (_) => fail('Expected success'),
+          (isIndexed) => expect(isIndexed, isFalse),
+        );
+      });
+    });
+
+    group('getStaleItems', () {
+      test('should return empty list placeholder', () async {
+        final result = await repository.getStaleItems();
+
+        expect(result.isRight(), true);
+        result.fold(
+          (_) => fail('Expected success'),
+          (items) => expect(items, isEmpty),
+        );
+      });
+    });
+
     group('clearAllItems', () {
       test('should return success when service succeeds', () async {
         // Arrange
@@ -277,6 +446,66 @@ void main() {
                 mockContentDataSource.getAllIndexableContent('current_account'))
             .called(1);
         verifyNever(() => mockSpotlightService.indexItems(any()));
+      });
+
+      test('should propagate content data source failure', () async {
+        // Arrange
+        when(() => mockSpotlightService.isSpotlightAvailable())
+            .thenAnswer((_) async => true);
+        when(() => mockContentDataSource.getAllIndexableContent(any()))
+            .thenAnswer((_) async =>
+                const Left(AppFailure.network(message: 'content failure')));
+
+        // Act
+        final result = await repository.syncIndex();
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => failure.maybeWhen(
+            network: (message, _) => expect(message, 'content failure'),
+            orElse: () => fail('Expected network failure'),
+          ),
+          (_) => fail('Expected failure'),
+        );
+        verifyNever(() => mockSpotlightService.indexItems(any()));
+      });
+
+      test('should propagate service failure when indexing items', () async {
+        // Arrange
+        final contentModels = [
+          SpotlightItemModel(
+            id: 'content_1',
+            type: 'tag',
+            title: 'Test Content',
+            deepLink: 'ashtrail://test',
+            accountId: 'current_account',
+            contentId: 'content_123',
+            lastUpdated: DateTime(2023, 1, 1),
+            isActive: true,
+          ),
+        ];
+
+        when(() => mockSpotlightService.isSpotlightAvailable())
+            .thenAnswer((_) async => true);
+        when(() => mockContentDataSource.getAllIndexableContent(any()))
+            .thenAnswer((_) async => Right(contentModels));
+        when(() => mockSpotlightService.indexItems(any())).thenAnswer(
+            (_) async =>
+                const Left(AppFailure.network(message: 'index failure')));
+
+        // Act
+        final result = await repository.syncIndex();
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => failure.maybeWhen(
+            network: (message, _) => expect(message, 'index failure'),
+            orElse: () => fail('Expected network failure'),
+          ),
+          (_) => fail('Expected failure'),
+        );
       });
     });
   });

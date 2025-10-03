@@ -1,6 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:ash_trail/core/failures/app_failure.dart';
 import 'package:ash_trail/features/spotlight_indexing/data/datasources/content_data_source.dart';
+import 'package:ash_trail/features/spotlight_indexing/data/models/spotlight_item_model.dart';
+import 'package:fpdart/fpdart.dart';
+
+class _ThrowingChartViewContentDataSource extends ContentDataSource {
+  const _ThrowingChartViewContentDataSource();
+
+  @override
+  Future<Either<AppFailure, List<SpotlightItemModel>>> getIndexableChartViews(
+    String accountId,
+  ) async {
+    throw Exception('chart view failure');
+  }
+}
 
 void main() {
   group('ContentDataSource', () {
@@ -141,6 +155,23 @@ void main() {
               expect(item.accountId, 'account123');
             }
           },
+        );
+      });
+
+      test('should surface failure when chart views fetch throws', () async {
+        const throwingDataSource = _ThrowingChartViewContentDataSource();
+
+        final result =
+            await throwingDataSource.getAllIndexableContent('account123');
+
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => failure.maybeWhen(
+            unexpected: (message, _, __) => expect(
+                message, contains('Failed to get all indexable content')),
+            orElse: () => fail('Expected unexpected failure'),
+          ),
+          (_) => fail('Expected failure'),
         );
       });
 

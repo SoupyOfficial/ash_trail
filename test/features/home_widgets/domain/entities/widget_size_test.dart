@@ -95,7 +95,7 @@ void main() {
 
     group('Enum Values Coverage', () {
       test('should have all expected enum values', () {
-        final allSizes = WidgetSize.values;
+        const allSizes = WidgetSize.values;
         expect(allSizes, hasLength(4));
         expect(allSizes, contains(WidgetSize.small));
         expect(allSizes, contains(WidgetSize.medium));
@@ -104,7 +104,7 @@ void main() {
       });
 
       test('should maintain consistent ordering', () {
-        final allSizes = WidgetSize.values;
+        const allSizes = WidgetSize.values;
         expect(allSizes[0], equals(WidgetSize.small));
         expect(allSizes[1], equals(WidgetSize.medium));
         expect(allSizes[2], equals(WidgetSize.large));

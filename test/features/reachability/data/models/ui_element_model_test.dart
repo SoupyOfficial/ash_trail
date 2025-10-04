@@ -1,10 +1,10 @@
 // Unit tests for UiElementModel
 // Tests JSON serialization, deserialization, and entity conversion
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 import 'package:ash_trail/features/reachability/data/models/ui_element_model.dart';
 import 'package:ash_trail/features/reachability/domain/entities/ui_element.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('UiElementModel', () {
@@ -15,10 +15,7 @@ void main() {
       model = const UiElementModel(
         id: 'button-test',
         label: 'Test Button',
-        left: 50.0,
-        top: 100.0,
-        width: 120.0,
-        height: 48.0,
+        bounds: Rect.fromLTWH(50.0, 100.0, 120.0, 48.0),
         type: 'button',
         isInteractive: true,
         semanticLabel: 'Submit form button',
@@ -28,10 +25,12 @@ void main() {
       json = {
         'id': 'button-test',
         'label': 'Test Button',
-        'left': 50.0,
-        'top': 100.0,
-        'width': 120.0,
-        'height': 48.0,
+        'bounds': {
+          'left': 50.0,
+          'top': 100.0,
+          'width': 120.0,
+          'height': 48.0,
+        },
         'type': 'button',
         'isInteractive': true,
         'semanticLabel': 'Submit form button',
@@ -47,14 +46,16 @@ void main() {
         // assert
         expect(result['id'], equals('button-test'));
         expect(result['label'], equals('Test Button'));
-        expect(result['left'], equals(50.0));
-        expect(result['top'], equals(100.0));
-        expect(result['width'], equals(120.0));
-        expect(result['height'], equals(48.0));
         expect(result['type'], equals('button'));
-        expect(result['isInteractive'], equals(true));
+        expect(result['isInteractive'], isTrue);
         expect(result['semanticLabel'], equals('Submit form button'));
-        expect(result['hasAlternativeAccess'], equals(false));
+        expect(result['hasAlternativeAccess'], isFalse);
+
+        final bounds = result['bounds'] as Map<String, dynamic>;
+        expect(bounds['left'], equals(50.0));
+        expect(bounds['top'], equals(100.0));
+        expect(bounds['width'], equals(120.0));
+        expect(bounds['height'], equals(48.0));
       });
 
       test('should serialize with null optional fields', () {
@@ -62,10 +63,7 @@ void main() {
         const modelWithNulls = UiElementModel(
           id: 'simple-button',
           label: 'Simple',
-          left: 0.0,
-          top: 0.0,
-          width: 100.0,
-          height: 40.0,
+          bounds: Rect.fromLTWH(0.0, 0.0, 100.0, 40.0),
           type: 'button',
           isInteractive: true,
         );
@@ -77,6 +75,10 @@ void main() {
         expect(result['semanticLabel'], isNull);
         expect(result['hasAlternativeAccess'], isNull);
         expect(result['id'], equals('simple-button'));
+
+        final bounds = result['bounds'] as Map<String, dynamic>;
+        expect(bounds['width'], equals(100.0));
+        expect(bounds['height'], equals(40.0));
       });
 
       test('should serialize boolean fields correctly', () {
@@ -84,10 +86,7 @@ void main() {
         const interactiveElement = UiElementModel(
           id: 'interactive',
           label: 'Button',
-          left: 0.0,
-          top: 0.0,
-          width: 100.0,
-          height: 40.0,
+          bounds: Rect.fromLTWH(0.0, 0.0, 100.0, 40.0),
           type: 'button',
           isInteractive: true,
           hasAlternativeAccess: true,
@@ -96,10 +95,7 @@ void main() {
         const nonInteractiveElement = UiElementModel(
           id: 'text',
           label: 'Text',
-          left: 0.0,
-          top: 0.0,
-          width: 100.0,
-          height: 20.0,
+          bounds: Rect.fromLTWH(0.0, 0.0, 100.0, 20.0),
           type: 'text',
           isInteractive: false,
           hasAlternativeAccess: false,
@@ -125,14 +121,12 @@ void main() {
         // assert
         expect(result.id, equals('button-test'));
         expect(result.label, equals('Test Button'));
-        expect(result.left, equals(50.0));
-        expect(result.top, equals(100.0));
-        expect(result.width, equals(120.0));
-        expect(result.height, equals(48.0));
+        expect(result.bounds,
+            equals(const Rect.fromLTWH(50.0, 100.0, 120.0, 48.0)));
         expect(result.type, equals('button'));
-        expect(result.isInteractive, equals(true));
+        expect(result.isInteractive, isTrue);
         expect(result.semanticLabel, equals('Submit form button'));
-        expect(result.hasAlternativeAccess, equals(false));
+        expect(result.hasAlternativeAccess, isFalse);
       });
 
       test('should handle null optional fields in JSON', () {
@@ -140,10 +134,12 @@ void main() {
         final jsonWithNulls = {
           'id': 'minimal-element',
           'label': 'Minimal',
-          'left': 10.0,
-          'top': 20.0,
-          'width': 80.0,
-          'height': 30.0,
+          'bounds': {
+            'left': 10.0,
+            'top': 20.0,
+            'width': 80.0,
+            'height': 30.0,
+          },
           'type': 'text',
           'isInteractive': false,
           'semanticLabel': null,
@@ -165,10 +161,12 @@ void main() {
         final jsonWithInts = {
           'id': 'int-coords',
           'label': 'Integer Coordinates',
-          'left': 100,
-          'top': 200,
-          'width': 150,
-          'height': 50,
+          'bounds': {
+            'left': 100,
+            'top': 200,
+            'width': 150,
+            'height': 50,
+          },
           'type': 'button',
           'isInteractive': true,
         };
@@ -177,10 +175,10 @@ void main() {
         final result = UiElementModel.fromJson(jsonWithInts);
 
         // assert
-        expect(result.left, equals(100.0));
-        expect(result.top, equals(200.0));
-        expect(result.width, equals(150.0));
-        expect(result.height, equals(50.0));
+        expect(result.bounds.left, equals(100.0));
+        expect(result.bounds.top, equals(200.0));
+        expect(result.bounds.width, equals(150.0));
+        expect(result.bounds.height, equals(50.0));
       });
     });
 
@@ -192,14 +190,12 @@ void main() {
         // assert
         expect(entity.id, equals('button-test'));
         expect(entity.label, equals('Test Button'));
-        expect(entity.bounds.left, equals(50.0));
-        expect(entity.bounds.top, equals(100.0));
-        expect(entity.bounds.width, equals(120.0));
-        expect(entity.bounds.height, equals(48.0));
+        expect(entity.bounds,
+            equals(const Rect.fromLTWH(50.0, 100.0, 120.0, 48.0)));
         expect(entity.type, equals(UiElementType.button));
-        expect(entity.isInteractive, equals(true));
+        expect(entity.isInteractive, isTrue);
         expect(entity.semanticLabel, equals('Submit form button'));
-        expect(entity.hasAlternativeAccess, equals(false));
+        expect(entity.hasAlternativeAccess, isFalse);
       });
 
       test('should handle null fields in entity conversion', () {
@@ -207,10 +203,7 @@ void main() {
         const modelWithNulls = UiElementModel(
           id: 'simple',
           label: 'Simple',
-          left: 0.0,
-          top: 0.0,
-          width: 100.0,
-          height: 40.0,
+          bounds: Rect.fromLTWH(0.0, 0.0, 100.0, 40.0),
           type: 'text',
           isInteractive: false,
         );
@@ -226,10 +219,10 @@ void main() {
 
       test('should create from entity correctly', () {
         // arrange
-        final entity = UiElement(
+        const entity = UiElement(
           id: 'entity-button',
           label: 'From Entity',
-          bounds: const Rect.fromLTWH(25.0, 75.0, 100.0, 44.0),
+          bounds: Rect.fromLTWH(25.0, 75.0, 100.0, 44.0),
           type: UiElementType.textField,
           isInteractive: true,
           semanticLabel: 'Input field',
@@ -242,14 +235,12 @@ void main() {
         // assert
         expect(result.id, equals('entity-button'));
         expect(result.label, equals('From Entity'));
-        expect(result.left, equals(25.0));
-        expect(result.top, equals(75.0));
-        expect(result.width, equals(100.0));
-        expect(result.height, equals(44.0));
+        expect(result.bounds,
+            equals(const Rect.fromLTWH(25.0, 75.0, 100.0, 44.0)));
         expect(result.type, equals('text_field'));
-        expect(result.isInteractive, equals(true));
+        expect(result.isInteractive, isTrue);
         expect(result.semanticLabel, equals('Input field'));
-        expect(result.hasAlternativeAccess, equals(true));
+        expect(result.hasAlternativeAccess, isTrue);
       });
     });
 
@@ -267,14 +258,14 @@ void main() {
         // act
         final updated = model.copyWith(
           label: 'Updated Button',
-          width: 140.0,
+          bounds: const Rect.fromLTWH(50.0, 100.0, 140.0, 48.0),
         );
 
         // assert
         expect(updated.label, equals('Updated Button'));
-        expect(updated.width, equals(140.0));
-        expect(updated.id, equals(model.id)); // unchanged
-        expect(updated.height, equals(model.height)); // unchanged
+        expect(updated.bounds.width, equals(140.0));
+        expect(updated.id, equals(model.id));
+        expect(updated.bounds.top, equals(model.bounds.top));
       });
 
       test('should support copyWith with null values', () {
@@ -287,23 +278,20 @@ void main() {
         // assert
         expect(updated.semanticLabel, isNull);
         expect(updated.hasAlternativeAccess, isNull);
-        expect(updated.id, equals(model.id)); // unchanged
+        expect(updated.id, equals(model.id));
       });
     });
 
     group('Round-trip conversion', () {
       test('should maintain data integrity through JSON round-trip', () {
         // act
-        final json = model.toJson();
-        final reconstructed = UiElementModel.fromJson(json);
+        final jsonData = model.toJson();
+        final reconstructed = UiElementModel.fromJson(jsonData);
 
         // assert
         expect(reconstructed.id, equals(model.id));
         expect(reconstructed.label, equals(model.label));
-        expect(reconstructed.left, equals(model.left));
-        expect(reconstructed.top, equals(model.top));
-        expect(reconstructed.width, equals(model.width));
-        expect(reconstructed.height, equals(model.height));
+        expect(reconstructed.bounds, equals(model.bounds));
         expect(reconstructed.type, equals(model.type));
         expect(reconstructed.isInteractive, equals(model.isInteractive));
         expect(reconstructed.semanticLabel, equals(model.semanticLabel));
@@ -319,10 +307,7 @@ void main() {
         // assert
         expect(reconstructed.id, equals(model.id));
         expect(reconstructed.label, equals(model.label));
-        expect(reconstructed.left, equals(model.left));
-        expect(reconstructed.top, equals(model.top));
-        expect(reconstructed.width, equals(model.width));
-        expect(reconstructed.height, equals(model.height));
+        expect(reconstructed.bounds, equals(model.bounds));
         expect(reconstructed.type, equals(model.type));
         expect(reconstructed.isInteractive, equals(model.isInteractive));
       });
@@ -343,10 +328,7 @@ void main() {
           final testModel = UiElementModel(
             id: 'test-$stringType',
             label: 'Test $stringType',
-            left: 0.0,
-            top: 0.0,
-            width: 100.0,
-            height: 40.0,
+            bounds: const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0),
             type: stringType,
             isInteractive: true,
           );
@@ -365,13 +347,10 @@ void main() {
 
       test('should default unknown types correctly', () {
         // arrange
-        final testModel = UiElementModel(
+        const testModel = UiElementModel(
           id: 'unknown-type',
           label: 'Unknown Type',
-          left: 0.0,
-          top: 0.0,
-          width: 100.0,
-          height: 40.0,
+          bounds: Rect.fromLTWH(0.0, 0.0, 100.0, 40.0),
           type: 'invalid-type',
           isInteractive: false,
         );

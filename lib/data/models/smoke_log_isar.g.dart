@@ -15,7 +15,7 @@ extension GetSmokeLogIsarCollection on Isar {
 
 const SmokeLogIsarSchema = CollectionSchema(
   name: r'SmokeLogIsar',
-  id: -1403544242698835062,
+  id: -1403544242698834944,
   properties: {
     r'accountId': PropertySchema(
       id: 0,
@@ -104,9 +104,9 @@ const SmokeLogIsarSchema = CollectionSchema(
   deserializeProp: _smokeLogIsarDeserializeProp,
   idName: r'id',
   indexes: {
-    r'logId': IndexSchema(
-      id: 3089637606214822530,
-      name: r'logId',
+    r'logIdIdx': IndexSchema(
+      id: 3700773556174249472,
+      name: r'logIdIdx',
       unique: false,
       replace: false,
       properties: [
@@ -117,9 +117,9 @@ const SmokeLogIsarSchema = CollectionSchema(
         )
       ],
     ),
-    r'accountId': IndexSchema(
-      id: -1591555361937770434,
-      name: r'accountId',
+    r'accountIdx': IndexSchema(
+      id: -1220630423637780992,
+      name: r'accountIdx',
       unique: false,
       replace: false,
       properties: [
@@ -130,9 +130,9 @@ const SmokeLogIsarSchema = CollectionSchema(
         )
       ],
     ),
-    r'ts': IndexSchema(
-      id: -1208453773318402379,
-      name: r'ts',
+    r'tsIdx': IndexSchema(
+      id: -7009367181788102656,
+      name: r'tsIdx',
       unique: false,
       replace: false,
       properties: [
@@ -143,9 +143,9 @@ const SmokeLogIsarSchema = CollectionSchema(
         )
       ],
     ),
-    r'isDirty': IndexSchema(
-      id: 5701622868881901852,
-      name: r'isDirty',
+    r'dirtyIdx': IndexSchema(
+      id: -1775459499094506496,
+      name: r'dirtyIdx',
       unique: false,
       replace: false,
       properties: [
@@ -156,9 +156,9 @@ const SmokeLogIsarSchema = CollectionSchema(
         )
       ],
     ),
-    r'accountTsIndex_accountId_ts': IndexSchema(
-      id: -7047772158859825311,
-      name: r'accountTsIndex_accountId_ts',
+    r'accountTsIdx': IndexSchema(
+      id: -1407171561156630784,
+      name: r'accountTsIdx',
       unique: false,
       replace: false,
       properties: [
@@ -342,7 +342,7 @@ extension SmokeLogIsarQueryWhereSort
   QueryBuilder<SmokeLogIsar, SmokeLogIsar, QAfterWhere> anyTs() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'ts'),
+        const IndexWhereClause.any(indexName: r'tsIdx'),
       );
     });
   }
@@ -350,7 +350,7 @@ extension SmokeLogIsarQueryWhereSort
   QueryBuilder<SmokeLogIsar, SmokeLogIsar, QAfterWhere> anyIsDirty() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'isDirty'),
+        const IndexWhereClause.any(indexName: r'dirtyIdx'),
       );
     });
   }
@@ -429,7 +429,7 @@ extension SmokeLogIsarQueryWhere
       String logId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'logId',
+        indexName: r'logIdIdx',
         value: [logId],
       ));
     });
@@ -441,13 +441,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'logId',
+              indexName: r'logIdIdx',
               lower: [],
               upper: [logId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'logId',
+              indexName: r'logIdIdx',
               lower: [logId],
               includeLower: false,
               upper: [],
@@ -455,13 +455,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'logId',
+              indexName: r'logIdIdx',
               lower: [logId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'logId',
+              indexName: r'logIdIdx',
               lower: [],
               upper: [logId],
               includeUpper: false,
@@ -474,7 +474,7 @@ extension SmokeLogIsarQueryWhere
       String accountId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'accountId',
+        indexName: r'accountIdx',
         value: [accountId],
       ));
     });
@@ -486,13 +486,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountId',
+              indexName: r'accountIdx',
               lower: [],
               upper: [accountId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountId',
+              indexName: r'accountIdx',
               lower: [accountId],
               includeLower: false,
               upper: [],
@@ -500,13 +500,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountId',
+              indexName: r'accountIdx',
               lower: [accountId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountId',
+              indexName: r'accountIdx',
               lower: [],
               upper: [accountId],
               includeUpper: false,
@@ -519,7 +519,7 @@ extension SmokeLogIsarQueryWhere
       DateTime ts) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'ts',
+        indexName: r'tsIdx',
         value: [ts],
       ));
     });
@@ -531,13 +531,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ts',
+              indexName: r'tsIdx',
               lower: [],
               upper: [ts],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ts',
+              indexName: r'tsIdx',
               lower: [ts],
               includeLower: false,
               upper: [],
@@ -545,13 +545,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ts',
+              indexName: r'tsIdx',
               lower: [ts],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ts',
+              indexName: r'tsIdx',
               lower: [],
               upper: [ts],
               includeUpper: false,
@@ -566,7 +566,7 @@ extension SmokeLogIsarQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'ts',
+        indexName: r'tsIdx',
         lower: [ts],
         includeLower: include,
         upper: [],
@@ -580,7 +580,7 @@ extension SmokeLogIsarQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'ts',
+        indexName: r'tsIdx',
         lower: [],
         upper: [ts],
         includeUpper: include,
@@ -596,7 +596,7 @@ extension SmokeLogIsarQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'ts',
+        indexName: r'tsIdx',
         lower: [lowerTs],
         includeLower: includeLower,
         upper: [upperTs],
@@ -609,7 +609,7 @@ extension SmokeLogIsarQueryWhere
       bool isDirty) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'isDirty',
+        indexName: r'dirtyIdx',
         value: [isDirty],
       ));
     });
@@ -621,13 +621,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'isDirty',
+              indexName: r'dirtyIdx',
               lower: [],
               upper: [isDirty],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'isDirty',
+              indexName: r'dirtyIdx',
               lower: [isDirty],
               includeLower: false,
               upper: [],
@@ -635,13 +635,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'isDirty',
+              indexName: r'dirtyIdx',
               lower: [isDirty],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'isDirty',
+              indexName: r'dirtyIdx',
               lower: [],
               upper: [isDirty],
               includeUpper: false,
@@ -654,7 +654,7 @@ extension SmokeLogIsarQueryWhere
       accountTsIndexEqualToAnyAccountIdTs(String accountTsIndex) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'accountTsIndex_accountId_ts',
+        indexName: r'accountTsIdx',
         value: [accountTsIndex],
       ));
     });
@@ -666,13 +666,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [],
               upper: [accountTsIndex],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex],
               includeLower: false,
               upper: [],
@@ -680,13 +680,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [],
               upper: [accountTsIndex],
               includeUpper: false,
@@ -700,7 +700,7 @@ extension SmokeLogIsarQueryWhere
           String accountTsIndex, String accountId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'accountTsIndex_accountId_ts',
+        indexName: r'accountTsIdx',
         value: [accountTsIndex, accountId],
       ));
     });
@@ -713,13 +713,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex],
               upper: [accountTsIndex, accountId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex, accountId],
               includeLower: false,
               upper: [accountTsIndex],
@@ -727,13 +727,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex, accountId],
               includeLower: false,
               upper: [accountTsIndex],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex],
               upper: [accountTsIndex, accountId],
               includeUpper: false,
@@ -747,7 +747,7 @@ extension SmokeLogIsarQueryWhere
           String accountTsIndex, String accountId, DateTime ts) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'accountTsIndex_accountId_ts',
+        indexName: r'accountTsIdx',
         value: [accountTsIndex, accountId, ts],
       ));
     });
@@ -760,13 +760,13 @@ extension SmokeLogIsarQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex, accountId],
               upper: [accountTsIndex, accountId, ts],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex, accountId, ts],
               includeLower: false,
               upper: [accountTsIndex, accountId],
@@ -774,13 +774,13 @@ extension SmokeLogIsarQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex, accountId, ts],
               includeLower: false,
               upper: [accountTsIndex, accountId],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'accountTsIndex_accountId_ts',
+              indexName: r'accountTsIdx',
               lower: [accountTsIndex, accountId],
               upper: [accountTsIndex, accountId, ts],
               includeUpper: false,
@@ -798,7 +798,7 @@ extension SmokeLogIsarQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'accountTsIndex_accountId_ts',
+        indexName: r'accountTsIdx',
         lower: [accountTsIndex, accountId, ts],
         includeLower: include,
         upper: [accountTsIndex, accountId],
@@ -815,7 +815,7 @@ extension SmokeLogIsarQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'accountTsIndex_accountId_ts',
+        indexName: r'accountTsIdx',
         lower: [accountTsIndex, accountId],
         upper: [accountTsIndex, accountId, ts],
         includeUpper: include,
@@ -834,7 +834,7 @@ extension SmokeLogIsarQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'accountTsIndex_accountId_ts',
+        indexName: r'accountTsIdx',
         lower: [accountTsIndex, accountId, lowerTs],
         includeLower: includeLower,
         upper: [accountTsIndex, accountId, upperTs],

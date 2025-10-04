@@ -315,7 +315,7 @@ class _ChartsTimeSeriesScreenState extends ConsumerState<ChartsTimeSeriesScreen>
                             final point = chart.validDataPoints[index];
                             return LineTooltipItem(
                               '${point.formatTimestamp(chart.aggregation)}\n${_formatTooltipValue(point.value, chart.metric)}',
-                              TextStyle(
+                              const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),

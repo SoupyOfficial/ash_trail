@@ -61,7 +61,7 @@ class _SkeletonShimmerState extends ConsumerState<SkeletonShimmer>
                 Theme.of(context).colorScheme.surfaceContainerHigh,
                 Theme.of(context).colorScheme.surfaceContainerHighest,
               ],
-              stops: [
+              stops: const [
                 0.1,
                 0.3,
                 0.4,

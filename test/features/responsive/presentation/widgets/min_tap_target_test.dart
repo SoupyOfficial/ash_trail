@@ -82,10 +82,10 @@ void main() {
 
     testWidgets('preserves child widget', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: MinTapTarget(
-              child: const Text('Test Content'),
+              child: Text('Test Content'),
             ),
           ),
         ),
@@ -142,11 +142,11 @@ void main() {
 
     testWidgets('handles null onPressed', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: ResponsiveButton(
               onPressed: null,
-              child: const Text('Disabled Button'),
+              child: Text('Disabled Button'),
             ),
           ),
         ),

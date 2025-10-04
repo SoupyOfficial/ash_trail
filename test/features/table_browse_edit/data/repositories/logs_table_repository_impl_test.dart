@@ -50,7 +50,7 @@ void main() {
           () async {
         // Arrange
         const accountId = 'test_account';
-        final filter = LogFilter(minMoodScore: 5);
+        const filter = LogFilter(minMoodScore: 5);
         const sort = LogSort();
         const limit = 25;
         const offset = 10;
@@ -191,7 +191,7 @@ void main() {
           () async {
         // Arrange
         const accountId = 'test_account';
-        final filter = LogFilter(minMoodScore: 5);
+        const filter = LogFilter(minMoodScore: 5);
         const expectedCount = 42;
 
         when(() => mockLocalDataSource.getLogsCount(

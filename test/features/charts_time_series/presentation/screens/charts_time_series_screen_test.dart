@@ -7,7 +7,6 @@ import 'package:ash_trail/features/charts_time_series/presentation/screens/chart
 import 'package:ash_trail/features/charts_time_series/presentation/providers/charts_time_series_providers.dart';
 import 'package:ash_trail/features/charts_time_series/domain/entities/time_series_chart.dart';
 import 'package:ash_trail/features/charts_time_series/domain/entities/chart_data_point.dart';
-import 'package:ash_trail/core/failures/app_failure.dart';
 
 const testAccountId = 'test-account-id';
 

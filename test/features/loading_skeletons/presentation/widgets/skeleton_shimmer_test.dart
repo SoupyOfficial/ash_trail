@@ -13,7 +13,7 @@ void main() {
 
       // Act
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: SkeletonShimmer(
@@ -38,10 +38,10 @@ void main() {
 
       // Act
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: MediaQuery(
-              data: const MediaQueryData(accessibleNavigation: true),
+              data: MediaQueryData(accessibleNavigation: true),
               child: Scaffold(
                 body: SkeletonShimmer(
                   enabled: true,
@@ -96,7 +96,7 @@ void main() {
 
       // Act - Create widget
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: SkeletonShimmer(
@@ -128,7 +128,7 @@ void main() {
 
     testWidgets('should use theme colors for shimmer gradient', (tester) async {
       // Arrange
-      final testChild = SizedBox(width: 100, height: 20);
+      const testChild = SizedBox(width: 100, height: 20);
       final customTheme = ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,

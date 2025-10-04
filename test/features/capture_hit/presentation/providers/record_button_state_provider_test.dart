@@ -68,7 +68,7 @@ class TestCreateSmokeLogNotifier extends smoke.CreateSmokeLogNotifier {
     };
 
     if (_error != null) {
-      state = AsyncError<SmokeLog>(_error!, StackTrace.current);
+      state = AsyncError<SmokeLog?>(_error!, StackTrace.current);
       throw _error!;
     }
 
@@ -77,7 +77,7 @@ class TestCreateSmokeLogNotifier extends smoke.CreateSmokeLogNotifier {
       throw StateError('TestCreateSmokeLogNotifier.nextLog is not configured');
     }
 
-    state = AsyncData<SmokeLog>(result);
+    state = AsyncData<SmokeLog?>(result);
     return result;
   }
 }

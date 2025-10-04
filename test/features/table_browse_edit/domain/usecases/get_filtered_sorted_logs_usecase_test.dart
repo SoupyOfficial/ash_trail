@@ -24,7 +24,7 @@ void main() {
 
   group('GetFilteredSortedLogsUseCase', () {
     const accountId = 'acct-1';
-    final baseFilter = LogFilter();
+    const baseFilter = LogFilter();
 
     final sampleLog = SmokeLog(
       id: 'log1',
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('passes through repository failure', () async {
-      final failure = AppFailure.cache(message: 'db down');
+      const failure = AppFailure.cache(message: 'db down');
       when(() => repository.getFilteredSortedLogs(
             accountId: any(named: 'accountId'),
             filter: any(named: 'filter'),

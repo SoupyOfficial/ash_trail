@@ -49,7 +49,7 @@ void main() {
             return Future.value(dashboardData);
           }),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: GoalProgressScreen(accountId: accountId),
         ),
       );
@@ -66,7 +66,7 @@ void main() {
             return completer.future;
           }),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: GoalProgressScreen(accountId: accountId),
         ),
       ));
@@ -93,7 +93,7 @@ void main() {
             throw const AppFailure.network(message: 'Network error occurred');
           }),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: GoalProgressScreen(accountId: accountId),
         ),
       ));
@@ -193,7 +193,7 @@ void main() {
             throw const AppFailure.cache(message: 'Cache error');
           }),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: GoalProgressScreen(accountId: accountId),
         ),
       ));

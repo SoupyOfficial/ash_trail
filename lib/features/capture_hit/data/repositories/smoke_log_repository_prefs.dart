@@ -2,7 +2,6 @@
 // Provides basic data persistence until Isar database implementation in Phase 2.
 
 import 'dart:convert';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/failures/app_failure.dart';
@@ -154,20 +153,3 @@ class SmokeLogRepositoryPrefs implements SmokeLogRepository {
     }
   }
 }
-
-/// Provider for SharedPreferences instance
-final sharedPreferencesProvider =
-    FutureProvider<SharedPreferences>((ref) async {
-  return SharedPreferences.getInstance();
-});
-
-/// Provider for SmokeLogRepository using SharedPreferences
-final smokeLogRepositoryProvider = Provider<SmokeLogRepository>((ref) {
-  final prefsAsync = ref.watch(sharedPreferencesProvider);
-  return prefsAsync.when(
-    data: (prefs) => SmokeLogRepositoryPrefs(prefs),
-    loading: () => throw AppFailure.cache(message: 'Loading preferences...'),
-    error: (error, stack) => throw AppFailure.cache(
-        message: 'Failed to initialize preferences: $error'),
-  );
-});

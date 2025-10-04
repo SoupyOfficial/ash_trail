@@ -36,7 +36,7 @@ void main() {
 
     group('text theme', () {
       test('should have consistent text styles', () {
-        final textTheme = AppTheme.textTheme;
+        const textTheme = AppTheme.textTheme;
 
         expect(textTheme.displayLarge?.fontSize, equals(57));
         expect(textTheme.displayMedium?.fontSize, equals(45));

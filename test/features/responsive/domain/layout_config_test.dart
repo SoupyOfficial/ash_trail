@@ -7,7 +7,7 @@ void main() {
   test(
       'LayoutConfig paddingFor returns compact on mobile and padding otherwise',
       () {
-    final config = LayoutConfig(
+    const config = LayoutConfig(
       padding: const EdgeInsets.all(20),
       compactPadding: const EdgeInsets.all(10),
       contentMaxWidth: 1000,

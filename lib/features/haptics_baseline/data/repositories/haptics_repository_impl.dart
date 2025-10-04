@@ -23,7 +23,7 @@ class HapticsRepositoryImpl implements HapticsRepository {
           _prefs.getBool(_hapticsEnabledKey) ?? true; // Default enabled
       return Right(enabled);
     } catch (e) {
-      return Left(AppFailure.cache(
+      return const Left(AppFailure.cache(
         message: 'Failed to get haptics enabled preference',
       ));
     }
@@ -35,7 +35,7 @@ class HapticsRepositoryImpl implements HapticsRepository {
       await _prefs.setBool(_hapticsEnabledKey, enabled);
       return const Right(null);
     } catch (e) {
-      return Left(AppFailure.cache(
+      return const Left(AppFailure.cache(
         message: 'Failed to save haptics enabled preference',
       ));
     }

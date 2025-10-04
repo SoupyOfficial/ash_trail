@@ -10,13 +10,12 @@ _$UiElementModelImpl _$$UiElementModelImplFromJson(Map<String, dynamic> json) =>
     _$UiElementModelImpl(
       id: json['id'] as String,
       label: json['label'] as String,
-      left: (json['left'] as num).toDouble(),
-      top: (json['top'] as num).toDouble(),
-      width: (json['width'] as num).toDouble(),
-      height: (json['height'] as num).toDouble(),
+      bounds: const _RectJsonConverter()
+          .fromJson(json['bounds'] as Map<String, dynamic>),
       type: json['type'] as String,
       isInteractive: json['isInteractive'] as bool,
       semanticLabel: json['semanticLabel'] as String?,
+      hasAccessibilityLabel: json['hasAccessibilityLabel'] as bool?,
       hasAlternativeAccess: json['hasAlternativeAccess'] as bool?,
     );
 
@@ -25,12 +24,10 @@ Map<String, dynamic> _$$UiElementModelImplToJson(
     <String, dynamic>{
       'id': instance.id,
       'label': instance.label,
-      'left': instance.left,
-      'top': instance.top,
-      'width': instance.width,
-      'height': instance.height,
+      'bounds': const _RectJsonConverter().toJson(instance.bounds),
       'type': instance.type,
       'isInteractive': instance.isInteractive,
       'semanticLabel': instance.semanticLabel,
+      'hasAccessibilityLabel': instance.hasAccessibilityLabel,
       'hasAlternativeAccess': instance.hasAlternativeAccess,
     };

@@ -21,7 +21,7 @@ void main() {
     testWidgets('should render default chart skeleton', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple()),
+        wrapWithProviders(const SkeletonChartSimple()),
       );
 
       // Assert
@@ -44,7 +44,7 @@ void main() {
 
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(height: customHeight)),
+        wrapWithProviders(const SkeletonChartSimple(height: customHeight)),
       );
 
       // Assert
@@ -60,7 +60,7 @@ void main() {
 
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(barCount: customBarCount)),
+        wrapWithProviders(const SkeletonChartSimple(barCount: customBarCount)),
       );
 
       // Assert
@@ -73,7 +73,7 @@ void main() {
     testWidgets('should show legend when enabled', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(showLegend: true)),
+        wrapWithProviders(const SkeletonChartSimple(showLegend: true)),
       );
 
       // Assert
@@ -89,7 +89,7 @@ void main() {
     testWidgets('should not show legend when disabled', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(showLegend: false)),
+        wrapWithProviders(const SkeletonChartSimple(showLegend: false)),
       );
 
       // Assert
@@ -102,7 +102,7 @@ void main() {
     testWidgets('should have proper container styling', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple()),
+        wrapWithProviders(const SkeletonChartSimple()),
       );
 
       // Assert
@@ -122,7 +122,7 @@ void main() {
     testWidgets('should render Y-axis labels', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple()),
+        wrapWithProviders(const SkeletonChartSimple()),
       );
 
       // Assert - Should have Y-axis skeleton containers
@@ -136,7 +136,7 @@ void main() {
     testWidgets('should render X-axis labels', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(barCount: 3)),
+        wrapWithProviders(const SkeletonChartSimple(barCount: 3)),
       );
 
       // Assert
@@ -150,7 +150,7 @@ void main() {
     testWidgets('should handle edge case with zero bars', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(barCount: 0)),
+        wrapWithProviders(const SkeletonChartSimple(barCount: 0)),
       );
 
       // Assert - Should not crash
@@ -161,7 +161,7 @@ void main() {
     testWidgets('should handle large bar count', (tester) async {
       // Act
       await tester.pumpWidget(
-        wrapWithProviders(SkeletonChartSimple(barCount: 20)),
+        wrapWithProviders(const SkeletonChartSimple(barCount: 20)),
       );
 
       // Assert - Should not crash

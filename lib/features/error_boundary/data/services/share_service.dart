@@ -42,7 +42,7 @@ class PlatformShareService implements ShareService {
       // 2. Use platform channels to invoke native sharing
       // 3. Handle platform-specific errors
 
-      return left(AppFailure.unexpected(
+      return left(const AppFailure.unexpected(
         message: 'Platform sharing not yet implemented',
       ));
     } catch (e, st) {

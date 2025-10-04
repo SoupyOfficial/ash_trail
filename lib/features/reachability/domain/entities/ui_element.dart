@@ -18,6 +18,7 @@ class UiElement with _$UiElement {
     required UiElementType type,
     required bool isInteractive,
     String? semanticLabel,
+    bool? hasAccessibilityLabel,
     bool? hasAlternativeAccess,
   }) = _UiElement;
 
@@ -65,8 +66,10 @@ class UiElement with _$UiElement {
   /// Whether this element needs accessibility improvements
   bool get needsAccessibilityImprovement {
     if (!isInteractive) return false;
-    return (semanticLabel == null || semanticLabel!.isEmpty) ||
-        (hasAlternativeAccess != true);
+    final hasLabel = (semanticLabel != null && semanticLabel!.isNotEmpty) ||
+        hasAccessibilityLabel == true;
+    final hasAltAccess = hasAlternativeAccess == true;
+    return !hasLabel || !hasAltAccess;
   }
 
   /// Minimum touch target size (48dp)

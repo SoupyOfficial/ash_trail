@@ -164,15 +164,12 @@ void main() {
   });
 
   group('CreateSmokeLogNotifier', () {
-    test('build method throws UnimplementedError', () async {
-      // Arrange
-      final notifier = container.read(createSmokeLogProvider({}).notifier);
+    test('build method resolves to null initial value', () async {
+      // Act
+      final value = await container.read(createSmokeLogProvider({}).future);
 
-      // Act & Assert
-      expect(
-        () => notifier.build({}),
-        throwsA(isA<UnimplementedError>()),
-      );
+      // Assert
+      expect(value, isNull);
     });
 
     test('createSmokeLog succeeds and returns smoke log', () async {
@@ -247,16 +244,13 @@ void main() {
   });
 
   group('UndoSmokeLogNotifier', () {
-    test('build method throws UnimplementedError', () async {
-      // Arrange
-      final notifier =
-          container.read(undoSmokeLogProvider(testAccountId).notifier);
+    test('build method resolves to null initial value', () async {
+      // Act
+      final value =
+          await container.read(undoSmokeLogProvider(testAccountId).future);
 
-      // Act & Assert
-      expect(
-        () => notifier.build(testAccountId),
-        throwsA(isA<UnimplementedError>()),
-      );
+      // Assert
+      expect(value, isNull);
     });
 
     test('undoLast succeeds and returns smoke log', () async {

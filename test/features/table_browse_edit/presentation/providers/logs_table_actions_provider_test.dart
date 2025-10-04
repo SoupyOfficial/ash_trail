@@ -76,19 +76,24 @@ void main() {
   ProviderContainer createContainer() {
     return ProviderContainer(
       overrides: [
-        updateSmokeLogUseCaseProvider.overrideWithValue(mockUpdateUseCase),
-        deleteSmokeLogUseCaseProvider.overrideWithValue(mockDeleteUseCase),
+        updateSmokeLogUseCaseProvider
+            .overrideWith((ref) async => mockUpdateUseCase),
+        deleteSmokeLogUseCaseProvider
+            .overrideWith((ref) async => mockDeleteUseCase),
         deleteSmokeLogsBatchUseCaseProvider
-            .overrideWithValue(mockDeleteBatchUseCase),
+            .overrideWith((ref) async => mockDeleteBatchUseCase),
         getFilteredSortedLogsUseCaseProvider
-            .overrideWithValue(mockGetLogsUseCase),
-        getLogsCountUseCaseProvider.overrideWithValue(mockGetCountUseCase),
+            .overrideWith((ref) async => mockGetLogsUseCase),
+        getLogsCountUseCaseProvider
+            .overrideWith((ref) async => mockGetCountUseCase),
         getUsedMethodIdsUseCaseProvider
-            .overrideWithValue(mockGetMethodsUseCase),
-        getUsedTagIdsUseCaseProvider.overrideWithValue(mockGetTagsUseCase),
-        addTagsToLogsBatchUseCaseProvider.overrideWithValue(mockAddTagsUseCase),
+            .overrideWith((ref) async => mockGetMethodsUseCase),
+        getUsedTagIdsUseCaseProvider
+            .overrideWith((ref) async => mockGetTagsUseCase),
+        addTagsToLogsBatchUseCaseProvider
+            .overrideWith((ref) async => mockAddTagsUseCase),
         removeTagsFromLogsBatchUseCaseProvider
-            .overrideWithValue(mockRemoveTagsUseCase),
+            .overrideWith((ref) async => mockRemoveTagsUseCase),
       ],
     );
   }
@@ -906,7 +911,7 @@ void main() {
 
       // Assert
       expect(container.read(updateSmokeLogProvider(account1)).hasValue, true);
-      expect(container.read(updateSmokeLogProvider(account2)).hasValue, false);
+      expect(container.read(updateSmokeLogProvider(account2)).value, isNull);
 
       container.dispose();
     });

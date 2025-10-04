@@ -10,7 +10,7 @@ class TestWidgetWithMixin extends StatelessWidget with AccessibilityMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = isAccessibilityModeActive(context);
+    final isActive = this.isAccessibilityModeActive(context);
     final tapTarget = getEffectiveMinTapTarget(context);
 
     return Column(
@@ -26,9 +26,9 @@ void main() {
   group('AccessibilityMixin', () {
     testWidgets('should detect accessibility mode correctly', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
-            body: const TestWidgetWithMixin(),
+            body: TestWidgetWithMixin(),
           ),
         ),
       );
@@ -41,14 +41,14 @@ void main() {
     testWidgets('should provide effective minimum tap target size',
         (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(
+        const MediaQuery(
+          data: MediaQueryData(
             boldText: true,
             textScaler: TextScaler.linear(1.5),
           ),
           child: MaterialApp(
             home: Scaffold(
-              body: const TestWidgetWithMixin(),
+              body: TestWidgetWithMixin(),
             ),
           ),
         ),
@@ -63,7 +63,7 @@ void main() {
       // We can't test the actual values without a BuildContext, but we can verify
       // the mixin class exists and has the expected methods
 
-      final mixin = TestWidgetWithMixin();
+      const mixin = TestWidgetWithMixin();
       expect(mixin, isA<AccessibilityMixin>());
     });
   });

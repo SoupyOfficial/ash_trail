@@ -74,15 +74,15 @@ class AppShell extends ConsumerWidget {
     final isWide = MediaQuery.sizeOf(context).width >= 840;
 
     final items = <_NavItem>[
-      _NavItem(label: 'Home', icon: Icons.home_outlined, active: Icons.home),
-      _NavItem(
+      const _NavItem(label: 'Home', icon: Icons.home_outlined, active: Icons.home),
+      const _NavItem(
           label: 'Logs', icon: Icons.list_alt_outlined, active: Icons.list),
-      _NavItem(
+      const _NavItem(
           label: 'Charts',
           icon: Icons.show_chart,
           active: Icons.show_chart,
           disabled: true),
-      _NavItem(
+      const _NavItem(
           label: 'Settings',
           icon: Icons.settings_outlined,
           active: Icons.settings),

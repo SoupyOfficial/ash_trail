@@ -3,6 +3,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/models/smoke_log.dart';
+import '../../../capture_hit/presentation/providers/smoke_log_local_datasource_provider.dart';
+import '../../data/datasources/logs_table_datasource_fallback.dart';
 import '../../data/datasources/logs_table_local_datasource.dart';
 import '../../data/datasources/logs_table_remote_datasource.dart';
 import '../../data/repositories/logs_table_repository_impl.dart';
@@ -21,91 +23,89 @@ import '../../domain/usecases/update_smoke_log_usecase.dart';
 /// Data source providers - Abstract interfaces
 /// These should be overridden in main.dart with concrete implementations
 final logsTableLocalDataSourceProvider =
-    Provider<LogsTableLocalDataSource>((ref) {
-  throw UnimplementedError(
-    'logsTableLocalDataSourceProvider must be overridden with Isar implementation',
+    FutureProvider<LogsTableLocalDataSource>((ref) async {
+  final smokeLogLocal = await ref.watch(smokeLogLocalDataSourceProvider.future);
+  return LogsTableLocalDataSourceFallback(
+    smokeLogLocalDataSource: smokeLogLocal,
   );
 });
 
 final logsTableRemoteDataSourceProvider =
     Provider<LogsTableRemoteDataSource>((ref) {
-  throw UnimplementedError(
-    'logsTableRemoteDataSourceProvider must be overridden with Firestore implementation',
-  );
+  return const LogsTableRemoteDataSourceNoop();
 });
 
 /// Repository implementation provider
-final logsTableRepositoryProvider = Provider<LogsTableRepository>((ref) {
+final logsTableRepositoryProvider =
+    FutureProvider<LogsTableRepository>((ref) async {
+  final local = await ref.watch(logsTableLocalDataSourceProvider.future);
+  final remote = ref.watch(logsTableRemoteDataSourceProvider);
+
   return LogsTableRepositoryImpl(
-    localDataSource: ref.watch(logsTableLocalDataSourceProvider),
-    remoteDataSource: ref.watch(logsTableRemoteDataSourceProvider),
+    localDataSource: local,
+    remoteDataSource: remote,
   );
 });
 
 /// Use case providers
 final getFilteredSortedLogsUseCaseProvider =
-    Provider<GetFilteredSortedLogsUseCase>((ref) {
-  return GetFilteredSortedLogsUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+    FutureProvider<GetFilteredSortedLogsUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return GetFilteredSortedLogsUseCase(repository: repository);
 });
 
-final getLogsCountUseCaseProvider = Provider<GetLogsCountUseCase>((ref) {
-  return GetLogsCountUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+final getLogsCountUseCaseProvider =
+    FutureProvider<GetLogsCountUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return GetLogsCountUseCase(repository: repository);
 });
 
-final updateSmokeLogUseCaseProvider = Provider<UpdateSmokeLogUseCase>((ref) {
-  return UpdateSmokeLogUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+final updateSmokeLogUseCaseProvider =
+    FutureProvider<UpdateSmokeLogUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return UpdateSmokeLogUseCase(repository: repository);
 });
 
-final deleteSmokeLogUseCaseProvider = Provider<DeleteSmokeLogUseCase>((ref) {
-  return DeleteSmokeLogUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+final deleteSmokeLogUseCaseProvider =
+    FutureProvider<DeleteSmokeLogUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return DeleteSmokeLogUseCase(repository: repository);
 });
 
 final deleteSmokeLogsBatchUseCaseProvider =
-    Provider<DeleteSmokeLogsBatchUseCase>((ref) {
-  return DeleteSmokeLogsBatchUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+    FutureProvider<DeleteSmokeLogsBatchUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return DeleteSmokeLogsBatchUseCase(repository: repository);
 });
 
 final addTagsToLogsBatchUseCaseProvider =
-    Provider<AddTagsToLogsBatchUseCase>((ref) {
-  return AddTagsToLogsBatchUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+    FutureProvider<AddTagsToLogsBatchUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return AddTagsToLogsBatchUseCase(repository: repository);
 });
 
 final removeTagsFromLogsBatchUseCaseProvider =
-    Provider<RemoveTagsFromLogsBatchUseCase>((ref) {
-  return RemoveTagsFromLogsBatchUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+    FutureProvider<RemoveTagsFromLogsBatchUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return RemoveTagsFromLogsBatchUseCase(repository: repository);
 });
 
-final getSmokeLogByIdUseCaseProvider = Provider<GetSmokeLogByIdUseCase>((ref) {
-  return GetSmokeLogByIdUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+final getSmokeLogByIdUseCaseProvider =
+    FutureProvider<GetSmokeLogByIdUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return GetSmokeLogByIdUseCase(repository: repository);
 });
 
 final getUsedMethodIdsUseCaseProvider =
-    Provider<GetUsedMethodIdsUseCase>((ref) {
-  return GetUsedMethodIdsUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+    FutureProvider<GetUsedMethodIdsUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return GetUsedMethodIdsUseCase(repository: repository);
 });
 
-final getUsedTagIdsUseCaseProvider = Provider<GetUsedTagIdsUseCase>((ref) {
-  return GetUsedTagIdsUseCase(
-    repository: ref.watch(logsTableRepositoryProvider),
-  );
+final getUsedTagIdsUseCaseProvider =
+    FutureProvider<GetUsedTagIdsUseCase>((ref) async {
+  final repository = await ref.watch(logsTableRepositoryProvider.future);
+  return GetUsedTagIdsUseCase(repository: repository);
 });
 
 /// Filter options providers
@@ -114,7 +114,7 @@ final getUsedTagIdsUseCaseProvider = Provider<GetUsedTagIdsUseCase>((ref) {
 /// Get method IDs that have been used in logs for filter dropdown
 final usedMethodIdsProvider =
     FutureProvider.family<List<String>, String>((ref, accountId) async {
-  final useCase = ref.watch(getUsedMethodIdsUseCaseProvider);
+  final useCase = await ref.watch(getUsedMethodIdsUseCaseProvider.future);
   final result = await useCase(accountId: accountId);
 
   return result.fold(
@@ -126,7 +126,7 @@ final usedMethodIdsProvider =
 /// Get tag IDs that have been used in logs for filter chips
 final usedTagIdsProvider =
     FutureProvider.family<List<String>, String>((ref, accountId) async {
-  final useCase = ref.watch(getUsedTagIdsUseCaseProvider);
+  final useCase = await ref.watch(getUsedTagIdsUseCaseProvider.future);
   final result = await useCase(accountId: accountId);
 
   return result.fold(
@@ -176,7 +176,7 @@ class LogsTableParams {
 /// Returns paginated logs based on current filter and sort criteria
 final filteredSortedLogsProvider =
     FutureProvider.family<List<SmokeLog>, LogsTableParams>((ref, params) async {
-  final useCase = ref.watch(getFilteredSortedLogsUseCaseProvider);
+  final useCase = await ref.watch(getFilteredSortedLogsUseCaseProvider.future);
   final result = await useCase(
     accountId: params.accountId,
     filter: params.filter,
@@ -195,7 +195,7 @@ final filteredSortedLogsProvider =
 /// Returns total count of logs matching current filter criteria
 final logsCountProvider =
     FutureProvider.family<int, LogsTableParams>((ref, params) async {
-  final useCase = ref.watch(getLogsCountUseCaseProvider);
+  final useCase = await ref.watch(getLogsCountUseCaseProvider.future);
   final result = await useCase(
     accountId: params.accountId,
     filter: params.filter,
@@ -212,7 +212,7 @@ final logsCountProvider =
 final smokeLogByIdProvider =
     FutureProvider.family<SmokeLog, ({String id, String accountId})>(
         (ref, params) async {
-  final useCase = ref.watch(getSmokeLogByIdUseCaseProvider);
+  final useCase = await ref.watch(getSmokeLogByIdUseCaseProvider.future);
   final result = await useCase(
     smokeLogId: params.id,
     accountId: params.accountId,

@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:logger/logger.dart';
 
 import '../../core/failures/app_failure.dart';

@@ -5,7 +5,7 @@ import 'package:ash_trail/domain/models/account.dart';
 
 void main() {
   test('Account JSON roundtrip', () {
-    final account = Account(
+    const account = Account(
       id: 'a1',
       displayName: 'User One',
       provider: 'email',

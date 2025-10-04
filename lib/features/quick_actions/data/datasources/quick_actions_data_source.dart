@@ -3,6 +3,8 @@
 
 import 'dart:async';
 import 'package:quick_actions/quick_actions.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import '../models/quick_action_model.dart';
 import '../../domain/entities/quick_action_entity.dart';
 
@@ -20,11 +22,21 @@ class QuickActionsDataSourceImpl implements QuickActionsDataSource {
   final StreamController<QuickActionEntity> _actionController =
       StreamController<QuickActionEntity>.broadcast();
 
+  bool _isSupportedPlatform() {
+    if (kIsWeb) return false;
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => true,
+      TargetPlatform.iOS => true,
+      _ => false,
+    };
+  }
+
   @override
   Future<void> initialize() async {
+    // Guard to prevent MissingPluginException on unsupported platforms
+    if (!_isSupportedPlatform()) return;
     // Set up the handler for quick action invocations
     _quickActions.initialize((type) {
-      // Convert the string type to a QuickActionEntity
       final action = _mapTypeToEntity(type);
       if (action != null) {
         _actionController.add(action);
@@ -34,6 +46,7 @@ class QuickActionsDataSourceImpl implements QuickActionsDataSource {
 
   @override
   Future<void> setShortcutItems(List<QuickActionModel> actions) async {
+    if (!_isSupportedPlatform()) return; // no-op on unsupported platforms
     final shortcutItems = actions
         .map((action) => ShortcutItem(
               type: action.type,
@@ -47,6 +60,7 @@ class QuickActionsDataSourceImpl implements QuickActionsDataSource {
 
   @override
   Future<void> clearShortcutItems() async {
+    if (!_isSupportedPlatform()) return; // no-op
     await _quickActions.clearShortcutItems();
   }
 

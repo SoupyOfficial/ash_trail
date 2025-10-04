@@ -13,13 +13,11 @@ class UiElementModel with _$UiElementModel {
   const factory UiElementModel({
     required String id,
     required String label,
-    required double left,
-    required double top,
-    required double width,
-    required double height,
+    @_RectJsonConverter() required Rect bounds,
     required String type,
     required bool isInteractive,
     String? semanticLabel,
+    bool? hasAccessibilityLabel,
     bool? hasAlternativeAccess,
   }) = _UiElementModel;
 
@@ -31,25 +29,44 @@ class UiElementModel with _$UiElementModel {
   UiElement toEntity() => UiElement(
         id: id,
         label: label,
-        bounds: Rect.fromLTWH(left, top, width, height),
+        bounds: bounds,
         type: _typeFromString(type),
         isInteractive: isInteractive,
         semanticLabel: semanticLabel,
+        hasAccessibilityLabel: hasAccessibilityLabel,
         hasAlternativeAccess: hasAlternativeAccess,
       );
 
   factory UiElementModel.fromEntity(UiElement entity) => UiElementModel(
         id: entity.id,
         label: entity.label,
-        left: entity.bounds.left,
-        top: entity.bounds.top,
-        width: entity.bounds.width,
-        height: entity.bounds.height,
+        bounds: entity.bounds,
         type: _typeToString(entity.type),
         isInteractive: entity.isInteractive,
         semanticLabel: entity.semanticLabel,
+        hasAccessibilityLabel: entity.hasAccessibilityLabel,
         hasAlternativeAccess: entity.hasAlternativeAccess,
       );
+}
+
+class _RectJsonConverter extends JsonConverter<Rect, Map<String, dynamic>> {
+  const _RectJsonConverter();
+
+  @override
+  Rect fromJson(Map<String, dynamic> json) => Rect.fromLTWH(
+        (json['left'] as num).toDouble(),
+        (json['top'] as num).toDouble(),
+        (json['width'] as num).toDouble(),
+        (json['height'] as num).toDouble(),
+      );
+
+  @override
+  Map<String, dynamic> toJson(Rect rect) => <String, dynamic>{
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      };
 }
 
 UiElementType _typeFromString(String type) => switch (type) {

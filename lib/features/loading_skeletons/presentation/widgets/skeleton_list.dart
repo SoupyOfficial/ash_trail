@@ -66,10 +66,10 @@ class _SkeletonListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SkeletonContainer(
+                  const SkeletonContainer(
                     height: 16,
                     width: double.infinity,
-                    child: const SizedBox(),
+                    child: SizedBox(),
                   ),
                   if (showSubtitle) ...[
                     const SizedBox(height: 8),
@@ -83,10 +83,10 @@ class _SkeletonListItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            SkeletonContainer(
+            const SkeletonContainer(
               width: 60,
               height: 20,
-              child: const SizedBox(),
+              child: SizedBox(),
             ),
           ],
         ),

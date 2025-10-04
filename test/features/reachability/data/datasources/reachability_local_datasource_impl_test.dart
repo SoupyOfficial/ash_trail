@@ -151,10 +151,7 @@ void main() {
             const UiElementModel(
               id: 'button1',
               label: 'Test Button',
-              left: 0,
-              top: 0,
-              width: 48,
-              height: 48,
+              bounds: Rect.fromLTWH(0, 0, 48, 48),
               type: 'button',
               isInteractive: true,
             ),
@@ -255,10 +252,10 @@ void main() {
         // arrange
         const screenSize = Size(400, 800);
         final zones = [
-          ReachabilityZone(
+          const ReachabilityZone(
             id: 'easy-zone',
             name: 'Easy Reach Zone',
-            bounds: const Rect.fromLTWH(0, 500, 400, 300),
+            bounds: Rect.fromLTWH(0, 500, 400, 300),
             level: ReachabilityLevel.easy,
             description: 'Easy reach area',
           ),
@@ -289,10 +286,10 @@ void main() {
         // arrange
         const screenSize = Size(400, 800);
         final zones = [
-          ReachabilityZone(
+          const ReachabilityZone(
             id: 'easy-zone',
             name: 'Easy Reach Zone',
-            bounds: const Rect.fromLTWH(0, 500, 400, 300),
+            bounds: Rect.fromLTWH(0, 500, 400, 300),
             level: ReachabilityLevel.easy,
             description: 'Easy reach area',
           ),

@@ -11,10 +11,10 @@ class LogsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return AdaptiveLayout(
-      mobile: const _MobileLogsView(),
-      tablet: const _TabletLogsView(),
-      desktop: const _DesktopLogsView(),
+    return const AdaptiveLayout(
+      mobile: _MobileLogsView(),
+      tablet: _TabletLogsView(),
+      desktop: _DesktopLogsView(),
     );
   }
 }
@@ -117,33 +117,33 @@ class _TabletLogsViewState extends ConsumerState<_TabletLogsView> {
       ),
       body: LoadingStateHandler(
         isLoading: _isLoading,
-        loadingWidget: ResponsivePadding(
+        loadingWidget: const ResponsivePadding(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SkeletonContainer(
                 height: 32,
                 width: 100,
-                child: const SizedBox(),
+                child: SizedBox(),
               ),
-              const ResponsiveGap(tablet: 20.0),
+              ResponsiveGap(tablet: 20.0),
               Row(
                 children: [
                   SkeletonContainer(
                     height: 40,
                     width: 80,
-                    child: const SizedBox(),
+                    child: SizedBox(),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   SkeletonContainer(
                     height: 40,
                     width: 60,
-                    child: const SizedBox(),
+                    child: SizedBox(),
                   ),
                 ],
               ),
-              const ResponsiveGap(tablet: 24.0),
-              const Expanded(
+              ResponsiveGap(tablet: 24.0),
+              Expanded(
                 child: SkeletonList(itemCount: 4),
               ),
             ],
@@ -227,42 +227,42 @@ class _DesktopLogsViewState extends ConsumerState<_DesktopLogsView> {
   Widget build(BuildContext context) {
     return LoadingStateHandler(
       isLoading: _isLoading,
-      loadingWidget: DualPaneLayout(
+      loadingWidget: const DualPaneLayout(
         primary: ResponsiveContainer(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SkeletonContainer(
                   height: 32,
                   width: 100,
-                  child: const SizedBox(),
+                  child: SizedBox(),
                 ),
-                const ResponsiveGap(desktop: 24.0),
+                ResponsiveGap(desktop: 24.0),
                 Row(
                   children: [
                     SkeletonContainer(
                       height: 40,
                       width: 80,
-                      child: const SizedBox(),
+                      child: SizedBox(),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     SkeletonContainer(
                       height: 40,
                       width: 60,
-                      child: const SizedBox(),
+                      child: SizedBox(),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     SkeletonContainer(
                       height: 40,
                       width: 60,
-                      child: const SizedBox(),
+                      child: SizedBox(),
                     ),
                   ],
                 ),
-                const ResponsiveGap(desktop: 32.0),
-                const Expanded(
+                ResponsiveGap(desktop: 32.0),
+                Expanded(
                   child: SkeletonList(itemCount: 6),
                 ),
               ],
@@ -271,24 +271,24 @@ class _DesktopLogsViewState extends ConsumerState<_DesktopLogsView> {
         ),
         secondary: ResponsiveContainer(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SkeletonContainer(
                   height: 24,
                   width: 120,
-                  child: const SizedBox(),
+                  child: SizedBox(),
                 ),
-                const ResponsiveGap(desktop: 16.0),
-                const Expanded(
+                ResponsiveGap(desktop: 16.0),
+                Expanded(
                   child: SkeletonChart(height: 200, showLegend: false),
                 ),
               ],
             ),
           ),
         ),
-        divider: const VerticalDivider(),
+        divider: VerticalDivider(),
       ),
       child: DualPaneLayout(
         primary: ResponsiveContainer(

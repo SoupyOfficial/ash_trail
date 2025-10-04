@@ -11,10 +11,8 @@ _$ReachabilityZoneModelImpl _$$ReachabilityZoneModelImplFromJson(
     _$ReachabilityZoneModelImpl(
       id: json['id'] as String,
       name: json['name'] as String,
-      left: (json['left'] as num).toDouble(),
-      top: (json['top'] as num).toDouble(),
-      width: (json['width'] as num).toDouble(),
-      height: (json['height'] as num).toDouble(),
+      bounds: const _RectJsonConverter()
+          .fromJson(json['bounds'] as Map<String, dynamic>),
       level: json['level'] as String,
       description: json['description'] as String,
     );
@@ -24,10 +22,7 @@ Map<String, dynamic> _$$ReachabilityZoneModelImplToJson(
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
-      'left': instance.left,
-      'top': instance.top,
-      'width': instance.width,
-      'height': instance.height,
+      'bounds': const _RectJsonConverter().toJson(instance.bounds),
       'level': instance.level,
       'description': instance.description,
     };

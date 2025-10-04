@@ -1,27 +1,84 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
 import '../models/smoke_log_isar.dart';
 import '../../core/failures/app_failure.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Service wrapper for obtaining and caching the singleton Isar instance.
+///
+/// Adds resilience around platform plugin availability so that—during tests
+/// or in edge cases where the `path_provider` plugin has not yet been
+/// registered—we fall back to a safe writable directory instead of throwing
+/// a [MissingPluginException]. This prevents the recording flow from
+/// surfacing a cryptic "Recording failed" state caused purely by early
+/// initialization order.
 class IsarService {
   static Isar? _isar;
+  static Future<Isar>? _opening; // Prevent concurrent opens.
 
+  /// Directory resolver indirection (overridable in tests).
+  static Future<Directory> Function() directoryResolver =
+      () => getApplicationDocumentsDirectory();
+
+  /// Obtain the singleton Isar instance (opening it if necessary).
   static Future<Isar> getInstance() async {
-    if (_isar != null && _isar!.isOpen) {
+    if (_isar != null && _isar!.isOpen) return _isar!;
+    if (_opening != null) return _opening!; // Another caller is opening.
+
+    _opening = _openInternal();
+    try {
+      _isar = await _opening!;
       return _isar!;
+    } finally {
+      _opening = null; // Clear latch even on failure.
     }
-
-    final dir = await getApplicationDocumentsDirectory();
-
-    _isar = await Isar.open([
-      SmokeLogIsarSchema,
-    ], directory: dir.path);
-
-    return _isar!;
   }
 
+  static Future<Isar> _openInternal() async {
+    // Web: Isar uses IndexedDB; directory parameter must be omitted and
+    // dart:io directory APIs are unsupported (would yield `_Namespace`).
+    if (kIsWeb) {
+      // Isar 3.x does not support web yet; surface a controlled error so
+      // repository/provider layers can switch to the in-memory fallback.
+      throw UnsupportedError('Isar 3.x has no web support');
+    }
+
+    Directory targetDir;
+    try {
+      targetDir = await directoryResolver();
+    } on MissingPluginException catch (_) {
+      targetDir = Directory.current; // Plugin not yet registered.
+    } on UnsupportedError catch (_) {
+      // Some desktop/web stubs throw UnsupportedError instead.
+      targetDir = Directory.current;
+    } catch (_) {
+      targetDir = Directory.systemTemp.createTempSync('ash_trail_isar_');
+    }
+
+    try {
+      return await Isar.open([
+        SmokeLogIsarSchema,
+      ], directory: targetDir.path);
+    } on UnsupportedError catch (e) {
+      // Some desktop environments (or misconfigured sandbox entitlements) can
+      // surface an `_Namespace` UnsupportedError when resolving the documents
+      // directory. Retry once with a temp directory so the user can still log.
+      if (e.toString().contains('_Namespace')) {
+        final fallback = Directory.systemTemp.createTempSync('ash_trail_isar_');
+        return Isar.open([
+          SmokeLogIsarSchema,
+        ], directory: fallback.path);
+      }
+      rethrow;
+    }
+  }
+
+  /// Close and dispose of the cached instance (useful for tests / hot restart).
   static Future<void> close() async {
     await _isar?.close();
     _isar = null;

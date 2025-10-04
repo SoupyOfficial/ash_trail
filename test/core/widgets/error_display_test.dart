@@ -272,12 +272,12 @@ void main() {
       testWidgets('should handle empty actions list', (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
-          MaterialApp(
+          const MaterialApp(
             home: Scaffold(
               body: ErrorDisplay(
                 title: 'Empty Actions',
                 message: 'No actions provided',
-                actions: const [], // Empty actions list
+                actions: [], // Empty actions list
               ),
             ),
           ),

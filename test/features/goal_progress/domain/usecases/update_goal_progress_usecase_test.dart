@@ -193,7 +193,7 @@ void main() {
       when(() => mockRepository.updateGoalProgress(
             goalId: goalId,
             newProgress: newProgress,
-          )).thenAnswer((_) async => Left(failure));
+          )).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(params);
@@ -221,7 +221,7 @@ void main() {
             newProgress: 30,
           )).thenAnswer((_) async => Right(goalAtTarget));
       when(() => mockRepository.markGoalAsAchieved(goalId))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(params);

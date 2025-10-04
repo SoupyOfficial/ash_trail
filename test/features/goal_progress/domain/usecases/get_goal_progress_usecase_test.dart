@@ -57,7 +57,7 @@ void main() {
       when(() => mockRepository.calculateCurrentProgress(
             accountId: accountId,
             goal: testActiveGoal,
-          )).thenAnswer((_) async => Right(15));
+          )).thenAnswer((_) async => const Right(15));
 
       // Act
       final result = await useCase(accountId);
@@ -86,9 +86,9 @@ void main() {
     test('should handle empty goal lists', () async {
       // Arrange
       when(() => mockRepository.getActiveGoals(accountId))
-          .thenAnswer((_) async => Right([]));
+          .thenAnswer((_) async => const Right([]));
       when(() => mockRepository.getCompletedGoals(accountId))
-          .thenAnswer((_) async => Right([]));
+          .thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await useCase(accountId);
@@ -111,10 +111,10 @@ void main() {
       // Arrange
       const failure = AppFailure.cache(message: 'Cache error');
       when(() => mockRepository.getActiveGoals(accountId))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
       // Mock completed goals to return empty (shouldn't be called but needed for safety)
       when(() => mockRepository.getCompletedGoals(accountId))
-          .thenAnswer((_) async => Right([]));
+          .thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await useCase(accountId);
@@ -133,7 +133,7 @@ void main() {
       when(() => mockRepository.getActiveGoals(accountId))
           .thenAnswer((_) async => Right([testActiveGoal]));
       when(() => mockRepository.getCompletedGoals(accountId))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(accountId);
@@ -151,13 +151,13 @@ void main() {
       when(() => mockRepository.getActiveGoals(accountId))
           .thenAnswer((_) async => Right([testActiveGoal]));
       when(() => mockRepository.getCompletedGoals(accountId))
-          .thenAnswer((_) async => Right([]));
+          .thenAnswer((_) async => const Right([]));
       when(() => mockRepository.calculateCurrentProgress(
                 accountId: accountId,
                 goal: testActiveGoal,
               ))
           .thenAnswer(
-              (_) async => Left(AppFailure.cache(message: 'Calc error')));
+              (_) async => const Left(AppFailure.cache(message: 'Calc error')));
 
       // Act
       final result = await useCase(accountId);
@@ -227,7 +227,7 @@ void main() {
         when(() => mockRepository.calculateCurrentProgress(
               accountId: accountId,
               goal: goal,
-            )).thenAnswer((_) async => Right(0));
+            )).thenAnswer((_) async => const Right(0));
       }
 
       // Act

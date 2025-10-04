@@ -3,10 +3,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/models/smoke_log.dart';
-import '../../../../data/repositories/smoke_log_repository_isar.dart';
-import '../../../../data/services/isar_service.dart';
-import '../../data/datasources/smoke_log_local_datasource_impl.dart';
-import '../../data/datasources/smoke_log_local_datasource.dart';
+import '../../../../data/repositories/smoke_log_repository_provider.dart';
 import '../../domain/usecases/create_smoke_log_usecase.dart';
 import '../../domain/usecases/undo_last_smoke_log_usecase.dart';
 import '../../domain/usecases/get_last_smoke_log_usecase.dart';
@@ -14,16 +11,14 @@ import '../../domain/usecases/delete_smoke_log_usecase.dart';
 // Optional: integrate with quick tagging to attach selected tags after creation
 import '../../../quick_tagging/presentation/providers/quick_tagging_providers.dart';
 
-// Export the repository provider from the Isar implementation
-export '../../../../data/repositories/smoke_log_repository_isar.dart'
+// Export the unified repository provider (platform-aware)
+export '../../../../data/repositories/smoke_log_repository_provider.dart'
     show smokeLogRepositoryProvider;
 
 /// Local data source provider
-final smokeLogLocalDataSourceProvider =
-    FutureProvider<SmokeLogLocalDataSource>((ref) async {
-  final isarService = await ref.watch(isarSmokeLogServiceProvider.future);
-  return SmokeLogLocalDataSourceImpl(isarService);
-});
+// Re-export platform-aware local data source provider
+export 'smoke_log_local_datasource_provider.dart'
+    show smokeLogLocalDataSourceProvider;
 
 /// Use case providers - now using async repository
 final createSmokeLogUseCaseProvider =
@@ -69,12 +64,9 @@ final lastSmokeLogProvider =
 /// Provider for creating smoke logs
 /// Returns the created smoke log or throws an AppFailure
 class CreateSmokeLogNotifier
-    extends AutoDisposeFamilyAsyncNotifier<SmokeLog, Map<String, dynamic>> {
+    extends AutoDisposeFamilyAsyncNotifier<SmokeLog?, Map<String, dynamic>> {
   @override
-  Future<SmokeLog> build(Map<String, dynamic> arg) {
-    // Return a never-completing future initially
-    return Future<SmokeLog>(() => throw UnimplementedError());
-  }
+  Future<SmokeLog?> build(Map<String, dynamic> arg) async => null;
 
   /// Create a new smoke log with the given parameters
   Future<SmokeLog> createSmokeLog({
@@ -101,14 +93,17 @@ class CreateSmokeLogNotifier
 
     final created = result.fold(
       (failure) {
-        state = AsyncError(failure, StackTrace.current);
+        state = AsyncError<SmokeLog?>(failure, StackTrace.current);
         throw failure;
       },
       (smokeLog) {
-        state = AsyncData(smokeLog);
+        state = AsyncData<SmokeLog?>(smokeLog);
         return smokeLog;
       },
     );
+
+    // Refresh any views that depend on the latest log entry
+    ref.invalidate(lastSmokeLogProvider(accountId));
 
     // Best-effort: attach any selected quick tags
     try {
@@ -127,17 +122,15 @@ class CreateSmokeLogNotifier
 }
 
 final createSmokeLogProvider = AutoDisposeAsyncNotifierProviderFamily<
-    CreateSmokeLogNotifier, SmokeLog, Map<String, dynamic>>(() {
+    CreateSmokeLogNotifier, SmokeLog?, Map<String, dynamic>>(() {
   return CreateSmokeLogNotifier();
 });
 
 /// Provider for undo functionality
 class UndoSmokeLogNotifier
-    extends AutoDisposeFamilyAsyncNotifier<SmokeLog, String> {
+    extends AutoDisposeFamilyAsyncNotifier<SmokeLog?, String> {
   @override
-  Future<SmokeLog> build(String arg) {
-    return Future<SmokeLog>(() => throw UnimplementedError());
-  }
+  Future<SmokeLog?> build(String arg) async => null;
 
   /// Undo the last smoke log for the given account
   Future<SmokeLog> undoLast({
@@ -154,11 +147,11 @@ class UndoSmokeLogNotifier
 
     return result.fold(
       (failure) {
-        state = AsyncError(failure, StackTrace.current);
+        state = AsyncError<SmokeLog?>(failure, StackTrace.current);
         throw failure;
       },
       (smokeLog) {
-        state = AsyncData(smokeLog);
+        state = AsyncData<SmokeLog?>(smokeLog);
 
         // Invalidate related providers to refresh UI
         ref.invalidate(lastSmokeLogProvider(accountId));
@@ -170,6 +163,6 @@ class UndoSmokeLogNotifier
 }
 
 final undoSmokeLogProvider = AutoDisposeAsyncNotifierProviderFamily<
-    UndoSmokeLogNotifier, SmokeLog, String>(() {
+    UndoSmokeLogNotifier, SmokeLog?, String>(() {
   return UndoSmokeLogNotifier();
 });

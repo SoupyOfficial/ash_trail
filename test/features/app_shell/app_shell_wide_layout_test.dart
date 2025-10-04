@@ -10,9 +10,9 @@ void main() {
     final router = GoRouter(routes: [
       GoRoute(
           path: '/',
-          pageBuilder: (c, s) => NoTransitionPage(
+          pageBuilder: (c, s) => const NoTransitionPage(
                   child: AppShell(
-                child: const Text('Wide content'),
+                child: Text('Wide content'),
               ))),
     ]);
 
@@ -39,9 +39,9 @@ void main() {
     final router = GoRouter(routes: [
       GoRoute(
           path: '/',
-          pageBuilder: (c, s) => NoTransitionPage(
+          pageBuilder: (c, s) => const NoTransitionPage(
                   child: AppShell(
-                child: const Text('Narrow content'),
+                child: Text('Narrow content'),
               ))),
     ]);
 
@@ -71,9 +71,9 @@ void main() {
     final router = GoRouter(routes: [
       GoRoute(
           path: '/',
-          pageBuilder: (c, s) => NoTransitionPage(
+          pageBuilder: (c, s) => const NoTransitionPage(
                   child: AppShell(
-                child: const Text('Content'),
+                child: Text('Content'),
               ))),
     ]);
 
@@ -90,9 +90,9 @@ void main() {
     final router = GoRouter(routes: [
       GoRoute(
           path: '/',
-          pageBuilder: (c, s) => NoTransitionPage(
+          pageBuilder: (c, s) => const NoTransitionPage(
                   child: AppShell(
-                child: const Text('Content'),
+                child: Text('Content'),
               ))),
     ]);
 

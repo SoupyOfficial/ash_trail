@@ -7,7 +7,7 @@ import '../../../accessibility_foundation/presentation/widgets/semantic_wrappers
 import '../../../capture_hit/presentation/providers/record_button_state_provider.dart';
 import '../../../loading_skeletons/presentation/widgets/widgets.dart';
 import '../../../responsive/presentation/widgets/responsive_padding.dart';
-import '../../../../core/providers/account_providers.dart';
+import '../../../responsive/presentation/widgets/breakpoint_builder.dart';
 import '../providers/home_providers.dart';
 import '../widgets/recording_status_widget.dart';
 import '../widgets/welcome_header_widget.dart';
@@ -22,18 +22,22 @@ class HomeScreen extends ConsumerWidget {
     final activeAccountAsync = ref.watch(activeAccountAsyncProvider);
     final homeState = ref.watch(homeScreenStateProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: ResponsivePadding(
-          child: homeState.when(
-            loading: () => _buildLoadingState(),
-            error: (error, stackTrace) => _buildErrorState(context, ref, error),
-            data: (state) => _buildMainContent(
-              context,
-              ref,
-              recordState,
-              activeAccountAsync,
-              state,
+    // Provide responsive breakpoint & screen size context for padding/layout widgets
+    return BreakpointBuilder(
+      builder: (context, breakpoint, _) => Scaffold(
+        body: SafeArea(
+          child: ResponsivePadding(
+            child: homeState.when(
+              loading: () => _buildLoadingState(),
+              error: (error, stackTrace) =>
+                  _buildErrorState(context, ref, error),
+              data: (state) => _buildMainContent(
+                context,
+                ref,
+                recordState,
+                activeAccountAsync,
+                state,
+              ),
             ),
           ),
         ),

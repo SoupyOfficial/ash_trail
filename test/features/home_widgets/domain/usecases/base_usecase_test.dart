@@ -34,7 +34,7 @@ void main() {
     group('UseCase Interface', () {
       test('should be implemented correctly by concrete use case', () async {
         final useCase = TestUseCase(result: 'success');
-        final params = TestParams(value: 'test');
+        const params = TestParams(value: 'test');
 
         final result = await useCase.call(params);
 
@@ -46,12 +46,12 @@ void main() {
       });
 
       test('should handle failure case correctly', () async {
-        final testFailure = AppFailure.network(message: 'Network error');
+        const testFailure = AppFailure.network(message: 'Network error');
         final useCase = TestUseCase(
           shouldFail: true,
           failure: testFailure,
         );
-        final params = TestParams(value: 'test');
+        const params = TestParams(value: 'test');
 
         final result = await useCase.call(params);
 
@@ -64,7 +64,7 @@ void main() {
 
       test('should pass parameters correctly to implementation', () async {
         final useCase = TestUseCase();
-        final params = TestParams(value: 'parameter_test');
+        const params = TestParams(value: 'parameter_test');
 
         final result = await useCase.call(params);
 

@@ -24,7 +24,7 @@ class ThemeRepositoryImpl implements ThemeRepository {
       final mode = AppThemeMode.fromString(modeString);
       return right(mode);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to retrieve theme preference',
       ));
     }
@@ -36,13 +36,13 @@ class ThemeRepositoryImpl implements ThemeRepository {
       final success =
           await _prefs.setString(_themePreferenceKey, mode.toString());
       if (!success) {
-        return left(AppFailure.cache(
+        return left(const AppFailure.cache(
           message: 'Failed to save theme preference',
         ));
       }
       return right(null);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to save theme preference',
       ));
     }

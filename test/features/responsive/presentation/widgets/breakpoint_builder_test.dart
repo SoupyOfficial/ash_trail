@@ -82,10 +82,10 @@ void main() {
   group('ResponsiveBuilder', () {
     testWidgets('shows mobile widget on mobile breakpoint', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(size: Size(375, 800)),
-            child: const ResponsiveBuilder(
+            data: MediaQueryData(size: Size(375, 800)),
+            child: ResponsiveBuilder(
               mobile: Text('Mobile'),
               tablet: Text('Tablet'),
               desktop: Text('Desktop'),
@@ -101,10 +101,10 @@ void main() {
 
     testWidgets('shows tablet widget on tablet breakpoint', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(size: Size(700, 800)),
-            child: const ResponsiveBuilder(
+            data: MediaQueryData(size: Size(700, 800)),
+            child: ResponsiveBuilder(
               mobile: Text('Mobile'),
               tablet: Text('Tablet'),
               desktop: Text('Desktop'),
@@ -120,10 +120,10 @@ void main() {
 
     testWidgets('shows desktop widget on desktop breakpoint', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(size: Size(1024, 800)),
-            child: const ResponsiveBuilder(
+            data: MediaQueryData(size: Size(1024, 800)),
+            child: ResponsiveBuilder(
               mobile: Text('Mobile'),
               tablet: Text('Tablet'),
               desktop: Text('Desktop'),
@@ -140,10 +140,10 @@ void main() {
     testWidgets('falls back to mobile when tablet not provided',
         (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(size: Size(700, 800)),
-            child: const ResponsiveBuilder(
+            data: MediaQueryData(size: Size(700, 800)),
+            child: ResponsiveBuilder(
               mobile: Text('Mobile'),
               desktop: Text('Desktop'),
             ),
@@ -158,10 +158,10 @@ void main() {
     testWidgets('falls back through tablet to mobile when desktop not provided',
         (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(size: Size(1024, 800)),
-            child: const ResponsiveBuilder(
+            data: MediaQueryData(size: Size(1024, 800)),
+            child: ResponsiveBuilder(
               mobile: Text('Mobile'),
               tablet: Text('Tablet'),
             ),

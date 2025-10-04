@@ -38,10 +38,10 @@ class WelcomeHeaderWidget extends StatelessWidget {
 
         // Account status
         accountAsync.when(
-          loading: () => SkeletonContainer(
+          loading: () => const SkeletonContainer(
             width: 200,
             height: 20,
-            child: const SizedBox(),
+            child: SizedBox(),
           ),
           error: (error, stackTrace) => Text(
             'Account unavailable',

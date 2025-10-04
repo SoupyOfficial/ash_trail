@@ -25,8 +25,8 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
-          home: const WidgetConfigScreen(accountId: testAccountId),
+        child: const MaterialApp(
+          home: WidgetConfigScreen(accountId: testAccountId),
         ),
       );
 
@@ -116,8 +116,8 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           // Could override repository here to simulate failure
         ],
-        child: MaterialApp(
-          home: const WidgetConfigScreen(accountId: testAccountId),
+        child: const MaterialApp(
+          home: WidgetConfigScreen(accountId: testAccountId),
         ),
       );
 
@@ -136,8 +136,8 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
-          home: const WidgetConfigScreen(accountId: testAccountId),
+        child: const MaterialApp(
+          home: WidgetConfigScreen(accountId: testAccountId),
         ),
       );
 
@@ -156,8 +156,8 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
-          home: const WidgetConfigScreen(accountId: testAccountId),
+        child: const MaterialApp(
+          home: WidgetConfigScreen(accountId: testAccountId),
         ),
       );
 
@@ -183,8 +183,8 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
-          home: const WidgetConfigScreen(accountId: testAccountId),
+        child: const MaterialApp(
+          home: WidgetConfigScreen(accountId: testAccountId),
         ),
       );
 
@@ -206,8 +206,8 @@ void main() {
         overrides: [
           sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
-          home: const WidgetConfigScreen(accountId: testAccountId),
+        child: const MaterialApp(
+          home: WidgetConfigScreen(accountId: testAccountId),
         ),
       );
 

@@ -226,7 +226,7 @@ class _AuditControlsState extends ConsumerState<AuditControls> {
     // Generate sample UI elements for demonstration
     return [
       // Top navigation (difficult to reach)
-      UiElement(
+      const UiElement(
         id: 'nav_back',
         label: 'Back Button',
         bounds: Rect.fromLTWH(16, 50, 44, 44),

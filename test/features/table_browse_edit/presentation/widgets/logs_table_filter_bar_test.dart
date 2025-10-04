@@ -13,7 +13,7 @@ void main() {
   const testAccountId = 'test_account_123';
 
   Widget createTestWidget({LogsTableState? initialState}) {
-    return ProviderScope(
+    return const ProviderScope(
       child: MaterialApp(
         home: Scaffold(
           body: LogsTableFilterBar(accountId: testAccountId),
@@ -223,7 +223,7 @@ void main() {
           ProviderScope(
             child: MaterialApp(
               theme: ThemeData.light(),
-              home: Scaffold(
+              home: const Scaffold(
                 body: LogsTableFilterBar(accountId: testAccountId),
               ),
             ),
@@ -240,7 +240,7 @@ void main() {
           ProviderScope(
             child: MaterialApp(
               theme: ThemeData.dark(),
-              home: Scaffold(
+              home: const Scaffold(
                 body: LogsTableFilterBar(accountId: testAccountId),
               ),
             ),
@@ -288,7 +288,7 @@ void main() {
               logsTableStateProvider(testAccountId)
                   .overrideWith((ref) => notifier),
             ],
-            child: MaterialApp(
+            child: const MaterialApp(
               home: Scaffold(
                 body: LogsTableFilterBar(accountId: testAccountId),
               ),

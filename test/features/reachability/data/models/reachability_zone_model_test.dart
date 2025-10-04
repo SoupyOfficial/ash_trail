@@ -1,10 +1,10 @@
 // Unit tests for ReachabilityZoneModel
 // Tests JSON serialization, deserialization, and entity conversion
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
 import 'package:ash_trail/features/reachability/data/models/reachability_zone_model.dart';
 import 'package:ash_trail/features/reachability/domain/entities/reachability_zone.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ReachabilityZoneModel', () {
@@ -12,13 +12,10 @@ void main() {
     late Map<String, dynamic> json;
 
     setUp(() {
-      model = ReachabilityZoneModel(
+      model = const ReachabilityZoneModel(
         id: 'zone-easy-thumb',
         name: 'Easy Reach Zone',
-        left: 0.0,
-        top: 500.0,
-        width: 375.0,
-        height: 312.0,
+        bounds: Rect.fromLTWH(0.0, 500.0, 375.0, 312.0),
         level: 'easy',
         description: 'Area easily reachable by thumb',
       );
@@ -26,10 +23,12 @@ void main() {
       json = {
         'id': 'zone-easy-thumb',
         'name': 'Easy Reach Zone',
-        'left': 0.0,
-        'top': 500.0,
-        'width': 375.0,
-        'height': 312.0,
+        'bounds': {
+          'left': 0.0,
+          'top': 500.0,
+          'width': 375.0,
+          'height': 312.0,
+        },
         'level': 'easy',
         'description': 'Area easily reachable by thumb',
       };
@@ -43,12 +42,14 @@ void main() {
         // assert
         expect(result['id'], equals('zone-easy-thumb'));
         expect(result['name'], equals('Easy Reach Zone'));
-        expect(result['left'], equals(0.0));
-        expect(result['top'], equals(500.0));
-        expect(result['width'], equals(375.0));
-        expect(result['height'], equals(312.0));
         expect(result['level'], equals('easy'));
         expect(result['description'], equals('Area easily reachable by thumb'));
+
+        final bounds = result['bounds'] as Map<String, dynamic>;
+        expect(bounds['left'], equals(0.0));
+        expect(bounds['top'], equals(500.0));
+        expect(bounds['width'], equals(375.0));
+        expect(bounds['height'], equals(312.0));
       });
 
       test('should serialize different zone levels', () {
@@ -64,10 +65,7 @@ void main() {
           final testZone = ReachabilityZoneModel(
             id: 'zone-$level',
             name: name,
-            left: 10.0,
-            top: 100.0,
-            width: 200.0,
-            height: 150.0,
+            bounds: const Rect.fromLTWH(10.0, 100.0, 200.0, 150.0),
             level: level,
             description: 'Test zone for $level',
           );
@@ -84,13 +82,10 @@ void main() {
 
       test('should serialize coordinates as doubles', () {
         // arrange
-        final zoneWithInts = ReachabilityZoneModel(
+        const zoneWithInts = ReachabilityZoneModel(
           id: 'int-zone',
           name: 'Integer Zone',
-          left: 100.0,
-          top: 200.0,
-          width: 300.0,
-          height: 400.0,
+          bounds: Rect.fromLTWH(100.0, 200.0, 300.0, 400.0),
           level: 'moderate',
           description: 'Zone with integer-like coordinates',
         );
@@ -99,10 +94,11 @@ void main() {
         final result = zoneWithInts.toJson();
 
         // assert
-        expect(result['left'], isA<double>());
-        expect(result['top'], isA<double>());
-        expect(result['width'], isA<double>());
-        expect(result['height'], isA<double>());
+        final bounds = result['bounds'] as Map<String, dynamic>;
+        expect(bounds['left'], isA<double>());
+        expect(bounds['top'], isA<double>());
+        expect(bounds['width'], isA<double>());
+        expect(bounds['height'], isA<double>());
       });
     });
 
@@ -114,10 +110,8 @@ void main() {
         // assert
         expect(result.id, equals('zone-easy-thumb'));
         expect(result.name, equals('Easy Reach Zone'));
-        expect(result.left, equals(0.0));
-        expect(result.top, equals(500.0));
-        expect(result.width, equals(375.0));
-        expect(result.height, equals(312.0));
+        expect(result.bounds,
+            equals(const Rect.fromLTWH(0.0, 500.0, 375.0, 312.0)));
         expect(result.level, equals('easy'));
         expect(result.description, equals('Area easily reachable by thumb'));
       });
@@ -127,10 +121,12 @@ void main() {
         final jsonWithInts = {
           'id': 'int-coordinates',
           'name': 'Integer Coords',
-          'left': 50,
-          'top': 100,
-          'width': 200,
-          'height': 150,
+          'bounds': {
+            'left': 50,
+            'top': 100,
+            'width': 200,
+            'height': 150,
+          },
           'level': 'moderate',
           'description': 'Zone with integer coordinates',
         };
@@ -139,10 +135,10 @@ void main() {
         final result = ReachabilityZoneModel.fromJson(jsonWithInts);
 
         // assert
-        expect(result.left, equals(50.0));
-        expect(result.top, equals(100.0));
-        expect(result.width, equals(200.0));
-        expect(result.height, equals(150.0));
+        expect(result.bounds.left, equals(50.0));
+        expect(result.bounds.top, equals(100.0));
+        expect(result.bounds.width, equals(200.0));
+        expect(result.bounds.height, equals(150.0));
       });
 
       test('should handle all zone levels in JSON', () {
@@ -153,10 +149,12 @@ void main() {
           final testJson = {
             'id': 'test-$level',
             'name': 'Test $level',
-            'left': 0.0,
-            'top': 0.0,
-            'width': 100.0,
-            'height': 100.0,
+            'bounds': {
+              'left': 0.0,
+              'top': 0.0,
+              'width': 100.0,
+              'height': 100.0,
+            },
             'level': level,
             'description': 'Test description for $level',
           };
@@ -179,10 +177,8 @@ void main() {
         // assert
         expect(entity.id, equals('zone-easy-thumb'));
         expect(entity.name, equals('Easy Reach Zone'));
-        expect(entity.bounds.left, equals(0.0));
-        expect(entity.bounds.top, equals(500.0));
-        expect(entity.bounds.width, equals(375.0));
-        expect(entity.bounds.height, equals(312.0));
+        expect(entity.bounds,
+            equals(const Rect.fromLTWH(0.0, 500.0, 375.0, 312.0)));
         expect(entity.level, equals(ReachabilityLevel.easy));
         expect(entity.description, equals('Area easily reachable by thumb'));
       });
@@ -200,10 +196,7 @@ void main() {
           final testModel = ReachabilityZoneModel(
             id: 'test-$stringLevel',
             name: 'Test $stringLevel',
-            left: 0.0,
-            top: 0.0,
-            width: 100.0,
-            height: 100.0,
+            bounds: const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
             level: stringLevel,
             description: 'Test zone',
           );
@@ -219,10 +212,10 @@ void main() {
 
       test('should create from entity correctly', () {
         // arrange
-        final entity = ReachabilityZone(
+        const entity = ReachabilityZone(
           id: 'entity-zone',
           name: 'From Entity',
-          bounds: const Rect.fromLTWH(25.0, 75.0, 150.0, 200.0),
+          bounds: Rect.fromLTWH(25.0, 75.0, 150.0, 200.0),
           level: ReachabilityLevel.moderate,
           description: 'Zone created from entity',
         );
@@ -233,23 +226,18 @@ void main() {
         // assert
         expect(result.id, equals('entity-zone'));
         expect(result.name, equals('From Entity'));
-        expect(result.left, equals(25.0));
-        expect(result.top, equals(75.0));
-        expect(result.width, equals(150.0));
-        expect(result.height, equals(200.0));
+        expect(result.bounds,
+            equals(const Rect.fromLTWH(25.0, 75.0, 150.0, 200.0)));
         expect(result.level, equals('moderate'));
         expect(result.description, equals('Zone created from entity'));
       });
 
       test('should handle unknown levels gracefully', () {
         // arrange
-        final testModel = ReachabilityZoneModel(
+        const testModel = ReachabilityZoneModel(
           id: 'unknown-level',
           name: 'Unknown Level Zone',
-          left: 0.0,
-          top: 0.0,
-          width: 100.0,
-          height: 100.0,
+          bounds: Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
           level: 'invalid-level',
           description: 'Zone with invalid level',
         );
@@ -283,7 +271,7 @@ void main() {
         expect(updated.name, equals('Updated Zone'));
         expect(updated.level, equals('moderate'));
         expect(updated.id, equals(model.id)); // unchanged
-        expect(updated.width, equals(model.width)); // unchanged
+        expect(updated.bounds, equals(model.bounds)); // unchanged
       });
 
       test('should support copyWith for all properties', () {
@@ -291,10 +279,7 @@ void main() {
         final updated = model.copyWith(
           id: 'new-id',
           name: 'New Name',
-          left: 10.0,
-          top: 20.0,
-          width: 300.0,
-          height: 400.0,
+          bounds: const Rect.fromLTWH(10.0, 20.0, 300.0, 400.0),
           level: 'difficult',
           description: 'New description',
         );
@@ -302,10 +287,8 @@ void main() {
         // assert
         expect(updated.id, equals('new-id'));
         expect(updated.name, equals('New Name'));
-        expect(updated.left, equals(10.0));
-        expect(updated.top, equals(20.0));
-        expect(updated.width, equals(300.0));
-        expect(updated.height, equals(400.0));
+        expect(updated.bounds,
+            equals(const Rect.fromLTWH(10.0, 20.0, 300.0, 400.0)));
         expect(updated.level, equals('difficult'));
         expect(updated.description, equals('New description'));
       });
@@ -320,10 +303,7 @@ void main() {
         // assert
         expect(reconstructed.id, equals(model.id));
         expect(reconstructed.name, equals(model.name));
-        expect(reconstructed.left, equals(model.left));
-        expect(reconstructed.top, equals(model.top));
-        expect(reconstructed.width, equals(model.width));
-        expect(reconstructed.height, equals(model.height));
+        expect(reconstructed.bounds, equals(model.bounds));
         expect(reconstructed.level, equals(model.level));
         expect(reconstructed.description, equals(model.description));
       });
@@ -336,10 +316,7 @@ void main() {
         // assert
         expect(reconstructed.id, equals(model.id));
         expect(reconstructed.name, equals(model.name));
-        expect(reconstructed.left, equals(model.left));
-        expect(reconstructed.top, equals(model.top));
-        expect(reconstructed.width, equals(model.width));
-        expect(reconstructed.height, equals(model.height));
+        expect(reconstructed.bounds, equals(model.bounds));
         expect(reconstructed.level, equals(model.level));
         expect(reconstructed.description, equals(model.description));
       });
@@ -359,10 +336,7 @@ void main() {
           final testModel = ReachabilityZoneModel(
             id: 'test',
             name: 'Test',
-            left: 0.0,
-            top: 0.0,
-            width: 100.0,
-            height: 100.0,
+            bounds: const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
             level: input,
             description: 'Test',
           );

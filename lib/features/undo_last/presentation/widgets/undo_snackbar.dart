@@ -232,9 +232,9 @@ class _UndoSnackbarState extends ConsumerState<UndoSnackbar>
                   color: colorScheme.onInverseSurface,
                 ),
               )
-            : Text(
+            : const Text(
                 'UNDO',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14.0,
                 ),

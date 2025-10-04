@@ -386,9 +386,9 @@ void main() {
 
       // Act
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(
+            data: MediaQueryData(
               size: Size(400, 600),
               textScaler: TextScaler.linear(1.0),
               accessibleNavigation: false,

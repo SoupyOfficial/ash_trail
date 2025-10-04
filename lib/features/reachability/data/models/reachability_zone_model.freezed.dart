@@ -23,10 +23,8 @@ ReachabilityZoneModel _$ReachabilityZoneModelFromJson(
 mixin _$ReachabilityZoneModel {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
-  double get left => throw _privateConstructorUsedError;
-  double get top => throw _privateConstructorUsedError;
-  double get width => throw _privateConstructorUsedError;
-  double get height => throw _privateConstructorUsedError;
+  @_RectJsonConverter()
+  Rect get bounds => throw _privateConstructorUsedError;
   String get level => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
 
@@ -45,10 +43,7 @@ abstract class $ReachabilityZoneModelCopyWith<$Res> {
   $Res call(
       {String id,
       String name,
-      double left,
-      double top,
-      double width,
-      double height,
+      @_RectJsonConverter() Rect bounds,
       String level,
       String description});
 }
@@ -69,10 +64,7 @@ class _$ReachabilityZoneModelCopyWithImpl<$Res,
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? left = null,
-    Object? top = null,
-    Object? width = null,
-    Object? height = null,
+    Object? bounds = null,
     Object? level = null,
     Object? description = null,
   }) {
@@ -85,22 +77,10 @@ class _$ReachabilityZoneModelCopyWithImpl<$Res,
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      left: null == left
-          ? _value.left
-          : left // ignore: cast_nullable_to_non_nullable
-              as double,
-      top: null == top
-          ? _value.top
-          : top // ignore: cast_nullable_to_non_nullable
-              as double,
-      width: null == width
-          ? _value.width
-          : width // ignore: cast_nullable_to_non_nullable
-              as double,
-      height: null == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as double,
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
       level: null == level
           ? _value.level
           : level // ignore: cast_nullable_to_non_nullable
@@ -125,10 +105,7 @@ abstract class _$$ReachabilityZoneModelImplCopyWith<$Res>
   $Res call(
       {String id,
       String name,
-      double left,
-      double top,
-      double width,
-      double height,
+      @_RectJsonConverter() Rect bounds,
       String level,
       String description});
 }
@@ -147,10 +124,7 @@ class __$$ReachabilityZoneModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? name = null,
-    Object? left = null,
-    Object? top = null,
-    Object? width = null,
-    Object? height = null,
+    Object? bounds = null,
     Object? level = null,
     Object? description = null,
   }) {
@@ -163,22 +137,10 @@ class __$$ReachabilityZoneModelImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      left: null == left
-          ? _value.left
-          : left // ignore: cast_nullable_to_non_nullable
-              as double,
-      top: null == top
-          ? _value.top
-          : top // ignore: cast_nullable_to_non_nullable
-              as double,
-      width: null == width
-          ? _value.width
-          : width // ignore: cast_nullable_to_non_nullable
-              as double,
-      height: null == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as double,
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
       level: null == level
           ? _value.level
           : level // ignore: cast_nullable_to_non_nullable
@@ -197,10 +159,7 @@ class _$ReachabilityZoneModelImpl extends _ReachabilityZoneModel {
   const _$ReachabilityZoneModelImpl(
       {required this.id,
       required this.name,
-      required this.left,
-      required this.top,
-      required this.width,
-      required this.height,
+      @_RectJsonConverter() required this.bounds,
       required this.level,
       required this.description})
       : super._();
@@ -213,13 +172,8 @@ class _$ReachabilityZoneModelImpl extends _ReachabilityZoneModel {
   @override
   final String name;
   @override
-  final double left;
-  @override
-  final double top;
-  @override
-  final double width;
-  @override
-  final double height;
+  @_RectJsonConverter()
+  final Rect bounds;
   @override
   final String level;
   @override
@@ -227,7 +181,7 @@ class _$ReachabilityZoneModelImpl extends _ReachabilityZoneModel {
 
   @override
   String toString() {
-    return 'ReachabilityZoneModel(id: $id, name: $name, left: $left, top: $top, width: $width, height: $height, level: $level, description: $description)';
+    return 'ReachabilityZoneModel(id: $id, name: $name, bounds: $bounds, level: $level, description: $description)';
   }
 
   @override
@@ -237,10 +191,7 @@ class _$ReachabilityZoneModelImpl extends _ReachabilityZoneModel {
             other is _$ReachabilityZoneModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.left, left) || other.left == left) &&
-            (identical(other.top, top) || other.top == top) &&
-            (identical(other.width, width) || other.width == width) &&
-            (identical(other.height, height) || other.height == height) &&
+            (identical(other.bounds, bounds) || other.bounds == bounds) &&
             (identical(other.level, level) || other.level == level) &&
             (identical(other.description, description) ||
                 other.description == description));
@@ -248,8 +199,8 @@ class _$ReachabilityZoneModelImpl extends _ReachabilityZoneModel {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, name, left, top, width, height, level, description);
+  int get hashCode =>
+      Object.hash(runtimeType, id, name, bounds, level, description);
 
   @JsonKey(ignore: true)
   @override
@@ -270,10 +221,7 @@ abstract class _ReachabilityZoneModel extends ReachabilityZoneModel {
   const factory _ReachabilityZoneModel(
       {required final String id,
       required final String name,
-      required final double left,
-      required final double top,
-      required final double width,
-      required final double height,
+      @_RectJsonConverter() required final Rect bounds,
       required final String level,
       required final String description}) = _$ReachabilityZoneModelImpl;
   const _ReachabilityZoneModel._() : super._();
@@ -286,13 +234,8 @@ abstract class _ReachabilityZoneModel extends ReachabilityZoneModel {
   @override
   String get name;
   @override
-  double get left;
-  @override
-  double get top;
-  @override
-  double get width;
-  @override
-  double get height;
+  @_RectJsonConverter()
+  Rect get bounds;
   @override
   String get level;
   @override

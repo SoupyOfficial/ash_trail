@@ -71,7 +71,7 @@ void main() {
               ),
             ),
           ],
-          child: _wrapWithApp(LogsTableSelectionToolbar(accountId: accountId)),
+          child: _wrapWithApp(const LogsTableSelectionToolbar(accountId: accountId)),
         ),
       );
 
@@ -110,7 +110,7 @@ void main() {
               return fakeActions;
             }),
           ],
-          child: _wrapWithApp(LogsTableSelectionToolbar(accountId: accountId)),
+          child: _wrapWithApp(const LogsTableSelectionToolbar(accountId: accountId)),
         ),
       );
 
@@ -168,7 +168,7 @@ void main() {
               return fakeActions;
             }),
           ],
-          child: _wrapWithApp(LogsTableSelectionToolbar(accountId: accountId)),
+          child: _wrapWithApp(const LogsTableSelectionToolbar(accountId: accountId)),
         ),
       );
 

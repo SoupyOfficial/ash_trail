@@ -12,8 +12,9 @@ export 'presentation/services/accessibility_service.dart';
 // Semantic wrapper widgets
 export 'presentation/widgets/semantic_wrappers.dart';
 
-// Providers (when build_runner generates the files)
-// export 'presentation/providers/accessibility_providers.dart';
+// Providers
+export 'presentation/providers/accessibility_providers.dart';
+export 'presentation/providers/accessibility_config_providers.dart';
 
 /// A utility mixin to provide accessibility helpers to widgets
 mixin AccessibilityMixin {

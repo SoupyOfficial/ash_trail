@@ -7,13 +7,13 @@ part 'smoke_log_isar.g.dart';
 class SmokeLogIsar {
   Id id = Isar.autoIncrement;
 
-  @Index()
+  @Index(name: 'logIdIdx', type: IndexType.hash, caseSensitive: true)
   late String logId; // UUID from domain model
 
-  @Index()
+  @Index(name: 'accountIdx', type: IndexType.hash, caseSensitive: true)
   late String accountId;
 
-  @Index()
+  @Index(name: 'tsIdx')
   late DateTime ts;
 
   late int durationMs;
@@ -35,7 +35,7 @@ class SmokeLogIsar {
   late DateTime updatedAt;
 
   // Sync metadata
-  @Index()
+  @Index(name: 'dirtyIdx')
   late bool isDirty; // Needs sync to remote
 
   DateTime? lastSyncAt;
@@ -43,7 +43,10 @@ class SmokeLogIsar {
   String? syncError; // Last sync error if any
 
   // Composite index for efficient queries
-  @Index(composite: [CompositeIndex('accountId'), CompositeIndex('ts')])
+  @Index(
+    name: 'accountTsIdx',
+    composite: [CompositeIndex('accountId'), CompositeIndex('ts')],
+  )
   String get accountTsIndex => '$accountId-${ts.millisecondsSinceEpoch}';
 
   /// Convert from domain model to Isar model

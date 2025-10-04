@@ -315,7 +315,7 @@ void main() {
       });
 
       testWidgets('should handle long notes with ellipsis', (tester) async {
-        final longNotes =
+        const longNotes =
             'This is a very long note that should be truncated with ellipsis when it exceeds the maximum number of lines allowed in the display area.';
         final customLog = testLog.copyWith(notes: longNotes);
 

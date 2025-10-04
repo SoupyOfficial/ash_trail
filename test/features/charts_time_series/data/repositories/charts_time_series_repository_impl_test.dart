@@ -283,7 +283,7 @@ void main() {
     group('getChartSummary', () {
       test('should return chart summary successfully', () async {
         // Arrange
-        final mockSummary = ChartSummary(
+        const mockSummary = ChartSummary(
           totalCount: 10,
           totalDurationMs: 600000,
           averageDurationMs: 60000,

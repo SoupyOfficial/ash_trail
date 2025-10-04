@@ -159,20 +159,20 @@ void main() {
           screenWidth: 400.0,
           screenHeight: 800.0,
           elements: [
-            UiElementModel(
+            const UiElementModel(
               id: 'button1',
               label: 'Test Button',
-              bounds: const Rect.fromLTWH(0, 0, 48, 48),
+              bounds: Rect.fromLTWH(0, 0, 48, 48),
               type: 'button',
               isInteractive: true,
               hasAccessibilityLabel: true,
             ),
           ],
           zones: [
-            ReachabilityZoneModel(
+            const ReachabilityZoneModel(
               id: 'zone1',
               name: 'Easy Zone',
-              bounds: const Rect.fromLTWH(0, 320, 400, 480),
+              bounds: Rect.fromLTWH(0, 320, 400, 480),
               level: 'easy',
               description: 'Easy to reach area',
             ),
@@ -186,7 +186,7 @@ void main() {
             accessibilityIssues: 0,
           ),
           recommendations: [
-            AuditRecommendationModel(
+            const AuditRecommendationModel(
               elementId: 'button1',
               type: 'add_accessibility_label',
               description: 'Add semantic label',

@@ -1,14 +1,14 @@
 // Unit tests for ReachabilityAuditReportModel
 // Tests JSON serialization, deserialization, and entity conversion
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/painting.dart';
-import 'package:ash_trail/features/reachability/data/models/reachability_audit_report_model.dart';
-import 'package:ash_trail/features/reachability/data/models/audit_summary_model.dart';
-import 'package:ash_trail/features/reachability/data/models/ui_element_model.dart';
-import 'package:ash_trail/features/reachability/data/models/reachability_zone_model.dart';
 import 'package:ash_trail/features/reachability/data/models/audit_recommendation_model.dart';
+import 'package:ash_trail/features/reachability/data/models/audit_summary_model.dart';
+import 'package:ash_trail/features/reachability/data/models/reachability_audit_report_model.dart';
+import 'package:ash_trail/features/reachability/data/models/reachability_zone_model.dart';
+import 'package:ash_trail/features/reachability/data/models/ui_element_model.dart';
 import 'package:ash_trail/features/reachability/domain/entities/reachability_audit_report.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ReachabilityAuditReportModel', () {
@@ -22,26 +22,20 @@ void main() {
         screenName: 'Test Screen',
         screenWidth: 375.0,
         screenHeight: 812.0,
-        elements: [
-          const UiElementModel(
+        elements: const [
+          UiElementModel(
             id: 'button-1',
             label: 'Submit Button',
-            left: 100.0,
-            top: 200.0,
-            width: 120.0,
-            height: 48.0,
+            bounds: Rect.fromLTWH(100.0, 200.0, 120.0, 48.0),
             type: 'button',
             isInteractive: true,
           ),
         ],
-        zones: [
+        zones: const [
           ReachabilityZoneModel(
             id: 'easy-zone',
             name: 'Easy Reach Zone',
-            left: 0.0,
-            top: 500.0,
-            width: 375.0,
-            height: 312.0,
+            bounds: Rect.fromLTWH(0.0, 500.0, 375.0, 312.0),
             level: 'easy',
             description: 'Comfortable thumb zone',
           ),
@@ -54,8 +48,8 @@ void main() {
           avgTouchTargetSize: 45.5,
           accessibilityIssues: 0,
         ),
-        recommendations: [
-          const AuditRecommendationModel(
+        recommendations: const [
+          AuditRecommendationModel(
             elementId: 'button-1',
             type: 'increase_touch_target',
             priority: 1,
@@ -75,10 +69,12 @@ void main() {
           {
             'id': 'button-1',
             'label': 'Submit Button',
-            'left': 100.0,
-            'top': 200.0,
-            'width': 120.0,
-            'height': 48.0,
+            'bounds': {
+              'left': 100.0,
+              'top': 200.0,
+              'width': 120.0,
+              'height': 48.0,
+            },
             'type': 'button',
             'isInteractive': true,
           }
@@ -87,10 +83,12 @@ void main() {
           {
             'id': 'easy-zone',
             'name': 'Easy Reach Zone',
-            'left': 0.0,
-            'top': 500.0,
-            'width': 375.0,
-            'height': 312.0,
+            'bounds': {
+              'left': 0.0,
+              'top': 500.0,
+              'width': 375.0,
+              'height': 312.0,
+            },
             'level': 'easy',
             'description': 'Comfortable thumb zone',
           }
@@ -125,10 +123,11 @@ void main() {
         expect(result['screenName'], equals('Test Screen'));
         expect(result['screenWidth'], equals(375.0));
         expect(result['screenHeight'], equals(812.0));
-        expect(result['elements'], isA<List>());
-        expect(result['zones'], isA<List>());
+        expect(result['elements'], isA<List<UiElementModel>>());
+        expect(result['zones'], isA<List<ReachabilityZoneModel>>());
         expect(result['summary'], isA<AuditSummaryModel>());
-        expect(result['recommendations'], isA<List>());
+        expect(
+            result['recommendations'], isA<List<AuditRecommendationModel>>());
       });
 
       test('should handle null recommendations in JSON', () {
@@ -163,7 +162,11 @@ void main() {
         expect(result.screenWidth, equals(375.0));
         expect(result.screenHeight, equals(812.0));
         expect(result.elements, hasLength(1));
+        expect(result.elements.first.bounds,
+            equals(const Rect.fromLTWH(100.0, 200.0, 120.0, 48.0)));
         expect(result.zones, hasLength(1));
+        expect(result.zones.first.bounds,
+            equals(const Rect.fromLTWH(0.0, 500.0, 375.0, 312.0)));
         expect(result.summary.totalElements, equals(5));
         expect(result.recommendations, hasLength(1));
       });
@@ -222,7 +225,11 @@ void main() {
         expect(entity.screenSize.width, equals(375.0));
         expect(entity.screenSize.height, equals(812.0));
         expect(entity.elements, hasLength(1));
+        expect(entity.elements.first.bounds,
+            equals(const Rect.fromLTWH(100.0, 200.0, 120.0, 48.0)));
         expect(entity.zones, hasLength(1));
+        expect(entity.zones.first.bounds,
+            equals(const Rect.fromLTWH(0.0, 500.0, 375.0, 312.0)));
         expect(entity.summary.totalElements, equals(5));
         expect(entity.recommendations, hasLength(1));
       });
@@ -317,10 +324,12 @@ void main() {
             {
               'id': 'button-1',
               'label': 'Submit Button',
-              'left': 100.0,
-              'top': 200.0,
-              'width': 120.0,
-              'height': 48.0,
+              'bounds': {
+                'left': 100.0,
+                'top': 200.0,
+                'width': 120.0,
+                'height': 48.0,
+              },
               'type': 'button',
               'isInteractive': true,
             }
@@ -329,10 +338,12 @@ void main() {
             {
               'id': 'easy-zone',
               'name': 'Easy Reach Zone',
-              'left': 0.0,
-              'top': 500.0,
-              'width': 375.0,
-              'height': 312.0,
+              'bounds': {
+                'left': 0.0,
+                'top': 500.0,
+                'width': 375.0,
+                'height': 312.0,
+              },
               'level': 'easy',
               'description': 'Comfortable thumb zone',
             }
@@ -367,7 +378,11 @@ void main() {
         expect(modelFromJson.screenWidth, equals(375.0));
         expect(modelFromJson.screenHeight, equals(812.0));
         expect(modelFromJson.elements.length, equals(1));
+        expect(modelFromJson.elements.first.bounds,
+            equals(const Rect.fromLTWH(100.0, 200.0, 120.0, 48.0)));
         expect(modelFromJson.zones.length, equals(1));
+        expect(modelFromJson.zones.first.bounds,
+            equals(const Rect.fromLTWH(0.0, 500.0, 375.0, 312.0)));
         expect(modelFromJson.summary.totalElements, equals(5));
         expect(modelFromJson.recommendations?.length, equals(1));
       });
@@ -382,6 +397,12 @@ void main() {
         expect(reconstructed.screenName, equals(model.screenName));
         expect(reconstructed.screenWidth, equals(model.screenWidth));
         expect(reconstructed.screenHeight, equals(model.screenHeight));
+        expect(reconstructed.elements, hasLength(1));
+        expect(reconstructed.elements.first.bounds,
+            equals(model.elements.first.bounds));
+        expect(reconstructed.zones, hasLength(1));
+        expect(
+            reconstructed.zones.first.bounds, equals(model.zones.first.bounds));
       });
     });
   });

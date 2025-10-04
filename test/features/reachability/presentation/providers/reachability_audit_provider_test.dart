@@ -91,7 +91,7 @@ void main() {
         const screenSize = Size(400, 800);
         const elements = <UiElement>[];
 
-        final failure = AppFailure.unexpected(message: 'Test error');
+        const failure = AppFailure.unexpected(message: 'Test error');
 
         when(() => mockUseCase.call(
               screenName: screenName,

@@ -9,11 +9,11 @@ import 'logs_table_state_provider.dart';
 /// Provider for updating smoke logs
 /// Returns the updated smoke log or throws an AppFailure
 class UpdateSmokeLogNotifier
-    extends AutoDisposeFamilyAsyncNotifier<SmokeLog, String> {
+    extends AutoDisposeFamilyAsyncNotifier<SmokeLog?, String> {
   @override
-  Future<SmokeLog> build(String arg) {
-    // Return a never-completing future initially
-    return Future<SmokeLog>(() => throw UnimplementedError());
+  Future<SmokeLog?> build(String accountId) async {
+    // No previous update has run yet.
+    return null;
   }
 
   /// Update a smoke log with the given data
@@ -23,7 +23,7 @@ class UpdateSmokeLogNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(updateSmokeLogUseCaseProvider);
+    final useCase = await ref.read(updateSmokeLogUseCaseProvider.future);
     final result = await useCase(
       smokeLog: smokeLog,
       accountId: accountId,
@@ -38,7 +38,8 @@ class UpdateSmokeLogNotifier
         state = AsyncData(updatedLog);
 
         // Invalidate related providers to refresh the table
-        ref.invalidate(filteredSortedLogsProvider);
+        final params = ref.read(currentQueryParamsProvider(accountId));
+        ref.invalidate(filteredSortedLogsProvider(params));
 
         return updatedLog;
       },
@@ -47,7 +48,7 @@ class UpdateSmokeLogNotifier
 }
 
 final updateSmokeLogProvider = AutoDisposeAsyncNotifierProviderFamily<
-    UpdateSmokeLogNotifier, SmokeLog, String>(() {
+    UpdateSmokeLogNotifier, SmokeLog?, String>(() {
   return UpdateSmokeLogNotifier();
 });
 
@@ -55,9 +56,7 @@ final updateSmokeLogProvider = AutoDisposeAsyncNotifierProviderFamily<
 class DeleteSmokeLogNotifier
     extends AutoDisposeFamilyAsyncNotifier<void, String> {
   @override
-  Future<void> build(String arg) {
-    return Future<void>(() => throw UnimplementedError());
-  }
+  Future<void> build(String accountId) async {}
 
   /// Delete a smoke log by ID
   Future<void> deleteSmokeLog({
@@ -66,7 +65,7 @@ class DeleteSmokeLogNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(deleteSmokeLogUseCaseProvider);
+    final useCase = await ref.read(deleteSmokeLogUseCaseProvider.future);
     final result = await useCase(
       smokeLogId: smokeLogId,
       accountId: accountId,
@@ -81,8 +80,9 @@ class DeleteSmokeLogNotifier
         state = const AsyncData(null);
 
         // Invalidate related providers to refresh the table
-        ref.invalidate(filteredSortedLogsProvider);
-        ref.invalidate(logsCountProvider);
+        final params = ref.read(currentQueryParamsProvider(accountId));
+        ref.invalidate(filteredSortedLogsProvider(params));
+        ref.invalidate(logsCountProvider(params));
 
         // Remove from selection if it was selected
         ref
@@ -102,9 +102,7 @@ final deleteSmokeLogProvider = AutoDisposeAsyncNotifierProviderFamily<
 class DeleteSmokeLogsBatchNotifier
     extends AutoDisposeFamilyAsyncNotifier<int, String> {
   @override
-  Future<int> build(String arg) {
-    return Future<int>(() => throw UnimplementedError());
-  }
+  Future<int> build(String accountId) async => 0;
 
   /// Delete multiple smoke logs by IDs
   Future<int> deleteSmokeLogsBatch({
@@ -113,7 +111,9 @@ class DeleteSmokeLogsBatchNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(deleteSmokeLogsBatchUseCaseProvider);
+    final useCase = await ref.read(
+      deleteSmokeLogsBatchUseCaseProvider.future,
+    );
     final result = await useCase(
       smokeLogIds: smokeLogIds,
       accountId: accountId,
@@ -128,8 +128,9 @@ class DeleteSmokeLogsBatchNotifier
         state = AsyncData(deletedCount);
 
         // Invalidate related providers to refresh the table
-        ref.invalidate(filteredSortedLogsProvider);
-        ref.invalidate(logsCountProvider);
+        final params = ref.read(currentQueryParamsProvider(accountId));
+        ref.invalidate(filteredSortedLogsProvider(params));
+        ref.invalidate(logsCountProvider(params));
 
         // Clear selection
         ref.read(logsTableStateProvider(accountId).notifier).clearSelection();
@@ -165,9 +166,7 @@ final deleteSmokeLogsBatchProvider = AutoDisposeAsyncNotifierProviderFamily<
 class RefreshLogsTableNotifier
     extends AutoDisposeFamilyAsyncNotifier<void, String> {
   @override
-  Future<void> build(String arg) {
-    return Future<void>(() => throw UnimplementedError());
-  }
+  Future<void> build(String accountId) async {}
 
   /// Refresh the logs table data
   Future<void> refresh({required String accountId}) async {
@@ -208,9 +207,7 @@ final refreshLogsTableProvider = AutoDisposeAsyncNotifierProviderFamily<
 class AddTagsToLogsBatchNotifier
     extends AutoDisposeFamilyAsyncNotifier<int, String> {
   @override
-  Future<int> build(String arg) {
-    return Future<int>(() => throw UnimplementedError());
-  }
+  Future<int> build(String accountId) async => 0;
 
   Future<int> addTagsToLogs({
     required String accountId,
@@ -219,7 +216,9 @@ class AddTagsToLogsBatchNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(addTagsToLogsBatchUseCaseProvider);
+    final useCase = await ref.read(
+      addTagsToLogsBatchUseCaseProvider.future,
+    );
     final result = await useCase(
       accountId: accountId,
       smokeLogIds: smokeLogIds,
@@ -235,8 +234,9 @@ class AddTagsToLogsBatchNotifier
         state = AsyncData(count);
 
         // Refresh table and used tags
-        ref.invalidate(filteredSortedLogsProvider);
-        ref.invalidate(usedTagIdsProvider);
+        final params = ref.read(currentQueryParamsProvider(accountId));
+        ref.invalidate(filteredSortedLogsProvider(params));
+        ref.invalidate(usedTagIdsProvider(accountId));
 
         return count;
       },
@@ -253,9 +253,7 @@ final addTagsToLogsBatchProvider = AutoDisposeAsyncNotifierProviderFamily<
 class RemoveTagsFromLogsBatchNotifier
     extends AutoDisposeFamilyAsyncNotifier<int, String> {
   @override
-  Future<int> build(String arg) {
-    return Future<int>(() => throw UnimplementedError());
-  }
+  Future<int> build(String accountId) async => 0;
 
   Future<int> removeTagsFromLogs({
     required String accountId,
@@ -264,7 +262,9 @@ class RemoveTagsFromLogsBatchNotifier
   }) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(removeTagsFromLogsBatchUseCaseProvider);
+    final useCase = await ref.read(
+      removeTagsFromLogsBatchUseCaseProvider.future,
+    );
     final result = await useCase(
       accountId: accountId,
       smokeLogIds: smokeLogIds,
@@ -280,8 +280,9 @@ class RemoveTagsFromLogsBatchNotifier
         state = AsyncData(count);
 
         // Refresh table and used tags
-        ref.invalidate(filteredSortedLogsProvider);
-        ref.invalidate(usedTagIdsProvider);
+        final params = ref.read(currentQueryParamsProvider(accountId));
+        ref.invalidate(filteredSortedLogsProvider(params));
+        ref.invalidate(usedTagIdsProvider(accountId));
 
         return count;
       },

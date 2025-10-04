@@ -22,13 +22,12 @@ UiElementModel _$UiElementModelFromJson(Map<String, dynamic> json) {
 mixin _$UiElementModel {
   String get id => throw _privateConstructorUsedError;
   String get label => throw _privateConstructorUsedError;
-  double get left => throw _privateConstructorUsedError;
-  double get top => throw _privateConstructorUsedError;
-  double get width => throw _privateConstructorUsedError;
-  double get height => throw _privateConstructorUsedError;
+  @_RectJsonConverter()
+  Rect get bounds => throw _privateConstructorUsedError;
   String get type => throw _privateConstructorUsedError;
   bool get isInteractive => throw _privateConstructorUsedError;
   String? get semanticLabel => throw _privateConstructorUsedError;
+  bool? get hasAccessibilityLabel => throw _privateConstructorUsedError;
   bool? get hasAlternativeAccess => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -46,13 +45,11 @@ abstract class $UiElementModelCopyWith<$Res> {
   $Res call(
       {String id,
       String label,
-      double left,
-      double top,
-      double width,
-      double height,
+      @_RectJsonConverter() Rect bounds,
       String type,
       bool isInteractive,
       String? semanticLabel,
+      bool? hasAccessibilityLabel,
       bool? hasAlternativeAccess});
 }
 
@@ -71,13 +68,11 @@ class _$UiElementModelCopyWithImpl<$Res, $Val extends UiElementModel>
   $Res call({
     Object? id = null,
     Object? label = null,
-    Object? left = null,
-    Object? top = null,
-    Object? width = null,
-    Object? height = null,
+    Object? bounds = null,
     Object? type = null,
     Object? isInteractive = null,
     Object? semanticLabel = freezed,
+    Object? hasAccessibilityLabel = freezed,
     Object? hasAlternativeAccess = freezed,
   }) {
     return _then(_value.copyWith(
@@ -89,22 +84,10 @@ class _$UiElementModelCopyWithImpl<$Res, $Val extends UiElementModel>
           ? _value.label
           : label // ignore: cast_nullable_to_non_nullable
               as String,
-      left: null == left
-          ? _value.left
-          : left // ignore: cast_nullable_to_non_nullable
-              as double,
-      top: null == top
-          ? _value.top
-          : top // ignore: cast_nullable_to_non_nullable
-              as double,
-      width: null == width
-          ? _value.width
-          : width // ignore: cast_nullable_to_non_nullable
-              as double,
-      height: null == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as double,
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -117,6 +100,10 @@ class _$UiElementModelCopyWithImpl<$Res, $Val extends UiElementModel>
           ? _value.semanticLabel
           : semanticLabel // ignore: cast_nullable_to_non_nullable
               as String?,
+      hasAccessibilityLabel: freezed == hasAccessibilityLabel
+          ? _value.hasAccessibilityLabel
+          : hasAccessibilityLabel // ignore: cast_nullable_to_non_nullable
+              as bool?,
       hasAlternativeAccess: freezed == hasAlternativeAccess
           ? _value.hasAlternativeAccess
           : hasAlternativeAccess // ignore: cast_nullable_to_non_nullable
@@ -136,13 +123,11 @@ abstract class _$$UiElementModelImplCopyWith<$Res>
   $Res call(
       {String id,
       String label,
-      double left,
-      double top,
-      double width,
-      double height,
+      @_RectJsonConverter() Rect bounds,
       String type,
       bool isInteractive,
       String? semanticLabel,
+      bool? hasAccessibilityLabel,
       bool? hasAlternativeAccess});
 }
 
@@ -159,13 +144,11 @@ class __$$UiElementModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? label = null,
-    Object? left = null,
-    Object? top = null,
-    Object? width = null,
-    Object? height = null,
+    Object? bounds = null,
     Object? type = null,
     Object? isInteractive = null,
     Object? semanticLabel = freezed,
+    Object? hasAccessibilityLabel = freezed,
     Object? hasAlternativeAccess = freezed,
   }) {
     return _then(_$UiElementModelImpl(
@@ -177,22 +160,10 @@ class __$$UiElementModelImplCopyWithImpl<$Res>
           ? _value.label
           : label // ignore: cast_nullable_to_non_nullable
               as String,
-      left: null == left
-          ? _value.left
-          : left // ignore: cast_nullable_to_non_nullable
-              as double,
-      top: null == top
-          ? _value.top
-          : top // ignore: cast_nullable_to_non_nullable
-              as double,
-      width: null == width
-          ? _value.width
-          : width // ignore: cast_nullable_to_non_nullable
-              as double,
-      height: null == height
-          ? _value.height
-          : height // ignore: cast_nullable_to_non_nullable
-              as double,
+      bounds: null == bounds
+          ? _value.bounds
+          : bounds // ignore: cast_nullable_to_non_nullable
+              as Rect,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -205,6 +176,10 @@ class __$$UiElementModelImplCopyWithImpl<$Res>
           ? _value.semanticLabel
           : semanticLabel // ignore: cast_nullable_to_non_nullable
               as String?,
+      hasAccessibilityLabel: freezed == hasAccessibilityLabel
+          ? _value.hasAccessibilityLabel
+          : hasAccessibilityLabel // ignore: cast_nullable_to_non_nullable
+              as bool?,
       hasAlternativeAccess: freezed == hasAlternativeAccess
           ? _value.hasAlternativeAccess
           : hasAlternativeAccess // ignore: cast_nullable_to_non_nullable
@@ -219,13 +194,11 @@ class _$UiElementModelImpl extends _UiElementModel {
   const _$UiElementModelImpl(
       {required this.id,
       required this.label,
-      required this.left,
-      required this.top,
-      required this.width,
-      required this.height,
+      @_RectJsonConverter() required this.bounds,
       required this.type,
       required this.isInteractive,
       this.semanticLabel,
+      this.hasAccessibilityLabel,
       this.hasAlternativeAccess})
       : super._();
 
@@ -237,13 +210,8 @@ class _$UiElementModelImpl extends _UiElementModel {
   @override
   final String label;
   @override
-  final double left;
-  @override
-  final double top;
-  @override
-  final double width;
-  @override
-  final double height;
+  @_RectJsonConverter()
+  final Rect bounds;
   @override
   final String type;
   @override
@@ -251,11 +219,13 @@ class _$UiElementModelImpl extends _UiElementModel {
   @override
   final String? semanticLabel;
   @override
+  final bool? hasAccessibilityLabel;
+  @override
   final bool? hasAlternativeAccess;
 
   @override
   String toString() {
-    return 'UiElementModel(id: $id, label: $label, left: $left, top: $top, width: $width, height: $height, type: $type, isInteractive: $isInteractive, semanticLabel: $semanticLabel, hasAlternativeAccess: $hasAlternativeAccess)';
+    return 'UiElementModel(id: $id, label: $label, bounds: $bounds, type: $type, isInteractive: $isInteractive, semanticLabel: $semanticLabel, hasAccessibilityLabel: $hasAccessibilityLabel, hasAlternativeAccess: $hasAlternativeAccess)';
   }
 
   @override
@@ -265,23 +235,30 @@ class _$UiElementModelImpl extends _UiElementModel {
             other is _$UiElementModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.label, label) || other.label == label) &&
-            (identical(other.left, left) || other.left == left) &&
-            (identical(other.top, top) || other.top == top) &&
-            (identical(other.width, width) || other.width == width) &&
-            (identical(other.height, height) || other.height == height) &&
+            (identical(other.bounds, bounds) || other.bounds == bounds) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.isInteractive, isInteractive) ||
                 other.isInteractive == isInteractive) &&
             (identical(other.semanticLabel, semanticLabel) ||
                 other.semanticLabel == semanticLabel) &&
+            (identical(other.hasAccessibilityLabel, hasAccessibilityLabel) ||
+                other.hasAccessibilityLabel == hasAccessibilityLabel) &&
             (identical(other.hasAlternativeAccess, hasAlternativeAccess) ||
                 other.hasAlternativeAccess == hasAlternativeAccess));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, label, left, top, width,
-      height, type, isInteractive, semanticLabel, hasAlternativeAccess);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      label,
+      bounds,
+      type,
+      isInteractive,
+      semanticLabel,
+      hasAccessibilityLabel,
+      hasAlternativeAccess);
 
   @JsonKey(ignore: true)
   @override
@@ -302,13 +279,11 @@ abstract class _UiElementModel extends UiElementModel {
   const factory _UiElementModel(
       {required final String id,
       required final String label,
-      required final double left,
-      required final double top,
-      required final double width,
-      required final double height,
+      @_RectJsonConverter() required final Rect bounds,
       required final String type,
       required final bool isInteractive,
       final String? semanticLabel,
+      final bool? hasAccessibilityLabel,
       final bool? hasAlternativeAccess}) = _$UiElementModelImpl;
   const _UiElementModel._() : super._();
 
@@ -320,19 +295,16 @@ abstract class _UiElementModel extends UiElementModel {
   @override
   String get label;
   @override
-  double get left;
-  @override
-  double get top;
-  @override
-  double get width;
-  @override
-  double get height;
+  @_RectJsonConverter()
+  Rect get bounds;
   @override
   String get type;
   @override
   bool get isInteractive;
   @override
   String? get semanticLabel;
+  @override
+  bool? get hasAccessibilityLabel;
   @override
   bool? get hasAlternativeAccess;
   @override

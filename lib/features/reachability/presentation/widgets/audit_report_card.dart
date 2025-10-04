@@ -119,7 +119,7 @@ class AuditReportCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.lightbulb_outline,
                       size: 16,
                       color: Colors.amber,
@@ -138,7 +138,7 @@ class AuditReportCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.warning,
                       size: 16,
                       color: Colors.orange,

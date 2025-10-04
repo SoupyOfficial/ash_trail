@@ -141,9 +141,4 @@ final smokeLogRepositoryIsarProvider =
   return SmokeLogRepositoryIsar(isarService);
 });
 
-// Provider that switches between different repository implementations
-final smokeLogRepositoryProvider =
-    FutureProvider<SmokeLogRepository>((ref) async {
-  // For Phase 2, we use the Isar implementation
-  return await ref.watch(smokeLogRepositoryIsarProvider.future);
-});
+// (Unified provider lives in smoke_log_repository_provider.dart)

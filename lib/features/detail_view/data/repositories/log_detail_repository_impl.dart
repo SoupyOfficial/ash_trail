@@ -47,7 +47,7 @@ class LogDetailRepositoryImpl implements LogDetailRepository {
     return localExists.fold(
       (failure) => _remoteDataSource.logExists(logId),
       (exists) => exists 
-          ? Right(true) 
+          ? const Right(true) 
           : _remoteDataSource.logExists(logId), // Check remote if not local
     );
   }

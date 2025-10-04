@@ -46,7 +46,7 @@ void main() {
       when(() => repository.deleteSmokeLog(
               smokeLogId: any(named: 'smokeLogId'),
               accountId: any(named: 'accountId')))
-          .thenAnswer((_) async => Left(AppFailure.cache(message: 'db')));
+          .thenAnswer((_) async => const Left(AppFailure.cache(message: 'db')));
       final res = await single(smokeLogId: 'log1', accountId: 'acct-1');
       expect(res.isLeft(), true);
       res.mapLeft((f) => expect(f.displayMessage, 'db'));
@@ -102,7 +102,7 @@ void main() {
               smokeLogIds: any(named: 'smokeLogIds'),
               accountId: any(named: 'accountId')))
           .thenAnswer(
-              (_) async => Left(AppFailure.network(message: 'offline')));
+              (_) async => const Left(AppFailure.network(message: 'offline')));
       final res =
           await batch(smokeLogIds: const ['a', 'b'], accountId: 'acct-1');
       expect(res.isLeft(), true);

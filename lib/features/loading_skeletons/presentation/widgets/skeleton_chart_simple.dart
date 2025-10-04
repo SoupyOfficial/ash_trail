@@ -28,10 +28,10 @@ class SkeletonChartSimple extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title skeleton
-          SkeletonContainer(
+          const SkeletonContainer(
             height: 16,
             width: 120,
-            child: const SizedBox(),
+            child: SizedBox(),
           ),
           const SizedBox(height: 12),
 
@@ -47,10 +47,10 @@ class SkeletonChartSimple extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(
                       4,
-                      (index) => SkeletonContainer(
+                      (index) => const SkeletonContainer(
                         height: 10,
                         width: 25,
-                        child: const SizedBox(),
+                        child: SizedBox(),
                       ),
                     ),
                   ),
@@ -86,10 +86,10 @@ class SkeletonChartSimple extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               // X-axis label
-                              SkeletonContainer(
+                              const SkeletonContainer(
                                 height: 8,
                                 width: double.infinity,
-                                child: const SizedBox(),
+                                child: SizedBox(),
                               ),
                             ],
                           ),
@@ -120,10 +120,10 @@ class SkeletonChartSimple extends StatelessWidget {
                         child: const SizedBox(),
                       ),
                       const SizedBox(width: 4),
-                      SkeletonContainer(
+                      const SkeletonContainer(
                         height: 8,
                         width: 40,
-                        child: const SizedBox(),
+                        child: SizedBox(),
                       ),
                     ],
                   ),

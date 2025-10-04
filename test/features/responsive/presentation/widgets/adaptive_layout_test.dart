@@ -117,11 +117,11 @@ void main() {
                 breakpointProvider.overrideWithValue(Breakpoint.mobile),
                 layoutConfigProvider.overrideWithValue(const LayoutConfig()),
               ],
-              child: AdaptiveLayout(
-                mobile: const Text('Default Mobile'),
-                tablet: const Text('Default Tablet'),
-                desktop: const Text('Default Desktop'),
-                breakpoints: const {
+              child: const AdaptiveLayout(
+                mobile: Text('Default Mobile'),
+                tablet: Text('Default Tablet'),
+                desktop: Text('Default Desktop'),
+                breakpoints: {
                   Breakpoint.mobile: Text('Custom Mobile'),
                   Breakpoint.tablet: Text('Custom Tablet'),
                 },
@@ -146,11 +146,11 @@ void main() {
                 breakpointProvider.overrideWithValue(Breakpoint.desktop),
                 layoutConfigProvider.overrideWithValue(const LayoutConfig()),
               ],
-              child: AdaptiveLayout(
-                mobile: const Text('Default Mobile'),
-                tablet: const Text('Default Tablet'),
-                desktop: const Text('Default Desktop'),
-                breakpoints: const {
+              child: const AdaptiveLayout(
+                mobile: Text('Default Mobile'),
+                tablet: Text('Default Tablet'),
+                desktop: Text('Default Desktop'),
+                breakpoints: {
                   Breakpoint.mobile: Text('Custom Mobile'),
                   // No custom desktop, should fall back to default
                 },

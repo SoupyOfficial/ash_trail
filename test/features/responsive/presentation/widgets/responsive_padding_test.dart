@@ -135,11 +135,11 @@ void main() {
                 layoutConfigProvider.overrideWithValue(const LayoutConfig()),
                 screenSizeProvider.overrideWithValue(const Size(375, 800)),
               ],
-              child: ResponsivePadding(
+              child: const ResponsivePadding(
                 mobile: EdgeInsets.zero,
-                tablet: const EdgeInsets.all(0),
-                desktop: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                child: const Text('Zero Padding Test'),
+                tablet: EdgeInsets.all(0),
+                desktop: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                child: Text('Zero Padding Test'),
               ),
             ),
           ),

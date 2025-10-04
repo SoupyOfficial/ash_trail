@@ -69,7 +69,7 @@ class AccessibilityService {
       // Increase tap targets for accessibility needs
       if (capabilities.isScreenReaderEnabled ||
           capabilities.textScaleFactor > 1.15) {
-        final multiplier = 1.2;
+        const multiplier = 1.2;
         final result = baseSize * multiplier;
         // Guard against infinite or invalid results
         return result.isFinite && result > 0 ? result : baseSize;

@@ -13,10 +13,7 @@ class ReachabilityZoneModel with _$ReachabilityZoneModel {
   const factory ReachabilityZoneModel({
     required String id,
     required String name,
-    required double left,
-    required double top,
-    required double width,
-    required double height,
+    @_RectJsonConverter() required Rect bounds,
     required String level,
     required String description,
   }) = _ReachabilityZoneModel;
@@ -29,7 +26,7 @@ class ReachabilityZoneModel with _$ReachabilityZoneModel {
   ReachabilityZone toEntity() => ReachabilityZone(
         id: id,
         name: name,
-        bounds: Rect.fromLTWH(left, top, width, height),
+        bounds: bounds,
         level: _levelFromString(level),
         description: description,
       );
@@ -38,13 +35,30 @@ class ReachabilityZoneModel with _$ReachabilityZoneModel {
       ReachabilityZoneModel(
         id: entity.id,
         name: entity.name,
-        left: entity.bounds.left,
-        top: entity.bounds.top,
-        width: entity.bounds.width,
-        height: entity.bounds.height,
+        bounds: entity.bounds,
         level: _levelToString(entity.level),
         description: entity.description,
       );
+}
+
+class _RectJsonConverter extends JsonConverter<Rect, Map<String, dynamic>> {
+  const _RectJsonConverter();
+
+  @override
+  Rect fromJson(Map<String, dynamic> json) => Rect.fromLTWH(
+        (json['left'] as num).toDouble(),
+        (json['top'] as num).toDouble(),
+        (json['width'] as num).toDouble(),
+        (json['height'] as num).toDouble(),
+      );
+
+  @override
+  Map<String, dynamic> toJson(Rect rect) => <String, dynamic>{
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      };
 }
 
 ReachabilityLevel _levelFromString(String level) => switch (level) {

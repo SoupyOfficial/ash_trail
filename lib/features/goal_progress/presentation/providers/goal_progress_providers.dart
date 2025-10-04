@@ -2,6 +2,7 @@
 // Manages repository, use cases, and state for goal progress dashboard
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/datasources/goal_progress_datasource_fallback.dart';
 import '../../data/datasources/goal_progress_local_datasource.dart';
 import '../../data/datasources/goal_progress_remote_datasource.dart';
 import '../../data/repositories/goal_progress_repository_impl.dart';
@@ -11,46 +12,54 @@ import '../../domain/usecases/update_goal_progress_usecase.dart';
 
 /// Repository providers - Abstract interfaces
 /// These should be overridden in main.dart with concrete implementations
+final _goalProgressFallbackStoreProvider =
+    Provider<GoalProgressFallbackStore>((ref) {
+  return GoalProgressFallbackStore();
+});
+
 final goalProgressLocalDataSourceProvider =
-    Provider<GoalProgressLocalDataSource>((ref) {
-  throw UnimplementedError(
-    'goalProgressLocalDataSourceProvider must be overridden with Isar implementation',
-  );
+    FutureProvider<GoalProgressLocalDataSource>((ref) async {
+  final store = ref.watch(_goalProgressFallbackStoreProvider);
+  return GoalProgressLocalDataSourceFallback(store: store);
 });
 
 final goalProgressRemoteDataSourceProvider =
-    Provider<GoalProgressRemoteDataSource>((ref) {
-  throw UnimplementedError(
-    'goalProgressRemoteDataSourceProvider must be overridden with Firestore implementation',
-  );
+    FutureProvider<GoalProgressRemoteDataSource>((ref) async {
+  final store = ref.watch(_goalProgressFallbackStoreProvider);
+  return GoalProgressRemoteDataSourceFallback(store: store);
 });
 
 /// Repository implementation provider
-final goalProgressRepositoryProvider = Provider<GoalProgressRepository>((ref) {
+final goalProgressRepositoryProvider =
+    FutureProvider<GoalProgressRepository>((ref) async {
+  final local = await ref.watch(goalProgressLocalDataSourceProvider.future);
+  final remote = await ref.watch(goalProgressRemoteDataSourceProvider.future);
+
   return GoalProgressRepositoryImpl(
-    localDataSource: ref.watch(goalProgressLocalDataSourceProvider),
-    remoteDataSource: ref.watch(goalProgressRemoteDataSourceProvider),
+    localDataSource: local,
+    remoteDataSource: remote,
   );
 });
 
 /// Use case providers
-final getGoalProgressUseCaseProvider = Provider<GetGoalProgressUseCase>((ref) {
-  return GetGoalProgressUseCase(
-    ref.watch(goalProgressRepositoryProvider),
-  );
+final getGoalProgressUseCaseProvider =
+    FutureProvider<GetGoalProgressUseCase>((ref) async {
+  final repository = await ref.watch(goalProgressRepositoryProvider.future);
+  return GetGoalProgressUseCase(repository);
 });
 
-final updateGoalProgressUseCaseProvider = Provider<UpdateGoalProgressUseCase>((ref) {
-  return UpdateGoalProgressUseCase(
-    ref.watch(goalProgressRepositoryProvider),
-  );
+final updateGoalProgressUseCaseProvider =
+    FutureProvider<UpdateGoalProgressUseCase>((ref) async {
+  final repository = await ref.watch(goalProgressRepositoryProvider.future);
+  return UpdateGoalProgressUseCase(repository);
 });
 
 /// Goal Progress Dashboard Provider
 /// Returns the complete dashboard data with active and completed goals
 final goalProgressDashboardProvider =
-    FutureProvider.family<GoalProgressDashboard, String>((ref, accountId) async {
-  final useCase = ref.watch(getGoalProgressUseCaseProvider);
+    FutureProvider.family<GoalProgressDashboard, String>(
+        (ref, accountId) async {
+  final useCase = await ref.watch(getGoalProgressUseCaseProvider.future);
   final result = await useCase(accountId);
 
   return result.fold(
@@ -64,16 +73,13 @@ final goalProgressDashboardProvider =
 class UpdateGoalProgressNotifier
     extends AutoDisposeFamilyAsyncNotifier<void, UpdateGoalProgressParams> {
   @override
-  Future<void> build(UpdateGoalProgressParams arg) {
-    // Return a never-completing future initially
-    return Future<void>(() => throw UnimplementedError());
-  }
+  Future<void> build(UpdateGoalProgressParams arg) async {}
 
   /// Update goal progress with the given parameters
   Future<void> updateProgress(UpdateGoalProgressParams params) async {
     state = const AsyncLoading();
 
-    final useCase = ref.read(updateGoalProgressUseCaseProvider);
+    final useCase = await ref.read(updateGoalProgressUseCaseProvider.future);
     final result = await useCase(params);
 
     result.fold(
@@ -85,7 +91,7 @@ class UpdateGoalProgressNotifier
         state = const AsyncData(null);
 
         // Invalidate related providers to refresh UI
-        ref.invalidate(goalProgressDashboardProvider);
+        ref.invalidate(goalProgressDashboardProvider(updatedGoal.accountId));
       },
     );
   }
@@ -106,7 +112,7 @@ final selectedDashboardSectionProvider = StateProvider<DashboardSection>((ref) {
 /// Provider to check if there are any goals at all
 final hasAnyGoalsProvider = Provider.family<bool, String>((ref, accountId) {
   final dashboardAsync = ref.watch(goalProgressDashboardProvider(accountId));
-  
+
   return dashboardAsync.when(
     data: (dashboard) => dashboard.hasGoals,
     loading: () => false,
@@ -115,9 +121,10 @@ final hasAnyGoalsProvider = Provider.family<bool, String>((ref, accountId) {
 });
 
 /// Provider for completion rate percentage
-final goalCompletionRateProvider = Provider.family<double, String>((ref, accountId) {
+final goalCompletionRateProvider =
+    Provider.family<double, String>((ref, accountId) {
   final dashboardAsync = ref.watch(goalProgressDashboardProvider(accountId));
-  
+
   return dashboardAsync.when(
     data: (dashboard) => dashboard.completionRate,
     loading: () => 0.0,

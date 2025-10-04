@@ -6,12 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:ash_trail/features/table_browse_edit/presentation/screens/logs_table_screen.dart';
-import 'package:ash_trail/features/table_browse_edit/presentation/providers/logs_table_state_provider.dart';
+import 'package:ash_trail/domain/models/smoke_log.dart';
 import 'package:ash_trail/features/table_browse_edit/presentation/providers/logs_table_actions_provider.dart';
-import 'package:ash_trail/features/table_browse_edit/presentation/widgets/logs_table_header.dart';
+import 'package:ash_trail/features/table_browse_edit/presentation/providers/logs_table_providers.dart';
+import 'package:ash_trail/features/table_browse_edit/presentation/providers/logs_table_state_provider.dart';
+import 'package:ash_trail/features/table_browse_edit/presentation/screens/logs_table_screen.dart';
 import 'package:ash_trail/features/table_browse_edit/presentation/widgets/logs_table_content.dart';
 import 'package:ash_trail/features/table_browse_edit/presentation/widgets/logs_table_filter_bar.dart';
+import 'package:ash_trail/features/table_browse_edit/presentation/widgets/logs_table_header.dart';
 import 'package:ash_trail/features/table_browse_edit/presentation/widgets/logs_table_pagination.dart';
 import 'package:ash_trail/features/table_browse_edit/presentation/widgets/logs_table_selection_toolbar.dart';
 
@@ -36,15 +38,36 @@ void main() {
   Widget createTestWidget({
     LogsTableState? tableState,
     TableActions? tableActions,
+    ThemeData? theme,
+    ThemeData? darkTheme,
   }) {
     return MaterialApp(
+      theme: theme,
+      darkTheme: darkTheme,
       home: ProviderScope(
         overrides: [
           logsTableStateProvider(testAccountId).overrideWith((ref) {
-            return LogsTableStateNotifier(accountId: testAccountId);
+            final notifier = LogsTableStateNotifier(accountId: testAccountId);
+            if (tableState != null) {
+              notifier.state = tableState;
+            }
+            return notifier;
           }),
           tableActionsProvider(testAccountId).overrideWith((ref) {
             return tableActions ?? mockTableActions;
+          }),
+          filteredSortedLogsProvider.overrideWithProvider((params) {
+            return FutureProvider<List<SmokeLog>>(
+                (ref) async => const <SmokeLog>[]);
+          }),
+          logsCountProvider.overrideWithProvider((params) {
+            return FutureProvider<int>((ref) async => 0);
+          }),
+          usedMethodIdsProvider.overrideWithProvider((accountId) {
+            return FutureProvider<List<String>>((ref) async => const []);
+          }),
+          usedTagIdsProvider.overrideWithProvider((accountId) {
+            return FutureProvider<List<String>>((ref) async => const []);
           }),
         ],
         child: const LogsTableScreen(accountId: testAccountId),
@@ -62,9 +85,9 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
       expect(find.text('Smoke Logs'), findsOneWidget);
 
-  // assert - Refresh button
-  expect(find.byKey(const Key('logs_refresh_button')), findsOneWidget);
-  expect(find.byKey(const Key('logs_more_menu_button')), findsOneWidget);
+      // assert - Refresh button
+      expect(find.byKey(const Key('logs_refresh_button')), findsOneWidget);
+      expect(find.byKey(const Key('logs_more_menu_button')), findsOneWidget);
 
       // assert - Main content components present
       expect(find.byType(LogsTableFilterBar), findsOneWidget);
@@ -79,7 +102,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // assert
-  final refreshButton = find.byKey(const Key('logs_refresh_button'));
+      final refreshButton = find.byKey(const Key('logs_refresh_button'));
       expect(refreshButton, findsOneWidget);
 
       // Check tooltip
@@ -95,7 +118,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // act
-  await tester.tap(find.byKey(const Key('logs_refresh_button')));
+      await tester.tap(find.byKey(const Key('logs_refresh_button')));
       await tester.pumpAndSettle();
 
       // assert
@@ -108,7 +131,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // act - tap popup menu button
-  await tester.tap(find.byKey(const Key('logs_more_menu_button')));
+      await tester.tap(find.byKey(const Key('logs_more_menu_button')));
       await tester.pumpAndSettle();
 
       // assert
@@ -122,7 +145,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // act - open menu and select clear filters
-  await tester.tap(find.byKey(const Key('logs_more_menu_button')));
+      await tester.tap(find.byKey(const Key('logs_more_menu_button')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Clear Filters'));
       await tester.pumpAndSettle();
@@ -136,7 +159,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // act - open menu and select reset view
-  await tester.tap(find.byKey(const Key('logs_more_menu_button')));
+      await tester.tap(find.byKey(const Key('logs_more_menu_button')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Reset View'));
       await tester.pumpAndSettle();
@@ -186,19 +209,9 @@ void main() {
     testWidgets('screen handles theme changes correctly', (tester) async {
       // arrange & act - light theme
       await tester.pumpWidget(
-        MaterialApp(
+        createTestWidget(
+          tableActions: mockTableActions,
           theme: ThemeData.light(),
-          home: ProviderScope(
-            overrides: [
-              logsTableStateProvider(testAccountId).overrideWith((ref) {
-                return LogsTableStateNotifier(accountId: testAccountId);
-              }),
-              tableActionsProvider(testAccountId).overrideWith((ref) {
-                return mockTableActions;
-              }),
-            ],
-            child: const LogsTableScreen(accountId: testAccountId),
-          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -208,19 +221,9 @@ void main() {
 
       // act - dark theme
       await tester.pumpWidget(
-        MaterialApp(
+        createTestWidget(
+          tableActions: mockTableActions,
           theme: ThemeData.dark(),
-          home: ProviderScope(
-            overrides: [
-              logsTableStateProvider(testAccountId).overrideWith((ref) {
-                return LogsTableStateNotifier(accountId: testAccountId);
-              }),
-              tableActionsProvider(testAccountId).overrideWith((ref) {
-                return mockTableActions;
-              }),
-            ],
-            child: const LogsTableScreen(accountId: testAccountId),
-          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -240,7 +243,7 @@ void main() {
       expect(find.text('Smoke Logs'), findsOneWidget);
 
       // Refresh button should have tooltip
-  final refreshButton = find.byKey(const Key('logs_refresh_button'));
+      final refreshButton = find.byKey(const Key('logs_refresh_button'));
       await tester.longPress(refreshButton);
       await tester.pumpAndSettle();
       expect(find.text('Refresh'), findsOneWidget);
@@ -253,7 +256,7 @@ void main() {
 
       // assert - key interactive elements should be found
       expect(find.byType(IconButton), findsAtLeastNWidgets(1));
-  expect(find.byKey(const Key('logs_more_menu_button')), findsOneWidget);
+      expect(find.byKey(const Key('logs_more_menu_button')), findsOneWidget);
     });
 
     testWidgets('has adequate touch targets', (tester) async {
@@ -262,12 +265,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // assert - buttons should have minimum 48dp touch targets
-    final refreshButton = tester
-      .widget<IconButton>(find.byKey(const Key('logs_refresh_button')));
+      final refreshButton = tester
+          .widget<IconButton>(find.byKey(const Key('logs_refresh_button')));
       expect(refreshButton, isNotNull);
 
-    final popupButton = tester
-      .widget<PopupMenuButton>(find.byKey(const Key('logs_more_menu_button')));
+      final popupButton = tester.widget<PopupMenuButton>(
+          find.byKey(const Key('logs_more_menu_button')));
       expect(popupButton, isNotNull);
     });
   });
@@ -288,7 +291,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // act - try to interact with elements
-  await tester.tap(find.byKey(const Key('logs_refresh_button')));
+      await tester.tap(find.byKey(const Key('logs_refresh_button')));
       await tester.pumpAndSettle();
 
       // assert - should not crash
@@ -319,6 +322,19 @@ void main() {
               tableActionsProvider(testAccountId).overrideWith((ref) {
                 return mockTableActions;
               }),
+              filteredSortedLogsProvider.overrideWithProvider((params) {
+                return FutureProvider<List<SmokeLog>>(
+                    (ref) async => const <SmokeLog>[]);
+              }),
+              logsCountProvider.overrideWithProvider((params) {
+                return FutureProvider<int>((ref) async => 0);
+              }),
+              usedMethodIdsProvider.overrideWithProvider((accountId) {
+                return FutureProvider<List<String>>((ref) async => const []);
+              }),
+              usedTagIdsProvider.overrideWithProvider((accountId) {
+                return FutureProvider<List<String>>((ref) async => const []);
+              }),
             ],
             child: countingWidget,
           ),
@@ -337,7 +353,7 @@ void main() {
 
       // act - rapid taps on refresh
       for (int i = 0; i < 3; i++) {
-  await tester.tap(find.byKey(const Key('logs_refresh_button')));
+        await tester.tap(find.byKey(const Key('logs_refresh_button')));
         await tester.pump();
       }
       await tester.pumpAndSettle();

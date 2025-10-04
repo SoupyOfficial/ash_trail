@@ -64,7 +64,7 @@ void main() {
 
     group('Enum Values Coverage', () {
       test('should have all expected enum values', () {
-        final allActions = WidgetTapAction.values;
+        const allActions = WidgetTapAction.values;
         expect(allActions, hasLength(4));
         expect(allActions, contains(WidgetTapAction.openApp));
         expect(allActions, contains(WidgetTapAction.recordOverlay));
@@ -73,7 +73,7 @@ void main() {
       });
 
       test('should maintain consistent ordering', () {
-        final allActions = WidgetTapAction.values;
+        const allActions = WidgetTapAction.values;
         expect(allActions[0], equals(WidgetTapAction.openApp));
         expect(allActions[1], equals(WidgetTapAction.recordOverlay));
         expect(allActions[2], equals(WidgetTapAction.viewLogs));

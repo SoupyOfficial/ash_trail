@@ -24,10 +24,10 @@ class SkeletonChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Chart title
-            SkeletonContainer(
+            const SkeletonContainer(
               height: 20,
               width: 150,
-              child: const SizedBox(),
+              child: SizedBox(),
             ),
             const SizedBox(height: 16),
 
@@ -50,10 +50,10 @@ class SkeletonChart extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: List.generate(
                             5,
-                            (index) => SkeletonContainer(
+                            (index) => const SkeletonContainer(
                               height: 12,
                               width: 30,
-                              child: const SizedBox(),
+                              child: SizedBox(),
                             ),
                           ),
                         ),
@@ -102,10 +102,10 @@ class SkeletonChart extends StatelessWidget {
                                       const SizedBox(
                                           height: 4), // Reduced spacing
                                       // X-axis label
-                                      SkeletonContainer(
+                                      const SkeletonContainer(
                                         height: 10, // Reduced height
                                         width: double.infinity,
-                                        child: const SizedBox(),
+                                        child: SizedBox(),
                                       ),
                                     ],
                                   ),
@@ -134,10 +134,10 @@ class SkeletonChart extends StatelessWidget {
                     child: const SizedBox(),
                   ),
                   const SizedBox(width: 8),
-                  SkeletonContainer(
+                  const SkeletonContainer(
                     height: 14,
                     width: 80,
-                    child: const SizedBox(),
+                    child: SizedBox(),
                   ),
                 ],
               ),

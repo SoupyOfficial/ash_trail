@@ -31,7 +31,7 @@ class LiveActivityDataSource {
       final model = LiveActivityModel.fromJson(jsonMap);
       return right(model);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to retrieve current activity',
       ));
     }
@@ -44,7 +44,7 @@ class LiveActivityDataSource {
       final success = await _prefs.setString(_currentActivityKey, jsonString);
       
       if (!success) {
-        return left(AppFailure.cache(
+        return left(const AppFailure.cache(
           message: 'Failed to save current activity',
         ));
       }
@@ -53,7 +53,7 @@ class LiveActivityDataSource {
       _currentActivityController.add(activity);
       return right(null);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to save current activity',
       ));
     }
@@ -65,7 +65,7 @@ class LiveActivityDataSource {
       final success = await _prefs.remove(_currentActivityKey);
       
       if (!success) {
-        return left(AppFailure.cache(
+        return left(const AppFailure.cache(
           message: 'Failed to clear current activity',
         ));
       }
@@ -74,7 +74,7 @@ class LiveActivityDataSource {
       _currentActivityController.add(null);
       return right(null);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to clear current activity',
       ));
     }
@@ -109,7 +109,7 @@ class LiveActivityDataSource {
       final activity = activities.where((a) => a.id == id).firstOrNull;
       return right(activity);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to retrieve activity by ID',
       ));
     }
@@ -141,14 +141,14 @@ class LiveActivityDataSource {
       final success = await _prefs.setString(_activityHistoryKey, updatedJsonString);
       
       if (!success) {
-        return left(AppFailure.cache(
+        return left(const AppFailure.cache(
           message: 'Failed to save activity to history',
         ));
       }
       
       return right(null);
     } catch (e) {
-      return left(AppFailure.cache(
+      return left(const AppFailure.cache(
         message: 'Failed to save activity to history',
       ));
     }

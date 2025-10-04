@@ -22,6 +22,7 @@ mixin _$UiElement {
   UiElementType get type => throw _privateConstructorUsedError;
   bool get isInteractive => throw _privateConstructorUsedError;
   String? get semanticLabel => throw _privateConstructorUsedError;
+  bool? get hasAccessibilityLabel => throw _privateConstructorUsedError;
   bool? get hasAlternativeAccess => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -41,6 +42,7 @@ abstract class $UiElementCopyWith<$Res> {
       UiElementType type,
       bool isInteractive,
       String? semanticLabel,
+      bool? hasAccessibilityLabel,
       bool? hasAlternativeAccess});
 }
 
@@ -63,6 +65,7 @@ class _$UiElementCopyWithImpl<$Res, $Val extends UiElement>
     Object? type = null,
     Object? isInteractive = null,
     Object? semanticLabel = freezed,
+    Object? hasAccessibilityLabel = freezed,
     Object? hasAlternativeAccess = freezed,
   }) {
     return _then(_value.copyWith(
@@ -90,6 +93,10 @@ class _$UiElementCopyWithImpl<$Res, $Val extends UiElement>
           ? _value.semanticLabel
           : semanticLabel // ignore: cast_nullable_to_non_nullable
               as String?,
+      hasAccessibilityLabel: freezed == hasAccessibilityLabel
+          ? _value.hasAccessibilityLabel
+          : hasAccessibilityLabel // ignore: cast_nullable_to_non_nullable
+              as bool?,
       hasAlternativeAccess: freezed == hasAlternativeAccess
           ? _value.hasAlternativeAccess
           : hasAlternativeAccess // ignore: cast_nullable_to_non_nullable
@@ -113,6 +120,7 @@ abstract class _$$UiElementImplCopyWith<$Res>
       UiElementType type,
       bool isInteractive,
       String? semanticLabel,
+      bool? hasAccessibilityLabel,
       bool? hasAlternativeAccess});
 }
 
@@ -133,6 +141,7 @@ class __$$UiElementImplCopyWithImpl<$Res>
     Object? type = null,
     Object? isInteractive = null,
     Object? semanticLabel = freezed,
+    Object? hasAccessibilityLabel = freezed,
     Object? hasAlternativeAccess = freezed,
   }) {
     return _then(_$UiElementImpl(
@@ -160,6 +169,10 @@ class __$$UiElementImplCopyWithImpl<$Res>
           ? _value.semanticLabel
           : semanticLabel // ignore: cast_nullable_to_non_nullable
               as String?,
+      hasAccessibilityLabel: freezed == hasAccessibilityLabel
+          ? _value.hasAccessibilityLabel
+          : hasAccessibilityLabel // ignore: cast_nullable_to_non_nullable
+              as bool?,
       hasAlternativeAccess: freezed == hasAlternativeAccess
           ? _value.hasAlternativeAccess
           : hasAlternativeAccess // ignore: cast_nullable_to_non_nullable
@@ -178,6 +191,7 @@ class _$UiElementImpl extends _UiElement {
       required this.type,
       required this.isInteractive,
       this.semanticLabel,
+      this.hasAccessibilityLabel,
       this.hasAlternativeAccess})
       : super._();
 
@@ -194,11 +208,13 @@ class _$UiElementImpl extends _UiElement {
   @override
   final String? semanticLabel;
   @override
+  final bool? hasAccessibilityLabel;
+  @override
   final bool? hasAlternativeAccess;
 
   @override
   String toString() {
-    return 'UiElement(id: $id, label: $label, bounds: $bounds, type: $type, isInteractive: $isInteractive, semanticLabel: $semanticLabel, hasAlternativeAccess: $hasAlternativeAccess)';
+    return 'UiElement(id: $id, label: $label, bounds: $bounds, type: $type, isInteractive: $isInteractive, semanticLabel: $semanticLabel, hasAccessibilityLabel: $hasAccessibilityLabel, hasAlternativeAccess: $hasAlternativeAccess)';
   }
 
   @override
@@ -214,13 +230,23 @@ class _$UiElementImpl extends _UiElement {
                 other.isInteractive == isInteractive) &&
             (identical(other.semanticLabel, semanticLabel) ||
                 other.semanticLabel == semanticLabel) &&
+            (identical(other.hasAccessibilityLabel, hasAccessibilityLabel) ||
+                other.hasAccessibilityLabel == hasAccessibilityLabel) &&
             (identical(other.hasAlternativeAccess, hasAlternativeAccess) ||
                 other.hasAlternativeAccess == hasAlternativeAccess));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, label, bounds, type,
-      isInteractive, semanticLabel, hasAlternativeAccess);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      label,
+      bounds,
+      type,
+      isInteractive,
+      semanticLabel,
+      hasAccessibilityLabel,
+      hasAlternativeAccess);
 
   @JsonKey(ignore: true)
   @override
@@ -237,6 +263,7 @@ abstract class _UiElement extends UiElement {
       required final UiElementType type,
       required final bool isInteractive,
       final String? semanticLabel,
+      final bool? hasAccessibilityLabel,
       final bool? hasAlternativeAccess}) = _$UiElementImpl;
   const _UiElement._() : super._();
 
@@ -252,6 +279,8 @@ abstract class _UiElement extends UiElement {
   bool get isInteractive;
   @override
   String? get semanticLabel;
+  @override
+  bool? get hasAccessibilityLabel;
   @override
   bool? get hasAlternativeAccess;
   @override

@@ -64,7 +64,7 @@ void main() {
       test('should update filter and reset page', () {
         final notifier =
             container.read(logsTableStateProvider(accountId).notifier);
-        final newFilter = LogFilter(minMoodScore: 7);
+        const newFilter = LogFilter(minMoodScore: 7);
 
         notifier.updateFilter(newFilter);
 
@@ -80,7 +80,7 @@ void main() {
             container.read(logsTableStateProvider(accountId).notifier);
 
         // First set some filters
-        notifier.updateFilter(LogFilter(minMoodScore: 7, searchText: 'test'));
+        notifier.updateFilter(const LogFilter(minMoodScore: 7, searchText: 'test'));
 
         // Then clear them
         notifier.clearFilters();
@@ -417,7 +417,7 @@ void main() {
             container.read(logsTableStateProvider(accountId).notifier);
 
         // Set up complex state
-        notifier.updateFilter(LogFilter(minMoodScore: 5));
+        notifier.updateFilter(const LogFilter(minMoodScore: 5));
         notifier.updateSort(const LogSort(field: LogSortField.duration));
         notifier.updateTotalLogs(200);
         notifier.goToPage(2);
@@ -467,7 +467,7 @@ void main() {
             container.read(logsTableStateProvider(accountId).notifier);
 
         // Set up complex state
-        final filter = LogFilter(minMoodScore: 6, searchText: 'test');
+        const filter = LogFilter(minMoodScore: 6, searchText: 'test');
         const sort = LogSort(
             field: LogSortField.physicalScore, order: LogSortOrder.descending);
 
@@ -515,7 +515,7 @@ void main() {
         // Modify state for first account
         final notifier1 =
             container.read(logsTableStateProvider(accountId).notifier);
-        notifier1.updateFilter(LogFilter(minMoodScore: 7));
+        notifier1.updateFilter(const LogFilter(minMoodScore: 7));
 
         // Check that second account has default state
         final state2 = container.read(logsTableStateProvider(accountId2));

@@ -11,7 +11,7 @@ void main() {
     testWidgets('displays Siri Shortcuts card with title and icon',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: SiriShortcutsWidget(),
@@ -28,7 +28,7 @@ void main() {
     testWidgets('has correct semantic structure for accessibility',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: SiriShortcutsWidget(),
@@ -47,7 +47,7 @@ void main() {
     testWidgets('displays expected minimum touch targets',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: SiriShortcutsWidget(),
@@ -71,7 +71,7 @@ void main() {
     testWidgets('displays screen with app bar and content',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: SiriShortcutsScreen(),
           ),
@@ -86,7 +86,7 @@ void main() {
 
     testWidgets('includes instructions widget', (WidgetTester tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: SiriShortcutsScreen(),
           ),

@@ -136,7 +136,7 @@ void main() {
 
   test('propagates repository failure', () async {
     when(() => repository.updateSmokeLog(any()))
-        .thenAnswer((_) async => Left(AppFailure.cache(message: 'db')));
+        .thenAnswer((_) async => const Left(AppFailure.cache(message: 'db')));
     final res = await useCase(smokeLog: baseLog(), accountId: 'acct-1');
     expect(res.isLeft(), true);
     res.mapLeft((f) => expect(f.displayMessage, 'db'));

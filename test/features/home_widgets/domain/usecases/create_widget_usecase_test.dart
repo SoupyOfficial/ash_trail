@@ -43,7 +43,7 @@ void main() {
 
     test('should create widget successfully with valid parameters', () async {
       // Arrange
-      final params = CreateWidgetParams(
+      const params = CreateWidgetParams(
         accountId: testAccountId,
         size: WidgetSize.medium,
         tapAction: WidgetTapAction.openApp,
@@ -80,7 +80,7 @@ void main() {
 
     test('should create widget with custom display options', () async {
       // Arrange
-      final params = CreateWidgetParams(
+      const params = CreateWidgetParams(
         accountId: testAccountId,
         size: WidgetSize.large,
         tapAction: WidgetTapAction.recordOverlay,
@@ -112,7 +112,7 @@ void main() {
 
     test('should return validation failure for empty account ID', () async {
       // Arrange
-      final params = CreateWidgetParams(
+      const params = CreateWidgetParams(
         accountId: '', // Empty account ID
         size: WidgetSize.medium,
         tapAction: WidgetTapAction.openApp,
@@ -145,7 +145,7 @@ void main() {
 
     test('should handle repository network failure', () async {
       // Arrange
-      final params = CreateWidgetParams(
+      const params = CreateWidgetParams(
         accountId: testAccountId,
         size: WidgetSize.small,
         tapAction: WidgetTapAction.quickRecord,
@@ -186,7 +186,7 @@ void main() {
 
     test('should handle repository cache failure', () async {
       // Arrange
-      final params = CreateWidgetParams(
+      const params = CreateWidgetParams(
         accountId: testAccountId,
         size: WidgetSize.medium,
         tapAction: WidgetTapAction.viewLogs,

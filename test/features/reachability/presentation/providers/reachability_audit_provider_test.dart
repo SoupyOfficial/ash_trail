@@ -97,7 +97,7 @@ void main() {
               screenName: screenName,
               screenSize: screenSize,
               elements: elements,
-            )).thenAnswer((_) async => Left(failure));
+            )).thenAnswer((_) async => const Left(failure));
 
         // act & assert
         final notifier = container.read(currentAuditReportProvider.notifier);

@@ -141,7 +141,7 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: customTheme,
-            home: Scaffold(
+            home: const Scaffold(
               body: SkeletonShimmer(
                 enabled: true,
                 child: testChild,

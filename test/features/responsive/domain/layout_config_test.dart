@@ -8,8 +8,8 @@ void main() {
       'LayoutConfig paddingFor returns compact on mobile and padding otherwise',
       () {
     const config = LayoutConfig(
-      padding: const EdgeInsets.all(20),
-      compactPadding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(20),
+      compactPadding: EdgeInsets.all(10),
       contentMaxWidth: 1000,
     );
     expect(config.paddingFor(Breakpoint.mobile), const EdgeInsets.all(10));

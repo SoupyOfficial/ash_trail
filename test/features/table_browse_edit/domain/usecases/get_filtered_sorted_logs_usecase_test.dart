@@ -107,7 +107,7 @@ void main() {
             sort: any(named: 'sort'),
             limit: any(named: 'limit'),
             offset: any(named: 'offset'),
-          )).thenAnswer((_) async => Left(failure));
+          )).thenAnswer((_) async => const Left(failure));
 
       final result = await useCase(accountId: accountId);
       expect(result.isLeft(), true);

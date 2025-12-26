@@ -1,0 +1,323 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/enums.dart';
+import '../providers/log_record_provider.dart';
+
+/// Dialog for creating a new log entry
+class CreateLogEntryDialog extends ConsumerStatefulWidget {
+  const CreateLogEntryDialog({super.key});
+
+  @override
+  ConsumerState<CreateLogEntryDialog> createState() =>
+      _CreateLogEntryDialogState();
+}
+
+class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
+  final _formKey = GlobalKey<FormState>();
+
+  EventType _selectedEventType = EventType.inhale;
+  Unit _selectedUnit = Unit.hits;
+  double? _value;
+  String? _note;
+  DateTime _eventTime = DateTime.now();
+  final List<String> _tags = [];
+
+  bool _isSubmitting = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Log Event'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Event Type Dropdown
+              DropdownButtonFormField<EventType>(
+                value: _selectedEventType,
+                decoration: const InputDecoration(
+                  labelText: 'Event Type',
+                  border: OutlineInputBorder(),
+                ),
+                items:
+                    EventType.values.map((type) {
+                      return DropdownMenuItem(
+                        value: type,
+                        child: Text(_formatEnumName(type.name)),
+                      );
+                    }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedEventType = value;
+                      // Auto-select appropriate unit
+                      switch (value) {
+                        case EventType.inhale:
+                          _selectedUnit = Unit.hits;
+                          break;
+                        case EventType.sessionStart:
+                        case EventType.sessionEnd:
+                          _selectedUnit = Unit.seconds;
+                          break;
+                        default:
+                          _selectedUnit = Unit.none;
+                      }
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Value Input
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Value',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (value) {
+                        _value = double.tryParse(value);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: DropdownButtonFormField<Unit>(
+                      value: _selectedUnit,
+                      decoration: const InputDecoration(
+                        labelText: 'Unit',
+                        border: OutlineInputBorder(),
+                      ),
+                      items:
+                          Unit.values.map((unit) {
+                            return DropdownMenuItem(
+                              value: unit,
+                              child: Text(_formatEnumName(unit.name)),
+                            );
+                          }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedUnit = value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Event Time Picker
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Event Time'),
+                subtitle: Text(
+                  '${_eventTime.toLocal()}'.split('.')[0],
+                  style: const TextStyle(fontSize: 14),
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: _eventTime,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+
+                  if (date != null && mounted) {
+                    final time = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(_eventTime),
+                    );
+
+                    if (time != null && mounted) {
+                      setState(() {
+                        _eventTime = DateTime(
+                          date.year,
+                          date.month,
+                          date.day,
+                          time.hour,
+                          time.minute,
+                        );
+                      });
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Notes
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                  border: OutlineInputBorder(),
+                  hintText: 'Add any additional notes...',
+                ),
+                maxLines: 3,
+                onChanged: (value) {
+                  _note = value.isEmpty ? null : value;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Tags
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Tags (optional, comma-separated)',
+                  border: OutlineInputBorder(),
+                  hintText: 'e.g., morning, sativa, relaxation',
+                ),
+                onChanged: (value) {
+                  _tags.clear();
+                  if (value.isNotEmpty) {
+                    _tags.addAll(
+                      value
+                          .split(',')
+                          .map((s) => s.trim())
+                          .where((s) => s.isNotEmpty),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isSubmitting ? null : _submitLog,
+          child:
+              _isSubmitting
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : const Text('Log'),
+        ),
+      ],
+    );
+  }
+
+  String _formatEnumName(String name) {
+    // Convert camelCase to Title Case
+    final result = name.replaceAllMapped(
+      RegExp(r'([A-Z])'),
+      (match) => ' ${match.group(0)}',
+    );
+    return result[0].toUpperCase() + result.substring(1);
+  }
+
+  Future<void> _submitLog() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final service = ref.read(logRecordServiceProvider);
+      final accountId = ref.read(activeAccountIdProvider);
+
+      if (accountId == null) {
+        throw Exception('No active account');
+      }
+
+      await service.createLogRecord(
+        accountId: accountId,
+        eventType: _selectedEventType,
+        eventAt: _eventTime,
+        value: _value,
+        unit: _selectedUnit,
+        note: _note,
+        tags: _tags.isEmpty ? null : _tags,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Event logged successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error logging event: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+}
+
+/// Quick log button with preset
+class QuickLogButton extends ConsumerWidget {
+  final EventType eventType;
+  final String label;
+  final IconData icon;
+  final Unit? defaultUnit;
+  final double? defaultValue;
+
+  const QuickLogButton({
+    super.key,
+    required this.eventType,
+    required this.label,
+    required this.icon,
+    this.defaultUnit,
+    this.defaultValue,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton.icon(
+      onPressed: () async {
+        final service = ref.read(logRecordServiceProvider);
+        final accountId = ref.read(activeAccountIdProvider);
+
+        if (accountId == null) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('No active account')));
+          return;
+        }
+
+        try {
+          await service.createLogRecord(
+            accountId: accountId,
+            eventType: eventType,
+            value: defaultValue,
+            unit: defaultUnit ?? Unit.none,
+          );
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('$label logged')));
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error: $e')));
+          }
+        }
+      },
+      icon: Icon(icon),
+      label: Text(label),
+    );
+  }
+}

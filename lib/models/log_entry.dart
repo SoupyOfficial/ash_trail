@@ -2,6 +2,16 @@ import 'package:isar/isar.dart';
 
 part 'log_entry.g.dart';
 
+/// @deprecated This model is deprecated. Use [LogRecord] from log_record.dart instead.
+/// LogEntry is a legacy model that's being phased out in favor of the more
+/// comprehensive LogRecord model which provides:
+/// - EventType enum for better event categorization
+/// - Unit enum for measurement standardization
+/// - Tags for flexible categorization
+/// - Source tracking for data provenance
+/// - Platform-agnostic repository pattern
+///
+/// Migration path: Use LogRecordService instead of LoggingService
 enum SyncState {
   pending, // Not yet synced to Firestore
   synced, // Successfully synced
@@ -9,6 +19,7 @@ enum SyncState {
   error, // Error occurred during sync
 }
 
+/// @deprecated Use [LogRecord] instead. This model will be removed in a future release.
 @collection
 class LogEntry {
   Id id = Isar.autoIncrement;

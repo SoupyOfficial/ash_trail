@@ -185,9 +185,24 @@ class SyncService {
       // Mark as synced
       await _logRecordService.markSynced(localRecord, remoteRecord.updatedAt);
     } else {
-      // Insert new record
-      // Note: This requires exposing a method to insert with specific IDs
-      // For now, we'll skip this case
+      // Insert new record from remote
+      await _logRecordService.importLogRecord(
+        logId: remoteRecord.logId,
+        accountId: remoteRecord.accountId,
+        profileId: remoteRecord.profileId,
+        eventType: remoteRecord.eventType,
+        eventAt: remoteRecord.eventAt,
+        createdAt: remoteRecord.createdAt,
+        updatedAt: remoteRecord.updatedAt,
+        value: remoteRecord.value,
+        unit: remoteRecord.unit,
+        note: remoteRecord.note,
+        tags: remoteRecord.tags,
+        sessionId: remoteRecord.sessionId,
+        source: remoteRecord.source,
+        deviceId: remoteRecord.deviceId,
+        appVersion: remoteRecord.appVersion,
+      );
     }
   }
 
@@ -232,9 +247,25 @@ class SyncService {
           );
 
           if (localRecord == null) {
-            // New record, would need to insert
-            // For now, skip
-            failedCount++;
+            // New record from remote - import it
+            await _logRecordService.importLogRecord(
+              logId: remoteRecord.logId,
+              accountId: remoteRecord.accountId,
+              profileId: remoteRecord.profileId,
+              eventType: remoteRecord.eventType,
+              eventAt: remoteRecord.eventAt,
+              createdAt: remoteRecord.createdAt,
+              updatedAt: remoteRecord.updatedAt,
+              value: remoteRecord.value,
+              unit: remoteRecord.unit,
+              note: remoteRecord.note,
+              tags: remoteRecord.tags,
+              sessionId: remoteRecord.sessionId,
+              source: remoteRecord.source,
+              deviceId: remoteRecord.deviceId,
+              appVersion: remoteRecord.appVersion,
+            );
+            successCount++;
           } else {
             // Update existing
             if (remoteRecord.updatedAt.isAfter(localRecord.updatedAt)) {

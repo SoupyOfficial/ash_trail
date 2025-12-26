@@ -3,12 +3,28 @@ import '../models/log_entry.dart';
 import '../services/logging_service.dart';
 import 'account_provider.dart';
 
+/// @deprecated This provider file is deprecated. Use [log_record_provider.dart] instead.
+///
+/// These providers are being phased out:
+/// - loggingServiceProvider -> use logRecordServiceProvider
+/// - logEntriesProvider -> use activeAccountLogRecordsProvider or logRecordsProvider
+/// - quickLogProvider -> use createLogRecordProvider
+/// - statisticsProvider -> use logRecordStatsProvider
+///
+/// Migration path:
+/// 1. Import log_record_provider.dart instead of logging_provider.dart
+/// 2. Replace LogEntry with LogRecord in your code
+/// 3. Update provider references to use the new providers
+/// 4. Use EventType, Unit, and other enums from models/enums.dart
+
 // Service provider
+/// @deprecated Use logRecordServiceProvider instead
 final loggingServiceProvider = Provider<LoggingService>((ref) {
   return LoggingService();
 });
 
 // Log entries for active account
+/// @deprecated Use activeAccountLogRecordsProvider or logRecordsProvider instead
 final logEntriesProvider = StreamProvider<List<LogEntry>>((ref) {
   final activeAccount = ref.watch(activeAccountProvider);
 
@@ -26,11 +42,13 @@ final logEntriesProvider = StreamProvider<List<LogEntry>>((ref) {
 });
 
 // Quick log notifier
+/// @deprecated Use createLogRecordProvider instead
 final quickLogProvider =
     StateNotifierProvider<QuickLogger, AsyncValue<LogEntry?>>((ref) {
       return QuickLogger(ref);
     });
 
+/// @deprecated Use LogRecordService.createLogRecord with createLogRecordProvider instead
 class QuickLogger extends StateNotifier<AsyncValue<LogEntry?>> {
   final Ref _ref;
 
@@ -93,6 +111,7 @@ final filteredLogEntriesProvider = Provider<List<LogEntry>>((ref) {
 });
 
 // Statistics provider
+/// @deprecated Use logRecordStatsProvider instead
 final statisticsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final activeAccount = await ref.watch(activeAccountProvider.future);
 

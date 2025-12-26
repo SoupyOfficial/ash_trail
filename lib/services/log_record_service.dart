@@ -72,6 +72,47 @@ class LogRecordService {
     return await _repository.create(record);
   }
 
+  /// Import a log record from remote source (e.g., Firestore)
+  /// This preserves the remote logId and metadata
+  Future<LogRecord> importLogRecord({
+    required String logId,
+    required String accountId,
+    String? profileId,
+    required EventType eventType,
+    required DateTime eventAt,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    double? value,
+    Unit unit = Unit.none,
+    String? note,
+    List<String>? tags,
+    String? sessionId,
+    Source source = Source.imported,
+    String? deviceId,
+    String? appVersion,
+  }) async {
+    final record = LogRecord.create(
+      logId: logId, // Use provided logId instead of generating new one
+      accountId: accountId,
+      profileId: profileId,
+      eventType: eventType,
+      eventAt: eventAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      value: value,
+      unit: unit,
+      note: note,
+      tagsString: tags?.join(','),
+      sessionId: sessionId,
+      source: source,
+      deviceId: deviceId ?? _getDeviceId(),
+      appVersion: appVersion ?? _getAppVersion(),
+      syncState: SyncState.synced, // Mark as synced since it came from remote
+    );
+
+    return await _repository.create(record);
+  }
+
   /// Update an existing log record
   Future<LogRecord> updateLogRecord(
     LogRecord record, {

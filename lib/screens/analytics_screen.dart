@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../providers/logging_provider.dart';
-import '../models/log_entry.dart';
+import '../providers/log_record_provider.dart';
+import '../providers/logging_provider.dart' show statisticsProvider;
+import '../models/log_record.dart';
+import '../models/enums.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -14,7 +16,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
-    final logEntriesAsync = ref.watch(logEntriesProvider);
+    final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
     final statisticsAsync = ref.watch(statisticsProvider);
 
     return Scaffold(
@@ -30,8 +32,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       body: TabBarView(
         children: [
           // Data tab
-          logEntriesAsync.when(
-            data: (entries) => _buildDataView(context, entries),
+          logRecordsAsync.when(
+            data: (records) => _buildDataView(context, records),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('Error: $error')),
           ),
@@ -46,8 +48,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     );
   }
 
-  Widget _buildDataView(BuildContext context, List<LogEntry> entries) {
-    if (entries.isEmpty) {
+  Widget _buildDataView(BuildContext context, List<LogRecord> records) {
+    if (records.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,20 +80,20 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem(context, 'Total', entries.length.toString()),
+                  _buildStatItem(context, 'Total', records.length.toString()),
                   _buildStatItem(
                     context,
                     'Synced',
-                    entries
-                        .where((e) => e.syncState == SyncState.synced)
+                    records
+                        .where((r) => r.syncState == SyncState.synced)
                         .length
                         .toString(),
                   ),
                   _buildStatItem(
                     context,
                     'Pending',
-                    entries
-                        .where((e) => e.syncState == SyncState.pending)
+                    records
+                        .where((r) => r.syncState == SyncState.pending)
                         .length
                         .toString(),
                   ),
@@ -111,30 +113,33 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
-                ...entries.map(
-                  (entry) => Card(
+                ...records.map(
+                  (record) => Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
-                      leading: _getSyncStateIcon(entry.syncState),
+                      leading: _getSyncStateIcon(record.syncState),
                       title: Text(
-                        DateFormat(
-                          'MMM dd, yyyy HH:mm',
-                        ).format(entry.timestamp),
+                        DateFormat('MMM dd, yyyy HH:mm').format(record.eventAt),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (entry.notes != null) Text(entry.notes!),
+                          if (record.note != null) Text(record.note!),
+                          if (record.tags.isNotEmpty)
+                            Text(
+                              'Tags: ${record.tags.join(', ')}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
                           Text(
-                            'Sync: ${entry.syncState.name}',
+                            'Type: ${record.eventType.name} | Sync: ${record.syncState.name}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                       ),
                       trailing:
-                          entry.amount != null
+                          record.value != null
                               ? Text(
-                                entry.amount!.toStringAsFixed(1),
+                                '${record.value!.toStringAsFixed(1)} ${record.unit.name}',
                                 style: Theme.of(context).textTheme.titleMedium,
                               )
                               : null,
@@ -249,6 +254,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         return const Icon(Icons.cloud_done, color: Colors.green);
       case SyncState.pending:
         return const Icon(Icons.cloud_upload, color: Colors.orange);
+      case SyncState.syncing:
+        return const Icon(Icons.cloud_sync, color: Colors.blue);
       case SyncState.error:
         return const Icon(Icons.error, color: Colors.red);
       case SyncState.conflict:

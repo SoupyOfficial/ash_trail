@@ -2,17 +2,42 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../services/log_record_service.dart';
+import 'account_provider.dart';
 
 /// Provider for LogRecordService
 final logRecordServiceProvider = Provider<LogRecordService>((ref) {
   return LogRecordService();
 });
 
-/// Provider for active account ID
-final activeAccountIdProvider = StateProvider<String?>((ref) => null);
+/// Provider for active account ID (derived from activeAccountProvider)
+final activeAccountIdProvider = Provider<String?>((ref) {
+  final activeAccount = ref.watch(activeAccountProvider);
+  return activeAccount.when(
+    data: (account) => account?.userId,
+    loading: () => null,
+    error: (_, __) => null,
+  );
+});
 
 /// Provider for active profile ID
 final activeProfileIdProvider = StateProvider<String?>((ref) => null);
+
+/// Provider for watching log records for active account (convenience wrapper)
+final activeAccountLogRecordsProvider = StreamProvider<List<LogRecord>>((ref) {
+  final accountId = ref.watch(activeAccountIdProvider);
+
+  if (accountId == null) {
+    return Stream.value([]);
+  }
+
+  return ref
+      .watch(logRecordsProvider(const LogRecordsParams()))
+      .when(
+        data: (records) => Stream.value(records),
+        loading: () => Stream.value([]),
+        error: (_, __) => Stream.value([]),
+      );
+});
 
 /// Provider for creating a new log record
 final createLogRecordProvider =

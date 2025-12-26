@@ -3,6 +3,21 @@ import 'package:uuid/uuid.dart';
 import '../models/log_entry.dart';
 import '../services/isar_service.dart';
 
+/// @deprecated This service is deprecated. Use [LogRecordService] instead.
+///
+/// LoggingService is being phased out in favor of LogRecordService which provides:
+/// - Richer event typing with EventType enum
+/// - Better value tracking with Unit enum
+/// - Flexible tagging system
+/// - Platform-agnostic repository pattern
+/// - Session integration
+/// - Enhanced sync state tracking
+///
+/// Migration guide:
+/// - Replace LoggingService with LogRecordService
+/// - Use logRecordServiceProvider instead of loggingServiceProvider
+/// - Replace LogEntry with LogRecord
+/// - Update provider references from logging_provider to log_record_provider
 class LoggingService {
   final Isar _isar = IsarService.instance;
   final _uuid = const Uuid();

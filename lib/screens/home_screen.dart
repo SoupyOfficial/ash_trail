@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/enums.dart';
 import '../providers/account_provider.dart';
-import '../providers/logging_provider.dart';
+import '../providers/log_record_provider.dart';
+import '../providers/logging_provider.dart' show statisticsProvider;
 import '../providers/session_provider.dart';
 import '../widgets/quick_log_widget.dart';
 import '../widgets/session_controls_widget.dart';
@@ -141,7 +143,7 @@ class HomeScreen extends ConsumerWidget {
     WidgetRef ref,
     String accountName,
   ) {
-    final logEntriesAsync = ref.watch(logEntriesProvider);
+    final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
     final statisticsAsync = ref.watch(statisticsProvider);
     final activeSession = ref.watch(activeSessionProvider);
 
@@ -238,9 +240,9 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
 
-          logEntriesAsync.when(
-            data: (entries) {
-              if (entries.isEmpty) {
+          logRecordsAsync.when(
+            data: (records) {
+              if (records.isEmpty) {
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(32),
@@ -271,23 +273,28 @@ class HomeScreen extends ConsumerWidget {
                 );
               }
 
-              final recentEntries = entries.take(5).toList();
+              final recentRecords = records.take(5).toList();
               return Column(
                 children:
-                    recentEntries
+                    recentRecords
                         .map(
-                          (entry) => Card(
+                          (record) => Card(
                             child: ListTile(
-                              leading: const Icon(Icons.circle, size: 12),
-                              title: Text(_formatDateTime(entry.timestamp)),
+                              leading: Icon(
+                                _getEventIcon(record.eventType),
+                                size: 12,
+                              ),
+                              title: Text(_formatDateTime(record.eventAt)),
                               subtitle:
-                                  entry.notes != null
-                                      ? Text(entry.notes!)
+                                  record.note != null
+                                      ? Text(record.note!)
+                                      : record.tags.isNotEmpty
+                                      ? Text(record.tags.join(', '))
                                       : null,
                               trailing:
-                                  entry.amount != null
+                                  record.value != null
                                       ? Text(
-                                        entry.amount!.toStringAsFixed(1),
+                                        '${record.value!.toStringAsFixed(1)} ${record.unit.name}',
                                         style:
                                             Theme.of(
                                               context,
@@ -378,6 +385,27 @@ class HomeScreen extends ConsumerWidget {
 
   void _showBackdateDialog(BuildContext context) {
     showDialog(context: context, builder: (context) => const BackdateDialog());
+  }
+
+  IconData _getEventIcon(EventType eventType) {
+    switch (eventType) {
+      case EventType.inhale:
+        return Icons.air;
+      case EventType.sessionStart:
+        return Icons.play_arrow;
+      case EventType.sessionEnd:
+        return Icons.stop;
+      case EventType.note:
+        return Icons.note;
+      case EventType.purchase:
+        return Icons.shopping_cart;
+      case EventType.tolerance:
+        return Icons.trending_up;
+      case EventType.symptomRelief:
+        return Icons.healing;
+      case EventType.custom:
+        return Icons.circle;
+    }
   }
 
   String _formatDateTime(DateTime dt) {

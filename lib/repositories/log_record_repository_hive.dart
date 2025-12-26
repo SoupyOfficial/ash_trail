@@ -1,24 +1,25 @@
 import 'dart:async';
 import 'package:hive/hive.dart';
-import 'package:isar/isar.dart' show Isar;
 import '../models/log_record.dart';
 import '../models/web_models.dart';
 import '../models/model_converters.dart';
 import '../models/enums.dart';
 import 'log_record_repository.dart';
 
-/// Web implementation of LogRecordRepository using Hive
-class LogRecordRepositoryWeb implements LogRecordRepository {
+/// Hive implementation of LogRecordRepository for all platforms
+class LogRecordRepositoryHive implements LogRecordRepository {
   late final Box _box;
   final _controller = StreamController<List<LogRecord>>.broadcast();
   StreamSubscription? _boxWatchSubscription;
   int _nextId = 1;
 
-  LogRecordRepositoryWeb(Map<String, dynamic> boxes) {
+  LogRecordRepositoryHive(Map<String, dynamic> boxes) {
     _box = boxes['logRecords'] as Box;
     _boxWatchSubscription = _box.watch().listen((_) => _emitChanges());
     // Initialize _nextId based on existing records
     _nextId = _getAllRecords().fold(0, (max, r) => r.id > max ? r.id : max) + 1;
+    // Emit initial state
+    _emitChanges();
   }
 
   void dispose() {
@@ -52,7 +53,7 @@ class LogRecordRepositoryWeb implements LogRecordRepository {
   @override
   Future<LogRecord> create(LogRecord record) async {
     // Assign unique internal ID if not set
-    if (record.id == Isar.autoIncrement) {
+    if (record.id == 0) {
       record.id = _nextId++;
     }
     final webRecord = record.toWebModel();

@@ -1,10 +1,8 @@
 import '../models/session.dart';
-import 'session_repository_stub.dart'
-    if (dart.library.io) 'session_repository_native.dart'
-    if (dart.library.js_interop) 'session_repository_web.dart';
+import 'session_repository_hive.dart';
 
 /// Abstract repository interface for Session data access
-/// Platform-specific implementations handle Isar (native) or Hive (web)
+/// Uses Hive for local storage on all platforms
 abstract class SessionRepository {
   /// Create a new session
   Future<Session> create(Session session);
@@ -44,10 +42,7 @@ abstract class SessionRepository {
   Stream<Session?> watchActiveSession(String accountId);
 }
 
-/// Factory to create platform-specific SessionRepository
+/// Factory to create SessionRepository using Hive
 SessionRepository createSessionRepository([dynamic context]) {
-  if (context is Map<String, dynamic>) {
-    return SessionRepositoryWeb(context);
-  }
-  return SessionRepositoryNative();
+  return SessionRepositoryHive(context as Map<String, dynamic>);
 }

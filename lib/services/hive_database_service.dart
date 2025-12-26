@@ -1,9 +1,18 @@
 import 'database_service.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-/// Web implementation using Hive (web-compatible)
-/// Uses IndexedDB for storage in the browser
-class IsarDatabaseService implements DatabaseService {
+/// Hive implementation for all platforms (web, iOS, Android, desktop)
+/// Uses IndexedDB on web, native storage on mobile/desktop
+class HiveDatabaseService implements DatabaseService {
+  // Singleton instance
+  static final HiveDatabaseService _instance = HiveDatabaseService._internal();
+  static HiveDatabaseService get instance => _instance;
+
+  factory HiveDatabaseService() => _instance;
+
+  HiveDatabaseService._internal();
+
   bool _initialized = false;
 
   // Hive boxes for different data types
@@ -20,8 +29,8 @@ class IsarDatabaseService implements DatabaseService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    // On web, Hive automatically uses IndexedDB - no path needed
-    // No need to call Hive.init() on web
+    // Initialize Hive for Flutter (works on all platforms)
+    await Hive.initFlutter();
 
     // Open boxes for different data types
     _accountsBox = await Hive.openBox('accounts');
@@ -41,11 +50,11 @@ class IsarDatabaseService implements DatabaseService {
   bool get isInitialized => _initialized;
 
   @override
-  dynamic get instance {
+  dynamic get boxes {
     if (!_initialized) {
       throw Exception('Database not initialized. Call initialize() first.');
     }
-    // Return a map of boxes for web
+    // Return a map of boxes
     return {
       'accounts': _accountsBox,
       'logEntries': _logEntriesBox,

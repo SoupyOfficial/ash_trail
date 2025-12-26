@@ -1,6 +1,5 @@
-import 'package:isar/isar.dart';
 
-part 'log_entry.g.dart';
+
 
 /// @deprecated This model is deprecated. Use [LogRecord] from log_record.dart instead.
 /// LogEntry is a legacy model that's being phased out in favor of the more
@@ -20,17 +19,17 @@ enum SyncState {
 }
 
 /// @deprecated Use [LogRecord] instead. This model will be removed in a future release.
-@collection
-class LogEntry {
-  Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
+class LogEntry {
+  int id = 0;
+
+  
   late String entryId; // UUID for cloud sync identity
 
-  @Index()
+  
   late String userId; // Links to Account.userId
 
-  @Index()
+  
   late DateTime timestamp;
 
   // Optional fields for enhanced logging
@@ -41,7 +40,7 @@ class LogEntry {
   String? sessionId; // Group related entries into sessions
 
   // Sync state tracking
-  @Enumerated(EnumType.name)
+  
   late SyncState syncState;
 
   DateTime? lastSyncAttempt;

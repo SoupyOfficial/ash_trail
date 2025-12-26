@@ -11,12 +11,12 @@ class TemplateService {
   final Uuid _uuid = const Uuid();
 
   TemplateService() {
-    // Initialize repository based on platform
+    // Initialize repository with Hive database
     final dbService = DatabaseService.instance;
-    final dbInstance = dbService.instance;
+    final dbBoxes = dbService.boxes;
 
     _repository = createTemplateRepository(
-      dbInstance is Map<String, dynamic> ? dbInstance : null,
+      dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
   }
 

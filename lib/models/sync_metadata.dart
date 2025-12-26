@@ -1,13 +1,12 @@
-import 'package:isar/isar.dart';
 
-part 'sync_metadata.g.dart';
+
 
 /// Tracks sync state and metadata for accounts
-@collection
-class SyncMetadata {
-  Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
+class SyncMetadata {
+  int id = 0;
+
+  
   late String userId;
 
   DateTime? lastFullSync;

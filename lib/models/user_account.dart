@@ -1,16 +1,15 @@
-import 'package:isar/isar.dart';
+
 import 'enums.dart';
 
-part 'user_account.g.dart';
 
 /// UserAccount represents a user identity in the system
 /// This is the top-level identity that can have multiple profiles
-@collection
+
 class UserAccount {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
   /// Unique identifier for the account (UUID/Firebase UID)
-  @Index(unique: true)
+  
   late String accountId;
 
   /// Display name for the user
@@ -20,7 +19,7 @@ class UserAccount {
   String? email;
 
   /// Authentication provider used
-  @Enumerated(EnumType.name)
+  
   late AuthProvider authProvider;
 
   /// URL to user's profile photo
@@ -36,7 +35,7 @@ class UserAccount {
   String? activeProfileId;
 
   /// Whether this is the currently selected account for logging
-  @Index()
+  
   late bool isActive;
 
   /// Last successful sync time with Firestore

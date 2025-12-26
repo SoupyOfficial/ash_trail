@@ -1,26 +1,25 @@
-import 'package:isar/isar.dart';
+
 import 'enums.dart';
 
-part 'log_template.g.dart';
 
 /// LogTemplate represents a preset/template for quick logging
 /// Templates allow users to create common logging patterns with default values
-@collection
+
 class LogTemplate {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
   // ===== IDENTITY =====
 
   /// Unique identifier for this template (UUID)
-  @Index(unique: true, composite: [CompositeIndex('accountId')])
+  
   late String templateId;
 
   /// Account that owns this template
-  @Index()
+  
   late String accountId;
 
   /// Optional profile this template is associated with
-  @Index()
+  
   String? profileId;
 
   // ===== TEMPLATE DEFINITION =====
@@ -32,14 +31,14 @@ class LogTemplate {
   String? description;
 
   /// Default event type for this template
-  @Enumerated(EnumType.name)
+  
   late EventType eventType;
 
   /// Default value
   double? defaultValue;
 
   /// Default unit
-  @Enumerated(EnumType.name)
+  
   late Unit unit;
 
   /// Default note template/stub

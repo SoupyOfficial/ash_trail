@@ -1,12 +1,11 @@
-import 'package:isar/isar.dart';
 
-part 'account.g.dart';
 
-@collection
+
+
 class Account {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
-  @Index(unique: true)
+  
   late String userId; // Firebase UID or custom user identifier
 
   late String email;
@@ -15,7 +14,7 @@ class Account {
 
   String? photoUrl;
 
-  @Index()
+  
   late bool isActive; // Currently selected account for logging
 
   late DateTime createdAt;

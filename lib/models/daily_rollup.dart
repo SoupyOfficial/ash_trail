@@ -1,22 +1,21 @@
-import 'package:isar/isar.dart';
 
-part 'daily_rollup.g.dart';
+
 
 /// DailyRollup represents aggregated data for a specific day
 /// Used for performance optimization in analytics
-@collection
+
 class DailyRollup {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
   /// Account this rollup belongs to
-  @Index(composite: [CompositeIndex('date')])
+  
   late String accountId;
 
   /// Optional profile ID
   String? profileId;
 
   /// Date in YYYY-MM-DD format
-  @Index()
+  
   late String date;
 
   /// Total aggregated value for the day

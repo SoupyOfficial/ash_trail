@@ -6,13 +6,15 @@ import '../models/model_converters.dart';
 import 'account_repository.dart';
 
 /// Web implementation of AccountRepository using Hive
-class AccountRepositoryWeb implements AccountRepository {
+class AccountRepositoryHive implements AccountRepository {
   late final Box _box;
   final _controller = StreamController<List<Account>>.broadcast();
 
-  AccountRepositoryWeb(Map<String, dynamic> boxes) {
+  AccountRepositoryHive(Map<String, dynamic> boxes) {
     _box = boxes['accounts'] as Box;
     _box.watch().listen((_) => _emitChanges());
+    // Emit initial state
+    _emitChanges();
   }
 
   void _emitChanges() {

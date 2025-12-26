@@ -1,11 +1,9 @@
 import '../models/log_template.dart';
 import '../models/enums.dart';
-import 'template_repository_stub.dart'
-    if (dart.library.io) 'template_repository_native.dart'
-    if (dart.library.js_interop) 'template_repository_web.dart';
+import 'template_repository_hive.dart';
 
 /// Abstract repository interface for LogTemplate data access
-/// Platform-specific implementations handle Isar (native) or Hive (web)
+/// Uses Hive for local storage on all platforms
 abstract class TemplateRepository {
   /// Create a new template
   Future<LogTemplate> create(LogTemplate template);
@@ -41,10 +39,7 @@ abstract class TemplateRepository {
   Stream<List<LogTemplate>> watchActiveByAccount(String accountId);
 }
 
-/// Factory to create platform-specific TemplateRepository
+/// Factory to create TemplateRepository using Hive
 TemplateRepository createTemplateRepository([dynamic context]) {
-  if (context is Map<String, dynamic>) {
-    return TemplateRepositoryWeb(context);
-  }
-  return TemplateRepositoryNative();
+  return TemplateRepositoryHive(context as Map<String, dynamic>);
 }

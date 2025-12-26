@@ -1,31 +1,30 @@
-import 'package:isar/isar.dart';
 
-part 'session.g.dart';
+
 
 /// Session represents a logging session that groups related log entries
 /// Sessions track start/end times and compute aggregate metrics
-@collection
+
 class Session {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
   // ===== IDENTITY =====
 
   /// Unique identifier for this session (UUID)
-  @Index(unique: true, composite: [CompositeIndex('accountId')])
+  
   late String sessionId;
 
   /// Account that owns this session
-  @Index()
+  
   late String accountId;
 
   /// Optional profile this session is associated with
-  @Index()
+  
   String? profileId;
 
   // ===== TIME =====
 
   /// When the session started
-  @Index()
+  
   late DateTime startedAt;
 
   /// When the session ended (null if ongoing)
@@ -83,11 +82,11 @@ class Session {
   String? appVersion;
 
   /// Whether this session is currently active
-  @Index()
+  
   late bool isActive;
 
   /// Soft delete flag
-  @Index()
+  
   late bool isDeleted;
 
   /// When this session was deleted
@@ -145,14 +144,12 @@ class Session {
   }
 
   /// Get current duration (for active sessions)
-  @ignore
   Duration get currentDuration {
     final end = endedAt ?? DateTime.now();
     return end.difference(startedAt);
   }
 
   /// Check if session is ongoing
-  @ignore
   bool get isOngoing => isActive && endedAt == null;
 
   /// End the session

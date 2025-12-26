@@ -1,32 +1,28 @@
-import 'package:isar/isar.dart';
 import 'enums.dart';
-
-part 'log_record.g.dart';
 
 /// LogRecord is the main logging entity that captures all events
 /// Designed for offline-first with full sync capability
-@collection
 class LogRecord {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
   // ===== IDENTITY =====
 
   /// Stable identifier across local and Firestore (UUID/ULID)
-  @Index(unique: true, composite: [CompositeIndex('accountId')])
+  
   late String logId;
 
   /// Account that owns this log
-  @Index()
+  
   late String accountId;
 
   /// Optional profile within the account
-  @Index()
+  
   String? profileId;
 
   // ===== TIME =====
 
   /// When the event actually happened (used for charts and analytics)
-  @Index()
+  
   late DateTime eventAt;
 
   /// When this record was created locally
@@ -38,15 +34,15 @@ class LogRecord {
   // ===== EVENT PAYLOAD =====
 
   /// Type of event being logged
-  @Enumerated(EnumType.name)
-  @Index()
+  
+  
   late EventType eventType;
 
   /// Numeric value (e.g., duration in seconds, number of hits)
   double? value;
 
   /// Unit of measurement for the value
-  @Enumerated(EnumType.name)
+  
   late Unit unit;
 
   /// Optional notes/description
@@ -58,7 +54,7 @@ class LogRecord {
   // ===== QUALITY / METADATA =====
 
   /// Source of this record
-  @Enumerated(EnumType.name)
+  
   late Source source;
 
   /// Device identifier where this was created
@@ -70,7 +66,7 @@ class LogRecord {
   // ===== LIFECYCLE =====
 
   /// Soft delete flag
-  @Index()
+  
   late bool isDeleted;
 
   /// When this record was deleted (if applicable)
@@ -79,8 +75,8 @@ class LogRecord {
   // ===== SYNC =====
 
   /// Current sync state
-  @Enumerated(EnumType.name)
-  @Index()
+  
+  
   late SyncState syncState;
 
   /// Error message from last sync attempt
@@ -113,7 +109,7 @@ class LogRecord {
   double? craving;
 
   /// Time confidence level (for clock skew handling)
-  @Enumerated(EnumType.name)
+  
   late TimeConfidence timeConfidence;
 
   /// Edit history (JSON string storing revision history)

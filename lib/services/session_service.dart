@@ -13,12 +13,12 @@ class SessionService {
   final LogRecordService _logRecordService = LogRecordService();
 
   SessionService() {
-    // Initialize repository based on platform
+    // Initialize repository with Hive database
     final dbService = DatabaseService.instance;
-    final dbInstance = dbService.instance;
+    final dbBoxes = dbService.boxes;
 
     _repository = createSessionRepository(
-      dbInstance is Map<String, dynamic> ? dbInstance : null,
+      dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
   }
 

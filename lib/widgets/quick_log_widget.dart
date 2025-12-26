@@ -281,17 +281,26 @@ class _QuickLogWidgetState extends ConsumerState<QuickLogWidget> {
       return _buildTimeAdjustmentOverlay();
     }
 
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      onLongPressStart: _handleLongPressStart,
-      onLongPressEnd: _handleLongPressEnd,
-      child: FloatingActionButton.extended(
-        heroTag: 'quick_log',
-        onPressed: () {}, // Handled by GestureDetector
-        icon: const Icon(Icons.add),
-        label: const Text('Quick Log'),
+    return Listener(
+      onPointerExit: (_) {
+        // Cancel any active gestures when pointer leaves the button
+        // This is crucial for web where mouse can leave the button area
+        if (_isRecording || _isLongPressing) {
+          _handleTapCancel();
+        }
+      },
+      child: GestureDetector(
+        onTapDown: _handleTapDown,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        onLongPressStart: _handleLongPressStart,
+        onLongPressEnd: _handleLongPressEnd,
+        child: FloatingActionButton.extended(
+          heroTag: 'quick_log',
+          onPressed: () {}, // Handled by GestureDetector
+          icon: const Icon(Icons.add),
+          label: const Text('Quick Log'),
+        ),
       ),
     );
   }

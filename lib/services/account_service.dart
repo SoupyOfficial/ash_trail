@@ -7,13 +7,13 @@ class AccountService {
   late final AccountRepository _repository;
 
   AccountService() {
-    // Initialize repository based on platform
+    // Initialize repository with Hive database
     final dbService = DatabaseService.instance;
-    final dbInstance = dbService.instance;
+    final dbBoxes = dbService.boxes;
 
-    // Pass context for web (boxes map) or native (null, uses IsarService.instance internally)
+    // Pass Hive boxes map to repository
     _repository = createAccountRepository(
-      dbInstance is Map<String, dynamic> ? dbInstance : null,
+      dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
   }
 

@@ -6,13 +6,15 @@ import '../models/model_converters.dart';
 import 'session_repository.dart';
 
 /// Web implementation of SessionRepository using Hive
-class SessionRepositoryWeb implements SessionRepository {
+class SessionRepositoryHive implements SessionRepository {
   late final Box _box;
   final _controller = StreamController<List<Session>>.broadcast();
 
-  SessionRepositoryWeb(Map<String, dynamic> boxes) {
+  SessionRepositoryHive(Map<String, dynamic> boxes) {
     _box = boxes['sessions'] as Box;
     _box.watch().listen((_) => _emitChanges());
+    // Emit initial state
+    _emitChanges();
   }
 
   void _emitChanges() {

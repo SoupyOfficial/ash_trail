@@ -3,11 +3,11 @@ import 'package:hive/hive.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/services/log_record_service.dart';
-import 'package:ash_trail/repositories/log_record_repository_web.dart';
+import 'package:ash_trail/repositories/log_record_repository_hive.dart';
 
 void main() {
   late Box box;
-  late LogRecordRepositoryWeb repository;
+  late LogRecordRepositoryHive repository;
   late LogRecordService service;
 
   setUp(() async {
@@ -20,7 +20,7 @@ void main() {
     );
 
     // Create repository with test box
-    repository = LogRecordRepositoryWeb({'logRecords': box});
+    repository = LogRecordRepositoryHive({'logRecords': box});
 
     // Inject repository into service for testing
     service = LogRecordService(repository: repository);

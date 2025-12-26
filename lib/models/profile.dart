@@ -1,20 +1,19 @@
-import 'package:isar/isar.dart';
+
 import 'enums.dart';
 
-part 'profile.g.dart';
 
 /// Profile represents a persona within a user account
 /// Allows one account to have multiple "tracking identities" with different settings
-@collection
+
 class Profile {
-  Id id = Isar.autoIncrement;
+  int id = 0;
 
   /// Unique identifier for this profile (UUID)
-  @Index(unique: true)
+  
   late String profileId;
 
   /// Account this profile belongs to
-  @Index()
+  
   late String accountId;
 
   /// Display name for this profile
@@ -36,14 +35,14 @@ class Profile {
   // ===== DEFAULT LOGGING VALUES =====
 
   /// Default event type for quick logging
-  @Enumerated(EnumType.name)
+  
   EventType? defaultEventType;
 
   /// Default value for quick logging
   double? defaultValue;
 
   /// Default unit for quick logging
-  @Enumerated(EnumType.name)
+  
   Unit? defaultUnit;
 
   /// Default tags for quick logging (comma-separated)
@@ -53,7 +52,7 @@ class Profile {
   String? defaultLocation;
 
   /// Whether this profile is currently active
-  @Index()
+  
   late bool isActive;
 
   /// Soft delete flag

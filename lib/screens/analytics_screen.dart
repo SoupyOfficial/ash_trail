@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/log_record_provider.dart';
-import '../providers/logging_provider.dart' show statisticsProvider;
+import '../providers/log_record_provider.dart'
+    show logRecordStatsProvider, LogRecordsParams;
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../widgets/edit_log_record_dialog.dart';
@@ -18,7 +19,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
-    final statisticsAsync = ref.watch(statisticsProvider);
+    final statisticsAsync = ref.watch(
+      logRecordStatsProvider(LogRecordsParams(accountId: null)),
+    );
 
     return Scaffold(
       appBar: AppBar(

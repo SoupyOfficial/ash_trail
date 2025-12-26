@@ -1,11 +1,9 @@
 import '../models/log_record.dart';
 import '../models/enums.dart';
-import 'log_record_repository_stub.dart'
-    if (dart.library.io) 'log_record_repository_native.dart'
-    if (dart.library.js_interop) 'log_record_repository_web.dart';
+import 'log_record_repository_hive.dart';
 
 /// Abstract repository interface for LogRecord data access
-/// Platform-specific implementations handle Isar (native) or Hive (web)
+/// Uses Hive for local storage on all platforms (web, iOS, Android, desktop)
 abstract class LogRecordRepository {
   /// Create a new log record
   Future<LogRecord> create(LogRecord record);
@@ -55,10 +53,7 @@ abstract class LogRecordRepository {
   );
 }
 
-/// Factory to create platform-specific LogRecordRepository
+/// Factory to create LogRecordRepository using Hive
 LogRecordRepository createLogRecordRepository([dynamic context]) {
-  // For native platforms, use Isar-based implementation
-  // For web, use Hive-based implementation
-  // The conditional import handles platform selection automatically
-  return LogRecordRepositoryNative();
+  return LogRecordRepositoryHive(context as Map<String, dynamic>);
 }

@@ -7,13 +7,15 @@ import '../models/enums.dart';
 import 'template_repository.dart';
 
 /// Web implementation of TemplateRepository using Hive
-class TemplateRepositoryWeb implements TemplateRepository {
+class TemplateRepositoryHive implements TemplateRepository {
   late final Box _box;
   final _controller = StreamController<List<LogTemplate>>.broadcast();
 
-  TemplateRepositoryWeb(Map<String, dynamic> boxes) {
+  TemplateRepositoryHive(Map<String, dynamic> boxes) {
     _box = boxes['templates'] as Box;
     _box.watch().listen((_) => _emitChanges());
+    // Emit initial state
+    _emitChanges();
   }
 
   void _emitChanges() {

@@ -4,7 +4,8 @@ import '../models/enums.dart';
 import '../models/log_record.dart';
 import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
-import '../providers/logging_provider.dart' show statisticsProvider;
+import '../providers/log_record_provider.dart'
+    show logRecordStatsProvider, LogRecordsParams;
 import '../providers/session_provider.dart';
 import '../widgets/quick_log_widget.dart';
 import '../widgets/session_controls_widget.dart';
@@ -151,7 +152,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String accountName,
   ) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
-    final statisticsAsync = ref.watch(statisticsProvider);
+    final statisticsAsync = ref.watch(
+      logRecordStatsProvider(LogRecordsParams(accountId: null)),
+    );
     final activeSession = ref.watch(activeSessionProvider);
 
     return SingleChildScrollView(

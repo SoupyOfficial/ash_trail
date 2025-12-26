@@ -37,7 +37,7 @@ extension AccountWebConversion on Account {
 extension LogRecordWebConversion on LogRecord {
   WebLogRecord toWebModel() {
     return WebLogRecord(
-      id: id.toString(),
+      id: logId, // Use logId (UUID) not internal id
       accountId: accountId,
       profileId: profileId ?? '',
       eventType: eventType.name,
@@ -54,14 +54,18 @@ extension LogRecordWebConversion on LogRecord {
     );
   }
 
-  static LogRecord fromWebModel(WebLogRecord web, {int? id}) {
+  static LogRecord fromWebModel(
+    WebLogRecord web, {
+    int? id,
+    Map<String, dynamic>? extraFields,
+  }) {
     return LogRecord.create(
         logId: web.id,
         accountId: web.accountId,
         profileId: web.profileId.isEmpty ? null : web.profileId,
         eventType: EventType.values.firstWhere(
           (e) => e.name == web.eventType,
-          orElse: () => EventType.smoke,
+          orElse: () => EventType.inhale,
         ),
         eventAt: web.eventAt,
         createdAt: web.createdAt,
@@ -77,10 +81,28 @@ extension LogRecordWebConversion on LogRecord {
         source: Source.manual,
         deviceId: null,
         appVersion: null,
-        syncState: SyncState.pending,
+        syncState: SyncState.values.firstWhere(
+          (s) => s.name == (extraFields?['syncState'] ?? 'pending'),
+          orElse: () => SyncState.pending,
+        ),
       )
       ..id = id ?? 0
-      ..isDeleted = web.isDeleted;
+      ..isDeleted = web.isDeleted
+      ..deletedAt =
+          extraFields?['deletedAt'] != null
+              ? DateTime.parse(extraFields!['deletedAt'])
+              : null
+      ..revision = extraFields?['revision'] ?? 0
+      ..dirtyFields = extraFields?['dirtyFields'] as String?
+      ..syncedAt =
+          extraFields?['syncedAt'] != null
+              ? DateTime.parse(extraFields!['syncedAt'])
+              : null
+      ..syncError = extraFields?['syncError'] as String?
+      ..lastRemoteUpdateAt =
+          extraFields?['lastRemoteUpdateAt'] != null
+              ? DateTime.parse(extraFields!['lastRemoteUpdateAt'])
+              : null;
   }
 }
 

@@ -1,44 +1,37 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:isar/isar.dart';
+import 'package:hive/hive.dart';
 import 'package:ash_trail/models/log_record.dart';
-import 'package:ash_trail/models/user_account.dart';
-import 'package:ash_trail/models/profile.dart';
-import 'package:ash_trail/models/daily_rollup.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/services/log_record_service.dart';
-import 'dart:io';
+import 'package:ash_trail/repositories/log_record_repository_web.dart';
 
 void main() {
-  // Skip all tests if not on a supported platform (Isar requires native platform)
-  if (!Platform.isAndroid &&
-      !Platform.isIOS &&
-      !Platform.isMacOS &&
-      !Platform.isLinux &&
-      !Platform.isWindows) {
-    test('Service tests skipped - Isar not supported on this platform', () {
-      print(
-        '⚠️ Skipping service tests: Isar database only supports native platforms',
-      );
-      print('✅ Run these tests on: iOS, Android, macOS, Linux, or Windows');
-    });
-    return;
-  }
-  late Isar isar;
+  late Box box;
+  late LogRecordRepositoryWeb repository;
   late LogRecordService service;
 
   setUp(() async {
-    // Create in-memory Isar instance for testing
-    isar = await Isar.open(
-      [LogRecordSchema, UserAccountSchema, ProfileSchema, DailyRollupSchema],
-      directory: '',
-      name: 'test_log_record_${DateTime.now().millisecondsSinceEpoch}',
+    // Initialize Hive for testing (in-memory)
+    Hive.init('test_data_${DateTime.now().millisecondsSinceEpoch}');
+
+    // Create in-memory box for testing
+    box = await Hive.openBox(
+      'test_log_records_${DateTime.now().millisecondsSinceEpoch}',
     );
 
-    service = LogRecordService();
+    // Create repository with test box
+    repository = LogRecordRepositoryWeb({'logRecords': box});
+
+    // Inject repository into service for testing
+    service = LogRecordService(repository: repository);
   });
 
   tearDown(() async {
-    await isar.close(deleteFromDisk: true);
+    // Dispose repository to cancel stream subscriptions
+    repository.dispose();
+    // Close box
+    await box.clear();
+    await box.close();
   });
 
   group('LogRecordService - Create', () {
@@ -330,6 +323,75 @@ void main() {
       );
 
       expect(records.length, 2);
+    });
+
+    test('restores soft deleted record', () async {
+      final record = await service.createLogRecord(
+        accountId: 'test-account',
+        eventType: EventType.inhale,
+        value: 2.0,
+        note: 'Test note',
+      );
+
+      // Delete the record
+      await service.deleteLogRecord(record);
+
+      final deleted = await service.getLogRecordByLogId(record.logId);
+      expect(deleted!.isDeleted, true);
+      expect(deleted.deletedAt, isNotNull);
+
+      // Restore the record
+      await service.restoreDeleted(deleted);
+
+      final restored = await service.getLogRecordByLogId(record.logId);
+      expect(restored!.isDeleted, false);
+      expect(restored.deletedAt, null);
+      expect(restored.value, 2.0);
+      expect(restored.note, 'Test note');
+    });
+
+    test('restored records appear in default queries', () async {
+      final record1 = await service.createLogRecord(
+        accountId: 'test-account',
+        eventType: EventType.inhale,
+      );
+
+      final record2 = await service.createLogRecord(
+        accountId: 'test-account',
+        eventType: EventType.note,
+      );
+
+      // Delete and restore record2
+      await service.deleteLogRecord(record2);
+      final deleted = await service.getLogRecordByLogId(record2.logId);
+      await service.restoreDeleted(deleted!);
+
+      // Both records should be in default query
+      final records = await service.getLogRecords(
+        accountId: 'test-account',
+        includeDeleted: false,
+      );
+
+      expect(records.length, 2);
+      expect(records.any((r) => r.logId == record1.logId), true);
+      expect(records.any((r) => r.logId == record2.logId), true);
+    });
+
+    test('restore marks dirty fields for sync', () async {
+      final record = await service.createLogRecord(
+        accountId: 'test-account',
+        eventType: EventType.inhale,
+      );
+
+      await service.deleteLogRecord(record);
+      final deleted = await service.getLogRecordByLogId(record.logId);
+
+      await service.restoreDeleted(deleted!);
+
+      final restored = await service.getLogRecordByLogId(record.logId);
+      expect(restored!.dirtyFields, isNotNull);
+      expect(restored.dirtyFields!.contains('isDeleted'), true);
+      expect(restored.dirtyFields!.contains('deletedAt'), true);
     });
   });
 

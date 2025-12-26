@@ -57,8 +57,8 @@ abstract class LogRecordRepository {
 
 /// Factory to create platform-specific LogRecordRepository
 LogRecordRepository createLogRecordRepository([dynamic context]) {
-  if (context is Map<String, dynamic>) {
-    return LogRecordRepositoryWeb(context);
-  }
+  // For native platforms, use Isar-based implementation
+  // For web, use Hive-based implementation
+  // The conditional import handles platform selection automatically
   return LogRecordRepositoryNative();
 }

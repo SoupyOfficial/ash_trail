@@ -2,7 +2,6 @@ import 'package:uuid/uuid.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
-import 'database_service.dart';
 import 'validation_service.dart';
 
 /// LogRecordService handles all CRUD operations for log records
@@ -11,14 +10,9 @@ class LogRecordService {
   late final LogRecordRepository _repository;
   final Uuid _uuid = const Uuid();
 
-  LogRecordService() {
-    // Initialize repository based on platform
-    final dbService = DatabaseService.instance;
-    final dbInstance = dbService.instance;
-
-    _repository = createLogRecordRepository(
-      dbInstance is Map<String, dynamic> ? dbInstance : null,
-    );
+  LogRecordService({LogRecordRepository? repository}) {
+    // Use injected repository for testing, or create platform-specific one
+    _repository = repository ?? createLogRecordRepository(null);
   }
 
   /// Get device ID (platform-specific, simplified here)
@@ -187,11 +181,13 @@ class LogRecordService {
   }
 
   /// Get a log record by its internal id (kept for backward compatibility)
-  Future<LogRecord?> getLogRecordById(Id id) async {
-    // This method is kept for backward compatibility but may require refactoring
-    // Web doesn't use internal Isar IDs, so this will return null on web
-    final allRecords = await _repository.getByAccount(''); // TODO: Fix this
-    return allRecords.where((r) => r.id == id).firstOrNull;
+  @Deprecated(
+    'Use getLogRecordByLogId instead - internal IDs are platform-specific',
+  )
+  Future<LogRecord?> getLogRecordById(int id) async {
+    // This method is deprecated - use getLogRecordByLogId for cross-platform compatibility
+    // Returns null since we can't reliably map internal IDs across platforms
+    return null;
   }
 
   /// Get all log records for an account
@@ -422,11 +418,7 @@ class LogRecordService {
       timeConfidence: TimeConfidence.high,
     );
 
-    await _isar.writeTxn(() async {
-      await _isar.logRecords.put(record);
-    });
-
-    return record;
+    return await _repository.create(record);
   }
 
   /// Backdate log: Create a log entry for a past time
@@ -479,9 +471,7 @@ class LogRecordService {
       timeConfidence: timeConfidence,
     );
 
-    await _isar.writeTxn(() async {
-      await _isar.logRecords.put(record);
-    });
+    await _repository.create(record);
 
     return record;
   }
@@ -538,11 +528,7 @@ class LogRecordService {
           TimeConfidence.high, // High confidence for measured duration
     );
 
-    await _isar.writeTxn(() async {
-      await _isar.logRecords.put(record);
-    });
-
-    return record;
+    return await _repository.create(record);
   }
 
   /// Batch add: Create multiple log records at once
@@ -598,9 +584,10 @@ class LogRecordService {
       records.add(record);
     }
 
-    await _isar.writeTxn(() async {
-      await _isar.logRecords.putAll(records);
-    });
+    // Create all records
+    for (final record in records) {
+      await _repository.create(record);
+    }
 
     return records;
   }
@@ -611,9 +598,7 @@ class LogRecordService {
     record.deletedAt = null;
     record.markDirty(['isDeleted', 'deletedAt']);
 
-    await _isar.writeTxn(() async {
-      await _isar.logRecords.put(record);
-    });
+    await _repository.update(record);
   }
 
   /// Find potential duplicates for a given record
@@ -625,23 +610,20 @@ class LogRecordService {
     final startTime = record.eventAt.subtract(timeTolerance);
     final endTime = record.eventAt.add(timeTolerance);
 
-    final candidates =
-        await _isar.logRecords
-            .filter()
-            .accountIdEqualTo(record.accountId)
-            .and()
-            .eventAtBetween(startTime, endTime)
-            .and()
-            .eventTypeEqualTo(record.eventType)
-            .and()
-            .isDeletedEqualTo(false)
-            .findAll();
+    // Get all records in date range for the account
+    final candidates = await _repository.getByDateRange(
+      record.accountId,
+      startTime,
+      endTime,
+    );
 
-    // Filter using duplicate detection logic (exclude self and check for duplicates)
+    // Filter using duplicate detection logic (exclude self, check event type, and check for duplicates)
     return candidates
         .where(
           (candidate) =>
               candidate.logId != record.logId &&
+              candidate.eventType == record.eventType &&
+              !candidate.isDeleted &&
               ValidationService.isPotentialDuplicate(
                 eventAt1: record.eventAt,
                 eventAt2: candidate.eventAt,
@@ -710,10 +692,7 @@ class LogRecordService {
 
     if (changedFields.isNotEmpty) {
       record.markDirty(changedFields);
-
-      await _isar.writeTxn(() async {
-        await _isar.logRecords.put(record);
-      });
+      await _repository.update(record);
     }
 
     return record;

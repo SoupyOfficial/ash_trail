@@ -245,3 +245,75 @@ class LogRecordsParams {
     );
   }
 }
+
+/// Provider for log record mutations (update/delete)
+final logRecordNotifierProvider =
+    StateNotifierProvider<LogRecordNotifier, AsyncValue<LogRecord?>>((ref) {
+      return LogRecordNotifier(ref);
+    });
+
+/// StateNotifier for handling log record mutations
+class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
+  final Ref _ref;
+
+  LogRecordNotifier(this._ref) : super(const AsyncValue.data(null));
+
+  /// Update a log record
+  Future<void> updateLogRecord(
+    LogRecord record, {
+    EventType? eventType,
+    DateTime? eventAt,
+    double? value,
+    Unit? unit,
+    String? note,
+    List<String>? tags,
+    String? sessionId,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final service = _ref.read(logRecordServiceProvider);
+      final updated = await service.updateLogRecord(
+        record,
+        eventType: eventType,
+        eventAt: eventAt,
+        value: value,
+        unit: unit,
+        note: note,
+        tags: tags,
+        sessionId: sessionId,
+      );
+      state = AsyncValue.data(updated);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Delete a log record (soft delete)
+  Future<void> deleteLogRecord(LogRecord record) async {
+    state = const AsyncValue.loading();
+    try {
+      final service = _ref.read(logRecordServiceProvider);
+      await service.deleteLogRecord(record);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Restore a deleted log record
+  Future<void> restoreLogRecord(LogRecord record) async {
+    state = const AsyncValue.loading();
+    try {
+      final service = _ref.read(logRecordServiceProvider);
+      await service.restoreDeleted(record);
+      state = AsyncValue.data(record);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  /// Reset state
+  void reset() {
+    state = const AsyncValue.data(null);
+  }
+}

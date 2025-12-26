@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:hive/hive.dart';
+import 'package:isar/isar.dart' show Isar;
 import '../models/log_record.dart';
 import '../models/web_models.dart';
 import '../models/model_converters.dart';
@@ -10,13 +11,23 @@ import 'log_record_repository.dart';
 class LogRecordRepositoryWeb implements LogRecordRepository {
   late final Box _box;
   final _controller = StreamController<List<LogRecord>>.broadcast();
+  StreamSubscription? _boxWatchSubscription;
+  int _nextId = 1;
 
   LogRecordRepositoryWeb(Map<String, dynamic> boxes) {
     _box = boxes['logRecords'] as Box;
-    _box.watch().listen((_) => _emitChanges());
+    _boxWatchSubscription = _box.watch().listen((_) => _emitChanges());
+    // Initialize _nextId based on existing records
+    _nextId = _getAllRecords().fold(0, (max, r) => r.id > max ? r.id : max) + 1;
+  }
+
+  void dispose() {
+    _boxWatchSubscription?.cancel();
+    _controller.close();
   }
 
   void _emitChanges() {
+    if (!_box.isOpen) return; // Don't emit if box is closed
     _controller.add(_getAllRecords());
   }
 
@@ -25,10 +36,13 @@ class LogRecordRepositoryWeb implements LogRecordRepository {
     for (var key in _box.keys) {
       final json = Map<String, dynamic>.from(_box.get(key));
       final webRecord = WebLogRecord.fromJson(json);
+      // Use stored ID or assign new one
+      final id = json['_internalId'] as int? ?? _nextId++;
       records.add(
         LogRecordWebConversion.fromWebModel(
           webRecord,
-          id: int.tryParse(webRecord.id) ?? 0,
+          id: id,
+          extraFields: json, // Pass full JSON for extra fields
         ),
       );
     }
@@ -37,16 +51,41 @@ class LogRecordRepositoryWeb implements LogRecordRepository {
 
   @override
   Future<LogRecord> create(LogRecord record) async {
+    // Assign unique internal ID if not set
+    if (record.id == Isar.autoIncrement) {
+      record.id = _nextId++;
+    }
     final webRecord = record.toWebModel();
-    await _box.put(record.logId, webRecord.toJson());
+    final json = webRecord.toJson();
+    // Store additional fields not in WebLogRecord
+    json['_internalId'] = record.id;
+    json['syncState'] = record.syncState.name;
+    json['revision'] = record.revision;
+    json['dirtyFields'] = record.dirtyFields;
+    json['deletedAt'] = record.deletedAt?.toIso8601String();
+    json['syncedAt'] = record.syncedAt?.toIso8601String();
+    json['syncError'] = record.syncError;
+    json['lastRemoteUpdateAt'] = record.lastRemoteUpdateAt?.toIso8601String();
+    await _box.put(record.logId, json);
     return record;
   }
 
   @override
   Future<LogRecord> update(LogRecord record) async {
     final webRecord = record.toWebModel();
-    await _box.put(record.logId, webRecord.toJson());
-    return record;
+    final json = webRecord.toJson();
+    // Store additional fields not in WebLogRecord
+    json['_internalId'] = record.id;
+    json['syncState'] = record.syncState.name;
+    json['revision'] = record.revision;
+    json['dirtyFields'] = record.dirtyFields;
+    json['deletedAt'] = record.deletedAt?.toIso8601String();
+    json['syncedAt'] = record.syncedAt?.toIso8601String();
+    json['syncError'] = record.syncError;
+    json['lastRemoteUpdateAt'] = record.lastRemoteUpdateAt?.toIso8601String();
+    await _box.put(record.logId, json);
+    // Fetch and return the updated record to ensure consistency
+    return (await getByLogId(record.logId))!;
   }
 
   @override
@@ -58,19 +97,20 @@ class LogRecordRepositoryWeb implements LogRecordRepository {
   Future<LogRecord?> getByLogId(String logId) async {
     final json = _box.get(logId);
     if (json == null) return null;
-    final webRecord = WebLogRecord.fromJson(Map<String, dynamic>.from(json));
+    final jsonMap = Map<String, dynamic>.from(json);
+    final webRecord = WebLogRecord.fromJson(jsonMap);
+    final id = jsonMap['_internalId'] as int? ?? 0;
     return LogRecordWebConversion.fromWebModel(
       webRecord,
-      id: int.tryParse(webRecord.id) ?? 0,
+      id: id,
+      extraFields: jsonMap, // Pass full JSON for extra fields
     );
   }
 
   @override
   Future<List<LogRecord>> getByAccount(String accountId) async {
     final records =
-        _getAllRecords()
-            .where((r) => r.accountId == accountId && !r.isDeleted)
-            .toList();
+        _getAllRecords().where((r) => r.accountId == accountId).toList();
     records.sort((a, b) => b.eventAt.compareTo(a.eventAt));
     return records;
   }

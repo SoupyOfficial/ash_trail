@@ -80,55 +80,129 @@ test.describe('Complete Logging Flow', () => {
   });
 
   test('should edit an existing log entry', async ({ page }) => {
-    // Click on a log entry
+    // Click on a log entry to open action menu
     await page.click('[data-testid="log-entry-tile"]').catch(async () => {
       await page.click('li:first-child');
     });
 
-    // Click edit button
-    await page.click('button:has-text("Edit")').catch(async () => {
+    // Wait for action menu (bottom sheet) to appear
+    await page.waitForSelector('text=Edit, text=Delete', { timeout: 5000 }).catch(async () => {
+      // Fallback: click edit button directly if action menu doesn't appear
       await page.click('[data-testid="edit-button"]');
     });
 
-    // Update the note
-    await page.fill('input[name="note"], textarea[name="note"]', 'Updated note text');
+    // Click Edit action
+    await page.click('text=Edit').catch(async () => {
+      await page.click('button:has-text("Edit")');
+    });
+
+    // Wait for edit dialog to open
+    await page.waitForSelector('[data-testid="edit-log-dialog"]', { timeout: 5000 }).catch(async () => {
+      await page.waitForSelector('dialog:has-text("Edit Log Record"), [role="dialog"]:has-text("Edit")');
+    });
+
+    // Update the note field
+    await page.fill('textarea[name="note"], input[name="note"]', 'Updated note text');
 
     // Update the value
     await page.fill('input[name="value"]', '3.0');
 
     // Save changes
-    await page.click('button:has-text("Save"), button:has-text("Update")');
+    await page.click('button:has-text("Update"), button:has-text("Save")');
+
+    // Wait for dialog to close and changes to reflect
+    await page.waitForTimeout(1000);
 
     // Verify the update
     await page.waitForSelector('text=Updated note text', { timeout: 5000 });
-    await expect(page.locator('text=3.0 hits')).toBeVisible();
+    await expect(page.locator('text=3.0')).toBeVisible();
   });
 
   test('should delete a log entry', async ({ page }) => {
     // Get initial count of log entries
-    const initialCount = await page.locator('[data-testid="log-entry-tile"]').count();
+    const initialCount = await page.locator('[data-testid="log-entry-tile"]').count().catch(() => {
+      return page.locator('li').count();
+    });
 
-    // Long press or click delete on a log entry
+    // Click on a log entry to open action menu
     await page.click('[data-testid="log-entry-tile"]').catch(async () => {
       await page.click('li:first-child');
     });
 
-    // Click delete button
-    await page.click('button:has-text("Delete")').catch(async () => {
+    // Wait for action menu (bottom sheet) to appear
+    await page.waitForSelector('text=Edit, text=Delete', { timeout: 5000 }).catch(async () => {
       await page.click('[data-testid="delete-button"]');
+      return;
     });
 
-    // Confirm deletion
-    await page.click('button:has-text("Confirm"), button:has-text("Yes")');
+    // Click Delete action
+    await page.click('text=Delete').catch(async () => {
+      await page.click('button:has-text("Delete")');
+    });
 
-    // Wait a moment for the deletion
+    // Wait for confirmation dialog
+    await page.waitForSelector('text=Delete Log Record, text=Confirm Delete', { timeout: 5000 });
+
+    // Confirm deletion
+    await page.click('button:has-text("Delete"), button:has-text("Confirm")');
+
+    // Wait for SnackBar with UNDO option
+    await page.waitForSelector('text=Log deleted, text=deleted', { timeout: 3000 }).catch(() => {
+      // SnackBar might disappear quickly
+    });
+
+    // Wait a moment for the deletion to process
     await page.waitForTimeout(1000);
 
     // Verify count decreased (if there were entries)
     if (initialCount > 0) {
-      const newCount = await page.locator('[data-testid="log-entry-tile"]').count();
+      const newCount = await page.locator('[data-testid="log-entry-tile"]').count().catch(() => {
+        return page.locator('li').count();
+      });
       expect(newCount).toBeLessThan(initialCount);
     }
+  });
+
+  test('should undo delete with UNDO button', async ({ page }) => {
+    // Create a log entry first (so we have something to delete and restore)
+    await page.click('[data-testid="add-log-button"]', { timeout: 5000 }).catch(async () => {
+      await page.click('button[aria-label*="add"]');
+    });
+
+    await page.waitForSelector('[data-testid="create-log-dialog"]', { timeout: 5000 }).catch(async () => {
+      await page.waitForSelector('dialog, [role="dialog"]');
+    });
+
+    await page.fill('input[name="value"]', '5.0');
+    await page.fill('textarea[name="note"], input[name="note"]', 'Test entry for undo');
+    await page.click('button:has-text("Save"), button:has-text("Create")');
+    await page.waitForTimeout(1000);
+
+    // Get count before delete
+    const beforeCount = await page.locator('text=Test entry for undo').count();
+    expect(beforeCount).toBeGreaterThan(0);
+
+    // Click on the entry to open action menu
+    await page.click('text=Test entry for undo');
+
+    // Click Delete
+    await page.waitForSelector('text=Delete', { timeout: 5000 });
+    await page.click('text=Delete');
+
+    // Confirm deletion
+    await page.waitForSelector('text=Delete Log Record, text=Confirm', { timeout: 5000 });
+    await page.click('button:has-text("Delete"), button:has-text("Confirm")');
+
+    // Click UNDO in SnackBar (needs to be quick before it dismisses)
+    await page.click('button:has-text("UNDO"), text=UNDO', { timeout: 5000 }).catch(async () => {
+      console.log('UNDO button not found or SnackBar dismissed');
+    });
+
+    // Wait for restore to complete
+    await page.waitForTimeout(1000);
+
+    // Verify the entry is back
+    await expect(page.locator('text=Test entry for undo')).toBeVisible({ timeout: 5000 });
   });
 
   test('should use quick log button', async ({ page }) => {

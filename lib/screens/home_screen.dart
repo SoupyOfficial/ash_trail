@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
+import '../models/log_record.dart';
 import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
 import '../providers/logging_provider.dart' show statisticsProvider;
@@ -9,14 +10,20 @@ import '../widgets/quick_log_widget.dart';
 import '../widgets/session_controls_widget.dart';
 import '../widgets/template_selector_widget.dart';
 import '../widgets/backdate_dialog.dart';
+import '../widgets/edit_log_record_dialog.dart';
 import 'analytics_screen.dart';
 import 'accounts_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
     final activeAccountAsync = ref.watch(activeAccountProvider);
     final activeSession = ref.watch(activeSessionProvider);
 
@@ -301,6 +308,7 @@ class HomeScreen extends ConsumerWidget {
                                             ).textTheme.titleMedium,
                                       )
                                       : null,
+                              onTap: () => _showEditDialog(context, record),
                             ),
                           ),
                         )
@@ -422,6 +430,18 @@ class HomeScreen extends ConsumerWidget {
       return '${diff.inDays}d ago';
     } else {
       return '${dt.day}/${dt.month}/${dt.year}';
+    }
+  }
+
+  Future<void> _showEditDialog(BuildContext context, LogRecord record) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => EditLogRecordDialog(record: record),
+    );
+
+    if (result == true && mounted) {
+      // Record was updated, list will refresh automatically via stream
+      ref.read(logRecordNotifierProvider.notifier).reset();
     }
   }
 }

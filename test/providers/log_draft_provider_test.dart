@@ -9,14 +9,14 @@ void main() {
       final draft = LogDraft.empty();
 
       expect(draft.eventType, EventType.inhale);
-      expect(draft.value, isNull);
+      expect(draft.duration, isNull);
       expect(draft.unit, Unit.hits);
       expect(draft.note, isNull);
-      expect(draft.tags, isEmpty);
-      expect(draft.mood, isNull);
-      expect(draft.craving, isNull);
+      expect(draft.moodRating, isNull);
+      expect(draft.physicalRating, isNull);
       expect(draft.reason, isNull);
-      expect(draft.location, isNull);
+      expect(draft.latitude, isNull);
+      expect(draft.longitude, isNull);
       expect(draft.isValid, true);
     });
 
@@ -26,15 +26,14 @@ void main() {
 
       expect(updated.eventType, EventType.note);
       expect(updated.unit, draft.unit);
-      expect(updated.tags, draft.tags);
     });
 
-    test('copyWith with nullable value using function syntax', () {
-      final draft = LogDraft.empty().copyWith(value: () => 5.0);
-      expect(draft.value, 5.0);
+    test('copyWith with nullable duration using function syntax', () {
+      final draft = LogDraft.empty().copyWith(duration: () => 5.0);
+      expect(draft.duration, 5.0);
 
-      final cleared = draft.copyWith(value: () => null);
-      expect(cleared.value, isNull);
+      final cleared = draft.copyWith(duration: () => null);
+      expect(cleared.duration, isNull);
     });
 
     test('copyWith with nullable note using function syntax', () {
@@ -45,20 +44,20 @@ void main() {
       expect(cleared.note, isNull);
     });
 
-    test('copyWith with nullable mood using function syntax', () {
-      final draft = LogDraft.empty().copyWith(mood: () => 7.5);
-      expect(draft.mood, 7.5);
+    test('copyWith with nullable moodRating using function syntax', () {
+      final draft = LogDraft.empty().copyWith(moodRating: () => 7.5);
+      expect(draft.moodRating, 7.5);
 
-      final cleared = draft.copyWith(mood: () => null);
-      expect(cleared.mood, isNull);
+      final cleared = draft.copyWith(moodRating: () => null);
+      expect(cleared.moodRating, isNull);
     });
 
-    test('copyWith with nullable craving using function syntax', () {
-      final draft = LogDraft.empty().copyWith(craving: () => 3.0);
-      expect(draft.craving, 3.0);
+    test('copyWith with nullable physicalRating using function syntax', () {
+      final draft = LogDraft.empty().copyWith(physicalRating: () => 8.0);
+      expect(draft.physicalRating, 8.0);
 
-      final cleared = draft.copyWith(craving: () => null);
-      expect(cleared.craving, isNull);
+      final cleared = draft.copyWith(physicalRating: () => null);
+      expect(cleared.physicalRating, isNull);
     });
 
     test('copyWith with nullable reason using function syntax', () {
@@ -69,98 +68,98 @@ void main() {
       expect(cleared.reason, isNull);
     });
 
-    test('copyWith with tags list', () {
-      final draft = LogDraft.empty();
-      final updated = draft.copyWith(tags: ['tag1', 'tag2']);
+    test('copyWith with location coordinates', () {
+      final draft = LogDraft.empty().copyWith(
+        latitude: () => 37.7749,
+        longitude: () => -122.4194,
+      );
 
-      expect(updated.tags, ['tag1', 'tag2']);
+      expect(draft.latitude, 37.7749);
+      expect(draft.longitude, -122.4194);
     });
 
     group('validation', () {
-      test('negative value is invalid', () {
-        final draft = LogDraft.empty().copyWith(value: () => -5.0);
+      test('negative duration is invalid', () {
+        final draft = LogDraft.empty().copyWith(duration: () => -5.0);
         expect(draft.isValid, false);
       });
 
-      test('zero value is valid', () {
-        final draft = LogDraft.empty().copyWith(value: () => 0.0);
+      test('zero duration is valid', () {
+        final draft = LogDraft.empty().copyWith(duration: () => 0.0);
         expect(draft.isValid, true);
       });
 
-      test('positive value is valid', () {
-        final draft = LogDraft.empty().copyWith(value: () => 10.0);
+      test('positive duration is valid', () {
+        final draft = LogDraft.empty().copyWith(duration: () => 10.0);
         expect(draft.isValid, true);
       });
 
-      test('mood below 0 is invalid', () {
-        final draft = LogDraft.empty().copyWith(mood: () => -1.0);
+      test('moodRating below 0 is invalid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => -1.0);
         expect(draft.isValid, false);
       });
 
-      test('mood above 10 is invalid', () {
-        final draft = LogDraft.empty().copyWith(mood: () => 11.0);
+      test('moodRating above 10 is invalid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => 11.0);
         expect(draft.isValid, false);
       });
 
-      test('mood at 0 is valid', () {
-        final draft = LogDraft.empty().copyWith(mood: () => 0.0);
+      test('moodRating at 0 is valid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => 0.0);
         expect(draft.isValid, true);
       });
 
-      test('mood at 10 is valid', () {
-        final draft = LogDraft.empty().copyWith(mood: () => 10.0);
+      test('moodRating at 10 is valid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => 10.0);
         expect(draft.isValid, true);
       });
 
-      test('mood within range is valid', () {
-        final draft = LogDraft.empty().copyWith(mood: () => 5.5);
+      test('moodRating within range is valid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => 5.5);
         expect(draft.isValid, true);
       });
 
-      test('craving below 0 is invalid', () {
-        final draft = LogDraft.empty().copyWith(craving: () => -1.0);
+      test('physicalRating below 0 is invalid', () {
+        final draft = LogDraft.empty().copyWith(physicalRating: () => -1.0);
         expect(draft.isValid, false);
       });
 
-      test('craving above 10 is invalid', () {
-        final draft = LogDraft.empty().copyWith(craving: () => 11.0);
+      test('physicalRating above 10 is invalid', () {
+        final draft = LogDraft.empty().copyWith(physicalRating: () => 11.0);
         expect(draft.isValid, false);
       });
 
-      test('craving within range is valid', () {
-        final draft = LogDraft.empty().copyWith(craving: () => 7.0);
+      test('physicalRating within range is valid', () {
+        final draft = LogDraft.empty().copyWith(physicalRating: () => 7.0);
         expect(draft.isValid, true);
       });
     });
 
     group('equality', () {
-      test('two empty drafts are equal', () {
+      test('two empty drafts have same base values', () {
         final draft1 = LogDraft.empty();
         final draft2 = LogDraft.empty();
 
         // Note: eventTime will differ, so they won't be exactly equal
         // But the other fields should be comparable
         expect(draft1.eventType, draft2.eventType);
-        expect(draft1.value, draft2.value);
+        expect(draft1.duration, draft2.duration);
         expect(draft1.unit, draft2.unit);
       });
 
-      test('drafts with same values are equal', () {
+      test('drafts with same values have equal fields', () {
         final time = DateTime(2025, 1, 1, 12, 0);
         final draft1 = const LogDraft(
           eventType: EventType.inhale,
           unit: Unit.hits,
-          tags: ['tag1'],
         ).copyWith(eventTime: time);
         final draft2 = const LogDraft(
           eventType: EventType.inhale,
           unit: Unit.hits,
-          tags: ['tag1'],
         ).copyWith(eventTime: time);
 
         expect(draft1.eventType, draft2.eventType);
         expect(draft1.unit, draft2.unit);
-        expect(draft1.tags, draft2.tags);
       });
     });
   });
@@ -182,7 +181,7 @@ void main() {
       final draft = container.read(logDraftProvider);
 
       expect(draft.eventType, EventType.inhale);
-      expect(draft.value, isNull);
+      expect(draft.duration, isNull);
       expect(draft.unit, Unit.hits);
     });
 
@@ -217,20 +216,20 @@ void main() {
       });
     });
 
-    group('setValue', () {
-      test('sets numeric value', () {
-        notifier.setValue(5.0);
+    group('setDuration', () {
+      test('sets numeric duration', () {
+        notifier.setDuration(5.0);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.value, 5.0);
+        expect(draft.duration, 5.0);
       });
 
-      test('can set null value', () {
-        notifier.setValue(5.0);
-        notifier.setValue(null);
+      test('can set null duration', () {
+        notifier.setDuration(5.0);
+        notifier.setDuration(null);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.value, isNull);
+        expect(draft.duration, isNull);
       });
     });
 
@@ -278,96 +277,37 @@ void main() {
       });
     });
 
-    group('setTags', () {
-      test('sets tags list', () {
-        notifier.setTags(['morning', 'sativa']);
+    group('setMoodRating', () {
+      test('sets mood rating value', () {
+        notifier.setMoodRating(7.5);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.tags, ['morning', 'sativa']);
-      });
-
-      test('can set empty list', () {
-        notifier.setTags(['tag1']);
-        notifier.setTags([]);
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.tags, isEmpty);
-      });
-    });
-
-    group('addTag', () {
-      test('adds new tag', () {
-        notifier.addTag('morning');
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.tags, contains('morning'));
-      });
-
-      test('does not add duplicate tag', () {
-        notifier.addTag('morning');
-        notifier.addTag('morning');
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.tags.where((t) => t == 'morning').length, 1);
-      });
-
-      test('does not add empty tag', () {
-        notifier.addTag('');
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.tags, isEmpty);
-      });
-    });
-
-    group('removeTag', () {
-      test('removes existing tag', () {
-        notifier.setTags(['morning', 'evening']);
-        notifier.removeTag('morning');
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.tags, ['evening']);
-      });
-
-      test('handles removing non-existent tag', () {
-        notifier.setTags(['morning']);
-        notifier.removeTag('evening');
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.tags, ['morning']);
-      });
-    });
-
-    group('setMood', () {
-      test('sets mood value', () {
-        notifier.setMood(7.5);
-
-        final draft = container.read(logDraftProvider);
-        expect(draft.mood, 7.5);
+        expect(draft.moodRating, 7.5);
       });
 
       test('can set null', () {
-        notifier.setMood(5.0);
-        notifier.setMood(null);
+        notifier.setMoodRating(5.0);
+        notifier.setMoodRating(null);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.mood, isNull);
+        expect(draft.moodRating, isNull);
       });
     });
 
-    group('setCraving', () {
-      test('sets craving value', () {
-        notifier.setCraving(3.0);
+    group('setPhysicalRating', () {
+      test('sets physical rating value', () {
+        notifier.setPhysicalRating(8.0);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.craving, 3.0);
+        expect(draft.physicalRating, 8.0);
       });
 
       test('can set null', () {
-        notifier.setCraving(5.0);
-        notifier.setCraving(null);
+        notifier.setPhysicalRating(5.0);
+        notifier.setPhysicalRating(null);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.craving, isNull);
+        expect(draft.physicalRating, isNull);
       });
     });
 
@@ -389,27 +329,41 @@ void main() {
     });
 
     group('setLocation', () {
-      test('sets location', () {
-        notifier.setLocation('home');
+      test('sets latitude and longitude', () {
+        notifier.setLocation(37.7749, -122.4194);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.location, 'home');
+        expect(draft.latitude, 37.7749);
+        expect(draft.longitude, -122.4194);
       });
 
-      test('empty string sets null', () {
-        notifier.setLocation('home');
-        notifier.setLocation('');
+      test('can set null coordinates', () {
+        notifier.setLocation(37.7749, -122.4194);
+        notifier.setLocation(null, null);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.location, isNull);
+        expect(draft.latitude, isNull);
+        expect(draft.longitude, isNull);
       });
+    });
 
-      test('can set null', () {
-        notifier.setLocation('home');
-        notifier.setLocation(null);
+    group('setLatitude', () {
+      test('sets latitude only', () {
+        notifier.setLatitude(37.7749);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.location, isNull);
+        expect(draft.latitude, 37.7749);
+        expect(draft.longitude, isNull);
+      });
+    });
+
+    group('setLongitude', () {
+      test('sets longitude only', () {
+        notifier.setLongitude(-122.4194);
+
+        final draft = container.read(logDraftProvider);
+        expect(draft.longitude, -122.4194);
+        expect(draft.latitude, isNull);
       });
     });
 
@@ -417,28 +371,27 @@ void main() {
       test('resets all values to defaults', () {
         // Set various values
         notifier.setEventType(EventType.note);
-        notifier.setValue(10.0);
+        notifier.setDuration(10.0);
         notifier.setUnit(Unit.grams);
         notifier.setNote('Test note');
-        notifier.setTags(['tag1', 'tag2']);
-        notifier.setMood(8.0);
-        notifier.setCraving(4.0);
+        notifier.setMoodRating(8.0);
+        notifier.setPhysicalRating(6.0);
         notifier.setReason(LogReason.recreational);
-        notifier.setLocation('work');
+        notifier.setLocation(37.7749, -122.4194);
 
         // Reset
         notifier.reset();
 
         final draft = container.read(logDraftProvider);
         expect(draft.eventType, EventType.inhale);
-        expect(draft.value, isNull);
+        expect(draft.duration, isNull);
         expect(draft.unit, Unit.hits);
         expect(draft.note, isNull);
-        expect(draft.tags, isEmpty);
-        expect(draft.mood, isNull);
-        expect(draft.craving, isNull);
+        expect(draft.moodRating, isNull);
+        expect(draft.physicalRating, isNull);
         expect(draft.reason, isNull);
-        expect(draft.location, isNull);
+        expect(draft.latitude, isNull);
+        expect(draft.longitude, isNull);
       });
     });
 
@@ -452,8 +405,8 @@ void main() {
         expect(notifier.isDirty, true);
       });
 
-      test('returns true when value set', () {
-        notifier.setValue(5.0);
+      test('returns true when duration set', () {
+        notifier.setDuration(5.0);
         expect(notifier.isDirty, true);
       });
 
@@ -462,18 +415,13 @@ void main() {
         expect(notifier.isDirty, true);
       });
 
-      test('returns true when tags added', () {
-        notifier.addTag('tag1');
+      test('returns true when moodRating set', () {
+        notifier.setMoodRating(5.0);
         expect(notifier.isDirty, true);
       });
 
-      test('returns true when mood set', () {
-        notifier.setMood(5.0);
-        expect(notifier.isDirty, true);
-      });
-
-      test('returns true when craving set', () {
-        notifier.setCraving(5.0);
+      test('returns true when physicalRating set', () {
+        notifier.setPhysicalRating(5.0);
         expect(notifier.isDirty, true);
       });
 
@@ -483,12 +431,12 @@ void main() {
       });
 
       test('returns true when location set', () {
-        notifier.setLocation('home');
+        notifier.setLocation(37.7749, -122.4194);
         expect(notifier.isDirty, true);
       });
 
       test('returns false after reset', () {
-        notifier.setValue(10.0);
+        notifier.setDuration(10.0);
         notifier.setNote('Test');
         expect(notifier.isDirty, true);
 

@@ -9,13 +9,13 @@ import '../providers/account_provider.dart';
 /// Dialog for backdating a log entry
 class BackdateDialog extends ConsumerStatefulWidget {
   final EventType? defaultEventType;
-  final double? defaultValue;
+  final double? defaultDuration;
   final Unit? defaultUnit;
 
   const BackdateDialog({
     Key? key,
     this.defaultEventType,
-    this.defaultValue,
+    this.defaultDuration,
     this.defaultUnit,
   }) : super(key: key);
 
@@ -26,26 +26,23 @@ class BackdateDialog extends ConsumerStatefulWidget {
 class _BackdateDialogState extends ConsumerState<BackdateDialog> {
   DateTime _selectedDateTime = DateTime.now();
   EventType _eventType = EventType.inhale;
-  double _value = 1.0;
+  double _duration = 1.0;
   Unit _unit = Unit.count;
   final _notesController = TextEditingController();
-  final _locationController = TextEditingController();
-  int? _mood;
-  int? _craving;
-  final List<String> _tags = [];
+  double? _moodRating;
+  double? _physicalRating;
 
   @override
   void initState() {
     super.initState();
     _eventType = widget.defaultEventType ?? EventType.inhale;
-    _value = widget.defaultValue ?? 1.0;
+    _duration = widget.defaultDuration ?? 1.0;
     _unit = widget.defaultUnit ?? Unit.count;
   }
 
   @override
   void dispose() {
     _notesController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -97,19 +94,17 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
     final service = LogRecordService();
 
     try {
-      // Validate value
-      final validatedValue = ValidationService.clampValue(_value, _unit);
+      // Validate duration
+      final validatedDuration =
+          ValidationService.clampValue(_duration, _unit) ?? _duration;
 
       final record = await service.backdateLog(
         accountId: activeAccount.userId,
         eventType: _eventType,
-        value: validatedValue,
+        duration: validatedDuration,
         unit: _unit,
         eventAt: _selectedDateTime,
         note: _notesController.text.isEmpty ? null : _notesController.text,
-        tags: _tags.isEmpty ? null : _tags,
-        location:
-            _locationController.text.isEmpty ? null : _locationController.text,
       );
 
       if (mounted) {
@@ -253,22 +248,22 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
               const SizedBox(height: 16),
 
-              // Value and Unit
+              // Duration and Unit
               Row(
                 children: [
                   Expanded(
                     flex: 2,
                     child: TextField(
                       decoration: const InputDecoration(
-                        labelText: 'Value',
+                        labelText: 'Duration',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
-                        _value = double.tryParse(value) ?? 1.0;
+                        _duration = double.tryParse(value) ?? 1.0;
                       },
                       controller: TextEditingController(
-                        text: _value.toString(),
+                        text: _duration.toString(),
                       ),
                     ),
                   ),
@@ -302,32 +297,38 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
               const SizedBox(height: 16),
 
-              // Mood slider
-              Text('Mood (optional)', style: theme.textTheme.labelMedium),
+              // Mood rating slider
+              Text(
+                'Mood Rating (optional)',
+                style: theme.textTheme.labelMedium,
+              ),
               Slider(
-                value: _mood?.toDouble() ?? 5.0,
+                value: _moodRating ?? 5.0,
                 min: 0,
                 max: 10,
-                divisions: 10,
-                label: _mood?.toString() ?? 'Not set',
+                divisions: 20,
+                label: _moodRating?.toStringAsFixed(1) ?? 'Not set',
                 onChanged: (value) {
                   setState(() {
-                    _mood = value.toInt();
+                    _moodRating = value;
                   });
                 },
               ),
 
-              // Craving slider
-              Text('Craving (optional)', style: theme.textTheme.labelMedium),
+              // Physical rating slider
+              Text(
+                'Physical Rating (optional)',
+                style: theme.textTheme.labelMedium,
+              ),
               Slider(
-                value: _craving?.toDouble() ?? 5.0,
+                value: _physicalRating ?? 5.0,
                 min: 0,
                 max: 10,
-                divisions: 10,
-                label: _craving?.toString() ?? 'Not set',
+                divisions: 20,
+                label: _physicalRating?.toStringAsFixed(1) ?? 'Not set',
                 onChanged: (value) {
                   setState(() {
-                    _craving = value.toInt();
+                    _physicalRating = value;
                   });
                 },
               ),
@@ -342,48 +343,6 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Location
-              TextField(
-                controller: _locationController,
-                decoration: const InputDecoration(
-                  labelText: 'Location (optional)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Tags
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ..._tags.map(
-                    (tag) => Chip(
-                      label: Text(tag),
-                      onDeleted: () {
-                        setState(() {
-                          _tags.remove(tag);
-                        });
-                      },
-                    ),
-                  ),
-                  ActionChip(
-                    label: const Text('+ Tag'),
-                    onPressed: () async {
-                      final tag = await _showAddTagDialog();
-                      if (tag != null && !_tags.contains(tag)) {
-                        setState(() {
-                          _tags.add(tag);
-                        });
-                      }
-                    },
-                  ),
-                ],
               ),
 
               const SizedBox(height: 24),
@@ -428,38 +387,5 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
     } else {
       return 'just now';
     }
-  }
-
-  Future<String?> _showAddTagDialog() async {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Add Tag'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Tag',
-                hintText: 'e.g., stress',
-              ),
-              autofocus: true,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('CANCEL'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  if (controller.text.trim().isNotEmpty) {
-                    Navigator.pop(context, controller.text.trim());
-                  }
-                },
-                child: const Text('ADD'),
-              ),
-            ],
-          ),
-    );
   }
 }

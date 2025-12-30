@@ -17,12 +17,11 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
 
   EventType _selectedEventType = EventType.inhale;
   Unit _selectedUnit = Unit.hits;
-  double? _value;
+  double? _duration;
   String? _note;
   DateTime _eventTime = DateTime.now();
-  final List<String> _tags = [];
-  double? _mood;
-  double? _craving;
+  double? _moodRating;
+  double? _physicalRating;
   LogReason? _reason;
 
   bool _isSubmitting = false;
@@ -74,20 +73,20 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Value Input
+              // Duration Input
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       decoration: const InputDecoration(
-                        labelText: 'Value',
+                        labelText: 'Duration',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
                       onChanged: (value) {
-                        _value = double.tryParse(value);
+                        _duration = double.tryParse(value);
                       },
                     ),
                   ),
@@ -170,27 +169,6 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Tags
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Tags (optional, comma-separated)',
-                  border: OutlineInputBorder(),
-                  hintText: 'e.g., morning, sativa, relaxation',
-                ),
-                onChanged: (value) {
-                  _tags.clear();
-                  if (value.isNotEmpty) {
-                    _tags.addAll(
-                      value
-                          .split(',')
-                          .map((s) => s.trim())
-                          .where((s) => s.isNotEmpty),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-
               // Reason Dropdown
               DropdownButtonFormField<LogReason>(
                 value: _reason,
@@ -222,16 +200,18 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Mood Slider
+              // Mood Rating Slider
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Mood (optional)'),
+                      const Text('Mood Rating (optional)'),
                       Text(
-                        _mood != null ? _mood!.toStringAsFixed(1) : 'Not set',
+                        _moodRating != null
+                            ? _moodRating!.toStringAsFixed(1)
+                            : 'Not set',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -244,24 +224,24 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                       const Icon(Icons.sentiment_very_dissatisfied, size: 20),
                       Expanded(
                         child: Slider(
-                          value: _mood ?? 5.0,
+                          value: _moodRating ?? 5.0,
                           min: 0,
                           max: 10,
                           divisions: 20,
-                          label: _mood?.toStringAsFixed(1),
+                          label: _moodRating?.toStringAsFixed(1),
                           onChanged: (value) {
-                            setState(() => _mood = value);
+                            setState(() => _moodRating = value);
                           },
                         ),
                       ),
                       const Icon(Icons.sentiment_very_satisfied, size: 20),
                     ],
                   ),
-                  if (_mood != null)
+                  if (_moodRating != null)
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => setState(() => _mood = null),
+                        onPressed: () => setState(() => _moodRating = null),
                         child: const Text('Clear'),
                       ),
                     ),
@@ -269,17 +249,17 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
               ),
               const SizedBox(height: 8),
 
-              // Craving Slider
+              // Physical Rating Slider
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Craving Level (optional)'),
+                      const Text('Physical Rating (optional)'),
                       Text(
-                        _craving != null
-                            ? _craving!.toStringAsFixed(1)
+                        _physicalRating != null
+                            ? _physicalRating!.toStringAsFixed(1)
                             : 'Not set',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.secondary,
@@ -290,28 +270,28 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.thumb_down, size: 20),
+                      const Icon(Icons.fitness_center, size: 20),
                       Expanded(
                         child: Slider(
-                          value: _craving ?? 5.0,
+                          value: _physicalRating ?? 5.0,
                           min: 0,
                           max: 10,
                           divisions: 20,
-                          label: _craving?.toStringAsFixed(1),
+                          label: _physicalRating?.toStringAsFixed(1),
                           activeColor: Theme.of(context).colorScheme.secondary,
                           onChanged: (value) {
-                            setState(() => _craving = value);
+                            setState(() => _physicalRating = value);
                           },
                         ),
                       ),
-                      const Icon(Icons.thumb_up, size: 20),
+                      const Icon(Icons.self_improvement, size: 20),
                     ],
                   ),
-                  if (_craving != null)
+                  if (_physicalRating != null)
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => setState(() => _craving = null),
+                        onPressed: () => setState(() => _physicalRating = null),
                         child: const Text('Clear'),
                       ),
                     ),
@@ -369,12 +349,11 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
         accountId: accountId,
         eventType: _selectedEventType,
         eventAt: _eventTime,
-        value: _value,
+        duration: _duration ?? 0,
         unit: _selectedUnit,
         note: _note,
-        tags: _tags.isEmpty ? null : _tags,
-        mood: _mood,
-        craving: _craving,
+        moodRating: _moodRating,
+        physicalRating: _physicalRating,
         reason: _reason,
       );
 
@@ -404,7 +383,7 @@ class QuickLogButton extends ConsumerWidget {
   final String label;
   final IconData icon;
   final Unit? defaultUnit;
-  final double? defaultValue;
+  final double? defaultDuration;
 
   const QuickLogButton({
     super.key,
@@ -412,7 +391,7 @@ class QuickLogButton extends ConsumerWidget {
     required this.label,
     required this.icon,
     this.defaultUnit,
-    this.defaultValue,
+    this.defaultDuration,
   });
 
   @override
@@ -433,7 +412,7 @@ class QuickLogButton extends ConsumerWidget {
           await service.createLogRecord(
             accountId: accountId,
             eventType: eventType,
-            value: defaultValue,
+            duration: defaultDuration ?? 0,
             unit: defaultUnit ?? Unit.none,
           );
 

@@ -20,10 +20,9 @@ class EditLogRecordDialog extends ConsumerStatefulWidget {
 class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
   late DateTime _selectedDateTime;
   late EventType _eventType;
-  late double _value;
+  late double _duration;
   late Unit _unit;
   late TextEditingController _notesController;
-  late List<String> _tags;
   bool _isSubmitting = false;
 
   @override
@@ -32,10 +31,9 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
     // Pre-fill with existing values
     _selectedDateTime = widget.record.eventAt;
     _eventType = widget.record.eventType;
-    _value = widget.record.value ?? 1.0;
+    _duration = widget.record.duration;
     _unit = widget.record.unit;
     _notesController = TextEditingController(text: widget.record.note);
-    _tags = List.from(widget.record.tags);
   }
 
   @override
@@ -80,8 +78,9 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
     });
 
     try {
-      // Validate value
-      final validatedValue = ValidationService.clampValue(_value, _unit);
+      // Validate duration
+      final validatedDuration =
+          ValidationService.clampValue(_duration, _unit) ?? _duration;
 
       await ref
           .read(logRecordNotifierProvider.notifier)
@@ -89,10 +88,9 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
             widget.record,
             eventType: _eventType,
             eventAt: _selectedDateTime,
-            value: validatedValue,
+            duration: validatedDuration,
             unit: _unit,
             note: _notesController.text.isEmpty ? null : _notesController.text,
-            tags: _tags,
           );
 
       if (mounted) {
@@ -128,45 +126,6 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
       (match) => ' ${match.group(0)}',
     );
     return result[0].toUpperCase() + result.substring(1);
-  }
-
-  Future<String?> _showAddTagDialog() async {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Add Tag'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Tag',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              onSubmitted: (value) {
-                if (value.isNotEmpty) {
-                  Navigator.pop(context, value);
-                }
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  if (controller.text.isNotEmpty) {
-                    Navigator.pop(context, controller.text);
-                  }
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          ),
-    );
   }
 
   @override
@@ -250,15 +209,15 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Value Input
+              // Duration Input
               Row(
                 children: [
                   Expanded(
                     flex: 2,
                     child: TextFormField(
-                      initialValue: _value.toString(),
+                      initialValue: _duration.toString(),
                       decoration: const InputDecoration(
-                        labelText: 'Value',
+                        labelText: 'Duration',
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
@@ -268,7 +227,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                         final parsed = double.tryParse(value);
                         if (parsed != null) {
                           setState(() {
-                            _value = parsed;
+                            _duration = parsed;
                           });
                         }
                       },
@@ -313,38 +272,6 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                 ),
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
-              ),
-              const SizedBox(height: 16),
-
-              // Tags Section
-              Text('Tags', style: theme.textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ..._tags.map(
-                    (tag) => Chip(
-                      label: Text(tag),
-                      onDeleted: () {
-                        setState(() {
-                          _tags.remove(tag);
-                        });
-                      },
-                    ),
-                  ),
-                  ActionChip(
-                    label: const Text('+ Add Tag'),
-                    onPressed: () async {
-                      final tag = await _showAddTagDialog();
-                      if (tag != null && !_tags.contains(tag)) {
-                        setState(() {
-                          _tags.add(tag);
-                        });
-                      }
-                    },
-                  ),
-                ],
               ),
               const SizedBox(height: 24),
 

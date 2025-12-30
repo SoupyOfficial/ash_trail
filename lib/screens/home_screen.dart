@@ -6,10 +6,7 @@ import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
 import '../providers/log_record_provider.dart'
     show logRecordStatsProvider, LogRecordsParams;
-import '../providers/session_provider.dart';
 import '../widgets/quick_log_widget.dart';
-import '../widgets/session_controls_widget.dart';
-import '../widgets/template_selector_widget.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import 'analytics_screen.dart';
@@ -27,26 +24,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final activeAccountAsync = ref.watch(activeAccountProvider);
-    final activeSession = ref.watch(activeSessionProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ash Trail'),
         actions: [
-          // Session controls in app bar
-          activeSession.when(
-            data: (session) {
-              if (session != null) {
-                return const Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: SessionControlsWidget(compact: true),
-                );
-              }
-              return const SessionControlsWidget(compact: true);
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
@@ -79,40 +61,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              // Detailed logging FAB
-              FloatingActionButton.small(
-                heroTag: 'detailed',
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoggingScreen(),
-                      ),
-                    ),
-                tooltip: 'Detailed Log',
-                child: const Icon(Icons.edit_note),
-              ),
-              const SizedBox(height: 8),
-              // Templates FAB
-              FloatingActionButton.small(
-                heroTag: 'templates',
-                onPressed: () => _showTemplatesSheet(context),
-                tooltip: 'Templates',
-                child: const Icon(Icons.bookmark),
-              ),
-              const SizedBox(height: 8),
-              // Backdate FAB
+              // Backdate button (smaller)
               FloatingActionButton.small(
                 heroTag: 'backdate',
                 onPressed: () => _showBackdateDialog(context),
-                tooltip: 'Backdate Log',
                 child: const Icon(Icons.history),
               ),
               const SizedBox(height: 8),
-              // Quick Log FAB (main)
+              // Detailed log button
+              FloatingActionButton.small(
+                heroTag: 'detailed',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoggingScreen(),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.edit_note),
+              ),
+              const SizedBox(height: 8),
+              // Quick log button (main action)
               QuickLogWidget(
                 onLogCreated: () {
-                  // Refresh any needed data
+                  // Trigger refresh of the log records stream
+                  ref.invalidate(activeAccountLogRecordsProvider);
                 },
               ),
             ],
@@ -131,19 +105,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Icon(
             Icons.account_circle_outlined,
             size: 100,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 24),
           Text(
-            'No Active Account',
+            'Welcome to Ash Trail',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Add an account to start logging',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            ),
+            'Create or sign in to an account to start logging',
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
@@ -170,7 +144,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final statisticsAsync = ref.watch(
       logRecordStatsProvider(LogRecordsParams(accountId: null)),
     );
-    final activeSession = ref.watch(activeSessionProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -198,23 +171,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Session controls (full display when active)
-          activeSession.when(
-            data: (session) {
-              if (session != null) {
-                return Column(
-                  children: [
-                    const SessionControlsWidget(compact: false),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-
           // Statistics cards
           statisticsAsync.when(
             data: (stats) => _buildStatisticsRow(context, stats),
@@ -236,10 +192,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: const Icon(Icons.analytics),
             label: const Text('View Analytics'),
           ),
-          const SizedBox(height: 24),
-
-          // Templates section
-          const TemplateSelectorWidget(),
           const SizedBox(height: 24),
 
           // Recent entries
@@ -279,7 +231,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             size: 64,
                             color: Theme.of(
                               context,
-                            ).colorScheme.onSurface.withOpacity(0.3),
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -313,13 +265,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               subtitle:
                                   record.note != null
                                       ? Text(record.note!)
-                                      : record.tags.isNotEmpty
-                                      ? Text(record.tags.join(', '))
                                       : null,
                               trailing:
-                                  record.value != null
+                                  record.duration > 0
                                       ? Text(
-                                        '${record.value!.toStringAsFixed(1)} ${record.unit.name}',
+                                        '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
                                         style:
                                             Theme.of(
                                               context,
@@ -351,7 +301,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 children: [
                   Text(
-                    '${stats['totalEntries']}',
+                    '${stats['totalCount'] ?? 0}',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 4),
@@ -372,12 +322,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 children: [
                   Text(
-                    stats['totalAmount'].toStringAsFixed(1),
+                    (stats['totalDuration'] as num?)?.toStringAsFixed(1) ?? '0',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total Amount',
+                    'Total Duration',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -386,26 +336,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  void _showTemplatesSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder:
-          (context) => DraggableScrollableSheet(
-            initialChildSize: 0.7,
-            minChildSize: 0.5,
-            maxChildSize: 0.9,
-            expand: false,
-            builder: (context, scrollController) {
-              return SingleChildScrollView(
-                controller: scrollController,
-                child: const TemplateSelectorWidget(),
-              );
-            },
-          ),
     );
   }
 

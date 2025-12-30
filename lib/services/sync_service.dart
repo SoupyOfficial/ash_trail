@@ -175,11 +175,9 @@ class SyncService {
         localRecord,
         eventType: remoteRecord.eventType,
         eventAt: remoteRecord.eventAt,
-        value: remoteRecord.value,
+        duration: remoteRecord.duration,
         unit: remoteRecord.unit,
         note: remoteRecord.note,
-        tags: remoteRecord.tags,
-        sessionId: remoteRecord.sessionId,
       );
 
       // Mark as synced
@@ -189,16 +187,13 @@ class SyncService {
       await _logRecordService.importLogRecord(
         logId: remoteRecord.logId,
         accountId: remoteRecord.accountId,
-        profileId: remoteRecord.profileId,
         eventType: remoteRecord.eventType,
         eventAt: remoteRecord.eventAt,
         createdAt: remoteRecord.createdAt,
         updatedAt: remoteRecord.updatedAt,
-        value: remoteRecord.value,
+        duration: remoteRecord.duration,
         unit: remoteRecord.unit,
         note: remoteRecord.note,
-        tags: remoteRecord.tags,
-        sessionId: remoteRecord.sessionId,
         source: remoteRecord.source,
         deviceId: remoteRecord.deviceId,
         appVersion: remoteRecord.appVersion,
@@ -251,16 +246,13 @@ class SyncService {
             await _logRecordService.importLogRecord(
               logId: remoteRecord.logId,
               accountId: remoteRecord.accountId,
-              profileId: remoteRecord.profileId,
               eventType: remoteRecord.eventType,
               eventAt: remoteRecord.eventAt,
               createdAt: remoteRecord.createdAt,
               updatedAt: remoteRecord.updatedAt,
-              value: remoteRecord.value,
+              duration: remoteRecord.duration,
               unit: remoteRecord.unit,
               note: remoteRecord.note,
-              tags: remoteRecord.tags,
-              sessionId: remoteRecord.sessionId,
               source: remoteRecord.source,
               deviceId: remoteRecord.deviceId,
               appVersion: remoteRecord.appVersion,
@@ -273,11 +265,9 @@ class SyncService {
                 localRecord,
                 eventType: remoteRecord.eventType,
                 eventAt: remoteRecord.eventAt,
-                value: remoteRecord.value,
+                duration: remoteRecord.duration,
                 unit: remoteRecord.unit,
                 note: remoteRecord.note,
-                tags: remoteRecord.tags,
-                sessionId: remoteRecord.sessionId,
               );
 
               await _logRecordService.markSynced(

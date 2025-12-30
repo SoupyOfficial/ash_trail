@@ -20,9 +20,6 @@ abstract class LogRecordRepository {
   /// Get all log records for an account
   Future<List<LogRecord>> getByAccount(String accountId);
 
-  /// Get log records by session
-  Future<List<LogRecord>> getBySession(String sessionId);
-
   /// Get log records by date range
   Future<List<LogRecord>> getByDateRange(
     String accountId,

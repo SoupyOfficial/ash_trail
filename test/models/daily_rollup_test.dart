@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/models/daily_rollup.dart';
-import 'package:ash_trail/models/range_query_spec.dart';
-import 'package:ash_trail/models/enums.dart';
 
 void main() {
   group('DailyRollup Model', () {

@@ -2,27 +2,22 @@ import 'enums.dart';
 
 /// LogRecord is the main logging entity that captures all events
 /// Designed for offline-first with full sync capability
+///
+/// Based on Domain Model 4.2.2 - Log Entry
 class LogRecord {
   int id = 0;
 
   // ===== IDENTITY =====
 
   /// Stable identifier across local and Firestore (UUID/ULID)
-
   late String logId;
 
   /// Account that owns this log
-
   late String accountId;
-
-  /// Optional profile within the account
-
-  String? profileId;
 
   // ===== TIME =====
 
   /// When the event actually happened (used for charts and analytics)
-
   late DateTime eventAt;
 
   /// When this record was created locally
@@ -34,26 +29,37 @@ class LogRecord {
   // ===== EVENT PAYLOAD =====
 
   /// Type of event being logged
-
   late EventType eventType;
 
-  /// Numeric value (e.g., duration in seconds, number of hits)
-  double? value;
+  /// Duration value in seconds (required per domain model)
+  late double duration;
 
   /// Unit of measurement for the value
-
   late Unit unit;
 
   /// Optional notes/description
   String? note;
 
-  /// Tags for categorization (stored as comma-separated string)
-  String? tagsString;
+  /// Reason for this log entry (optional context)
+  LogReason? reason;
+
+  /// Mood rating scale (0-10, nullable) - maps to moodRating in domain model
+  double? moodRating;
+
+  /// Physical rating scale (0-10, nullable) - maps to physicalRating in domain model
+  double? physicalRating;
+
+  // ===== LOCATION =====
+
+  /// Latitude coordinate (WGS84 decimal degrees, -90 to 90)
+  double? latitude;
+
+  /// Longitude coordinate (WGS84 decimal degrees, -180 to 180)
+  double? longitude;
 
   // ===== QUALITY / METADATA =====
 
   /// Source of this record
-
   late Source source;
 
   /// Device identifier where this was created
@@ -62,10 +68,12 @@ class LogRecord {
   /// App version that created this record
   String? appVersion;
 
+  /// Time confidence level (for clock skew handling)
+  late TimeConfidence timeConfidence;
+
   // ===== LIFECYCLE =====
 
   /// Soft delete flag
-
   late bool isDeleted;
 
   /// When this record was deleted (if applicable)
@@ -74,7 +82,6 @@ class LogRecord {
   // ===== SYNC =====
 
   /// Current sync state
-
   late SyncState syncState;
 
   /// Error message from last sync attempt
@@ -86,79 +93,41 @@ class LogRecord {
   /// Last update time from Firestore (for conflict resolution)
   DateTime? lastRemoteUpdateAt;
 
-  /// Session ID for grouping related logs
-  String? sessionId;
-
-  /// Dirty fields tracking (comma-separated list of changed fields)
-  String? dirtyFields;
-
   /// Revision counter for conflict resolution
   int revision;
 
-  // ===== RICH METADATA =====
-
-  /// Location context (e.g., home, work, other)
-  String? location;
-
-  /// Mood scale (0-10, nullable)
-  double? mood;
-
-  /// Craving scale (0-10, nullable)
-  double? craving;
-
-  /// Reason for this log entry (optional context)
-  LogReason? reason;
-
-  /// Time confidence level (for clock skew handling)
-
-  late TimeConfidence timeConfidence;
-
-  /// Edit history (JSON string storing revision history)
-  String? editHistory;
-
-  /// Flag to mark this as a template
-  late bool isTemplate;
-
-  /// Template name if this is a template
-  String? templateName;
-
   LogRecord()
-    : revision = 0,
+    : duration = 0,
+      revision = 0,
       timeConfidence = TimeConfidence.high,
-      isTemplate = false;
+      isDeleted = false;
 
   LogRecord.create({
     required this.logId,
     required this.accountId,
-    this.profileId,
     DateTime? eventAt,
     DateTime? createdAt,
     DateTime? updatedAt,
     required this.eventType,
-    this.value,
-    this.unit = Unit.none,
+    this.duration = 0,
+    this.unit = Unit.seconds,
     this.note,
-    this.tagsString,
+    this.reason,
+    this.moodRating,
+    this.physicalRating,
+    this.latitude,
+    this.longitude,
     this.source = Source.manual,
     this.deviceId,
     this.appVersion,
+    this.timeConfidence = TimeConfidence.high,
     this.isDeleted = false,
     this.deletedAt,
     this.syncState = SyncState.pending,
     this.syncError,
     this.syncedAt,
     this.lastRemoteUpdateAt,
-    this.sessionId,
-    this.dirtyFields,
     this.revision = 0,
-    this.location,
-    this.mood,
-    this.craving,
-    this.reason,
-    this.timeConfidence = TimeConfidence.high,
-    this.editHistory,
-    this.isTemplate = false,
-    this.templateName,
   }) {
     this.eventAt = eventAt ?? DateTime.now();
     this.createdAt = createdAt ?? DateTime.now();
@@ -167,34 +136,14 @@ class LogRecord {
 
   // ===== HELPER METHODS =====
 
-  /// Get tags as a list
-  List<String> get tags {
-    if (tagsString == null || tagsString!.isEmpty) {
-      return [];
-    }
-    return tagsString!
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-  }
-
-  /// Set tags from a list
-  set tags(List<String> tagList) {
-    tagsString = tagList.join(',');
-  }
+  /// Check if location is set (both coordinates must be present)
+  bool get hasLocation => latitude != null && longitude != null;
 
   /// Mark this record as needing sync
-  void markDirty([List<String>? changedFields]) {
+  void markDirty() {
     updatedAt = DateTime.now();
     syncState = SyncState.pending;
     revision++;
-
-    if (changedFields != null && changedFields.isNotEmpty) {
-      final currentDirty = dirtyFields?.split(',').toSet() ?? <String>{};
-      currentDirty.addAll(changedFields);
-      dirtyFields = currentDirty.join(',');
-    }
   }
 
   /// Mark as synced
@@ -203,7 +152,6 @@ class LogRecord {
     syncedAt = DateTime.now();
     lastRemoteUpdateAt = remoteUpdateTime;
     syncError = null;
-    dirtyFields = null;
   }
 
   /// Mark sync error
@@ -216,75 +164,63 @@ class LogRecord {
   void softDelete() {
     isDeleted = true;
     deletedAt = DateTime.now();
-    markDirty(['isDeleted', 'deletedAt']);
+    markDirty();
   }
 
   /// Copy with method for updates
   LogRecord copyWith({
     String? logId,
     String? accountId,
-    String? profileId,
     DateTime? eventAt,
     DateTime? createdAt,
     DateTime? updatedAt,
     EventType? eventType,
-    double? value,
+    double? duration,
     Unit? unit,
     String? note,
-    String? tagsString,
+    LogReason? reason,
+    double? moodRating,
+    double? physicalRating,
+    double? latitude,
+    double? longitude,
     Source? source,
     String? deviceId,
     String? appVersion,
+    TimeConfidence? timeConfidence,
     bool? isDeleted,
     DateTime? deletedAt,
     SyncState? syncState,
     String? syncError,
     DateTime? syncedAt,
     DateTime? lastRemoteUpdateAt,
-    String? sessionId,
-    String? dirtyFields,
     int? revision,
-    String? location,
-    double? mood,
-    double? craving,
-    LogReason? reason,
-    TimeConfidence? timeConfidence,
-    String? editHistory,
-    bool? isTemplate,
-    String? templateName,
   }) {
     return LogRecord.create(
       logId: logId ?? this.logId,
       accountId: accountId ?? this.accountId,
-      profileId: profileId ?? this.profileId,
       eventAt: eventAt ?? this.eventAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       eventType: eventType ?? this.eventType,
-      value: value ?? this.value,
+      duration: duration ?? this.duration,
       unit: unit ?? this.unit,
       note: note ?? this.note,
-      tagsString: tagsString ?? this.tagsString,
+      reason: reason ?? this.reason,
+      moodRating: moodRating ?? this.moodRating,
+      physicalRating: physicalRating ?? this.physicalRating,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       source: source ?? this.source,
       deviceId: deviceId ?? this.deviceId,
       appVersion: appVersion ?? this.appVersion,
+      timeConfidence: timeConfidence ?? this.timeConfidence,
       isDeleted: isDeleted ?? this.isDeleted,
       deletedAt: deletedAt ?? this.deletedAt,
       syncState: syncState ?? this.syncState,
       syncError: syncError ?? this.syncError,
       syncedAt: syncedAt ?? this.syncedAt,
       lastRemoteUpdateAt: lastRemoteUpdateAt ?? this.lastRemoteUpdateAt,
-      sessionId: sessionId ?? this.sessionId,
-      dirtyFields: dirtyFields ?? this.dirtyFields,
       revision: revision ?? this.revision,
-      location: location ?? this.location,
-      mood: mood ?? this.mood,
-      craving: craving ?? this.craving,
-      reason: reason ?? this.reason,
-      timeConfidence: timeConfidence ?? this.timeConfidence,
-      editHistory: editHistory ?? this.editHistory,
-      isTemplate: isTemplate ?? this.isTemplate,
-      templateName: templateName ?? this.templateName,
     )..id = id;
   }
 
@@ -293,30 +229,25 @@ class LogRecord {
     return {
       'logId': logId,
       'accountId': accountId,
-      'profileId': profileId,
       'eventAt': eventAt.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'eventType': eventType.name,
-      'value': value,
+      'duration': duration,
       'unit': unit.name,
       'note': note,
-      'tags': tags,
+      'reason': reason?.name,
+      'moodRating': moodRating,
+      'physicalRating': physicalRating,
+      'latitude': latitude,
+      'longitude': longitude,
       'source': source.name,
       'deviceId': deviceId,
       'appVersion': appVersion,
+      'timeConfidence': timeConfidence.name,
       'isDeleted': isDeleted,
       'deletedAt': deletedAt?.toIso8601String(),
-      'sessionId': sessionId,
       'revision': revision,
-      'location': location,
-      'mood': mood,
-      'craving': craving,
-      'reason': reason?.name,
-      'timeConfidence': timeConfidence.name,
-      'editHistory': editHistory,
-      'isTemplate': isTemplate,
-      'templateName': templateName,
     };
   }
 
@@ -325,7 +256,6 @@ class LogRecord {
     return LogRecord.create(
       logId: data['logId'] as String,
       accountId: data['accountId'] as String,
-      profileId: data['profileId'] as String?,
       eventAt: DateTime.parse(data['eventAt'] as String),
       createdAt: DateTime.parse(data['createdAt'] as String),
       updatedAt: DateTime.parse(data['updatedAt'] as String),
@@ -333,31 +263,12 @@ class LogRecord {
         (e) => e.name == data['eventType'],
         orElse: () => EventType.custom,
       ),
-      value: (data['value'] as num?)?.toDouble(),
+      duration: (data['duration'] as num?)?.toDouble() ?? 0,
       unit: Unit.values.firstWhere(
         (u) => u.name == data['unit'],
-        orElse: () => Unit.none,
+        orElse: () => Unit.seconds,
       ),
       note: data['note'] as String?,
-      tagsString: (data['tags'] as List<dynamic>?)?.join(','),
-      source: Source.values.firstWhere(
-        (s) => s.name == data['source'],
-        orElse: () => Source.manual,
-      ),
-      deviceId: data['deviceId'] as String?,
-      appVersion: data['appVersion'] as String?,
-      isDeleted: data['isDeleted'] as bool? ?? false,
-      deletedAt:
-          data['deletedAt'] != null
-              ? DateTime.parse(data['deletedAt'] as String)
-              : null,
-      sessionId: data['sessionId'] as String?,
-      revision: data['revision'] as int? ?? 0,
-      syncState: SyncState.synced,
-      lastRemoteUpdateAt: DateTime.parse(data['updatedAt'] as String),
-      location: data['location'] as String?,
-      mood: (data['mood'] as num?)?.toDouble(),
-      craving: (data['craving'] as num?)?.toDouble(),
       reason:
           data['reason'] != null
               ? LogReason.values.firstWhere(
@@ -365,13 +276,28 @@ class LogRecord {
                 orElse: () => LogReason.other,
               )
               : null,
+      moodRating: (data['moodRating'] as num?)?.toDouble(),
+      physicalRating: (data['physicalRating'] as num?)?.toDouble(),
+      latitude: (data['latitude'] as num?)?.toDouble(),
+      longitude: (data['longitude'] as num?)?.toDouble(),
+      source: Source.values.firstWhere(
+        (s) => s.name == data['source'],
+        orElse: () => Source.manual,
+      ),
+      deviceId: data['deviceId'] as String?,
+      appVersion: data['appVersion'] as String?,
       timeConfidence: TimeConfidence.values.firstWhere(
         (tc) => tc.name == data['timeConfidence'],
         orElse: () => TimeConfidence.high,
       ),
-      editHistory: data['editHistory'] as String?,
-      isTemplate: data['isTemplate'] as bool? ?? false,
-      templateName: data['templateName'] as String?,
+      isDeleted: data['isDeleted'] as bool? ?? false,
+      deletedAt:
+          data['deletedAt'] != null
+              ? DateTime.parse(data['deletedAt'] as String)
+              : null,
+      revision: data['revision'] as int? ?? 0,
+      syncState: SyncState.synced,
+      lastRemoteUpdateAt: DateTime.parse(data['updatedAt'] as String),
     );
   }
 }

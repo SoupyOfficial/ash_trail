@@ -62,7 +62,6 @@ class LogRecordRepositoryHive implements LogRecordRepository {
     json['_internalId'] = record.id;
     json['syncState'] = record.syncState.name;
     json['revision'] = record.revision;
-    json['dirtyFields'] = record.dirtyFields;
     json['deletedAt'] = record.deletedAt?.toIso8601String();
     json['syncedAt'] = record.syncedAt?.toIso8601String();
     json['syncError'] = record.syncError;
@@ -79,7 +78,6 @@ class LogRecordRepositoryHive implements LogRecordRepository {
     json['_internalId'] = record.id;
     json['syncState'] = record.syncState.name;
     json['revision'] = record.revision;
-    json['dirtyFields'] = record.dirtyFields;
     json['deletedAt'] = record.deletedAt?.toIso8601String();
     json['syncedAt'] = record.syncedAt?.toIso8601String();
     json['syncError'] = record.syncError;
@@ -113,16 +111,6 @@ class LogRecordRepositoryHive implements LogRecordRepository {
     final records =
         _getAllRecords().where((r) => r.accountId == accountId).toList();
     records.sort((a, b) => b.eventAt.compareTo(a.eventAt));
-    return records;
-  }
-
-  @override
-  Future<List<LogRecord>> getBySession(String sessionId) async {
-    final records =
-        _getAllRecords()
-            .where((r) => r.sessionId == sessionId && !r.isDeleted)
-            .toList();
-    records.sort((a, b) => a.eventAt.compareTo(b.eventAt));
     return records;
   }
 

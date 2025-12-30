@@ -7,14 +7,12 @@ import '../providers/log_record_provider.dart';
 
 /// Widget to display a list of log records
 class LogRecordList extends ConsumerWidget {
-  final String? profileId;
   final DateTime? startDate;
   final DateTime? endDate;
   final bool includeDeleted;
 
   const LogRecordList({
     super.key,
-    this.profileId,
     this.startDate,
     this.endDate,
     this.includeDeleted = false,
@@ -30,7 +28,6 @@ class LogRecordList extends ConsumerWidget {
 
     final params = LogRecordsParams(
       accountId: accountId,
-      profileId: profileId,
       startDate: startDate,
       endDate: endDate,
       includeDeleted: includeDeleted,
@@ -75,9 +72,9 @@ class LogRecordTile extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(_formatEventTime(record.eventAt)),
-            if (record.value != null && record.unit != Unit.none)
+            if (record.duration > 0 && record.unit != Unit.none)
               Text(
-                '${_formatValue(record.value!, record.unit)} ${_formatUnit(record.unit)}',
+                '${_formatDuration(record.duration, record.unit)} ${_formatUnit(record.unit)}',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             if (record.note != null && record.note!.isNotEmpty)
@@ -89,17 +86,6 @@ class LogRecordTile extends ConsumerWidget {
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-              ),
-            if (record.tags.isNotEmpty)
-              Wrap(
-                spacing: 4,
-                children:
-                    record.tags.map((tag) {
-                      return Chip(
-                        label: Text(tag),
-                        visualDensity: VisualDensity.compact,
-                      );
-                    }).toList(),
               ),
           ],
         ),
@@ -148,7 +134,7 @@ class LogRecordTile extends ConsumerWidget {
     }
 
     return CircleAvatar(
-      backgroundColor: color.withOpacity(0.2),
+      backgroundColor: color.withValues(alpha: 0.2),
       child: Icon(iconData, color: color),
     );
   }
@@ -219,17 +205,17 @@ class LogRecordTile extends ConsumerWidget {
     }
   }
 
-  String _formatValue(double value, Unit unit) {
+  String _formatDuration(double duration, Unit unit) {
     // For duration values (seconds/minutes), show decimal precision
     if (unit == Unit.seconds || unit == Unit.minutes) {
-      return value.toStringAsFixed(1);
+      return duration.toStringAsFixed(1);
     }
     // For count-based values, show as integer if whole number
-    if (value == value.roundToDouble()) {
-      return value.toInt().toString();
+    if (duration == duration.roundToDouble()) {
+      return duration.toInt().toString();
     }
     // Otherwise show with one decimal place
-    return value.toStringAsFixed(1);
+    return duration.toStringAsFixed(1);
   }
 
   void _showRecordDetails(BuildContext context, WidgetRef ref) {
@@ -247,15 +233,18 @@ class LogRecordTile extends ConsumerWidget {
                     'Time',
                     DateFormat('MMM d, y h:mm a').format(record.eventAt),
                   ),
-                  if (record.value != null)
+                  if (record.duration > 0)
                     _buildDetailRow(
-                      'Value',
-                      '${_formatValue(record.value!, record.unit)} ${_formatUnit(record.unit)}',
+                      'Duration',
+                      '${_formatDuration(record.duration, record.unit)} ${_formatUnit(record.unit)}',
                     ),
                   if (record.note != null && record.note!.isNotEmpty)
                     _buildDetailRow('Note', record.note!),
-                  if (record.tags.isNotEmpty)
-                    _buildDetailRow('Tags', record.tags.join(', ')),
+                  if (record.latitude != null && record.longitude != null)
+                    _buildDetailRow(
+                      'Location',
+                      '${record.latitude!.toStringAsFixed(4)}, ${record.longitude!.toStringAsFixed(4)}',
+                    ),
                   _buildDetailRow('Status', record.syncState.name),
                   _buildDetailRow(
                     'Created',

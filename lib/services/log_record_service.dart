@@ -31,19 +31,17 @@ class LogRecordService {
   /// This is the main entry point for logging events
   Future<LogRecord> createLogRecord({
     required String accountId,
-    String? profileId,
     required EventType eventType,
     DateTime? eventAt,
-    double? value,
-    Unit unit = Unit.none,
+    double duration = 0,
+    Unit unit = Unit.seconds,
     String? note,
-    List<String>? tags,
-    String? sessionId,
     Source source = Source.manual,
-    double? mood,
-    double? craving,
+    double? moodRating,
+    double? physicalRating,
     LogReason? reason,
-    String? location,
+    double? latitude,
+    double? longitude,
   }) async {
     final logId = _uuid.v4();
     final now = DateTime.now();
@@ -51,24 +49,22 @@ class LogRecordService {
     final record = LogRecord.create(
       logId: logId,
       accountId: accountId,
-      profileId: profileId,
       eventType: eventType,
       eventAt: eventAt ?? now,
       createdAt: now,
       updatedAt: now,
-      value: value,
+      duration: duration,
       unit: unit,
       note: note,
-      tagsString: tags?.join(','),
-      sessionId: sessionId,
       source: source,
       deviceId: _getDeviceId(),
       appVersion: _getAppVersion(),
       syncState: SyncState.pending,
-      mood: mood,
-      craving: craving,
+      moodRating: moodRating,
+      physicalRating: physicalRating,
       reason: reason,
-      location: location,
+      latitude: latitude,
+      longitude: longitude,
     );
 
     return await _repository.create(record);
@@ -79,16 +75,13 @@ class LogRecordService {
   Future<LogRecord> importLogRecord({
     required String logId,
     required String accountId,
-    String? profileId,
     required EventType eventType,
     required DateTime eventAt,
     required DateTime createdAt,
     required DateTime updatedAt,
-    double? value,
-    Unit unit = Unit.none,
+    double duration = 0,
+    Unit unit = Unit.seconds,
     String? note,
-    List<String>? tags,
-    String? sessionId,
     Source source = Source.imported,
     String? deviceId,
     String? appVersion,
@@ -96,16 +89,13 @@ class LogRecordService {
     final record = LogRecord.create(
       logId: logId, // Use provided logId instead of generating new one
       accountId: accountId,
-      profileId: profileId,
       eventType: eventType,
       eventAt: eventAt,
       createdAt: createdAt,
       updatedAt: updatedAt,
-      value: value,
+      duration: duration,
       unit: unit,
       note: note,
-      tagsString: tags?.join(','),
-      sessionId: sessionId,
       source: source,
       deviceId: deviceId ?? _getDeviceId(),
       appVersion: appVersion ?? _getAppVersion(),
@@ -120,54 +110,32 @@ class LogRecordService {
     LogRecord record, {
     EventType? eventType,
     DateTime? eventAt,
-    double? value,
+    double? duration,
     Unit? unit,
     String? note,
-    List<String>? tags,
-    String? sessionId,
   }) async {
-    final changedFields = <String>[];
-
     if (eventType != null && eventType != record.eventType) {
       record.eventType = eventType;
-      changedFields.add('eventType');
     }
 
     if (eventAt != null && eventAt != record.eventAt) {
       record.eventAt = eventAt;
-      changedFields.add('eventAt');
     }
 
-    if (value != null && value != record.value) {
-      record.value = value;
-      changedFields.add('value');
+    if (duration != null && duration != record.duration) {
+      record.duration = duration;
     }
 
     if (unit != null && unit != record.unit) {
       record.unit = unit;
-      changedFields.add('unit');
     }
 
     if (note != null && note != record.note) {
       record.note = note;
-      changedFields.add('note');
     }
 
-    if (tags != null) {
-      final newTagsString = tags.join(',');
-      if (newTagsString != record.tagsString) {
-        record.tagsString = newTagsString;
-        changedFields.add('tags');
-      }
-    }
-
-    if (sessionId != null && sessionId != record.sessionId) {
-      record.sessionId = sessionId;
-      changedFields.add('sessionId');
-    }
-
-    // Mark as dirty with changed fields
-    record.markDirty(changedFields);
+    // Mark as dirty
+    record.markDirty();
 
     return await _repository.update(record);
   }
@@ -188,20 +156,9 @@ class LogRecordService {
     return await _repository.getByLogId(logId);
   }
 
-  /// Get a log record by its internal id (kept for backward compatibility)
-  @Deprecated(
-    'Use getLogRecordByLogId instead - internal IDs are platform-specific',
-  )
-  Future<LogRecord?> getLogRecordById(int id) async {
-    // This method is deprecated - use getLogRecordByLogId for cross-platform compatibility
-    // Returns null since we can't reliably map internal IDs across platforms
-    return null;
-  }
-
   /// Get all log records for an account
   Future<List<LogRecord>> getLogRecords({
     required String accountId,
-    String? profileId,
     DateTime? startDate,
     DateTime? endDate,
     List<EventType>? eventTypes,
@@ -219,9 +176,9 @@ class LogRecordService {
     // Apply additional filters in memory
     return records.where((record) {
       if (!includeDeleted && record.isDeleted) return false;
-      if (profileId != null && record.profileId != profileId) return false;
-      if (eventTypes != null && !eventTypes.contains(record.eventType))
+      if (eventTypes != null && !eventTypes.contains(record.eventType)) {
         return false;
+      }
       if (startDate != null && record.eventAt.isBefore(startDate)) return false;
       if (endDate != null && record.eventAt.isAfter(endDate)) return false;
       return true;
@@ -234,22 +191,15 @@ class LogRecordService {
     return records.take(limit).toList();
   }
 
-  /// Get log records by session ID
-  Future<List<LogRecord>> getLogRecordsBySession(String sessionId) async {
-    return await _repository.getBySession(sessionId);
-  }
-
   /// Count log records for an account
   Future<int> countLogRecords({
     required String accountId,
-    String? profileId,
     DateTime? startDate,
     DateTime? endDate,
     bool includeDeleted = false,
   }) async {
     final records = await getLogRecords(
       accountId: accountId,
-      profileId: profileId,
       startDate: startDate,
       endDate: endDate,
       includeDeleted: includeDeleted,
@@ -260,7 +210,6 @@ class LogRecordService {
   /// Watch log records for real-time updates
   Stream<List<LogRecord>> watchLogRecords({
     required String accountId,
-    String? profileId,
     DateTime? startDate,
     DateTime? endDate,
     bool includeDeleted = false,
@@ -277,7 +226,6 @@ class LogRecordService {
     return stream.map((records) {
       return records.where((record) {
         if (!includeDeleted && record.isDeleted) return false;
-        if (profileId != null && record.profileId != profileId) return false;
         return true;
       }).toList();
     });
@@ -308,16 +256,13 @@ class LogRecordService {
       final record = LogRecord.create(
         logId: logId,
         accountId: data['accountId'] as String,
-        profileId: data['profileId'] as String?,
         eventType: data['eventType'] as EventType,
         eventAt: data['eventAt'] as DateTime? ?? now,
         createdAt: now,
         updatedAt: now,
-        value: data['value'] as double?,
-        unit: data['unit'] as Unit? ?? Unit.none,
+        duration: (data['duration'] as num?)?.toDouble() ?? 0,
+        unit: data['unit'] as Unit? ?? Unit.seconds,
         note: data['note'] as String?,
-        tagsString: (data['tags'] as List<String>?)?.join(','),
-        sessionId: data['sessionId'] as String?,
         source: data['source'] as Source? ?? Source.manual,
         deviceId: _getDeviceId(),
         appVersion: _getAppVersion(),
@@ -335,33 +280,23 @@ class LogRecordService {
     return records;
   }
 
-  /// Clear all log records (use with extreme caution)
-  Future<void> clearAllLogRecords() async {
-    // Not implemented for web safety - would need to delete all records individually
-    throw UnimplementedError(
-      'clearAllLogRecords not supported via repository pattern',
-    );
-  }
-
   /// Get statistics for an account
   Future<Map<String, dynamic>> getStatistics({
     required String accountId,
-    String? profileId,
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     final records = await getLogRecords(
       accountId: accountId,
-      profileId: profileId,
       startDate: startDate,
       endDate: endDate,
       includeDeleted: false,
     );
 
     final totalCount = records.length;
-    final totalValue = records.fold<double>(
+    final totalDuration = records.fold<double>(
       0,
-      (sum, record) => sum + (record.value ?? 0),
+      (sum, record) => sum + record.duration,
     );
 
     final eventTypeCounts = <EventType, int>{};
@@ -372,8 +307,8 @@ class LogRecordService {
 
     return {
       'totalCount': totalCount,
-      'totalValue': totalValue,
-      'averageValue': totalCount > 0 ? totalValue / totalCount : 0,
+      'totalDuration': totalDuration,
+      'averageDuration': totalCount > 0 ? totalDuration / totalCount : 0,
       'eventTypeCounts': eventTypeCounts,
       'firstEvent': records.isNotEmpty ? records.first.eventAt : null,
       'lastEvent': records.isNotEmpty ? records.last.eventAt : null,
@@ -383,42 +318,36 @@ class LogRecordService {
   // ===== NEW LOGGING OPERATIONS =====
 
   /// Quick log: One-tap logging with minimal input
-  /// Uses profile defaults if available
   Future<LogRecord> quickLog({
     required String accountId,
-    String? profileId,
     EventType? eventType,
-    double? value,
+    double? duration,
     Unit? unit,
-    List<String>? tags,
     String? note,
-    String? location,
+    double? latitude,
+    double? longitude,
   }) async {
     final now = DateTime.now();
     final logId = _uuid.v4();
 
-    // Validate and clamp value
-    final clampedValue =
-        value != null && unit != null
-            ? ValidationService.clampValue(value, unit)
-            : value;
-
-    // Clean tags
-    final cleanedTags = tags != null ? ValidationService.cleanTags(tags) : null;
+    // Validate and clamp duration
+    final clampedDuration =
+        duration != null && unit != null
+            ? (ValidationService.clampValue(duration, unit) ?? 0)
+            : duration ?? 0;
 
     final record = LogRecord.create(
       logId: logId,
       accountId: accountId,
-      profileId: profileId,
       eventType: eventType ?? EventType.inhale,
       eventAt: now,
       createdAt: now,
       updatedAt: now,
-      value: clampedValue,
-      unit: unit ?? Unit.none,
+      duration: clampedDuration,
+      unit: unit ?? Unit.seconds,
       note: note,
-      tagsString: cleanedTags?.join(','),
-      location: location,
+      latitude: latitude,
+      longitude: longitude,
       source: Source.manual,
       deviceId: _getDeviceId(),
       appVersion: _getAppVersion(),
@@ -433,13 +362,12 @@ class LogRecordService {
   Future<LogRecord> backdateLog({
     required String accountId,
     required DateTime eventAt,
-    String? profileId,
     required EventType eventType,
-    double? value,
-    Unit unit = Unit.none,
-    List<String>? tags,
+    double duration = 0,
+    Unit unit = Unit.seconds,
     String? note,
-    String? location,
+    double? latitude,
+    double? longitude,
   }) async {
     final now = DateTime.now();
     final logId = _uuid.v4();
@@ -452,26 +380,21 @@ class LogRecordService {
     // Detect clock skew and set time confidence
     final timeConfidence = ValidationService.detectClockSkew(eventAt);
 
-    // Validate and clamp value
-    final clampedValue =
-        value != null ? ValidationService.clampValue(value, unit) : value;
-
-    // Clean tags
-    final cleanedTags = tags != null ? ValidationService.cleanTags(tags) : null;
+    // Validate and clamp duration
+    final clampedDuration = ValidationService.clampValue(duration, unit) ?? 0;
 
     final record = LogRecord.create(
       logId: logId,
       accountId: accountId,
-      profileId: profileId,
       eventType: eventType,
       eventAt: eventAt,
       createdAt: now,
       updatedAt: now,
-      value: clampedValue,
+      duration: clampedDuration,
       unit: unit,
       note: note,
-      tagsString: cleanedTags?.join(','),
-      location: location,
+      latitude: latitude,
+      longitude: longitude,
       source: Source.manual,
       deviceId: _getDeviceId(),
       appVersion: _getAppVersion(),
@@ -489,11 +412,10 @@ class LogRecordService {
   Future<LogRecord> recordDurationLog({
     required String accountId,
     required int durationMs,
-    String? profileId,
     EventType? eventType,
-    List<String>? tags,
     String? note,
-    String? location,
+    double? latitude,
+    double? longitude,
   }) async {
     final now = DateTime.now();
     final logId = _uuid.v4();
@@ -507,27 +429,22 @@ class LogRecordService {
     }
 
     // Clamp duration to reasonable maximum (e.g., 1 hour)
-    final clampedDuration = ValidationService.clampValue(
-      durationSeconds,
-      Unit.seconds,
-    );
-
-    // Clean tags
-    final cleanedTags = tags != null ? ValidationService.cleanTags(tags) : null;
+    final clampedDuration =
+        ValidationService.clampValue(durationSeconds, Unit.seconds) ??
+        durationSeconds;
 
     final record = LogRecord.create(
       logId: logId,
       accountId: accountId,
-      profileId: profileId,
       eventType: eventType ?? EventType.inhale,
       eventAt: now, // Release timestamp
       createdAt: now,
       updatedAt: now,
-      value: clampedDuration,
+      duration: clampedDuration,
       unit: Unit.seconds,
       note: note,
-      tagsString: cleanedTags?.join(','),
-      location: location,
+      latitude: latitude,
+      longitude: longitude,
       source: Source.manual,
       deviceId: _getDeviceId(),
       appVersion: _getAppVersion(),
@@ -539,72 +456,11 @@ class LogRecordService {
     return await _repository.create(record);
   }
 
-  /// Batch add: Create multiple log records at once
-  Future<List<LogRecord>> batchAdd({
-    required String accountId,
-    String? profileId,
-    required List<Map<String, dynamic>> entries,
-  }) async {
-    final records = <LogRecord>[];
-    final now = DateTime.now();
-
-    for (final entry in entries) {
-      final logId = _uuid.v4();
-      final eventAt = entry['eventAt'] as DateTime? ?? now;
-      final eventType = entry['eventType'] as EventType? ?? EventType.inhale;
-      final value = entry['value'] as double?;
-      final unit = entry['unit'] as Unit? ?? Unit.none;
-
-      // Validate and clamp value
-      final clampedValue =
-          value != null ? ValidationService.clampValue(value, unit) : value;
-
-      // Clean tags
-      final tags = entry['tags'] as List<String>?;
-      final cleanedTags =
-          tags != null ? ValidationService.cleanTags(tags) : null;
-
-      // Detect time confidence
-      final timeConfidence = ValidationService.detectClockSkew(eventAt);
-
-      final record = LogRecord.create(
-        logId: logId,
-        accountId: accountId,
-        profileId: profileId,
-        eventType: eventType,
-        eventAt: eventAt,
-        createdAt: now,
-        updatedAt: now,
-        value: clampedValue,
-        unit: unit,
-        note: entry['note'] as String?,
-        tagsString: cleanedTags?.join(','),
-        location: entry['location'] as String?,
-        mood: entry['mood'] as double?,
-        craving: entry['craving'] as double?,
-        source: Source.manual,
-        deviceId: _getDeviceId(),
-        appVersion: _getAppVersion(),
-        syncState: SyncState.pending,
-        timeConfidence: timeConfidence,
-      );
-
-      records.add(record);
-    }
-
-    // Create all records
-    for (final record in records) {
-      await _repository.create(record);
-    }
-
-    return records;
-  }
-
   /// Restore a soft-deleted record
   Future<void> restoreDeleted(LogRecord record) async {
     record.isDeleted = false;
     record.deletedAt = null;
-    record.markDirty(['isDeleted', 'deletedAt']);
+    record.markDirty();
 
     await _repository.update(record);
   }
@@ -625,7 +481,7 @@ class LogRecordService {
       endTime,
     );
 
-    // Filter using duplicate detection logic (exclude self, check event type, and check for duplicates)
+    // Filter using duplicate detection logic
     return candidates
         .where(
           (candidate) =>
@@ -635,8 +491,8 @@ class LogRecordService {
               ValidationService.isPotentialDuplicate(
                 eventAt1: record.eventAt,
                 eventAt2: candidate.eventAt,
-                value1: record.value,
-                value2: candidate.value,
+                value1: record.duration,
+                value2: candidate.duration,
                 eventType1: record.eventType.name,
                 eventType2: candidate.eventType.name,
                 timeTolerance: timeTolerance,
@@ -645,61 +501,42 @@ class LogRecordService {
         .toList();
   }
 
-  /// Create a log from a template
-  Future<LogRecord> createFromTemplate({
-    required String accountId,
-    String? profileId,
-    required EventType eventType,
-    double? defaultValue,
-    Unit? defaultUnit,
-    List<String>? defaultTags,
-    String? noteTemplate,
-    String? defaultLocation,
-  }) async {
-    return await quickLog(
-      accountId: accountId,
-      profileId: profileId,
-      eventType: eventType,
-      value: defaultValue,
-      unit: defaultUnit,
-      tags: defaultTags,
-      note: noteTemplate,
-      location: defaultLocation,
-    );
-  }
-
-  /// Update record with context fields
+  /// Update record with context fields (location, ratings)
   Future<LogRecord> updateContext(
     LogRecord record, {
-    String? location,
-    double? mood,
-    double? craving,
+    double? latitude,
+    double? longitude,
+    double? moodRating,
+    double? physicalRating,
   }) async {
-    final changedFields = <String>[];
+    bool changed = false;
 
-    if (location != null && location != record.location) {
-      record.location = location;
-      changedFields.add('location');
+    if (latitude != null && longitude != null) {
+      record.latitude = latitude;
+      record.longitude = longitude;
+      changed = true;
     }
 
-    if (mood != null) {
-      final validatedMood = ValidationService.validateMood(mood);
-      if (validatedMood != record.mood) {
-        record.mood = validatedMood;
-        changedFields.add('mood');
+    if (moodRating != null) {
+      final validatedMood = ValidationService.validateMood(moodRating);
+      if (validatedMood != record.moodRating) {
+        record.moodRating = validatedMood;
+        changed = true;
       }
     }
 
-    if (craving != null) {
-      final validatedCraving = ValidationService.validateCraving(craving);
-      if (validatedCraving != record.craving) {
-        record.craving = validatedCraving;
-        changedFields.add('craving');
+    if (physicalRating != null) {
+      final validatedPhysical = ValidationService.validateCraving(
+        physicalRating,
+      );
+      if (validatedPhysical != record.physicalRating) {
+        record.physicalRating = validatedPhysical;
+        changed = true;
       }
     }
 
-    if (changedFields.isNotEmpty) {
-      record.markDirty(changedFields);
+    if (changed) {
+      record.markDirty();
       await _repository.update(record);
     }
 

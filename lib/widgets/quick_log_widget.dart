@@ -210,25 +210,26 @@ class _QuickLogWidgetState extends ConsumerState<QuickLogWidget> {
 
     try {
       final eventType = widget.defaultEventType ?? EventType.inhale;
-      final value = widget.defaultValue ?? 1.0;
+      final duration = widget.defaultValue ?? 1.0;
       final unit = widget.defaultUnit ?? Unit.count;
 
-      // Validate value
-      final validatedValue = ValidationService.clampValue(value, unit);
+      // Validate duration
+      final validatedDuration =
+          ValidationService.clampValue(duration, unit) ?? duration;
 
       final record =
           adjustedTime != null
               ? await service.backdateLog(
                 accountId: activeAccount.userId,
                 eventType: eventType,
-                value: validatedValue,
+                duration: validatedDuration,
                 unit: unit,
                 eventAt: adjustedTime,
               )
               : await service.quickLog(
                 accountId: activeAccount.userId,
                 eventType: eventType,
-                value: validatedValue,
+                duration: validatedDuration,
                 unit: unit,
               );
 

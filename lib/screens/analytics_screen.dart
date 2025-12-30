@@ -61,7 +61,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             Icon(
               Icons.inbox_outlined,
               size: 100,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
@@ -106,15 +108,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
           ),
 
-          // Data table
+          // Recent entries list
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'All Entries (sorted by timestamp, newest first)',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  'Recent Entries',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
                 ...records.map(
@@ -129,11 +131,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (record.note != null) Text(record.note!),
-                          if (record.tags.isNotEmpty)
-                            Text(
-                              'Tags: ${record.tags.join(', ')}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
                           Text(
                             'Type: ${record.eventType.name} | Sync: ${record.syncState.name}',
                             style: Theme.of(context).textTheme.bodySmall,
@@ -141,9 +138,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         ],
                       ),
                       trailing:
-                          record.value != null
+                          record.duration > 0
                               ? Text(
-                                '${record.value!.toStringAsFixed(1)} ${record.unit.name}',
+                                '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
                                 style: Theme.of(context).textTheme.titleMedium,
                               )
                               : null,
@@ -180,24 +177,24 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   _buildStatRow(
                     context,
                     'Total Entries',
-                    stats['totalEntries'].toString(),
+                    '${stats['totalCount'] ?? 0}',
                   ),
                   _buildStatRow(
                     context,
-                    'Total Amount',
-                    stats['totalAmount'].toStringAsFixed(2),
+                    'Total Duration',
+                    (stats['totalDuration'] as num?)?.toStringAsFixed(2) ?? '0',
                   ),
-                  if (stats['firstEntry'] != null)
+                  if (stats['firstEvent'] != null)
                     _buildStatRow(
                       context,
                       'First Entry',
-                      DateFormat('MMM dd, yyyy').format(stats['firstEntry']),
+                      DateFormat('MMM dd, yyyy').format(stats['firstEvent']),
                     ),
-                  if (stats['lastEntry'] != null)
+                  if (stats['lastEvent'] != null)
                     _buildStatRow(
                       context,
                       'Last Entry',
-                      DateFormat('MMM dd, yyyy').format(stats['lastEntry']),
+                      DateFormat('MMM dd, yyyy').format(stats['lastEvent']),
                     ),
                 ],
               ),

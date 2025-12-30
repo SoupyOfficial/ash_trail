@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ash_trail/screens/logging_screen.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/providers/log_record_provider.dart';
-import 'package:ash_trail/providers/account_provider.dart';
 
 void main() {
   group('LoggingScreen Widget Tests', () {

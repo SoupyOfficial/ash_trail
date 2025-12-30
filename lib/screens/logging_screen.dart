@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../widgets/quick_log_widget.dart';
-import '../widgets/template_selector_widget.dart';
 import '../widgets/backdate_dialog.dart';
 
 /// Dedicated logging screen for detailed event entry
@@ -106,34 +105,6 @@ class _QuickLogTab extends ConsumerWidget {
                         );
                       },
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Templates section
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Templates',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Quick access to your saved templates',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 16),
-                  TemplateSelectorWidget(
-                    onTemplateUsed: () {
-                      // Template logging is handled by the widget
-                    },
                   ),
                 ],
               ),
@@ -251,17 +222,13 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
   bool _isSubmitting = false;
 
   // Form controllers
-  final _valueController = TextEditingController();
+  final _durationController = TextEditingController();
   final _noteController = TextEditingController();
-  final _tagsController = TextEditingController();
-  final _locationController = TextEditingController();
 
   @override
   void dispose() {
-    _valueController.dispose();
+    _durationController.dispose();
     _noteController.dispose();
-    _tagsController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -320,7 +287,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
             ),
             const SizedBox(height: 12),
 
-            // Value and Unit
+            // Duration and Unit
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -328,7 +295,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Value',
+                      'Duration',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -340,7 +307,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         Expanded(
                           flex: 2,
                           child: TextFormField(
-                            controller: _valueController,
+                            controller: _durationController,
                             decoration: const InputDecoration(
                               labelText: 'Amount',
                               border: OutlineInputBorder(),
@@ -349,7 +316,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                               decimal: true,
                             ),
                             onChanged: (value) {
-                              draftNotifier.setValue(double.tryParse(value));
+                              draftNotifier.setDuration(double.tryParse(value));
                             },
                           ),
                         ),
@@ -424,7 +391,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
             ),
             const SizedBox(height: 12),
 
-            // Mood and Craving
+            // Mood and Physical Rating
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -447,49 +414,54 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         const Icon(Icons.sentiment_very_dissatisfied, size: 20),
                         Expanded(
                           child: Slider(
-                            value: draft.mood ?? 5.0,
+                            value: draft.moodRating ?? 5.0,
                             min: 0,
                             max: 10,
                             divisions: 20,
-                            label: draft.mood?.toStringAsFixed(1) ?? 'Not set',
-                            onChanged: (value) => draftNotifier.setMood(value),
+                            label:
+                                draft.moodRating?.toStringAsFixed(1) ??
+                                'Not set',
+                            onChanged:
+                                (value) => draftNotifier.setMoodRating(value),
                           ),
                         ),
                         const Icon(Icons.sentiment_very_satisfied, size: 20),
                         SizedBox(
                           width: 50,
                           child: Text(
-                            draft.mood?.toStringAsFixed(1) ?? '-',
+                            draft.moodRating?.toStringAsFixed(1) ?? '-',
                             textAlign: TextAlign.center,
                           ),
                         ),
                       ],
                     ),
 
-                    // Craving slider
+                    // Physical rating slider
                     Row(
                       children: [
-                        const SizedBox(width: 80, child: Text('Craving')),
-                        const Icon(Icons.thumb_down, size: 20),
+                        const SizedBox(width: 80, child: Text('Physical')),
+                        const Icon(Icons.sentiment_very_dissatisfied, size: 20),
                         Expanded(
                           child: Slider(
-                            value: draft.craving ?? 5.0,
+                            value: draft.physicalRating ?? 5.0,
                             min: 0,
                             max: 10,
                             divisions: 20,
                             label:
-                                draft.craving?.toStringAsFixed(1) ?? 'Not set',
+                                draft.physicalRating?.toStringAsFixed(1) ??
+                                'Not set',
                             activeColor:
                                 Theme.of(context).colorScheme.secondary,
                             onChanged:
-                                (value) => draftNotifier.setCraving(value),
+                                (value) =>
+                                    draftNotifier.setPhysicalRating(value),
                           ),
                         ),
-                        const Icon(Icons.thumb_up, size: 20),
+                        const Icon(Icons.sentiment_very_satisfied, size: 20),
                         SizedBox(
                           width: 50,
                           child: Text(
-                            draft.craving?.toStringAsFixed(1) ?? '-',
+                            draft.physicalRating?.toStringAsFixed(1) ?? '-',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -501,7 +473,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
             ),
             const SizedBox(height: 12),
 
-            // Notes and Tags
+            // Notes
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -509,7 +481,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Additional Details',
+                      'Notes',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -525,35 +497,6 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                       ),
                       maxLines: 3,
                       onChanged: (value) => draftNotifier.setNote(value),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _tagsController,
-                      decoration: const InputDecoration(
-                        labelText: 'Tags (comma-separated)',
-                        border: OutlineInputBorder(),
-                        hintText: 'e.g., morning, relaxation',
-                      ),
-                      onChanged: (value) {
-                        final tags =
-                            value
-                                .split(',')
-                                .map((s) => s.trim())
-                                .where((s) => s.isNotEmpty)
-                                .toList();
-                        draftNotifier.setTags(tags);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _locationController,
-                      decoration: const InputDecoration(
-                        labelText: 'Location',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.location_on),
-                        hintText: 'e.g., home, work',
-                      ),
-                      onChanged: (value) => draftNotifier.setLocation(value),
                     ),
                   ],
                 ),
@@ -571,10 +514,8 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             ? null
                             : () {
                               draftNotifier.reset();
-                              _valueController.clear();
+                              _durationController.clear();
                               _noteController.clear();
-                              _tagsController.clear();
-                              _locationController.clear();
                             },
                     child: const Text('Clear'),
                   ),
@@ -628,23 +569,21 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
         accountId: widget.accountId,
         eventType: draft.eventType,
         eventAt: draft.eventTime,
-        value: draft.value,
+        duration: draft.duration ?? 0,
         unit: draft.unit,
         note: draft.note,
-        tags: draft.tags.isEmpty ? null : draft.tags,
-        mood: draft.mood,
-        craving: draft.craving,
+        moodRating: draft.moodRating,
+        physicalRating: draft.physicalRating,
         reason: draft.reason,
-        location: draft.location,
+        latitude: draft.latitude,
+        longitude: draft.longitude,
       );
 
       if (mounted) {
         // Reset form
         ref.read(logDraftProvider.notifier).reset();
-        _valueController.clear();
+        _durationController.clear();
         _noteController.clear();
-        _tagsController.clear();
-        _locationController.clear();
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Event logged successfully!')),

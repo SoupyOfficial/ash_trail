@@ -12,43 +12,43 @@ import 'account_provider.dart';
 @immutable
 class LogDraft {
   final EventType eventType;
-  final double? value;
+  final double? duration;
   final Unit unit;
   final DateTime eventTime;
   final String? note;
-  final List<String> tags;
-  final double? mood;
-  final double? craving;
+  final double? moodRating;
+  final double? physicalRating;
   final LogReason? reason;
-  final String? location;
+  final double? latitude;
+  final double? longitude;
   final bool isValid;
 
   const LogDraft({
     this.eventType = EventType.inhale,
-    this.value,
+    this.duration,
     this.unit = Unit.hits,
     DateTime? eventTime,
     this.note,
-    this.tags = const [],
-    this.mood,
-    this.craving,
+    this.moodRating,
+    this.physicalRating,
     this.reason,
-    this.location,
+    this.latitude,
+    this.longitude,
   }) : eventTime = eventTime ?? const _DefaultDateTime(),
        isValid = true;
 
   // Private constructor for validation state
   const LogDraft._({
     required this.eventType,
-    this.value,
+    this.duration,
     required this.unit,
     required DateTime eventTime,
     this.note,
-    required this.tags,
-    this.mood,
-    this.craving,
+    this.moodRating,
+    this.physicalRating,
     this.reason,
-    this.location,
+    this.latitude,
+    this.longitude,
     required this.isValid,
   }) : eventTime = eventTime;
 
@@ -58,33 +58,34 @@ class LogDraft {
   /// Copy with validation
   LogDraft copyWith({
     EventType? eventType,
-    double? Function()? value,
+    double? Function()? duration,
     Unit? unit,
     DateTime? eventTime,
     String? Function()? note,
-    List<String>? tags,
-    double? Function()? mood,
-    double? Function()? craving,
+    double? Function()? moodRating,
+    double? Function()? physicalRating,
     LogReason? Function()? reason,
-    String? Function()? location,
+    double? Function()? latitude,
+    double? Function()? longitude,
   }) {
     return LogDraft._(
       eventType: eventType ?? this.eventType,
-      value: value != null ? value() : this.value,
+      duration: duration != null ? duration() : this.duration,
       unit: unit ?? this.unit,
       eventTime: eventTime ?? this.eventTime,
       note: note != null ? note() : this.note,
-      tags: tags ?? this.tags,
-      mood: mood != null ? mood() : this.mood,
-      craving: craving != null ? craving() : this.craving,
+      moodRating: moodRating != null ? moodRating() : this.moodRating,
+      physicalRating:
+          physicalRating != null ? physicalRating() : this.physicalRating,
       reason: reason != null ? reason() : this.reason,
-      location: location != null ? location() : this.location,
+      latitude: latitude != null ? latitude() : this.latitude,
+      longitude: longitude != null ? longitude() : this.longitude,
       isValid: _validate(
         eventType ?? this.eventType,
-        value != null ? value() : this.value,
+        duration != null ? duration() : this.duration,
         unit ?? this.unit,
-        mood != null ? mood() : this.mood,
-        craving != null ? craving() : this.craving,
+        moodRating != null ? moodRating() : this.moodRating,
+        physicalRating != null ? physicalRating() : this.physicalRating,
       ),
     );
   }
@@ -92,17 +93,18 @@ class LogDraft {
   /// Validation logic for draft
   static bool _validate(
     EventType eventType,
-    double? value,
+    double? duration,
     Unit unit,
-    double? mood,
-    double? craving,
+    double? moodRating,
+    double? physicalRating,
   ) {
-    // Value must be non-negative if provided
-    if (value != null && value < 0) return false;
+    // Duration must be non-negative if provided
+    if (duration != null && duration < 0) return false;
 
-    // Mood/craving must be in 0-10 range if provided
-    if (mood != null && (mood < 0 || mood > 10)) return false;
-    if (craving != null && (craving < 0 || craving > 10)) return false;
+    // Mood/physical rating must be in 0-10 range if provided
+    if (moodRating != null && (moodRating < 0 || moodRating > 10)) return false;
+    if (physicalRating != null && (physicalRating < 0 || physicalRating > 10))
+      return false;
 
     return true;
   }
@@ -112,29 +114,29 @@ class LogDraft {
     if (identical(this, other)) return true;
     return other is LogDraft &&
         other.eventType == eventType &&
-        other.value == value &&
+        other.duration == duration &&
         other.unit == unit &&
         other.eventTime == eventTime &&
         other.note == note &&
-        listEquals(other.tags, tags) &&
-        other.mood == mood &&
-        other.craving == craving &&
+        other.moodRating == moodRating &&
+        other.physicalRating == physicalRating &&
         other.reason == reason &&
-        other.location == location;
+        other.latitude == latitude &&
+        other.longitude == longitude;
   }
 
   @override
   int get hashCode => Object.hash(
     eventType,
-    value,
+    duration,
     unit,
     eventTime,
     note,
-    Object.hashAll(tags),
-    mood,
-    craving,
+    moodRating,
+    physicalRating,
     reason,
-    location,
+    latitude,
+    longitude,
   );
 }
 
@@ -167,9 +169,9 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
     state = state.copyWith(eventType: type, unit: defaultUnit);
   }
 
-  /// Update value
-  void setValue(double? value) {
-    state = state.copyWith(value: () => value);
+  /// Update duration
+  void setDuration(double? duration) {
+    state = state.copyWith(duration: () => duration);
   }
 
   /// Update unit
@@ -187,31 +189,14 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
     state = state.copyWith(note: () => note?.isEmpty == true ? null : note);
   }
 
-  /// Update tags
-  void setTags(List<String> tags) {
-    state = state.copyWith(tags: tags);
+  /// Update mood rating (0-10 scale)
+  void setMoodRating(double? moodRating) {
+    state = state.copyWith(moodRating: () => moodRating);
   }
 
-  /// Add a tag
-  void addTag(String tag) {
-    if (tag.isNotEmpty && !state.tags.contains(tag)) {
-      state = state.copyWith(tags: [...state.tags, tag]);
-    }
-  }
-
-  /// Remove a tag
-  void removeTag(String tag) {
-    state = state.copyWith(tags: state.tags.where((t) => t != tag).toList());
-  }
-
-  /// Update mood (0-10 scale)
-  void setMood(double? mood) {
-    state = state.copyWith(mood: () => mood);
-  }
-
-  /// Update craving (0-10 scale)
-  void setCraving(double? craving) {
-    state = state.copyWith(craving: () => craving);
+  /// Update physical rating (0-10 scale)
+  void setPhysicalRating(double? physicalRating) {
+    state = state.copyWith(physicalRating: () => physicalRating);
   }
 
   /// Update reason
@@ -219,10 +204,21 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
     state = state.copyWith(reason: () => reason);
   }
 
-  /// Update location
-  void setLocation(String? location) {
+  /// Update latitude
+  void setLatitude(double? latitude) {
+    state = state.copyWith(latitude: () => latitude);
+  }
+
+  /// Update longitude
+  void setLongitude(double? longitude) {
+    state = state.copyWith(longitude: () => longitude);
+  }
+
+  /// Set both latitude and longitude at once
+  void setLocation(double? latitude, double? longitude) {
     state = state.copyWith(
-      location: () => location?.isEmpty == true ? null : location,
+      latitude: () => latitude,
+      longitude: () => longitude,
     );
   }
 
@@ -235,14 +231,14 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
   bool get isDirty {
     final empty = LogDraft.empty();
     return state.eventType != empty.eventType ||
-        state.value != null ||
+        state.duration != null ||
         state.unit != empty.unit ||
         state.note != null ||
-        state.tags.isNotEmpty ||
-        state.mood != null ||
-        state.craving != null ||
+        state.moodRating != null ||
+        state.physicalRating != null ||
         state.reason != null ||
-        state.location != null;
+        state.latitude != null ||
+        state.longitude != null;
   }
 }
 
@@ -269,9 +265,6 @@ final activeAccountIdProvider = Provider<String?>((ref) {
     error: (_, __) => null,
   );
 });
-
-/// Provider for active profile ID
-final activeProfileIdProvider = StateProvider<String?>((ref) => null);
 
 /// Provider for watching log records for active account (convenience wrapper)
 final activeAccountLogRecordsProvider = StreamProvider<List<LogRecord>>((ref) {
@@ -305,15 +298,17 @@ final createLogRecordProvider =
 
       return await service.createLogRecord(
         accountId: accountId,
-        profileId: params.profileId,
         eventType: params.eventType,
         eventAt: params.eventAt,
-        value: params.value,
+        duration: params.duration ?? 0,
         unit: params.unit,
         note: params.note,
-        tags: params.tags,
-        sessionId: params.sessionId,
         source: params.source,
+        moodRating: params.moodRating,
+        physicalRating: params.physicalRating,
+        reason: params.reason,
+        latitude: params.latitude,
+        longitude: params.longitude,
       );
     });
 
@@ -329,7 +324,6 @@ final logRecordsProvider =
 
       return service.watchLogRecords(
         accountId: accountId,
-        profileId: params.profileId,
         startDate: params.startDate,
         endDate: params.endDate,
         includeDeleted: params.includeDeleted,
@@ -351,7 +345,6 @@ final getLogRecordsProvider =
 
       return await service.getLogRecords(
         accountId: accountId,
-        profileId: params.profileId,
         startDate: params.startDate,
         endDate: params.endDate,
         eventTypes: params.eventTypes,
@@ -383,7 +376,6 @@ final logRecordStatsProvider =
 
       return await service.getStatistics(
         accountId: accountId,
-        profileId: params.profileId,
         startDate: params.startDate,
         endDate: params.endDate,
       );
@@ -403,26 +395,30 @@ final pendingSyncCountProvider = FutureProvider<int>((ref) async {
 
 /// Parameters for creating a log record
 class CreateLogRecordParams {
-  final String? profileId;
   final EventType eventType;
   final DateTime? eventAt;
-  final double? value;
+  final double? duration;
   final Unit unit;
   final String? note;
-  final List<String>? tags;
-  final String? sessionId;
   final Source source;
+  final double? moodRating;
+  final double? physicalRating;
+  final LogReason? reason;
+  final double? latitude;
+  final double? longitude;
 
   CreateLogRecordParams({
-    this.profileId,
     required this.eventType,
     this.eventAt,
-    this.value,
+    this.duration,
     this.unit = Unit.none,
     this.note,
-    this.tags,
-    this.sessionId,
     this.source = Source.manual,
+    this.moodRating,
+    this.physicalRating,
+    this.reason,
+    this.latitude,
+    this.longitude,
   });
 
   @override
@@ -430,27 +426,33 @@ class CreateLogRecordParams {
     if (identical(this, other)) return true;
 
     return other is CreateLogRecordParams &&
-        other.profileId == profileId &&
         other.eventType == eventType &&
         other.eventAt == eventAt &&
-        other.value == value &&
+        other.duration == duration &&
         other.unit == unit &&
         other.note == note &&
-        other.sessionId == sessionId &&
-        other.source == source;
+        other.source == source &&
+        other.moodRating == moodRating &&
+        other.physicalRating == physicalRating &&
+        other.reason == reason &&
+        other.latitude == latitude &&
+        other.longitude == longitude;
   }
 
   @override
   int get hashCode {
     return Object.hash(
-      profileId,
       eventType,
       eventAt,
-      value,
+      duration,
       unit,
       note,
-      sessionId,
       source,
+      moodRating,
+      physicalRating,
+      reason,
+      latitude,
+      longitude,
     );
   }
 }
@@ -458,7 +460,6 @@ class CreateLogRecordParams {
 /// Parameters for querying log records
 class LogRecordsParams {
   final String? accountId;
-  final String? profileId;
   final DateTime? startDate;
   final DateTime? endDate;
   final List<EventType>? eventTypes;
@@ -466,7 +467,6 @@ class LogRecordsParams {
 
   const LogRecordsParams({
     this.accountId,
-    this.profileId,
     this.startDate,
     this.endDate,
     this.eventTypes,
@@ -479,7 +479,6 @@ class LogRecordsParams {
 
     return other is LogRecordsParams &&
         other.accountId == accountId &&
-        other.profileId == profileId &&
         other.startDate == startDate &&
         other.endDate == endDate &&
         other.includeDeleted == includeDeleted;
@@ -487,13 +486,7 @@ class LogRecordsParams {
 
   @override
   int get hashCode {
-    return Object.hash(
-      accountId,
-      profileId,
-      startDate,
-      endDate,
-      includeDeleted,
-    );
+    return Object.hash(accountId, startDate, endDate, includeDeleted);
   }
 }
 
@@ -514,11 +507,9 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
     LogRecord record, {
     EventType? eventType,
     DateTime? eventAt,
-    double? value,
+    double? duration,
     Unit? unit,
     String? note,
-    List<String>? tags,
-    String? sessionId,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -527,11 +518,9 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
         record,
         eventType: eventType,
         eventAt: eventAt,
-        value: value,
+        duration: duration,
         unit: unit,
         note: note,
-        tags: tags,
-        sessionId: sessionId,
       );
       state = AsyncValue.data(updated);
     } catch (e, st) {

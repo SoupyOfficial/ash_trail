@@ -39,10 +39,31 @@ class LogRecordService {
     Source source = Source.manual,
     double? moodRating,
     double? physicalRating,
-    LogReason? reason,
+    List<LogReason>? reasons,
     double? latitude,
     double? longitude,
   }) async {
+    // Validate location cross-field constraint: both present or both null
+    if (!ValidationService.isValidLocationPair(latitude, longitude)) {
+      throw ArgumentError(
+        'Location coordinates must both be present or both be null. '
+        'Cannot have latitude without longitude or vice versa.',
+      );
+    }
+
+    // Validate ratings are in correct range (1-10, not 0-10)
+    // Per design 5.5: Ratings can be null (not set) or 1-10, but zero is not allowed
+    if (moodRating != null && (moodRating < 1 || moodRating > 10)) {
+      throw ArgumentError(
+        'Mood rating must be null (not set) or between 1 and 10 inclusive (zero not allowed)',
+      );
+    }
+    if (physicalRating != null && (physicalRating < 1 || physicalRating > 10)) {
+      throw ArgumentError(
+        'Physical rating must be null (not set) or between 1 and 10 inclusive (zero not allowed)',
+      );
+    }
+
     final logId = _uuid.v4();
     final now = DateTime.now();
 
@@ -62,7 +83,7 @@ class LogRecordService {
       syncState: SyncState.pending,
       moodRating: moodRating,
       physicalRating: physicalRating,
-      reason: reason,
+      reasons: reasons,
       latitude: latitude,
       longitude: longitude,
     );

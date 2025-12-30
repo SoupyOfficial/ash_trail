@@ -94,19 +94,19 @@ void main() {
         expect(draft.isValid, true);
       });
 
-      test('moodRating below 0 is invalid', () {
-        final draft = LogDraft.empty().copyWith(moodRating: () => -1.0);
+      test('moodRating below 1 is invalid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => 0.0);
         expect(draft.isValid, false);
+      });
+
+      test('moodRating at 1 is valid', () {
+        final draft = LogDraft.empty().copyWith(moodRating: () => 1.0);
+        expect(draft.isValid, true);
       });
 
       test('moodRating above 10 is invalid', () {
         final draft = LogDraft.empty().copyWith(moodRating: () => 11.0);
         expect(draft.isValid, false);
-      });
-
-      test('moodRating at 0 is valid', () {
-        final draft = LogDraft.empty().copyWith(moodRating: () => 0.0);
-        expect(draft.isValid, true);
       });
 
       test('moodRating at 10 is valid', () {
@@ -119,19 +119,19 @@ void main() {
         expect(draft.isValid, true);
       });
 
-      test('physicalRating below 0 is invalid', () {
-        final draft = LogDraft.empty().copyWith(physicalRating: () => -1.0);
+      test('physicalRating below 1 is invalid', () {
+        final draft = LogDraft.empty().copyWith(physicalRating: () => 0.0);
         expect(draft.isValid, false);
+      });
+
+      test('physicalRating at 1 is valid', () {
+        final draft = LogDraft.empty().copyWith(physicalRating: () => 1.0);
+        expect(draft.isValid, true);
       });
 
       test('physicalRating above 10 is invalid', () {
         final draft = LogDraft.empty().copyWith(physicalRating: () => 11.0);
         expect(draft.isValid, false);
-      });
-
-      test('physicalRating within range is valid', () {
-        final draft = LogDraft.empty().copyWith(physicalRating: () => 7.0);
-        expect(draft.isValid, true);
       });
     });
 

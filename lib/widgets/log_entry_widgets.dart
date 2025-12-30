@@ -22,7 +22,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
   DateTime _eventTime = DateTime.now();
   double? _moodRating;
   double? _physicalRating;
-  LogReason? _reason;
+  List<LogReason>? _reasons;
 
   bool _isSubmitting = false;
 
@@ -169,36 +169,8 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Reason Dropdown
-              DropdownButtonFormField<LogReason>(
-                value: _reason,
-                decoration: const InputDecoration(
-                  labelText: 'Reason (optional)',
-                  border: OutlineInputBorder(),
-                ),
-                items: [
-                  const DropdownMenuItem<LogReason>(
-                    value: null,
-                    child: Text('No reason specified'),
-                  ),
-                  ...LogReason.values.map((reason) {
-                    return DropdownMenuItem(
-                      value: reason,
-                      child: Row(
-                        children: [
-                          Icon(reason.icon, size: 18),
-                          const SizedBox(width: 8),
-                          Text(reason.displayName),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-                onChanged: (value) {
-                  setState(() => _reason = value);
-                },
-              ),
-              const SizedBox(height: 16),
+              // Reason Selection (removed for simplicity - use main logging screen for detailed entries)
+              // TODO: Implement multiselect for reasons if needed
 
               // Mood Rating Slider
               Column(
@@ -225,9 +197,9 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                       Expanded(
                         child: Slider(
                           value: _moodRating ?? 5.0,
-                          min: 0,
+                          min: 1,
                           max: 10,
-                          divisions: 20,
+                          divisions: 9,
                           label: _moodRating?.toStringAsFixed(1),
                           onChanged: (value) {
                             setState(() => _moodRating = value);
@@ -274,9 +246,9 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                       Expanded(
                         child: Slider(
                           value: _physicalRating ?? 5.0,
-                          min: 0,
+                          min: 1,
                           max: 10,
-                          divisions: 20,
+                          divisions: 9,
                           label: _physicalRating?.toStringAsFixed(1),
                           activeColor: Theme.of(context).colorScheme.secondary,
                           onChanged: (value) {
@@ -354,7 +326,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
         note: _note,
         moodRating: _moodRating,
         physicalRating: _physicalRating,
-        reason: _reason,
+        reasons: _reasons,
       );
 
       if (mounted) {

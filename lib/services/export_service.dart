@@ -100,7 +100,7 @@ class ExportService {
       'duration': record.duration,
       'unit': record.unit.name,
       'note': record.note,
-      'reason': record.reason?.name,
+      'reasons': record.reasons?.map((r) => r.name).toList(),
       'moodRating': record.moodRating,
       'physicalRating': record.physicalRating,
       'latitude': record.latitude,

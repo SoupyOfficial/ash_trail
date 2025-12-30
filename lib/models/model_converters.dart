@@ -42,7 +42,7 @@ extension LogRecordWebConversion on LogRecord {
       duration: duration,
       unit: unit.name,
       note: note,
-      reason: reason?.name,
+      reasons: reasons?.map((r) => r.name).toList(),
       moodRating: moodRating,
       physicalRating: physicalRating,
       latitude: latitude,
@@ -74,12 +74,16 @@ extension LogRecordWebConversion on LogRecord {
           orElse: () => Unit.seconds,
         ),
         note: web.note,
-        reason:
-            web.reason != null
-                ? LogReason.values.firstWhere(
-                  (r) => r.name == web.reason,
-                  orElse: () => LogReason.other,
-                )
+        reasons:
+            web.reasons != null
+                ? web.reasons!
+                    .map(
+                      (r) => LogReason.values.firstWhere(
+                        (reason) => reason.name == r,
+                        orElse: () => LogReason.other,
+                      ),
+                    )
+                    .toList()
                 : null,
         moodRating: web.moodRating,
         physicalRating: web.physicalRating,

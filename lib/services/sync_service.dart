@@ -5,6 +5,27 @@ import '../models/log_record.dart';
 import 'log_record_service.dart';
 
 /// SyncService handles bidirectional synchronization with Firestore
+///
+/// **Conflict Resolution Strategy:**
+/// Current implementation assumes SINGLE-WRITER MODEL per account:
+/// - One active writer per account at any time
+/// - No concurrent edits across devices
+/// - Conflicts are avoided by design, not resolved after the fact
+///
+/// This simplifies sync logic but limits multi-device concurrent editing.
+/// See design doc 5. Logging System section 5.6.1 for assumptions.
+///
+/// **Future Enhancement:** Multi-device conflict resolution is planned
+/// but not implemented in MVP. When implemented, would require:
+/// - Vector clocks or CRDT approach
+/// - Conflict detection at field/property level
+/// - User notification and merge strategy
+///
+/// **Conflict Detection:**
+/// Currently detects conflicts when lastRemoteUpdateAt < remote.updatedAt
+/// Uses "last write wins" strategy for resolution.
+/// TODO: Implement proper multi-device conflict handling for post-MVP
+///
 /// Implements conflict resolution and batch upload strategies
 class SyncService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

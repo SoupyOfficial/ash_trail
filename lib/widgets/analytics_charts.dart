@@ -324,6 +324,10 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
     Color color;
 
     switch (type) {
+      case EventType.vape:
+        icon = Icons.cloud;
+        color = Colors.indigo;
+        break;
       case EventType.inhale:
         icon = Icons.air;
         color = Colors.blue;

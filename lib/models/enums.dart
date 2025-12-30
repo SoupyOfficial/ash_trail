@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Event types for logging different actions
 enum EventType {
+  vape, // Vaping session
   inhale, // Single inhale/hit
   sessionStart, // Start of a session
   sessionEnd, // End of a session

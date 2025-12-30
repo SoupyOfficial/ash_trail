@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
 import '../models/log_record.dart';
 import '../providers/account_provider.dart';
-import '../providers/log_record_provider.dart';
 import '../providers/log_record_provider.dart'
-    show logRecordStatsProvider, LogRecordsParams;
-import '../widgets/quick_log_widget.dart';
+    show
+        logRecordStatsProvider,
+        LogRecordsParams,
+        activeAccountLogRecordsProvider,
+        activeAccountIdProvider;
+import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import 'analytics_screen.dart';
 import 'accounts_screen.dart';
-import 'logging_screen.dart';
 import 'history_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -58,39 +60,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: activeAccountAsync.maybeWhen(
         data: (account) {
           if (account == null) return null;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Backdate button (smaller)
-              FloatingActionButton.small(
-                heroTag: 'backdate',
-                onPressed: () => _showBackdateDialog(context),
-                child: const Icon(Icons.history),
-              ),
-              const SizedBox(height: 8),
-              // Detailed log button
-              FloatingActionButton.small(
-                heroTag: 'detailed',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoggingScreen(),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.edit_note),
-              ),
-              const SizedBox(height: 8),
-              // Quick log button (main action)
-              QuickLogWidget(
-                onLogCreated: () {
-                  // Trigger refresh of the log records stream
-                  ref.invalidate(activeAccountLogRecordsProvider);
-                },
-              ),
-            ],
+          return FloatingActionButton.small(
+            heroTag: 'backdate',
+            onPressed: () => _showBackdateDialog(context),
+            child: const Icon(Icons.history),
           );
         },
         orElse: () => null,
@@ -142,8 +115,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String accountName,
   ) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
-    final statisticsAsync = ref.watch(
+    final allTimeStatsAsync = ref.watch(
       logRecordStatsProvider(LogRecordsParams(accountId: null)),
+    );
+    final sevenDayStatsAsync = ref.watch(
+      logRecordStatsProvider(
+        LogRecordsParams(
+          accountId: null,
+          startDate: DateTime.now().subtract(const Duration(days: 7)),
+          endDate: DateTime.now(),
+        ),
+      ),
     );
 
     return SingleChildScrollView(
@@ -172,11 +154,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Statistics cards
-          statisticsAsync.when(
-            data: (stats) => _buildStatisticsRow(context, stats),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Text('Error loading stats: $error'),
+          // Statistics cards - All-time and 7-day
+          _buildStatisticsSection(
+            context,
+            ref,
+            allTimeStatsAsync,
+            sevenDayStatsAsync,
           ),
           const SizedBox(height: 16),
 
@@ -213,6 +196,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 24),
+
+          // Quick log widget
+          HomeQuickLogWidget(
+            onLogCreated: () {
+              ref.invalidate(activeAccountLogRecordsProvider);
+            },
           ),
           const SizedBox(height: 24),
 
@@ -262,7 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Tap the Quick Log button to start',
+                            'Hold the duration button above to log your first session',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
@@ -313,7 +304,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildStatisticsRow(BuildContext context, Map<String, dynamic> stats) {
+  Widget _buildStatisticsSection(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<Map<String, dynamic>> allTimeStatsAsync,
+    AsyncValue<Map<String, dynamic>> sevenDayStatsAsync,
+  ) {
+    return Column(
+      children: [
+        // All-time statistics
+        allTimeStatsAsync.when(
+          data: (stats) => _buildStatisticsRow(context, 'All-Time', stats),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Text('Error loading stats: $error'),
+        ),
+        const SizedBox(height: 8),
+        // 7-day statistics
+        sevenDayStatsAsync.when(
+          data: (stats) => _buildStatisticsRow(context, 'Last 7 Days', stats),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Text('Error loading stats: $error'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatisticsRow(
+    BuildContext context,
+    String label,
+    Map<String, dynamic> stats,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -328,7 +348,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total Entries',
+                    '$label: Count',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -349,7 +369,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total Duration',
+                    '$label: Duration (s)',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -367,6 +387,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   IconData _getEventIcon(EventType eventType) {
     switch (eventType) {
+      case EventType.vape:
+        return Icons.cloud;
       case EventType.inhale:
         return Icons.air;
       case EventType.sessionStart:

@@ -18,7 +18,7 @@ class LogDraft {
   final String? note;
   final double? moodRating;
   final double? physicalRating;
-  final LogReason? reason;
+  final List<LogReason>? reasons;
   final double? latitude;
   final double? longitude;
   final bool isValid;
@@ -26,12 +26,12 @@ class LogDraft {
   const LogDraft({
     this.eventType = EventType.inhale,
     this.duration,
-    this.unit = Unit.hits,
+    this.unit = Unit.seconds,
     DateTime? eventTime,
     this.note,
     this.moodRating,
     this.physicalRating,
-    this.reason,
+    this.reasons,
     this.latitude,
     this.longitude,
   }) : eventTime = eventTime ?? const _DefaultDateTime(),
@@ -46,7 +46,7 @@ class LogDraft {
     this.note,
     this.moodRating,
     this.physicalRating,
-    this.reason,
+    this.reasons,
     this.latitude,
     this.longitude,
     required this.isValid,
@@ -64,7 +64,7 @@ class LogDraft {
     String? Function()? note,
     double? Function()? moodRating,
     double? Function()? physicalRating,
-    LogReason? Function()? reason,
+    List<LogReason>? Function()? reasons,
     double? Function()? latitude,
     double? Function()? longitude,
   }) {
@@ -77,7 +77,7 @@ class LogDraft {
       moodRating: moodRating != null ? moodRating() : this.moodRating,
       physicalRating:
           physicalRating != null ? physicalRating() : this.physicalRating,
-      reason: reason != null ? reason() : this.reason,
+      reasons: reasons != null ? reasons() : this.reasons,
       latitude: latitude != null ? latitude() : this.latitude,
       longitude: longitude != null ? longitude() : this.longitude,
       isValid: _validate(
@@ -101,9 +101,11 @@ class LogDraft {
     // Duration must be non-negative if provided
     if (duration != null && duration < 0) return false;
 
-    // Mood/physical rating must be in 0-10 range if provided
-    if (moodRating != null && (moodRating < 0 || moodRating > 10)) return false;
-    if (physicalRating != null && (physicalRating < 0 || physicalRating > 10))
+    // Mood rating: null is valid (not set), or 1-10 (not 0-10)
+    if (moodRating != null && (moodRating < 1 || moodRating > 10)) return false;
+
+    // Physical rating: null is valid (not set), or 1-10 (not 0-10)
+    if (physicalRating != null && (physicalRating < 1 || physicalRating > 10))
       return false;
 
     return true;
@@ -120,7 +122,7 @@ class LogDraft {
         other.note == note &&
         other.moodRating == moodRating &&
         other.physicalRating == physicalRating &&
-        other.reason == reason &&
+        _listEquals(other.reasons, reasons) &&
         other.latitude == latitude &&
         other.longitude == longitude;
   }
@@ -134,10 +136,20 @@ class LogDraft {
     note,
     moodRating,
     physicalRating,
-    reason,
+    Object.hashAll(reasons ?? []),
     latitude,
     longitude,
   );
+}
+
+// Helper function for list comparison
+bool _listEquals<T>(List<T>? a, List<T>? b) {
+  if (a == null) return b == null;
+  if (b == null || a.length != b.length) return false;
+  for (int i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }
 
 /// Helper class for default DateTime in const constructor
@@ -154,19 +166,8 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
 
   /// Update event type and auto-select appropriate unit
   void setEventType(EventType type) {
-    Unit defaultUnit;
-    switch (type) {
-      case EventType.inhale:
-        defaultUnit = Unit.hits;
-        break;
-      case EventType.sessionStart:
-      case EventType.sessionEnd:
-        defaultUnit = Unit.seconds;
-        break;
-      default:
-        defaultUnit = state.unit;
-    }
-    state = state.copyWith(eventType: type, unit: defaultUnit);
+    // Always use seconds as the default unit
+    state = state.copyWith(eventType: type, unit: Unit.seconds);
   }
 
   /// Update duration
@@ -199,9 +200,21 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
     state = state.copyWith(physicalRating: () => physicalRating);
   }
 
-  /// Update reason
-  void setReason(LogReason? reason) {
-    state = state.copyWith(reason: () => reason);
+  /// Toggle reason in the list (add if not present, remove if present)
+  void toggleReason(LogReason reason) {
+    final currentReasons = state.reasons ?? [];
+    final newReasons =
+        currentReasons.contains(reason)
+            ? currentReasons.where((r) => r != reason).toList()
+            : [...currentReasons, reason];
+    state = state.copyWith(
+      reasons: () => newReasons.isEmpty ? null : newReasons,
+    );
+  }
+
+  /// Set reasons list
+  void setReasons(List<LogReason>? reasons) {
+    state = state.copyWith(reasons: () => reasons);
   }
 
   /// Update latitude
@@ -236,7 +249,7 @@ class LogDraftNotifier extends StateNotifier<LogDraft> {
         state.note != null ||
         state.moodRating != null ||
         state.physicalRating != null ||
-        state.reason != null ||
+        (state.reasons != null && state.reasons!.isNotEmpty) ||
         state.latitude != null ||
         state.longitude != null;
   }
@@ -306,7 +319,7 @@ final createLogRecordProvider =
         source: params.source,
         moodRating: params.moodRating,
         physicalRating: params.physicalRating,
-        reason: params.reason,
+        reasons: params.reasons,
         latitude: params.latitude,
         longitude: params.longitude,
       );
@@ -403,7 +416,7 @@ class CreateLogRecordParams {
   final Source source;
   final double? moodRating;
   final double? physicalRating;
-  final LogReason? reason;
+  final List<LogReason>? reasons;
   final double? latitude;
   final double? longitude;
 
@@ -416,7 +429,7 @@ class CreateLogRecordParams {
     this.source = Source.manual,
     this.moodRating,
     this.physicalRating,
-    this.reason,
+    this.reasons,
     this.latitude,
     this.longitude,
   });
@@ -434,7 +447,7 @@ class CreateLogRecordParams {
         other.source == source &&
         other.moodRating == moodRating &&
         other.physicalRating == physicalRating &&
-        other.reason == reason &&
+        _listEquals(other.reasons, reasons) &&
         other.latitude == latitude &&
         other.longitude == longitude;
   }
@@ -450,7 +463,7 @@ class CreateLogRecordParams {
       source,
       moodRating,
       physicalRating,
-      reason,
+      Object.hashAll(reasons ?? []),
       latitude,
       longitude,
     );

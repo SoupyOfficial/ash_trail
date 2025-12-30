@@ -53,7 +53,7 @@ class WebLogRecord {
   final double duration;
   final String? unit;
   final String? note;
-  final String? reason;
+  final List<String>? reasons;
   final double? moodRating;
   final double? physicalRating;
   final double? latitude;
@@ -70,7 +70,7 @@ class WebLogRecord {
     required this.duration,
     this.unit,
     this.note,
-    this.reason,
+    this.reasons,
     this.moodRating,
     this.physicalRating,
     this.latitude,
@@ -88,7 +88,7 @@ class WebLogRecord {
     'duration': duration,
     'unit': unit,
     'note': note,
-    'reason': reason,
+    'reasons': reasons,
     'moodRating': moodRating,
     'physicalRating': physicalRating,
     'latitude': latitude,
@@ -106,7 +106,7 @@ class WebLogRecord {
     duration: (json['duration'] as num?)?.toDouble() ?? 0,
     unit: json['unit'],
     note: json['note'],
-    reason: json['reason'],
+    reasons: (json['reasons'] as List?)?.map((e) => e as String).toList(),
     moodRating: (json['moodRating'] as num?)?.toDouble(),
     physicalRating: (json['physicalRating'] as num?)?.toDouble(),
     latitude: (json['latitude'] as num?)?.toDouble(),

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
-import '../widgets/quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
+import '../services/log_record_service.dart';
+import 'dart:async';
 
 /// Dedicated logging screen for detailed event entry
-/// Provides a full-screen experience for creating log entries with all options
+/// Primary interface: Long-press to record duration (design-recommended pattern)
+/// Secondary interface: Manual entry for backdate events
 class LoggingScreen extends ConsumerStatefulWidget {
   const LoggingScreen({super.key});
 
@@ -21,7 +23,7 @@ class _LoggingScreenState extends ConsumerState<LoggingScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -47,7 +49,6 @@ class _LoggingScreenState extends ConsumerState<LoggingScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.bolt), text: 'Quick'),
             Tab(icon: Icon(Icons.edit_note), text: 'Detailed'),
             Tab(icon: Icon(Icons.history), text: 'Backdate'),
           ],
@@ -56,7 +57,6 @@ class _LoggingScreenState extends ConsumerState<LoggingScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _QuickLogTab(accountId: accountId),
           _DetailedLogTab(accountId: accountId),
           _BackdateLogTab(accountId: accountId),
         ],
@@ -65,149 +65,8 @@ class _LoggingScreenState extends ConsumerState<LoggingScreen>
   }
 }
 
-/// Quick log tab - fast single-tap logging
-class _QuickLogTab extends ConsumerWidget {
-  final String accountId;
-
-  const _QuickLogTab({required this.accountId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Main quick log button
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Text(
-                    'Quick Log',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Tap for instant log • Long press for duration',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-                  Center(
-                    child: QuickLogWidget(
-                      onLogCreated: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Event logged!'),
-                            duration: Duration(seconds: 1),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Quick event type buttons
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Quick Events',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _QuickEventChip(
-                        eventType: EventType.inhale,
-                        label: 'Inhale',
-                        icon: Icons.air,
-                        accountId: accountId,
-                      ),
-                      _QuickEventChip(
-                        eventType: EventType.note,
-                        label: 'Note',
-                        icon: Icons.note,
-                        accountId: accountId,
-                      ),
-                      _QuickEventChip(
-                        eventType: EventType.tolerance,
-                        label: 'Tolerance',
-                        icon: Icons.trending_up,
-                        accountId: accountId,
-                      ),
-                      _QuickEventChip(
-                        eventType: EventType.symptomRelief,
-                        label: 'Relief',
-                        icon: Icons.healing,
-                        accountId: accountId,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Quick event chip for fast logging
-class _QuickEventChip extends ConsumerWidget {
-  final EventType eventType;
-  final String label;
-  final IconData icon;
-  final String accountId;
-
-  const _QuickEventChip({
-    required this.eventType,
-    required this.label,
-    required this.icon,
-    required this.accountId,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ActionChip(
-      avatar: Icon(icon, size: 18),
-      label: Text(label),
-      onPressed: () async {
-        final service = ref.read(logRecordServiceProvider);
-        try {
-          await service.createLogRecord(
-            accountId: accountId,
-            eventType: eventType,
-          );
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('$label logged')));
-          }
-        } catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Error: $e')));
-          }
-        }
-      },
-    );
-  }
-}
-
-/// Detailed log tab - full form with all options
+/// Detailed log tab - Primary interface with press-and-hold duration recording
+/// Pattern: User fills optional form fields, then presses & holds button to record duration
 class _DetailedLogTab extends ConsumerStatefulWidget {
   final String accountId;
 
@@ -225,10 +84,19 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
   final _durationController = TextEditingController();
   final _noteController = TextEditingController();
 
+  // Press-and-hold state
+  Timer? _longPressTimer;
+  DateTime? _recordingStartTime;
+  Timer? _recordingTimer;
+  Duration _recordedDuration = Duration.zero;
+  bool _isRecording = false;
+
   @override
   void dispose() {
     _durationController.dispose();
     _noteController.dispose();
+    _longPressTimer?.cancel();
+    _recordingTimer?.cancel();
     super.dispose();
   }
 
@@ -287,7 +155,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
             ),
             const SizedBox(height: 12),
 
-            // Duration and Unit
+            // Duration and Unit (manual entry)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -295,7 +163,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Duration',
+                      'Duration (or use long-press button below)',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -309,7 +177,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                           child: TextFormField(
                             controller: _durationController,
                             decoration: const InputDecoration(
-                              labelText: 'Amount',
+                              labelText: 'Seconds',
                               border: OutlineInputBorder(),
                             ),
                             keyboardType: const TextInputType.numberWithOptions(
@@ -320,30 +188,108 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: DropdownButtonFormField<Unit>(
-                            value: draft.unit,
-                            decoration: const InputDecoration(
-                              labelText: 'Unit',
-                              border: OutlineInputBorder(),
-                            ),
-                            items:
-                                Unit.values.map((unit) {
-                                  return DropdownMenuItem(
-                                    value: unit,
-                                    child: Text(_formatEnumName(unit.name)),
-                                  );
-                                }).toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                draftNotifier.setUnit(value);
-                              }
-                            },
+                        // Commented out - using seconds only
+                        // const SizedBox(width: 12),
+                        // Expanded(
+                        //   flex: 2,
+                        //   child: DropdownButtonFormField<Unit>(
+                        //     value: draft.unit,
+                        //     decoration: const InputDecoration(
+                        //       labelText: 'Unit',
+                        //       border: OutlineInputBorder(),
+                        //     ),
+                        //     items:
+                        //         Unit.values.map((unit) {
+                        //           return DropdownMenuItem(
+                        //             value: unit,
+                        //             child: Text(_formatEnumName(unit.name)),
+                        //           );
+                        //         }).toList(),
+                        //     onChanged: (value) {
+                        //       if (value != null) {
+                        //         draftNotifier.setUnit(value);
+                        //       }
+                        //     },
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Press-and-Hold Duration Recording Button (Primary pattern)
+            Card(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Press & Hold to Record Duration',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _isRecording ? 'Recording...' : 'Hold down the button',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    GestureDetector(
+                      onLongPressStart:
+                          (_) => _startDurationRecording(draftNotifier),
+                      onLongPressEnd:
+                          (_) => _endDurationRecording(draft, draftNotifier),
+                      onLongPressCancel: () => _cancelDurationRecording(),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              _isRecording
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer
+                                      .withOpacity(0.1),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
                           ),
                         ),
-                      ],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _isRecording ? Icons.pause : Icons.touch_app,
+                              size: 48,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              _recordedDuration.inSeconds > 0
+                                  ? '${_recordedDuration.inSeconds}s'
+                                  : 'Hold',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -359,7 +305,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Reason (optional)',
+                      'Reason (optional, can select multiple)',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -369,21 +315,18 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: [
-                        ChoiceChip(
-                          label: const Text('None'),
-                          selected: draft.reason == null,
-                          onSelected: (_) => draftNotifier.setReason(null),
-                        ),
-                        ...LogReason.values.map((reason) {
-                          return ChoiceChip(
-                            avatar: Icon(reason.icon, size: 18),
-                            label: Text(reason.displayName),
-                            selected: draft.reason == reason,
-                            onSelected: (_) => draftNotifier.setReason(reason),
-                          );
-                        }),
-                      ],
+                      children:
+                          LogReason.values.map((reason) {
+                            final isSelected =
+                                draft.reasons?.contains(reason) ?? false;
+                            return FilterChip(
+                              avatar: Icon(reason.icon, size: 18),
+                              label: Text(reason.displayName),
+                              selected: isSelected,
+                              onSelected:
+                                  (_) => draftNotifier.toggleReason(reason),
+                            );
+                          }).toList(),
                     ),
                   ],
                 ),
@@ -391,7 +334,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
             ),
             const SizedBox(height: 12),
 
-            // Mood and Physical Rating
+            // Mood and Physical Rating (optional, null by default per design)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -399,7 +342,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'How are you feeling?',
+                      'How are you feeling? (optional)',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -415,9 +358,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         Expanded(
                           child: Slider(
                             value: draft.moodRating ?? 5.0,
-                            min: 0,
+                            min: 1,
                             max: 10,
-                            divisions: 20,
+                            divisions: 9,
                             label:
                                 draft.moodRating?.toStringAsFixed(1) ??
                                 'Not set',
@@ -433,6 +376,11 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             textAlign: TextAlign.center,
                           ),
                         ),
+                        IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          tooltip: 'Reset',
+                          onPressed: () => draftNotifier.setMoodRating(null),
+                        ),
                       ],
                     ),
 
@@ -444,9 +392,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         Expanded(
                           child: Slider(
                             value: draft.physicalRating ?? 5.0,
-                            min: 0,
+                            min: 1,
                             max: 10,
-                            divisions: 20,
+                            divisions: 9,
                             label:
                                 draft.physicalRating?.toStringAsFixed(1) ??
                                 'Not set',
@@ -464,6 +412,12 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             draft.physicalRating?.toStringAsFixed(1) ?? '-',
                             textAlign: TextAlign.center,
                           ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          tooltip: 'Reset',
+                          onPressed:
+                              () => draftNotifier.setPhysicalRating(null),
                         ),
                       ],
                     ),
@@ -516,6 +470,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                               draftNotifier.reset();
                               _durationController.clear();
                               _noteController.clear();
+                              setState(() {
+                                _recordedDuration = Duration.zero;
+                              });
                             },
                     child: const Text('Clear'),
                   ),
@@ -544,6 +501,75 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
     );
   }
 
+  void _startDurationRecording(LogDraftNotifier draftNotifier) {
+    setState(() {
+      _isRecording = true;
+      _recordingStartTime = DateTime.now();
+      _recordedDuration = Duration.zero;
+    });
+
+    // Update duration every 100ms
+    _recordingTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (_recordingStartTime != null && mounted) {
+        setState(() {
+          _recordedDuration = DateTime.now().difference(_recordingStartTime!);
+        });
+      }
+    });
+  }
+
+  void _endDurationRecording(LogDraft draft, LogDraftNotifier draftNotifier) {
+    _recordingTimer?.cancel();
+
+    if (_recordingStartTime != null) {
+      final durationSeconds = _recordedDuration.inMilliseconds / 1000.0;
+
+      // Minimum threshold: 1 second
+      if (durationSeconds >= 1.0) {
+        // Auto-populate the duration field
+        _durationController.text = durationSeconds.toStringAsFixed(1);
+        draftNotifier.setDuration(durationSeconds);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Recorded ${durationSeconds.toStringAsFixed(1)}s duration',
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Duration too short (minimum 1 second)'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isRecording = false;
+        _recordingStartTime = null;
+      });
+    }
+  }
+
+  void _cancelDurationRecording() {
+    _recordingTimer?.cancel();
+    if (mounted) {
+      setState(() {
+        _isRecording = false;
+        _recordingStartTime = null;
+      });
+    }
+  }
+
   String _formatEnumName(String name) {
     final result = name.replaceAllMapped(
       RegExp(r'([A-Z])'),
@@ -563,7 +589,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
     setState(() => _isSubmitting = true);
 
     try {
-      final service = ref.read(logRecordServiceProvider);
+      final service = LogRecordService();
 
       await service.createLogRecord(
         accountId: widget.accountId,
@@ -574,7 +600,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
         note: draft.note,
         moodRating: draft.moodRating,
         physicalRating: draft.physicalRating,
-        reason: draft.reason,
+        reasons: draft.reasons,
         latitude: draft.latitude,
         longitude: draft.longitude,
       );
@@ -584,6 +610,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
         ref.read(logDraftProvider.notifier).reset();
         _durationController.clear();
         _noteController.clear();
+        setState(() {
+          _recordedDuration = Duration.zero;
+        });
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Event logged successfully!')),
@@ -603,7 +632,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
   }
 }
 
-/// Backdate log tab - log events from the past
+/// Backdate log tab - log events from the past (manual entry like detailed but with time override)
 class _BackdateLogTab extends ConsumerWidget {
   final String accountId;
 
@@ -629,7 +658,7 @@ class _BackdateLogTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Log an event that happened in the past',
+                    'Log an event that happened in the past (up to 30 days)',
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),

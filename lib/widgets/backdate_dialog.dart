@@ -304,9 +304,9 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
               ),
               Slider(
                 value: _moodRating ?? 5.0,
-                min: 0,
+                min: 1,
                 max: 10,
-                divisions: 20,
+                divisions: 9,
                 label: _moodRating?.toStringAsFixed(1) ?? 'Not set',
                 onChanged: (value) {
                   setState(() {
@@ -322,9 +322,9 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
               ),
               Slider(
                 value: _physicalRating ?? 5.0,
-                min: 0,
+                min: 1,
                 max: 10,
-                divisions: 20,
+                divisions: 9,
                 label: _physicalRating?.toStringAsFixed(1) ?? 'Not set',
                 onChanged: (value) {
                   setState(() {

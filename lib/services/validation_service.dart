@@ -167,22 +167,73 @@ class ValidationService {
 
   // ===== CONTEXT VALIDATION =====
 
-  /// Validate mood scale (0-10)
+  /// Validate mood rating
+  /// Null values are valid and represent "not set" state (per design)
+  /// Non-null values MUST be between 1-10 inclusive (zero not allowed)
+  /// Values outside range are clamped to nearest boundary
   static double? validateMood(double? mood) {
     if (mood == null) return null;
-    return mood.clamp(0, 10);
+    // Per design doc: 1-10 inclusive, zero is NOT a valid rating value
+    return mood.clamp(1, 10);
   }
 
-  /// Validate craving scale (0-10)
+  /// Validate craving rating
+  /// Null values are valid and represent "not set" state (per design)
+  /// Non-null values MUST be between 1-10 inclusive (zero not allowed)
+  /// Values outside range are clamped to nearest boundary
   static double? validateCraving(double? craving) {
     if (craving == null) return null;
-    return craving.clamp(0, 10);
+    // Per design doc: 1-10 inclusive, zero is NOT a valid rating value
+    return craving.clamp(1, 10);
+  }
+
+  /// Validate physical rating
+  /// Null values are valid and represent "not set" state (per design)
+  /// Non-null values MUST be between 1-10 inclusive (zero not allowed)
+  /// Values outside range are clamped to nearest boundary
+  static double? validatePhysicalRating(double? rating) {
+    if (rating == null) return null;
+    // Per design doc: 1-10 inclusive, zero is NOT a valid rating value
+    return rating.clamp(1, 10);
+  }
+
+  /// Check if a rating value is valid (null or 1-10)
+  /// Returns true for null (valid unset state) or values in 1-10 range
+  /// Returns false for zero or values outside 1-10 range
+  static bool isValidRating(double? rating) {
+    if (rating == null) return true; // Null is valid
+    return rating >= 1 && rating <= 10; // Non-null must be 1-10
   }
 
   /// Validate location string
   static bool isValidLocation(String? location) {
     if (location == null || location.isEmpty) return true;
     return location.length <= 100; // Max length
+  }
+
+  /// Validate latitude/longitude pair - both must be present or both null
+  /// This enforces the cross-field constraint from design doc 5.4.2
+  static bool isValidLocationPair(double? latitude, double? longitude) {
+    // Both null is valid
+    if (latitude == null && longitude == null) return true;
+
+    // Both present is valid (if in correct ranges)
+    if (latitude != null && longitude != null) {
+      return isValidLatitude(latitude) && isValidLongitude(longitude);
+    }
+
+    // One present, one null is INVALID (cross-field validation failure)
+    return false;
+  }
+
+  /// Validate latitude value (-90 to 90)
+  static bool isValidLatitude(double latitude) {
+    return latitude >= -90 && latitude <= 90;
+  }
+
+  /// Validate longitude value (-180 to 180)
+  static bool isValidLongitude(double longitude) {
+    return longitude >= -180 && longitude <= 180;
   }
 
   // ===== TAG VALIDATION =====

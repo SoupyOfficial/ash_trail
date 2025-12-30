@@ -146,4 +146,4 @@ pubspec.lock
 !.env.example
 
 # VS Code (uncomment if you want to ignore VS Code settings)
-#.vscode/
+.vscode/

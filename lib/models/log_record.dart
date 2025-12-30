@@ -40,13 +40,19 @@ class LogRecord {
   /// Optional notes/description
   String? note;
 
-  /// Reason for this log entry (optional context)
-  LogReason? reason;
+  /// Reasons for this log entry (optional context, can be multiple)
+  List<LogReason>? reasons;
 
-  /// Mood rating scale (0-10, nullable) - maps to moodRating in domain model
+  /// Mood rating scale (1-10 when provided, null by default)
+  /// Null = "not set" (user can optionally add later)
+  /// Valid values: 1-10 inclusive (zero not allowed per design)
+  /// Per design 5.5: Ratings default to null and must be reset by user
   double? moodRating;
 
-  /// Physical rating scale (0-10, nullable) - maps to physicalRating in domain model
+  /// Physical rating scale (1-10 when provided, null by default)
+  /// Null = "not set" (user can optionally add later)
+  /// Valid values: 1-10 inclusive (zero not allowed per design)
+  /// Per design 5.5: Ratings default to null and must be reset by user
   double? physicalRating;
 
   // ===== LOCATION =====
@@ -112,7 +118,7 @@ class LogRecord {
     this.duration = 0,
     this.unit = Unit.seconds,
     this.note,
-    this.reason,
+    this.reasons,
     this.moodRating,
     this.physicalRating,
     this.latitude,
@@ -178,7 +184,7 @@ class LogRecord {
     double? duration,
     Unit? unit,
     String? note,
-    LogReason? reason,
+    List<LogReason>? reasons,
     double? moodRating,
     double? physicalRating,
     double? latitude,
@@ -205,7 +211,7 @@ class LogRecord {
       duration: duration ?? this.duration,
       unit: unit ?? this.unit,
       note: note ?? this.note,
-      reason: reason ?? this.reason,
+      reasons: reasons ?? this.reasons,
       moodRating: moodRating ?? this.moodRating,
       physicalRating: physicalRating ?? this.physicalRating,
       latitude: latitude ?? this.latitude,
@@ -236,7 +242,7 @@ class LogRecord {
       'duration': duration,
       'unit': unit.name,
       'note': note,
-      'reason': reason?.name,
+      'reasons': reasons?.map((r) => r.name).toList(),
       'moodRating': moodRating,
       'physicalRating': physicalRating,
       'latitude': latitude,
@@ -269,12 +275,16 @@ class LogRecord {
         orElse: () => Unit.seconds,
       ),
       note: data['note'] as String?,
-      reason:
-          data['reason'] != null
-              ? LogReason.values.firstWhere(
-                (r) => r.name == data['reason'],
-                orElse: () => LogReason.other,
-              )
+      reasons:
+          data['reasons'] != null
+              ? (data['reasons'] as List)
+                  .map(
+                    (r) => LogReason.values.firstWhere(
+                      (reason) => reason.name == r,
+                      orElse: () => LogReason.other,
+                    ),
+                  )
+                  .toList()
               : null,
       moodRating: (data['moodRating'] as num?)?.toDouble(),
       physicalRating: (data['physicalRating'] as num?)?.toDouble(),

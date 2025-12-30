@@ -40,6 +40,10 @@ class LogRecordService {
     List<String>? tags,
     String? sessionId,
     Source source = Source.manual,
+    double? mood,
+    double? craving,
+    LogReason? reason,
+    String? location,
   }) async {
     final logId = _uuid.v4();
     final now = DateTime.now();
@@ -61,6 +65,10 @@ class LogRecordService {
       deviceId: _getDeviceId(),
       appVersion: _getAppVersion(),
       syncState: SyncState.pending,
+      mood: mood,
+      craving: craving,
+      reason: reason,
+      location: location,
     );
 
     return await _repository.create(record);

@@ -14,6 +14,7 @@ import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import 'analytics_screen.dart';
 import 'accounts_screen.dart';
+import 'logging_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -78,20 +79,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              // Detailed logging FAB
+              FloatingActionButton.small(
+                heroTag: 'detailed',
+                onPressed:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoggingScreen(),
+                      ),
+                    ),
+                tooltip: 'Detailed Log',
+                child: const Icon(Icons.edit_note),
+              ),
+              const SizedBox(height: 8),
               // Templates FAB
               FloatingActionButton.small(
                 heroTag: 'templates',
                 onPressed: () => _showTemplatesSheet(context),
-                child: const Icon(Icons.bookmark),
                 tooltip: 'Templates',
+                child: const Icon(Icons.bookmark),
               ),
               const SizedBox(height: 8),
               // Backdate FAB
               FloatingActionButton.small(
                 heroTag: 'backdate',
                 onPressed: () => _showBackdateDialog(context),
-                child: const Icon(Icons.history),
                 tooltip: 'Backdate Log',
+                child: const Icon(Icons.history),
               ),
               const SizedBox(height: 8),
               // Quick Log FAB (main)

@@ -8,21 +8,21 @@ class LogRecord {
   // ===== IDENTITY =====
 
   /// Stable identifier across local and Firestore (UUID/ULID)
-  
+
   late String logId;
 
   /// Account that owns this log
-  
+
   late String accountId;
 
   /// Optional profile within the account
-  
+
   String? profileId;
 
   // ===== TIME =====
 
   /// When the event actually happened (used for charts and analytics)
-  
+
   late DateTime eventAt;
 
   /// When this record was created locally
@@ -34,15 +34,14 @@ class LogRecord {
   // ===== EVENT PAYLOAD =====
 
   /// Type of event being logged
-  
-  
+
   late EventType eventType;
 
   /// Numeric value (e.g., duration in seconds, number of hits)
   double? value;
 
   /// Unit of measurement for the value
-  
+
   late Unit unit;
 
   /// Optional notes/description
@@ -54,7 +53,7 @@ class LogRecord {
   // ===== QUALITY / METADATA =====
 
   /// Source of this record
-  
+
   late Source source;
 
   /// Device identifier where this was created
@@ -66,7 +65,7 @@ class LogRecord {
   // ===== LIFECYCLE =====
 
   /// Soft delete flag
-  
+
   late bool isDeleted;
 
   /// When this record was deleted (if applicable)
@@ -75,8 +74,7 @@ class LogRecord {
   // ===== SYNC =====
 
   /// Current sync state
-  
-  
+
   late SyncState syncState;
 
   /// Error message from last sync attempt
@@ -108,8 +106,11 @@ class LogRecord {
   /// Craving scale (0-10, nullable)
   double? craving;
 
+  /// Reason for this log entry (optional context)
+  LogReason? reason;
+
   /// Time confidence level (for clock skew handling)
-  
+
   late TimeConfidence timeConfidence;
 
   /// Edit history (JSON string storing revision history)
@@ -153,6 +154,7 @@ class LogRecord {
     this.location,
     this.mood,
     this.craving,
+    this.reason,
     this.timeConfidence = TimeConfidence.high,
     this.editHistory,
     this.isTemplate = false,
@@ -245,6 +247,7 @@ class LogRecord {
     String? location,
     double? mood,
     double? craving,
+    LogReason? reason,
     TimeConfidence? timeConfidence,
     String? editHistory,
     bool? isTemplate,
@@ -277,6 +280,7 @@ class LogRecord {
       location: location ?? this.location,
       mood: mood ?? this.mood,
       craving: craving ?? this.craving,
+      reason: reason ?? this.reason,
       timeConfidence: timeConfidence ?? this.timeConfidence,
       editHistory: editHistory ?? this.editHistory,
       isTemplate: isTemplate ?? this.isTemplate,
@@ -308,6 +312,7 @@ class LogRecord {
       'location': location,
       'mood': mood,
       'craving': craving,
+      'reason': reason?.name,
       'timeConfidence': timeConfidence.name,
       'editHistory': editHistory,
       'isTemplate': isTemplate,
@@ -353,6 +358,13 @@ class LogRecord {
       location: data['location'] as String?,
       mood: (data['mood'] as num?)?.toDouble(),
       craving: (data['craving'] as num?)?.toDouble(),
+      reason:
+          data['reason'] != null
+              ? LogReason.values.firstWhere(
+                (r) => r.name == data['reason'],
+                orElse: () => LogReason.other,
+              )
+              : null,
       timeConfidence: TimeConfidence.values.firstWhere(
         (tc) => tc.name == data['timeConfidence'],
         orElse: () => TimeConfidence.high,

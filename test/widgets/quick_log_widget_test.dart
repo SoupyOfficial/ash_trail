@@ -4,7 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ash_trail/widgets/quick_log_widget.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/providers/account_provider.dart';
-import 'package:ash_trail/models/user_account.dart';
+import 'package:ash_trail/models/account.dart';
+
+/// Helper function to create a test account
+Account _createTestAccount() {
+  return Account.create(
+    userId: 'test-user',
+    email: 'test@example.com',
+    displayName: 'Test User',
+    isActive: true,
+  );
+}
 
 void main() {
   group('QuickLogWidget', () {
@@ -13,17 +23,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       expect(find.text('Quick Log'), findsOneWidget);
       expect(find.byIcon(Icons.add), findsOneWidget);
@@ -36,12 +43,7 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: MaterialApp(
@@ -51,6 +53,10 @@ void main() {
           ),
         ),
       );
+
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
 
       // Find the FAB
       final fab = find.byType(FloatingActionButton);
@@ -70,17 +76,16 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
 
       // Find the gesture detector wrapping the FAB
       final gestureDetector = find.byType(GestureDetector);
@@ -101,17 +106,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final gestureDetector = find.byType(GestureDetector);
 
@@ -133,17 +135,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final gestureDetector = find.byType(GestureDetector);
 
@@ -167,17 +166,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final gestureDetector = find.byType(GestureDetector);
 
@@ -195,12 +191,7 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(
@@ -210,6 +201,8 @@ void main() {
           ),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       // Verify widget renders with custom event type
       expect(find.text('Quick Log'), findsOneWidget);
@@ -222,12 +215,7 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: MaterialApp(
@@ -238,6 +226,8 @@ void main() {
         ),
       );
 
+      await tester.pumpAndSettle();
+
       // Note: Without full service integration, we can only verify
       // the callback property is accepted
       expect(find.text('Quick Log'), findsOneWidget);
@@ -246,10 +236,14 @@ void main() {
     testWidgets('shows error when no active account', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [activeAccountProvider.overrideWith((ref) async => null)],
+          overrides: [
+            activeAccountProvider.overrideWith((ref) => Stream.value(null)),
+          ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final fab = find.byType(FloatingActionButton);
 
@@ -266,17 +260,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       // Verify extended FAB structure
       expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -293,17 +284,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final gestureDetector = find.byType(GestureDetector);
 
@@ -327,17 +315,14 @@ void main() {
         ProviderScope(
           overrides: [
             activeAccountProvider.overrideWith(
-              (ref) async => UserAccount(
-                userId: 'test-user',
-                displayName: 'Test User',
-                email: 'test@example.com',
-                createdAt: DateTime.now(),
-              ),
+              (ref) => Stream.value(_createTestAccount()),
             ),
           ],
           child: const MaterialApp(home: Scaffold(body: QuickLogWidget())),
         ),
       );
+
+      await tester.pumpAndSettle();
 
       final gestureDetector = find.byType(GestureDetector);
 

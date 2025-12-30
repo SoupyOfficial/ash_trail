@@ -21,6 +21,9 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
   String? _note;
   DateTime _eventTime = DateTime.now();
   final List<String> _tags = [];
+  double? _mood;
+  double? _craving;
+  LogReason? _reason;
 
   bool _isSubmitting = false;
 
@@ -186,6 +189,134 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                   }
                 },
               ),
+              const SizedBox(height: 16),
+
+              // Reason Dropdown
+              DropdownButtonFormField<LogReason>(
+                value: _reason,
+                decoration: const InputDecoration(
+                  labelText: 'Reason (optional)',
+                  border: OutlineInputBorder(),
+                ),
+                items: [
+                  const DropdownMenuItem<LogReason>(
+                    value: null,
+                    child: Text('No reason specified'),
+                  ),
+                  ...LogReason.values.map((reason) {
+                    return DropdownMenuItem(
+                      value: reason,
+                      child: Row(
+                        children: [
+                          Icon(reason.icon, size: 18),
+                          const SizedBox(width: 8),
+                          Text(reason.displayName),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+                onChanged: (value) {
+                  setState(() => _reason = value);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Mood Slider
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Mood (optional)'),
+                      Text(
+                        _mood != null ? _mood!.toStringAsFixed(1) : 'Not set',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.sentiment_very_dissatisfied, size: 20),
+                      Expanded(
+                        child: Slider(
+                          value: _mood ?? 5.0,
+                          min: 0,
+                          max: 10,
+                          divisions: 20,
+                          label: _mood?.toStringAsFixed(1),
+                          onChanged: (value) {
+                            setState(() => _mood = value);
+                          },
+                        ),
+                      ),
+                      const Icon(Icons.sentiment_very_satisfied, size: 20),
+                    ],
+                  ),
+                  if (_mood != null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => setState(() => _mood = null),
+                        child: const Text('Clear'),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Craving Slider
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Craving Level (optional)'),
+                      Text(
+                        _craving != null
+                            ? _craving!.toStringAsFixed(1)
+                            : 'Not set',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.thumb_down, size: 20),
+                      Expanded(
+                        child: Slider(
+                          value: _craving ?? 5.0,
+                          min: 0,
+                          max: 10,
+                          divisions: 20,
+                          label: _craving?.toStringAsFixed(1),
+                          activeColor: Theme.of(context).colorScheme.secondary,
+                          onChanged: (value) {
+                            setState(() => _craving = value);
+                          },
+                        ),
+                      ),
+                      const Icon(Icons.thumb_up, size: 20),
+                    ],
+                  ),
+                  if (_craving != null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => setState(() => _craving = null),
+                        child: const Text('Clear'),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
@@ -242,6 +373,9 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
         unit: _selectedUnit,
         note: _note,
         tags: _tags.isEmpty ? null : _tags,
+        mood: _mood,
+        craving: _craving,
+        reason: _reason,
       );
 
       if (mounted) {

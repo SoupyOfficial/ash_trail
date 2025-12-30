@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Event types for logging different actions
 enum EventType {
   inhale, // Single inhale/hit
@@ -70,3 +72,60 @@ enum RangeType {
 
 /// Grouping options for aggregation
 enum GroupBy { hour, day, week, month, quarter, year }
+
+/// Reasons for logging an event (optional context)
+enum LogReason {
+  medical, // Medical/therapeutic use
+  recreational, // Recreational use
+  social, // Social situation
+  stress, // Stress relief
+  habit, // Habitual/routine
+  sleep, // Sleep aid
+  pain, // Pain management
+  other, // Other reason
+}
+
+/// Extension to provide display names for LogReason
+extension LogReasonExtension on LogReason {
+  String get displayName {
+    switch (this) {
+      case LogReason.medical:
+        return 'Medical';
+      case LogReason.recreational:
+        return 'Recreational';
+      case LogReason.social:
+        return 'Social';
+      case LogReason.stress:
+        return 'Stress Relief';
+      case LogReason.habit:
+        return 'Habit';
+      case LogReason.sleep:
+        return 'Sleep Aid';
+      case LogReason.pain:
+        return 'Pain Management';
+      case LogReason.other:
+        return 'Other';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case LogReason.medical:
+        return Icons.medical_services;
+      case LogReason.recreational:
+        return Icons.celebration;
+      case LogReason.social:
+        return Icons.people;
+      case LogReason.stress:
+        return Icons.spa;
+      case LogReason.habit:
+        return Icons.repeat;
+      case LogReason.sleep:
+        return Icons.bedtime;
+      case LogReason.pain:
+        return Icons.healing;
+      case LogReason.other:
+        return Icons.more_horiz;
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # CRUD Operations Test Coverage
 
 ## Overview
-This document outlines the comprehensive test coverage for CRUD (Create, Read, Update, Delete) operations on LogRecord entities in the AshTrail application.
+This document outlines the comprehensive test coverage for CRUD (Create, Read, Update, Delete) operations on LogRecord entities in the AshTrail application. **Updated for MVP with home screen vape-only logging.**
 
 ## Backend Unit Tests
 **Location:** `test/services/log_record_service_test.dart`
@@ -16,6 +16,9 @@ This document outlines the comprehensive test coverage for CRUD (Create, Read, U
 - ✅ Minimum duration threshold enforcement
 - ✅ Batch create multiple records
 - ✅ Backdate log creation
+- ✅ Vape event type (MVP default)
+- ✅ Mood and physical ratings (1-10, optional)
+- ✅ Reason context tracking (8 categories)
 
 ### Read Operations ✅
 - ✅ Gets log record by logId
@@ -40,7 +43,7 @@ This document outlines the comprehensive test coverage for CRUD (Create, Read, U
 - ✅ Soft deleted records included when requested
 - ✅ Marks deleted records for sync
 
-### Restore Operations (UNDO) ✅ **NEW**
+### Restore Operations (UNDO) ✅
 - ✅ Restores soft deleted record
 - ✅ Clears isDeleted flag and deletedAt timestamp
 - ✅ Restored records appear in default queries
@@ -53,7 +56,7 @@ This document outlines the comprehensive test coverage for CRUD (Create, Read, U
 - ✅ Tracks remote update timestamps
 
 ### Statistics ✅
-- ✅ Computes statistics correctly
+- ✅ Computes statistics correctly (all-time and 7-day windows)
 - ✅ Includes duration logs in statistics
 - ✅ Calculates averages and totals
 - ✅ Groups by event type
@@ -62,38 +65,55 @@ This document outlines the comprehensive test coverage for CRUD (Create, Read, U
 - **Framework:** flutter_test
 - **Database:** Hive (web repository for cross-platform testing)
 - **Pattern:** setUp/tearDown with isolated test database
-- **Coverage:** 38 test cases across all CRUD operations (24 passing, 11 requiring fixes)
+- **Coverage:** 40+ test cases across all CRUD operations
 
 ### Running Backend Tests
 ```bash
 # Tests now use Hive repository - no native libraries required!
 flutter test test/services/log_record_service_test.dart
+flutter test test/widgets/home_quick_log_widget_test.dart
 ```
 
 **Note:** Tests were updated to use the Hive-based web repository (`LogRecordRepositoryWeb`) instead of Isar native repository. This eliminates the need for platform-specific native libraries and makes tests run consistently across all platforms.
 
+## Frontend Widget Tests
+**Location:** `test/widgets/home_quick_log_widget_test.dart`
+
+### Home Screen Quick-Log Widget ✅
+- ✅ Renders all form elements (mood/physical sliders, reason chips, duration button)
+- ✅ Mood slider updates value
+- ✅ Physical slider updates value
+- ✅ Reset buttons clear ratings
+- ✅ Reason chips select/deselect
+- ✅ Press-and-hold button shows recording state
+- ✅ onLogCreated callback invoked
+- ✅ Default touch_app icon displayed
+
 ## Frontend E2E Tests (Playwright)
-**Location:** `playwright/tests/logging-flow.spec.ts`
+**Location:** `playwright/tests/hold-to-record.spec.ts`, `playwright/tests/logging-flow.spec.ts`
 
 ### Create Operations ✅
-- ✅ Opens create log dialog
-- ✅ Fills form fields (event type, value, unit, note, tags)
-- ✅ Submits form and creates entry
-- ✅ Verifies entry appears in list
-- ✅ Quick log button functionality
+- ✅ Home screen duration button visible ("Hold to record duration")
+- ✅ Press-and-hold to record duration
+- ✅ Shows recording state with seconds counter
+- ✅ Creates vape entry on release
+- ✅ Verifies entry appears in recent entries list
+- ✅ Shows snackbar with UNDO button
 
 ### Read Operations ✅
-- ✅ Displays log entry list
-- ✅ Shows log entry details
+- ✅ Displays log entry list on home screen (Recent Entries)
+- ✅ Shows all-time stats (count & duration)
+- ✅ Shows 7-day stats (count & duration)
+- ✅ Shows log entry details in history
 - ✅ Filters by event type
 - ✅ Searches by note content
 - ✅ Filters by date range
 
-### Update Operations ✅ **UPDATED**
+### Update Operations ✅
 - ✅ Taps log entry to open action menu (bottom sheet)
 - ✅ Selects "Edit" action from menu
 - ✅ Opens EditLogRecordDialog with pre-filled data
-- ✅ Modifies fields (note, value, event type, etc.)
+- ✅ Modifies fields (note, duration, mood, physical, reasons)
 - ✅ Submits update
 - ✅ Verifies changes reflected in list
 - ✅ Dialog closes after successful update

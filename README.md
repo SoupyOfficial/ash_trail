@@ -7,8 +7,11 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
 ### 🚀 Fast Logging First
 
 - **Multi-account support** - Switch between accounts seamlessly
-- **One-tap log entries** - Quick logging with optional notes and amounts
-- **Immediate feedback** - See your data reflected instantly in charts and tables
+- **Home screen logging** - Press-and-hold duration recording directly from home
+- **Vape tracking (MVP)** - Focus on vape session tracking with duration in seconds
+- **Optional context** - Add mood, physical ratings, and reasons (8 categories)
+- **Immediate feedback** - See your data reflected instantly in stats and recent entries
+- **All-time & 7-day stats** - Quick overview of total usage and recent trends
 
 ### 📊 Analytics-Heavy
 
@@ -36,9 +39,10 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
 ### Data Models
 
 - **Account** - Multi-account support with session management
-- **LogRecord** - Timestamped events with rich metadata (eventType, value, unit, tags)
+- **LogRecord** - Timestamped events with rich metadata (eventType, duration, unit, reasons, mood/physical ratings)
+- **EventType** - Event types including vape (MVP default), inhale, sessions, notes, etc.
+- **LogReason** - Context tracking (medical, recreational, social, stress, habit, sleep, pain, other)
 - **Session** - Groups related log entries with aggregate metrics
-- **LogTemplate** - Quick logging templates for common actions
 - **Profile** - Optional profiles within accounts
 - **DailyRollup** - Pre-aggregated daily statistics
 - **SyncMetadata** - Track sync status per account

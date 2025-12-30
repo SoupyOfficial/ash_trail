@@ -147,6 +147,9 @@ class ExtendedDocumentValidator:
         if 'duplicate-headings' in rules:
             self._check_duplicate_headings(file_path.name, lines)
         
+        if 'emphasis-as-heading' in rules:
+            self._check_emphasis_as_heading(file_path.name, lines)
+        
         if 'orphaned-content' in rules:
             self._check_orphaned_content(file_path.name, lines)
     
@@ -354,6 +357,49 @@ class ExtendedDocumentValidator:
                 else:
                     headings_seen[text] = (level, i)
     
+    def _check_emphasis_as_heading(self, filename: str, lines: List[str]):
+        """Check for bold/italic text used as headings (MD036)."""
+        in_code_block = False
+        code_fence_char = None
+        
+        for i, line in enumerate(lines, 1):
+            stripped = line.strip()
+            
+            # Track code blocks to skip them
+            if stripped.startswith('```') or stripped.startswith('~~~'):
+                if not in_code_block:
+                    in_code_block = True
+                    code_fence_char = stripped[:3]
+                elif stripped.startswith(code_fence_char):
+                    in_code_block = False
+                continue
+            
+            if in_code_block:
+                continue
+            
+            # Check for bold text on its own line that looks like a heading
+            # Pattern: **Text** or **Text:** at start of line, with capital letter
+            bold_heading_match = re.match(r'^\*\*([A-Z][^*]+)\*\*:?\s*$', stripped)
+            if bold_heading_match:
+                heading_text = bold_heading_match.group(1).strip()
+                # Avoid false positives for inline emphasis (check prev/next lines)
+                is_standalone = True
+                if i > 1 and lines[i-2].strip() and not lines[i-2].strip().startswith('#'):
+                    # Has content right before - might be inline emphasis
+                    prev_line = lines[i-2].strip()
+                    if not prev_line.endswith(('.', ':', '-', '*')) and len(prev_line) > 20:
+                        is_standalone = False
+                
+                if is_standalone:
+                    self.add_issue(ValidationIssue(
+                        file=filename,
+                        line=i,
+                        rule='emphasis-as-heading',
+                        severity='warning',
+                        message=f'Bold text "{heading_text}" appears to be used as a heading',
+                        suggestion='Use proper heading syntax (####) instead of bold text for section headings'
+                    ))
+    
     def _check_orphaned_content(self, filename: str, lines: List[str]):
         """Check for content before first heading."""
         found_heading = False
@@ -491,6 +537,7 @@ def main():
             'list-consistency',
             'heading-capitalization',
             'duplicate-headings',
+            'emphasis-as-heading',
             'orphaned-content',
             'terminology-consistency'
         ]

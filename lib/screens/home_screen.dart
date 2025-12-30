@@ -433,7 +433,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (result == true && mounted) {
       // Record was updated, list will refresh automatically via stream
-      ref.read(logRecordNotifierProvider.notifier).reset();
+      ref.invalidate(activeAccountLogRecordsProvider);
     }
   }
 }

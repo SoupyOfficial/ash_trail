@@ -24,7 +24,7 @@ class LogDraft {
   final bool isValid;
 
   const LogDraft({
-    this.eventType = EventType.inhale,
+    this.eventType = EventType.vape,
     this.duration,
     this.unit = Unit.seconds,
     DateTime? eventTime,

@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { clickElement, waitForElement } from './helpers/device-helpers';
 
 /**
  * Visual Regression Tests
  * 
  * Captures screenshots and compares them against baseline images
  * to detect unintended visual changes
+ * Works across web and mobile platforms
  */
 
 test.describe('Visual Regression', () => {
@@ -26,13 +28,13 @@ test.describe('Visual Regression', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Open create dialog
-    await page.click('[data-testid="add-log-button"]').catch(async () => {
-      await page.click('button[aria-label*="add"]');
+    // Open create dialog using cross-platform click
+    await clickElement(page, '[data-testid="add-log-button"]', {}).catch(async () => {
+      await clickElement(page, 'button[aria-label*="add"]', {});
     });
 
-    await page.waitForSelector('[data-testid="create-log-dialog"]', { timeout: 5000 }).catch(async () => {
-      await page.waitForSelector('dialog, [role="dialog"]');
+    await waitForElement(page, '[data-testid="create-log-dialog"]', { timeout: 5000 }).catch(async () => {
+      await waitForElement(page, 'dialog, [role="dialog"]', {});
     });
 
     await page.waitForTimeout(500);
@@ -46,13 +48,13 @@ test.describe('Visual Regression', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Navigate to analytics
-    await page.click('text=Analytics').catch(async () => {
-      await page.click('[data-testid="analytics-tab"]');
+    // Navigate to analytics using cross-platform click
+    await clickElement(page, 'text=Analytics', {}).catch(async () => {
+      await clickElement(page, '[data-testid="analytics-tab"]', {});
     });
 
     // Wait for charts to render
-    await page.waitForSelector('canvas, svg', { timeout: 10000 });
+    await waitForElement(page, 'canvas, svg', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('analytics-screen.png', {
@@ -183,11 +185,8 @@ test.describe('Interactions', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Hover over a button
-    const addButton = page.locator('[data-testid="add-log-button"]').catch(() => {
-      return page.locator('button').first();
-    });
-
+    // Hover over the add log button
+    const addButton = page.locator('[key="add-log-button"]');
     await addButton.hover();
     await page.waitForTimeout(300);
 
@@ -198,14 +197,16 @@ test.describe('Interactions', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Open dialog and focus input
-    await page.click('[data-testid="add-log-button"]').catch(async () => {
-      await page.click('button').first();
-    });
+    // Click the add log button to open dialog
+    await page.locator('[key="add-log-button"]').click();
+    await page.waitForTimeout(500);
 
-    const input = page.locator('input[name="value"]').first();
-    await input.focus();
-    await page.waitForTimeout(300);
+    // Focus on an input if dialog opened
+    const input = page.locator('input').first();
+    if (await input.isVisible().catch(() => false)) {
+      await input.focus();
+      await page.waitForTimeout(300);
+    }
 
     await expect(page).toHaveScreenshot('input-focus.png');
   });

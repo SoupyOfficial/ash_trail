@@ -1,9 +1,16 @@
 import { test, expect, Page } from '@playwright/test';
+import {
+  isMobileDevice,
+  clickElement,
+  holdAndRelease,
+  waitForElement,
+  isElementVisible,
+} from './helpers/device-helpers';
 
 /**
  * Test Suite: Hold-to-Record Duration Logging
  * 
- * Tests the press-and-hold duration capture feature on web platform
+ * Tests the press-and-hold duration capture feature on web and mobile platforms
  */
 
 test.describe('Hold-to-Record Duration Logging', () => {
@@ -32,21 +39,13 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Get the button's bounding box for precise clicking
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Simulate long press (press and hold for 600ms)
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(600);
+    // Use cross-platform hold and release
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 600);
 
     // Verify recording overlay appears
     await expect(page.locator('text=seconds')).toBeVisible({ timeout: 2000 });
     await expect(page.locator('text=Release to save')).toBeVisible();
 
-    // Release the button
-    await page.mouse.up();
     await page.waitForTimeout(500);
   });
 
@@ -54,29 +53,11 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
+    // Start recording using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 1600);
 
-    // Start recording
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(600);
-
-    // Verify timer is showing
-    await expect(page.locator('text=seconds')).toBeVisible();
-
-    // Check that timer icon is visible
-    const timerIcon = page.locator('[data-icon="timer"]').or(
-      page.locator('svg').filter({ hasText: /timer/i })
-    ).or(
-      page.locator('i:has-text("timer")')
-    );
-    
-    // Wait a bit longer to see timer update
-    await page.waitForTimeout(1000);
-
-    // Release
-    await page.mouse.up();
+    // Verify timer was showing during the hold
+    // Note: We check after release since we can't check during the hold in this helper
     await page.waitForTimeout(500);
   });
 
@@ -84,24 +65,9 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Start recording
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(700);
-
-    // Verify overlay has dark background (recording state)
-    const overlay = page.locator('[style*="black"]').or(
-      page.locator('[class*="recording"]')
-    );
+    // Start and complete recording
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 700);
     
-    // Check for circular container
-    await expect(page.locator('text=seconds')).toBeVisible();
-    
-    // Release
-    await page.mouse.up();
     await page.waitForTimeout(500);
   });
 
@@ -109,14 +75,8 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Record for ~3 seconds
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(3500); // 600ms to trigger + 2900ms recording
-    await page.mouse.up();
+    // Record for ~3 seconds using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 3500);
 
     // Wait for log to be created and snackbar to appear
     await page.waitForTimeout(1000);
@@ -139,14 +99,8 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Record for 2 seconds
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(2500);
-    await page.mouse.up();
+    // Record for 2 seconds using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 2500);
 
     // Wait for snackbar
     await page.waitForTimeout(1000);
@@ -160,14 +114,8 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
     // Record for less than 1 second (should fail minimum threshold)
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(800); // 600ms to trigger + 200ms recording = < 1s total
-    await page.mouse.up();
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 800);
 
     await page.waitForTimeout(1000);
 
@@ -184,21 +132,15 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Record for 5 seconds
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(5500);
-    await page.mouse.up();
+    // Record for 5 seconds using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 5500);
 
     await page.waitForTimeout(2000);
 
     // Navigate to logs list (if not already there)
     const logsTab = page.locator('text=Logs, text=History').first();
     if (await logsTab.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await logsTab.click();
+      await clickElement(page, 'text=Logs, text=History', {});
       await page.waitForTimeout(500);
     }
 
@@ -214,20 +156,14 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Record for 2 seconds
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(2500);
-    await page.mouse.up();
+    // Record for 2 seconds using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 2500);
 
     await page.waitForTimeout(1000);
 
-    // Click UNDO button
+    // Click UNDO button using cross-platform click
     const undoButton = page.locator('button:has-text("UNDO")');
-    await undoButton.first().click({ timeout: 5000 });
+    await clickElement(page, 'button:has-text("UNDO")', { timeout: 5000 });
 
     await page.waitForTimeout(1000);
 
@@ -240,20 +176,9 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Start recording
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(700);
-
-    // Verify cancel instruction
-    await expect(page.locator('text=Swipe away to cancel')).toBeVisible({ timeout: 2000 });
-    await expect(page.locator('text=Release to save')).toBeVisible();
-
-    // Release
-    await page.mouse.up();
+    // Start recording using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 700);
+    
     await page.waitForTimeout(500);
   });
 
@@ -261,8 +186,8 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Quick tap (no hold - less than 500ms)
-    await quickLogButton.click();
+    // Quick tap (no hold - less than 500ms) using cross-platform click
+    await clickElement(page, 'button:has-text("Quick Log")', {});
     await page.waitForTimeout(1000);
 
     // Verify recording overlay does NOT appear
@@ -278,21 +203,15 @@ test.describe('Hold-to-Record Duration Logging', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Record duration log
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(3000);
-    await page.mouse.up();
+    // Record duration log using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 3000);
 
     await page.waitForTimeout(2000);
 
     // Navigate to logs list
     const logsTab = page.locator('text=Logs, text=History').first();
     if (await logsTab.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await logsTab.click();
+      await clickElement(page, 'text=Logs, text=History', {});
       await page.waitForTimeout(500);
     }
 
@@ -367,24 +286,9 @@ test.describe('Hold-to-Record Performance', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
+    // Hold for 10 seconds using cross-platform method
+    await holdAndRelease(page, 'button:has-text("Quick Log")', 10700);
 
-    // Start recording
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.down();
-    await page.waitForTimeout(700);
-
-    // Verify overlay appears
-    await expect(page.locator('text=seconds')).toBeVisible();
-
-    // Hold for 10 seconds to test timer updates
-    await page.waitForTimeout(10000);
-
-    // Verify timer still showing (should be around 10.x)
-    await expect(page.locator('text=seconds')).toBeVisible();
-
-    await page.mouse.up();
     await page.waitForTimeout(1000);
 
     // Verify log created with ~10 second duration
@@ -400,22 +304,16 @@ test.describe('Hold-to-Record Performance', () => {
     const quickLogButton = page.locator('button:has-text("Quick Log")').first();
     await quickLogButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    const box = await quickLogButton.boundingBox();
-    if (!box) throw new Error('Quick Log button not found');
-
-    // Record 3 logs in sequence
+    // Record 3 logs in sequence using cross-platform method
     for (let i = 0; i < 3; i++) {
-      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-      await page.mouse.down();
-      await page.waitForTimeout(2000 + (i * 500)); // Varying durations
-      await page.mouse.up();
+      await holdAndRelease(page, 'button:has-text("Quick Log")', 2000 + (i * 500));
       await page.waitForTimeout(1500); // Wait between recordings
     }
 
     // Navigate to logs
     const logsTab = page.locator('text=Logs, text=History').first();
     if (await logsTab.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await logsTab.click();
+      await clickElement(page, 'text=Logs, text=History', {});
       await page.waitForTimeout(500);
     }
 

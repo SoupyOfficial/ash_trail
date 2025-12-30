@@ -281,8 +281,8 @@ class _QuickLogWidgetState extends ConsumerState<QuickLogWidget> {
       return _buildTimeAdjustmentOverlay();
     }
 
-    return Listener(
-      onPointerExit: (_) {
+    return MouseRegion(
+      onExit: (_) {
         // Cancel any active gestures when pointer leaves the button
         // This is crucial for web where mouse can leave the button area
         if (_isRecording || _isLongPressing) {
@@ -296,6 +296,7 @@ class _QuickLogWidgetState extends ConsumerState<QuickLogWidget> {
         onLongPressStart: _handleLongPressStart,
         onLongPressEnd: _handleLongPressEnd,
         child: FloatingActionButton.extended(
+          key: const Key('add-log-button'),
           heroTag: 'quick_log',
           onPressed: () {}, // Handled by GestureDetector
           icon: const Icon(Icons.add),

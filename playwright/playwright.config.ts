@@ -31,31 +31,86 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for major browsers and mobile devices */
   projects: [
+    // Setup project - runs once to authenticate and save state
+    {
+      name: 'setup',
+      testMatch: '**/auth.setup.ts',
+    },
+
+    // Authenticated tests - use stored auth state
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Use authenticated state
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { 
+        ...devices['Desktop Safari'],
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
 
-    /* Test against mobile viewports. */
+    /* Test against mobile viewports with touch support */
     {
       name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Pixel 5'],
+        // Ensure touch events are properly supported
+        hasTouch: true,
+        isMobile: true,
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
     {
       name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
+      use: { 
+        ...devices['iPhone 12'],
+        // Ensure touch events are properly supported
+        hasTouch: true,
+        isMobile: true,
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
+    /* Additional mobile devices for comprehensive testing */
+    {
+      name: 'Mobile Chrome Landscape',
+      use: {
+        ...devices['Pixel 5 landscape'],
+        hasTouch: true,
+        isMobile: true,
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
+    {
+      name: 'Tablet',
+      use: {
+        ...devices['iPad Pro'],
+        hasTouch: true,
+        isMobile: true,
+        storageState: '.auth/user.json',
+      },
+      dependencies: ['setup'],
     },
   ],
 

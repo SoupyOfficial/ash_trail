@@ -1,10 +1,16 @@
 import { test as base } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import {
+  clickElement,
+  fillInput,
+  selectOption,
+  waitForElement,
+} from './helpers/device-helpers';
 
 /**
  * Page Object Model for AshTrail Logging System
  * 
- * Provides reusable methods for interacting with the app
+ * Provides reusable methods for interacting with the app on both web and mobile
  */
 
 export class LogEntryPage {
@@ -16,8 +22,8 @@ export class LogEntryPage {
   }
 
   async clickAddButton() {
-    await this.page.click('[data-testid="add-log-button"]').catch(async () => {
-      await this.page.click('button[aria-label*="add"]');
+    await clickElement(this.page, '[data-testid="add-log-button"]', {}).catch(async () => {
+      await clickElement(this.page, 'button[aria-label*="add"]', {});
     });
   }
 
@@ -29,34 +35,34 @@ export class LogEntryPage {
     tags?: string;
   }) {
     if (data.eventType) {
-      await this.page.selectOption('select[name="eventType"]', data.eventType).catch(async () => {
-        await this.page.click('text=Event Type');
-        await this.page.click(`text=${data.eventType}`);
+      await selectOption(this.page, 'select[name="eventType"]', data.eventType, {}).catch(async () => {
+        await clickElement(this.page, 'text=Event Type', {});
+        await clickElement(this.page, `text=${data.eventType}`, {});
       });
     }
 
     if (data.value) {
-      await this.page.fill('input[name="value"]', data.value);
+      await fillInput(this.page, 'input[name="value"]', data.value);
     }
 
     if (data.unit) {
-      await this.page.selectOption('select[name="unit"]', data.unit).catch(async () => {
-        await this.page.click('text=Unit');
-        await this.page.click(`text=${data.unit}`);
+      await selectOption(this.page, 'select[name="unit"]', data.unit, {}).catch(async () => {
+        await clickElement(this.page, 'text=Unit', {});
+        await clickElement(this.page, `text=${data.unit}`, {});
       });
     }
 
     if (data.note) {
-      await this.page.fill('input[name="note"], textarea[name="note"]', data.note);
+      await fillInput(this.page, 'input[name="note"], textarea[name="note"]', data.note);
     }
 
     if (data.tags) {
-      await this.page.fill('input[name="tags"]', data.tags);
+      await fillInput(this.page, 'input[name="tags"]', data.tags);
     }
   }
 
   async saveLogEntry() {
-    await this.page.click('button:has-text("Save"), button:has-text("Create")');
+    await clickElement(this.page, 'button:has-text("Save"), button:has-text("Create")', {});
     await this.page.waitForTimeout(500);
   }
 
@@ -77,28 +83,28 @@ export class LogEntryPage {
 
   async deleteLogEntry(index: number = 0) {
     await this.clickLogEntry(index);
-    await this.page.click('button:has-text("Delete")');
-    await this.page.click('button:has-text("Confirm"), button:has-text("Yes")');
+    await clickElement(this.page, 'button:has-text("Delete")', {});
+    await clickElement(this.page, 'button:has-text("Confirm"), button:has-text("Yes")', {});
   }
 
   async editLogEntry(index: number, data: Parameters<typeof this.fillLogEntry>[0]) {
     await this.clickLogEntry(index);
-    await this.page.click('button:has-text("Edit")');
+    await clickElement(this.page, 'button:has-text("Edit")', {});
     await this.fillLogEntry(data);
-    await this.page.click('button:has-text("Save"), button:has-text("Update")');
+    await clickElement(this.page, 'button:has-text("Save"), button:has-text("Update")', {});
   }
 
   async searchLogEntries(query: string) {
-    await this.page.fill('input[placeholder*="Search"]', query);
+    await fillInput(this.page, 'input[placeholder*="Search"]', query);
     await this.page.waitForTimeout(500);
   }
 
   async filterByEventType(eventType: string) {
-    await this.page.click('[data-testid="filter-button"]').catch(async () => {
-      await this.page.click('button:has-text("Filter")');
+    await clickElement(this.page, '[data-testid="filter-button"]', {}).catch(async () => {
+      await clickElement(this.page, 'button:has-text("Filter")', {});
     });
-    await this.page.click(`text=${eventType}`);
-    await this.page.click('button:has-text("Apply")');
+    await clickElement(this.page, `text=${eventType}`, {});
+    await clickElement(this.page, 'button:has-text("Apply")', {});
   }
 }
 
@@ -113,13 +119,13 @@ export class SyncPage {
   }
 
   async triggerSync() {
-    await this.page.click('[data-testid="sync-button"]').catch(async () => {
-      await this.page.click('button:has-text("Sync")');
+    await clickElement(this.page, '[data-testid="sync-button"]', {}).catch(async () => {
+      await clickElement(this.page, 'button:has-text("Sync")', {});
     });
   }
 
   async waitForSyncComplete(timeout: number = 10000) {
-    await this.page.waitForSelector('text=/synced|up to date/i', { timeout });
+    await waitForElement(this.page, 'text=/synced|up to date/i', { timeout });
   }
 
   async getPendingCount() {
@@ -137,25 +143,25 @@ export class AnalyticsPage {
 
   async goto() {
     await this.page.goto('/');
-    await this.page.click('text=Analytics').catch(async () => {
-      await this.page.click('[data-testid="analytics-tab"]');
+    await clickElement(this.page, 'text=Analytics', {}).catch(async () => {
+      await clickElement(this.page, '[data-testid="analytics-tab"]', {});
     });
-    await this.page.waitForSelector('canvas, svg', { timeout: 10000 });
+    await waitForElement(this.page, 'canvas, svg', { timeout: 10000 });
   }
 
   async selectTimeRange(range: string) {
-    await this.page.click('[data-testid="range-selector"]').catch(async () => {
-      await this.page.click('text=Today, text=This Week');
+    await clickElement(this.page, '[data-testid="range-selector"]', {}).catch(async () => {
+      await clickElement(this.page, 'text=Today, text=This Week', {});
     });
-    await this.page.click(`text=${range}`);
+    await clickElement(this.page, `text=${range}`, {});
     await this.page.waitForTimeout(1000);
   }
 
   async selectGroupBy(groupBy: string) {
-    await this.page.click('[data-testid="group-by-selector"]').catch(async () => {
-      await this.page.click('text=Group By');
+    await clickElement(this.page, '[data-testid="group-by-selector"]', {}).catch(async () => {
+      await clickElement(this.page, 'text=Group By', {});
     });
-    await this.page.click(`text=${groupBy}`);
+    await clickElement(this.page, `text=${groupBy}`, {});
     await this.page.waitForTimeout(1000);
   }
 

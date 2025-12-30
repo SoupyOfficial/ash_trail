@@ -1,5 +1,4 @@
 import '../models/account.dart';
-import '../models/log_entry.dart';
 import '../repositories/account_repository.dart';
 import 'database_service.dart';
 

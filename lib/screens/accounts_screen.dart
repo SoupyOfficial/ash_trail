@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/account_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/account.dart';
+import 'profile/profile_screen.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -12,7 +14,58 @@ class AccountsScreen extends ConsumerWidget {
     final activeAccountAsync = ref.watch(activeAccountProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Accounts')),
+      appBar: AppBar(
+        title: const Text('Accounts'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Log Out',
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('Log Out'),
+                      content: const Text('Are you sure you want to log out?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        FilledButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Log Out'),
+                        ),
+                      ],
+                    ),
+              );
+
+              if (confirmed == true && context.mounted) {
+                try {
+                  final authService = ref.read(authServiceProvider);
+                  await authService.signOut();
+                  // Navigation handled automatically by auth state change
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error logging out: $e')),
+                    );
+                  }
+                }
+              }
+            },
+          ),
+        ],
+      ),
       body: accountsAsync.when(
         data: (accounts) {
           if (accounts.isEmpty) {
@@ -106,11 +159,6 @@ class AccountsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddAccountDialog(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Account'),
-      ),
     );
   }
 
@@ -128,99 +176,13 @@ class AccountsScreen extends ConsumerWidget {
           Text('No Accounts', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 8),
           Text(
-            'Add an account to get started',
+            'Your account will appear here',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  void _showAddAccountDialog(BuildContext context, WidgetRef ref) {
-    final userIdController = TextEditingController();
-    final emailController = TextEditingController();
-    final displayNameController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Add Account'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: userIdController,
-                    decoration: const InputDecoration(
-                      labelText: 'User ID',
-                      border: OutlineInputBorder(),
-                      hintText: 'Unique identifier',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: displayNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Display Name (optional)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () async {
-                  if (userIdController.text.isEmpty ||
-                      emailController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('User ID and Email are required'),
-                      ),
-                    );
-                    return;
-                  }
-
-                  final account = Account.create(
-                    userId: userIdController.text,
-                    email: emailController.text,
-                    displayName:
-                        displayNameController.text.isEmpty
-                            ? null
-                            : displayNameController.text,
-                  );
-
-                  await ref
-                      .read(accountSwitcherProvider.notifier)
-                      .addAccount(account);
-
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Account added!')),
-                    );
-                  }
-                },
-                child: const Text('Add'),
-              ),
-            ],
-          ),
     );
   }
 

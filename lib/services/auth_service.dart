@@ -1,0 +1,319 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+/// Service for handling authentication with Firebase Auth
+/// Supports email/password and Google Sign-In
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
+  // Storage keys
+  static const String _keyUserId = 'userId';
+  static const String _keyEmail = 'email';
+  static const String _keyDisplayName = 'displayName';
+
+  /// Get current user
+  User? get currentUser => _auth.currentUser;
+
+  /// Stream of auth state changes
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  /// Check if user is authenticated
+  bool get isAuthenticated => _auth.currentUser != null;
+
+  /// Sign up with email and password
+  Future<UserCredential> signUpWithEmail({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    try {
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Update display name if provided
+      if (displayName != null && displayName.isNotEmpty) {
+        await userCredential.user?.updateDisplayName(displayName);
+      }
+
+      // Store user info securely
+      await _storeUserInfo(userCredential.user);
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Sign in with email and password
+  Future<UserCredential> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Store user info securely
+      await _storeUserInfo(userCredential.user);
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Sign in with Google
+  Future<UserCredential> signInWithGoogle() async {
+    try {
+      // Trigger Google Sign-In flow
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        throw Exception('Google sign-in was cancelled');
+      }
+
+      // Obtain auth details
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create Firebase credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      // Store user info securely
+      await _storeUserInfo(userCredential.user);
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to sign in with Google: $e');
+    }
+  }
+
+  /// Sign out
+  Future<void> signOut() async {
+    try {
+      // Sign out from Google if signed in
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+      }
+
+      // Sign out from Firebase
+      await _auth.signOut();
+
+      // Clear stored user info
+      await _clearUserInfo();
+    } catch (e) {
+      throw Exception('Failed to sign out: $e');
+    }
+  }
+
+  /// Send password reset email
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Update user profile (display name, photo URL)
+  Future<void> updateProfile({String? displayName, String? photoURL}) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user currently signed in');
+      }
+
+      if (displayName != null) {
+        await user.updateDisplayName(displayName);
+      }
+
+      if (photoURL != null) {
+        await user.updatePhotoURL(photoURL);
+      }
+
+      // Reload user to get updated info
+      await user.reload();
+
+      // Update stored info
+      await _storeUserInfo(_auth.currentUser);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
+    }
+  }
+
+  /// Update user email
+  Future<void> updateEmail(String newEmail) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user currently signed in');
+      }
+
+      await user.verifyBeforeUpdateEmail(newEmail);
+
+      // Update stored info
+      await _storeUserInfo(_auth.currentUser);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to update email: $e');
+    }
+  }
+
+  /// Change password (requires current password for re-authentication)
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user currently signed in');
+      }
+
+      if (user.email == null) {
+        throw Exception('Email is required to change password');
+      }
+
+      // Re-authenticate user with current password
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to change password: $e');
+    }
+  }
+
+  /// Delete user account (requires password for re-authentication)
+  Future<void> deleteAccount(String password) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user currently signed in');
+      }
+
+      // Re-authenticate for security
+      if (user.email != null) {
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(credential);
+      }
+
+      // Delete the user account
+      await user.delete();
+
+      // Clear stored user info
+      await _clearUserInfo();
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
+
+  /// Re-authenticate user (for sensitive operations)
+  Future<void> reauthenticate(String password) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null || user.email == null) {
+        throw Exception('User not signed in or email not available');
+      }
+
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Store user info securely
+  Future<void> _storeUserInfo(User? user) async {
+    if (user != null) {
+      await _secureStorage.write(key: _keyUserId, value: user.uid);
+      await _secureStorage.write(key: _keyEmail, value: user.email ?? '');
+      await _secureStorage.write(
+        key: _keyDisplayName,
+        value: user.displayName ?? '',
+      );
+    }
+  }
+
+  /// Clear stored user info
+  Future<void> _clearUserInfo() async {
+    await _secureStorage.delete(key: _keyUserId);
+    await _secureStorage.delete(key: _keyEmail);
+    await _secureStorage.delete(key: _keyDisplayName);
+  }
+
+  /// Get stored user ID
+  Future<String?> getStoredUserId() async {
+    return await _secureStorage.read(key: _keyUserId);
+  }
+
+  /// Get stored email
+  Future<String?> getStoredEmail() async {
+    return await _secureStorage.read(key: _keyEmail);
+  }
+
+  /// Get stored display name
+  Future<String?> getStoredDisplayName() async {
+    return await _secureStorage.read(key: _keyDisplayName);
+  }
+
+  /// Handle Firebase Auth exceptions
+  String _handleAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'weak-password':
+        return 'The password provided is too weak.';
+      case 'email-already-in-use':
+        return 'An account already exists for that email.';
+      case 'user-not-found':
+        return 'No user found for that email.';
+      case 'wrong-password':
+        return 'Wrong password provided.';
+      case 'invalid-email':
+        return 'The email address is not valid.';
+      case 'user-disabled':
+        return 'This user account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many requests. Please try again later.';
+      case 'operation-not-allowed':
+        return 'This sign-in method is not enabled.';
+      case 'network-request-failed':
+        return 'Network error. Please check your connection.';
+      default:
+        return e.message ?? 'An authentication error occurred.';
+    }
+  }
+}

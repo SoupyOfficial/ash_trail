@@ -52,5 +52,10 @@ abstract class LogRecordRepository {
 
 /// Factory to create LogRecordRepository using Hive
 LogRecordRepository createLogRecordRepository([dynamic context]) {
+  if (context == null) {
+    throw ArgumentError(
+      'Database context cannot be null. Ensure DatabaseService is initialized.',
+    );
+  }
   return LogRecordRepositoryHive(context as Map<String, dynamic>);
 }

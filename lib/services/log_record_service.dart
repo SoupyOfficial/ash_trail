@@ -3,6 +3,7 @@ import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
 import 'validation_service.dart';
+import 'database_service.dart';
 
 /// LogRecordService handles all CRUD operations for log records
 /// Implements offline-first with sync queue management
@@ -11,8 +12,18 @@ class LogRecordService {
   final Uuid _uuid = const Uuid();
 
   LogRecordService({LogRecordRepository? repository}) {
-    // Use injected repository for testing, or create platform-specific one
-    _repository = repository ?? createLogRecordRepository(null);
+    if (repository != null) {
+      _repository = repository;
+    } else {
+      // Initialize repository with Hive database
+      final dbService = DatabaseService.instance;
+      final dbBoxes = dbService.boxes;
+
+      // Pass Hive boxes map to repository
+      _repository = createLogRecordRepository(
+        dbBoxes is Map<String, dynamic> ? dbBoxes : {},
+      );
+    }
   }
 
   /// Get device ID (platform-specific, simplified here)

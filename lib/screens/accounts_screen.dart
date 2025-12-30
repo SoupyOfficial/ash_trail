@@ -4,6 +4,7 @@ import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/account.dart';
 import 'profile/profile_screen.dart';
+import 'export_screen.dart';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
@@ -17,6 +18,15 @@ class AccountsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Accounts'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.import_export),
+            tooltip: 'Import / Export',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ExportScreen()));
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.person),
             tooltip: 'Profile',

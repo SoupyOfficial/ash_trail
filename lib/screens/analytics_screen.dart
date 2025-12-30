@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import '../providers/log_record_provider.dart';
 import '../providers/log_record_provider.dart'
     show logRecordStatsProvider, LogRecordsParams;
+import '../providers/account_provider.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../widgets/edit_log_record_dialog.dart';
+import '../widgets/analytics_charts.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -158,69 +160,53 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   Widget _buildChartsView(BuildContext context, Map<String, dynamic> stats) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Card(
-            child: Padding(
+    final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
+    final activeAccountAsync = ref.watch(activeAccountProvider);
+
+    return logRecordsAsync.when(
+      data: (records) {
+        return activeAccountAsync.when(
+          data: (account) {
+            if (account == null || records.isEmpty) {
+              return _buildEmptyChartsView(context);
+            }
+            return Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Statistics',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildStatRow(
-                    context,
-                    'Total Entries',
-                    '${stats['totalCount'] ?? 0}',
-                  ),
-                  _buildStatRow(
-                    context,
-                    'Total Duration',
-                    (stats['totalDuration'] as num?)?.toStringAsFixed(2) ?? '0',
-                  ),
-                  if (stats['firstEvent'] != null)
-                    _buildStatRow(
-                      context,
-                      'First Entry',
-                      DateFormat('MMM dd, yyyy').format(stats['firstEvent']),
-                    ),
-                  if (stats['lastEvent'] != null)
-                    _buildStatRow(
-                      context,
-                      'Last Entry',
-                      DateFormat('MMM dd, yyyy').format(stats['lastEvent']),
-                    ),
-                ],
+              child: AnalyticsChartsWidget(
+                records: records,
+                accountId: account.userId,
               ),
-            ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );
+  }
+
+  Widget _buildEmptyChartsView(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.analytics_outlined,
+            size: 80,
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Charts Coming Soon',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '• Cumulative usage over time\n'
-                    '• Daily/weekly breakdowns\n'
-                    '• Rolling windows\n'
-                    '• Session details',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+          Text(
+            'No data for charts',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start logging to see your analytics',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -234,19 +220,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         Text(value, style: Theme.of(context).textTheme.headlineMedium),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
-    );
-  }
-
-  Widget _buildStatRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          Text(value, style: Theme.of(context).textTheme.titleMedium),
-        ],
-      ),
     );
   }
 

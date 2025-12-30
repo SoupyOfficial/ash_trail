@@ -12,6 +12,7 @@ import '../widgets/edit_log_record_dialog.dart';
 import 'analytics_screen.dart';
 import 'accounts_screen.dart';
 import 'logging_screen.dart';
+import 'history_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -179,18 +180,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          // View Analytics button
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AnalyticsScreen(),
+          // Quick action buttons row
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AnalyticsScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.analytics),
+                  label: const Text('Analytics'),
                 ),
-              );
-            },
-            icon: const Icon(Icons.analytics),
-            label: const Text('View Analytics'),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HistoryScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.history),
+                  label: const Text('History'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 
@@ -207,7 +229,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AnalyticsScreen(),
+                      builder: (context) => const HistoryScreen(),
                     ),
                   );
                 },

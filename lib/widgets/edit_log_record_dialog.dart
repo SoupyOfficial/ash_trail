@@ -23,6 +23,13 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
   late double _duration;
   late Unit _unit;
   late TextEditingController _notesController;
+  late double? _moodRating;
+  late double? _physicalRating;
+  late List<LogReason> _reasons;
+  late double? _latitude;
+  late double? _longitude;
+  late TextEditingController _latitudeController;
+  late TextEditingController _longitudeController;
   bool _isSubmitting = false;
 
   @override
@@ -34,11 +41,24 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
     _duration = widget.record.duration;
     _unit = widget.record.unit;
     _notesController = TextEditingController(text: widget.record.note);
+    _moodRating = widget.record.moodRating;
+    _physicalRating = widget.record.physicalRating;
+    _reasons = List.from(widget.record.reasons ?? []);
+    _latitude = widget.record.latitude;
+    _longitude = widget.record.longitude;
+    _latitudeController = TextEditingController(
+      text: _latitude?.toString() ?? '',
+    );
+    _longitudeController = TextEditingController(
+      text: _longitude?.toString() ?? '',
+    );
   }
 
   @override
   void dispose() {
     _notesController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
     super.dispose();
   }
 
@@ -73,6 +93,41 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
   Future<void> _updateLog() async {
     if (_isSubmitting) return;
 
+    // Validate location if provided
+    if (!ValidationService.isValidLocationPair(_latitude, _longitude)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Location must have both latitude and longitude, or neither',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Validate ratings
+    if (_moodRating != null && (_moodRating! < 1 || _moodRating! > 10)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mood rating must be between 1 and 10'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_physicalRating != null &&
+        (_physicalRating! < 1 || _physicalRating! > 10)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Physical rating must be between 1 and 10'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
@@ -91,6 +146,11 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
             duration: validatedDuration,
             unit: _unit,
             note: _notesController.text.isEmpty ? null : _notesController.text,
+            moodRating: _moodRating,
+            physicalRating: _physicalRating,
+            reasons: _reasons,
+            latitude: _latitude,
+            longitude: _longitude,
           );
 
       if (mounted) {
@@ -272,6 +332,154 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                 ),
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
+              ),
+              const SizedBox(height: 24),
+
+              // Mood Rating
+              Text(
+                'Mood Rating (optional)',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _moodRating ?? 5.0,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      label: _moodRating?.toStringAsFixed(1) ?? 'Not set',
+                      onChanged: (value) {
+                        setState(() {
+                          _moodRating = value;
+                        });
+                      },
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _moodRating = null;
+                      });
+                    },
+                    child: Text(_moodRating == null ? 'Not set' : 'Clear'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Physical Rating
+              Text(
+                'Physical Rating (optional)',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _physicalRating ?? 5.0,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      label: _physicalRating?.toStringAsFixed(1) ?? 'Not set',
+                      onChanged: (value) {
+                        setState(() {
+                          _physicalRating = value;
+                        });
+                      },
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _physicalRating = null;
+                      });
+                    },
+                    child: Text(_physicalRating == null ? 'Not set' : 'Clear'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Reasons
+              Text('Reasons (optional)', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children:
+                    LogReason.values
+                        .map(
+                          (reason) => FilterChip(
+                            label: Text(reason.displayName),
+                            selected: _reasons.contains(reason),
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _reasons.add(reason);
+                                } else {
+                                  _reasons.remove(reason);
+                                }
+                              });
+                            },
+                          ),
+                        )
+                        .toList(),
+              ),
+              const SizedBox(height: 24),
+
+              // Location (Latitude/Longitude)
+              Text(
+                'Location (optional - both or neither)',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _latitudeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Latitude',
+                        border: OutlineInputBorder(),
+                        hintText: '-90 to 90',
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                      onChanged: (value) {
+                        final parsed = double.tryParse(value);
+                        setState(() {
+                          _latitude = parsed;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _longitudeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Longitude',
+                        border: OutlineInputBorder(),
+                        hintText: '-180 to 180',
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                      onChanged: (value) {
+                        final parsed = double.tryParse(value);
+                        setState(() {
+                          _longitude = parsed;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 

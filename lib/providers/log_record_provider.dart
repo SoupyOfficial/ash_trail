@@ -523,6 +523,11 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
     double? duration,
     Unit? unit,
     String? note,
+    double? moodRating,
+    double? physicalRating,
+    List<LogReason>? reasons,
+    double? latitude,
+    double? longitude,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -534,6 +539,11 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
         duration: duration,
         unit: unit,
         note: note,
+        moodRating: moodRating,
+        physicalRating: physicalRating,
+        reasons: reasons,
+        latitude: latitude,
+        longitude: longitude,
       );
       state = AsyncValue.data(updated);
     } catch (e, st) {

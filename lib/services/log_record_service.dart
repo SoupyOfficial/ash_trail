@@ -145,6 +145,11 @@ class LogRecordService {
     double? duration,
     Unit? unit,
     String? note,
+    double? moodRating,
+    double? physicalRating,
+    List<LogReason>? reasons,
+    double? latitude,
+    double? longitude,
   }) async {
     if (eventType != null && eventType != record.eventType) {
       record.eventType = eventType;
@@ -164,6 +169,23 @@ class LogRecordService {
 
     if (note != null && note != record.note) {
       record.note = note;
+    }
+
+    // Allow setting mood rating (including null to clear)
+    record.moodRating = moodRating ?? record.moodRating;
+
+    // Allow setting physical rating (including null to clear)
+    record.physicalRating = physicalRating ?? record.physicalRating;
+
+    // Allow setting reasons (including null to clear)
+    if (reasons != null) {
+      record.reasons = reasons.isEmpty ? null : reasons;
+    }
+
+    // Allow setting location (including null to clear)
+    if (latitude != null || longitude != null) {
+      record.latitude = latitude;
+      record.longitude = longitude;
     }
 
     // Mark as dirty

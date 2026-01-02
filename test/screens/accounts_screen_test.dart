@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ash_trail/screens/accounts_screen.dart';
 import 'package:ash_trail/models/account.dart';
+import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/providers/account_provider.dart';
 
 void main() {
@@ -22,8 +23,9 @@ void main() {
 
       await tester.pumpAndSettle();
 
+      // Updated: Now shows "No Accounts" and "Create Test Account" button
       expect(find.text('No Accounts'), findsOneWidget);
-      expect(find.text('Add an account to get started'), findsOneWidget);
+      expect(find.text('Create Test Account'), findsOneWidget);
     });
 
     testWidgets('AccountsScreen shows list of accounts', (
@@ -33,11 +35,13 @@ void main() {
         userId: 'user1',
         email: 'user1@example.com',
         displayName: 'User One',
+        authProvider: AuthProvider.devStatic,
       );
       final account2 = Account.create(
         userId: 'user2',
         email: 'user2@example.com',
         displayName: 'User Two',
+        authProvider: AuthProvider.devStatic,
       );
 
       await tester.pumpWidget(
@@ -66,12 +70,14 @@ void main() {
       final account1 = Account.create(
         userId: 'user1',
         email: 'user1@example.com',
+        authProvider: AuthProvider.devStatic,
+        isActive: true,
       );
-      account1.isActive = true;
 
       final account2 = Account.create(
         userId: 'user2',
         email: 'user2@example.com',
+        authProvider: AuthProvider.devStatic,
       );
 
       await tester.pumpWidget(
@@ -92,12 +98,22 @@ void main() {
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
     });
 
-    testWidgets('Add account FAB is present', (WidgetTester tester) async {
+    testWidgets('Developer Tools section is visible with accounts', (
+      WidgetTester tester,
+    ) async {
+      final account = Account.create(
+        userId: kTestAccountId,
+        email: kTestAccountEmail,
+        displayName: kTestAccountName,
+        authProvider: AuthProvider.devStatic,
+        isActive: true,
+      );
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            allAccountsProvider.overrideWith((ref) => Stream.value([])),
-            activeAccountProvider.overrideWith((ref) => Stream.value(null)),
+            allAccountsProvider.overrideWith((ref) => Stream.value([account])),
+            activeAccountProvider.overrideWith((ref) => Stream.value(account)),
           ],
           child: const MaterialApp(home: AccountsScreen()),
         ),
@@ -105,13 +121,13 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(
-        find.widgetWithText(FloatingActionButton, 'Add Account'),
-        findsOneWidget,
-      );
+      // Developer Tools section should be visible
+      expect(find.text('Developer Tools'), findsOneWidget);
+      expect(find.text('Create Test Account'), findsOneWidget);
+      expect(find.text('Add Sample Logs'), findsOneWidget);
     });
 
-    testWidgets('Add account dialog appears on FAB tap', (
+    testWidgets('App bar has expected action buttons', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -126,12 +142,10 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add Account'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('User ID'), findsOneWidget);
-      expect(find.text('Email'), findsOneWidget);
-      expect(find.text('Display Name (optional)'), findsOneWidget);
+      // App bar should have import/export, profile, and logout buttons
+      expect(find.byIcon(Icons.import_export), findsOneWidget);
+      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(Icons.logout), findsOneWidget);
     });
   });
 }

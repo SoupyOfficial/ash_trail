@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../models/log_record.dart';
-import '../models/daily_rollup.dart';
-import '../models/enums.dart';
 import '../services/analytics_service.dart';
+import 'charts/charts.dart';
 
 /// Provider for AnalyticsService
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
@@ -28,9 +28,11 @@ class AnalyticsChartsWidget extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
-  TimeRangeFilter _selectedRange = TimeRangeFilter.last7Days;
+  ChartTimeRange _selectedRange = ChartTimeRange.last7Days;
+  DateTimeRange? _customRange;
   RollingWindowStats? _stats;
   bool _isLoading = true;
+  ChartViewType _chartType = ChartViewType.bar;
 
   @override
   void initState() {
@@ -46,16 +48,31 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
     }
   }
 
+  int get _currentDays {
+    switch (_selectedRange) {
+      case ChartTimeRange.last7Days:
+        return 7;
+      case ChartTimeRange.last14Days:
+        return 14;
+      case ChartTimeRange.last30Days:
+        return 30;
+      case ChartTimeRange.custom:
+        if (_customRange != null) {
+          return _customRange!.end.difference(_customRange!.start).inDays + 1;
+        }
+        return 7;
+    }
+  }
+
   Future<void> _loadStats() async {
     setState(() => _isLoading = true);
 
     final analyticsService = ref.read(analyticsServiceProvider);
-    final days = _selectedRange == TimeRangeFilter.last7Days ? 7 : 30;
 
     final stats = await analyticsService.computeRollingWindow(
       accountId: widget.accountId,
       records: widget.records,
-      days: days,
+      days: _currentDays,
     );
 
     if (mounted) {
@@ -76,9 +93,9 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
         const SizedBox(height: 16),
 
         if (_isLoading)
-          const Center(child: CircularProgressIndicator())
+          const Expanded(child: Center(child: CircularProgressIndicator()))
         else if (_stats == null)
-          _buildNoDataState(context)
+          Expanded(child: _buildNoDataState(context))
         else
           Expanded(
             child: SingleChildScrollView(
@@ -88,16 +105,40 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
                   _buildSummaryCards(context, _stats!),
                   const SizedBox(height: 24),
 
-                  // Activity chart placeholder
+                  // Chart type selector
+                  _buildChartTypeSelector(context),
+                  const SizedBox(height: 16),
+
+                  // Activity chart - show different chart based on selection
                   _buildActivityChart(context, _stats!),
                   const SizedBox(height: 24),
 
-                  // Event type breakdown
-                  _buildEventTypeBreakdown(context, _stats!),
+                  // Event type pie chart
+                  EventTypePieChart(
+                    eventTypeCounts: _stats!.eventTypeCounts,
+                    title: 'Event Distribution',
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Hourly activity heatmap
+                  HourlyHeatmap(
+                    records: widget.records,
+                    title: 'Activity by Hour',
+                    baseColor: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Weekly pattern heatmap
+                  WeeklyHeatmap(
+                    records: widget.records,
+                    title: 'Weekly Pattern',
+                    baseColor: Colors.green,
+                  ),
                   const SizedBox(height: 24),
 
                   // Trend indicators
                   _buildTrendIndicators(context, _stats!),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -107,23 +148,94 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   }
 
   Widget _buildTimeRangeSelector(BuildContext context) {
-    return SegmentedButton<TimeRangeFilter>(
-      segments: const [
-        ButtonSegment(
-          value: TimeRangeFilter.last7Days,
-          label: Text('7 Days'),
-          icon: Icon(Icons.calendar_view_week),
+    return Row(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildTimeChip(ChartTimeRange.last7Days, '7 Days'),
+                const SizedBox(width: 8),
+                _buildTimeChip(ChartTimeRange.last14Days, '14 Days'),
+                const SizedBox(width: 8),
+                _buildTimeChip(ChartTimeRange.last30Days, '30 Days'),
+                const SizedBox(width: 8),
+                _buildTimeChip(ChartTimeRange.custom, 'Custom'),
+              ],
+            ),
+          ),
         ),
-        ButtonSegment(
-          value: TimeRangeFilter.last30Days,
-          label: Text('30 Days'),
-          icon: Icon(Icons.calendar_month),
+        IconButton(
+          icon: const Icon(Icons.date_range),
+          tooltip: 'Custom Date Range',
+          onPressed: _showCustomRangePicker,
         ),
       ],
-      selected: {_selectedRange},
-      onSelectionChanged: (Set<TimeRangeFilter> selected) {
-        setState(() => _selectedRange = selected.first);
-        _loadStats();
+    );
+  }
+
+  Widget _buildTimeChip(ChartTimeRange range, String label) {
+    final isSelected = _selectedRange == range;
+    String displayLabel = label;
+
+    if (range == ChartTimeRange.custom && _customRange != null) {
+      displayLabel =
+          '${DateFormat.MMMd().format(_customRange!.start)} - ${DateFormat.MMMd().format(_customRange!.end)}';
+    }
+
+    return FilterChip(
+      label: Text(displayLabel),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          if (range == ChartTimeRange.custom) {
+            _showCustomRangePicker();
+          } else {
+            setState(() {
+              _selectedRange = range;
+              _customRange = null;
+            });
+            _loadStats();
+          }
+        }
+      },
+    );
+  }
+
+  Future<void> _showCustomRangePicker() async {
+    final result = await showTimeRangePicker(
+      context: context,
+      initialStart: _customRange?.start,
+      initialEnd: _customRange?.end,
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _selectedRange = ChartTimeRange.custom;
+        _customRange = result;
+      });
+      _loadStats();
+    }
+  }
+
+  Widget _buildChartTypeSelector(BuildContext context) {
+    return SegmentedButton<ChartViewType>(
+      segments: const [
+        ButtonSegment(
+          value: ChartViewType.bar,
+          icon: Icon(Icons.bar_chart),
+          label: Text('Bar'),
+        ),
+        ButtonSegment(
+          value: ChartViewType.line,
+          icon: Icon(Icons.show_chart),
+          label: Text('Line'),
+        ),
+      ],
+      selected: {_chartType},
+      onSelectionChanged: (Set<ChartViewType> selected) {
+        setState(() => _chartType = selected.first);
       },
     );
   }
@@ -166,7 +278,7 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
             color: Colors.blue,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: _SummaryCard(
             title: 'Total Time',
@@ -175,7 +287,7 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
             color: Colors.green,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
           child: _SummaryCard(
             title: 'Daily Avg',
@@ -189,180 +301,18 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   }
 
   Widget _buildActivityChart(BuildContext context, RollingWindowStats stats) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Daily Activity',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            // Simple bar chart visualization
-            SizedBox(
-              height: 150,
-              child: _buildSimpleBarChart(context, stats.dailyRollups),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSimpleBarChart(BuildContext context, List<DailyRollup> rollups) {
-    if (rollups.isEmpty) {
-      return const Center(child: Text('No data'));
+    if (_chartType == ChartViewType.line) {
+      return ActivityLineChart(
+        rollups: stats.dailyRollups,
+        title: 'Daily Activity Trend',
+        lineColor: Theme.of(context).colorScheme.primary,
+      );
     }
-
-    // Find max value for scaling
-    final maxValue = rollups
-        .map((r) => r.eventCount)
-        .fold(1, (a, b) => a > b ? a : b);
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children:
-          rollups.map((rollup) {
-            final height =
-                rollup.eventCount > 0
-                    ? (rollup.eventCount / maxValue) * 130
-                    : 4.0;
-
-            return Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: Tooltip(
-                  message: '${rollup.date}: ${rollup.eventCount} entries',
-                  child: Container(
-                    height: height,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(
-                        alpha: rollup.eventCount > 0 ? 0.7 : 0.2,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+    return ActivityBarChart(
+      rollups: stats.dailyRollups,
+      title: 'Daily Activity',
+      barColor: Theme.of(context).colorScheme.primary,
     );
-  }
-
-  Widget _buildEventTypeBreakdown(
-    BuildContext context,
-    RollingWindowStats stats,
-  ) {
-    if (stats.eventTypeCounts.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final total = stats.eventTypeCounts.values.fold(0, (a, b) => a + b);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Event Types', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 16),
-            ...stats.eventTypeCounts.entries.map((entry) {
-              final percentage = total > 0 ? (entry.value / total * 100) : 0;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildEventTypeRow(
-                  context,
-                  entry.key,
-                  entry.value,
-                  percentage.toDouble(),
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventTypeRow(
-    BuildContext context,
-    EventType type,
-    int count,
-    double percentage,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                _getEventTypeIcon(type),
-                const SizedBox(width: 8),
-                Text(type.name),
-              ],
-            ),
-            Text('$count (${percentage.toStringAsFixed(0)}%)'),
-          ],
-        ),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: percentage / 100,
-          backgroundColor:
-              Theme.of(context).colorScheme.surfaceContainerHighest,
-        ),
-      ],
-    );
-  }
-
-  Widget _getEventTypeIcon(EventType type) {
-    IconData icon;
-    Color color;
-
-    switch (type) {
-      case EventType.vape:
-        icon = Icons.cloud;
-        color = Colors.indigo;
-        break;
-      case EventType.inhale:
-        icon = Icons.air;
-        color = Colors.blue;
-        break;
-      case EventType.sessionStart:
-        icon = Icons.play_circle;
-        color = Colors.green;
-        break;
-      case EventType.sessionEnd:
-        icon = Icons.stop_circle;
-        color = Colors.red;
-        break;
-      case EventType.note:
-        icon = Icons.note;
-        color = Colors.orange;
-        break;
-      case EventType.tolerance:
-        icon = Icons.trending_up;
-        color = Colors.purple;
-        break;
-      case EventType.symptomRelief:
-        icon = Icons.healing;
-        color = Colors.teal;
-        break;
-      case EventType.purchase:
-        icon = Icons.shopping_cart;
-        color = Colors.amber;
-        break;
-      case EventType.custom:
-        icon = Icons.star;
-        color = Colors.grey;
-        break;
-    }
-
-    return Icon(icon, size: 20, color: color);
   }
 
   Widget _buildTrendIndicators(BuildContext context, RollingWindowStats stats) {
@@ -373,15 +323,33 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
       metric: 'entries',
     );
 
+    final durationTrend = analyticsService.computeTrend(
+      rollups: stats.dailyRollups,
+      metric: 'duration',
+    );
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Trends', style: Theme.of(context).textTheme.titleMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Trends', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Last $_currentDays days',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
             _TrendIndicator(label: 'Activity', trend: entriesTrend),
+            const SizedBox(height: 12),
+            _TrendIndicator(label: 'Duration', trend: durationTrend),
             if (stats.averageMoodRating != null) ...[
               const SizedBox(height: 12),
               _TrendIndicator(
@@ -399,8 +367,11 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   }
 }
 
-/// Time range filter options
-enum TimeRangeFilter { last7Days, last30Days }
+/// Time range options for charts
+enum ChartTimeRange { last7Days, last14Days, last30Days, custom }
+
+/// Chart view type options
+enum ChartViewType { bar, line }
 
 /// Summary card widget
 class _SummaryCard extends StatelessWidget {
@@ -478,13 +449,31 @@ class _TrendIndicator extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 8),
-        Text(label),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Text(label, style: Theme.of(context).textTheme.bodyMedium),
         const Spacer(),
-        Text(
-          trendLabel,
-          style: TextStyle(color: color, fontWeight: FontWeight.w500),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            trendLabel,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
         ),
       ],
     );

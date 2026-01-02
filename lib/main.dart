@@ -48,7 +48,7 @@ class AshTrailApp extends ConsumerWidget {
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -65,7 +65,7 @@ class AshTrailApp extends ConsumerWidget {
         ),
         scaffoldBackgroundColor: Colors.black,
         useMaterial3: true,
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 2,
           color: const Color(0xFF1E1E1E),
           shape: RoundedRectangleBorder(

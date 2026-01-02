@@ -17,7 +17,22 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
   ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
-class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
@@ -28,14 +43,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Analytics'),
-        bottom: const TabBar(
-          tabs: [
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
             Tab(icon: Icon(Icons.table_chart), text: 'Data'),
             Tab(icon: Icon(Icons.analytics), text: 'Charts'),
           ],
         ),
       ),
       body: TabBarView(
+        controller: _tabController,
         children: [
           // Data tab
           logRecordsAsync.when(
@@ -43,7 +60,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => Center(child: Text('Error: $error')),
           ),
-          // Charts tab (placeholder for now)
+          // Charts tab
           statisticsAsync.when(
             data: (stats) => _buildChartsView(context, stats),
             loading: () => const Center(child: CircularProgressIndicator()),

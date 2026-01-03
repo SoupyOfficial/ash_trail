@@ -97,6 +97,12 @@ class MockLogRecordRepository implements LogRecordRepository {
   }
 
   @override
+  Future<void> deleteByAccount(String accountId) async {
+    if (throwError) throw Exception('Mock error');
+    _records.removeWhere((r) => r.accountId == accountId);
+  }
+
+  @override
   Stream<List<LogRecord>> watchByAccount(String accountId) {
     return Stream.value(
       _records.where((r) => r.accountId == accountId).toList(),

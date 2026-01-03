@@ -178,6 +178,14 @@ class LogRecordRepositoryHive implements LogRecordRepository {
   }
 
   @override
+  Future<void> deleteByAccount(String accountId) async {
+    final records = _getAllRecords().where((r) => r.accountId == accountId);
+    for (final record in records) {
+      await _box.delete(record.logId);
+    }
+  }
+
+  @override
   Stream<List<LogRecord>> watchByAccount(String accountId) {
     return _controller.stream.map(
       (records) =>

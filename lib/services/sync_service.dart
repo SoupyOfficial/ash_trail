@@ -25,6 +25,9 @@ import 'log_record_service.dart';
 /// Currently detects conflicts when lastRemoteUpdateAt < remote.updatedAt
 /// Uses "last write wins" strategy for resolution.
 /// TODO: Implement proper multi-device conflict handling for post-MVP
+/// Suggested approach: Use vector clocks or CRDT for conflict resolution.
+/// Consider implementing conflict detection at the field/property level.
+/// User notification and merge strategy will be required for a smooth user experience.
 ///
 /// Implements conflict resolution and batch upload strategies
 class SyncService {

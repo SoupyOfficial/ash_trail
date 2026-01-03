@@ -178,8 +178,70 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Reason Selection (removed for simplicity - use main logging screen for detailed entries)
-              // TODO: Implement multiselect for reasons if needed
+              // Reason Selection - Multiselect chips
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Reasons (optional)'),
+                      if (_reasons != null && _reasons!.isNotEmpty)
+                        TextButton(
+                          onPressed: () => setState(() => _reasons = null),
+                          child: const Text('Clear'),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children:
+                        LogReason.values.map((reason) {
+                          final isSelected =
+                              _reasons?.contains(reason) ?? false;
+                          return FilterChip(
+                            label: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  reason.icon,
+                                  size: 16,
+                                  color:
+                                      isSelected
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(reason.displayName),
+                              ],
+                            ),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                final currentReasons = _reasons ?? [];
+                                if (selected) {
+                                  _reasons = [...currentReasons, reason];
+                                } else {
+                                  _reasons =
+                                      currentReasons
+                                          .where((r) => r != reason)
+                                          .toList();
+                                  if (_reasons!.isEmpty) _reasons = null;
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
 
               // Mood Rating Slider
               Column(

@@ -70,7 +70,7 @@ void main() {
         expect(jsonExport, isNotEmpty);
         expect(jsonExport, contains('"version"'));
         expect(jsonExport, contains('"exportedAt"'));
-        expect(jsonExport, contains('"recordCount":5'));
+        expect(jsonExport, contains('"recordCount": 5'));
         expect(jsonExport, contains('"records"'));
 
         // All records are included
@@ -122,7 +122,7 @@ void main() {
         expect(csvExport, isNotEmpty);
 
         // Header row present
-        expect(csvExport, contains('id,'));
+        expect(csvExport, contains('logId,'));
         expect(csvExport, contains('accountId,'));
         expect(csvExport, contains('eventType,'));
         expect(csvExport, contains('eventAt,'));
@@ -161,14 +161,14 @@ void main() {
       final jsonExport = await exportService.exportToJson([record]);
 
       // THEN: All metadata is preserved
-      expect(jsonExport, contains('"duration":45.0'));
-      expect(jsonExport, contains('"unit":"seconds"'));
-      expect(jsonExport, contains('"eventType":"vape"'));
-      expect(jsonExport, contains('"note":"Complete record test"'));
-      expect(jsonExport, contains('"moodRating":7.5'));
-      expect(jsonExport, contains('"physicalRating":8.0'));
-      expect(jsonExport, contains('"latitude":37.7749'));
-      expect(jsonExport, contains('"longitude":-122.4194'));
+      expect(jsonExport, contains('"duration": 45.0'));
+      expect(jsonExport, contains('"unit": "seconds"'));
+      expect(jsonExport, contains('"eventType": "vape"'));
+      expect(jsonExport, contains('"note": "Complete record test"'));
+      expect(jsonExport, contains('"moodRating": 7.5'));
+      expect(jsonExport, contains('"physicalRating": 8.0'));
+      expect(jsonExport, contains('"latitude": 37.7749'));
+      expect(jsonExport, contains('"longitude": -122.4194'));
       expect(jsonExport, contains('"reasons"'));
       expect(jsonExport, contains('"stress"'));
       expect(jsonExport, contains('"recreational"'));
@@ -184,12 +184,12 @@ void main() {
 
       // THEN: Valid output with no crash
       expect(jsonExport, isNotEmpty);
-      expect(jsonExport, contains('"recordCount":0'));
-      expect(jsonExport, contains('"records":[]'));
+      expect(jsonExport, contains('"recordCount": 0'));
+      expect(jsonExport, contains('"records": []'));
 
       expect(csvExport, isNotEmpty);
       // CSV should have header row even with no data
-      expect(csvExport, contains('id,'));
+      expect(csvExport, contains('logId,'));
     });
 
     test('Story 24: Export handles special characters in notes', () async {
@@ -257,7 +257,7 @@ void main() {
       final jsonExport = await exportService.exportToJson(accountARecords);
 
       // THEN: Only Account A data in export
-      expect(jsonExport, contains('"recordCount":1'));
+      expect(jsonExport, contains('"recordCount": 1'));
       expect(jsonExport, contains(accountA));
       expect(jsonExport, isNot(contains(accountB)));
     });

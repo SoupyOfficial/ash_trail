@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/account.dart';
 import '../models/enums.dart';
 import '../services/account_service.dart';
+import 'log_record_provider.dart';
 
 // Service provider
 final accountServiceProvider = Provider<AccountService>((ref) {
@@ -47,7 +48,8 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
       final service = _ref.read(accountServiceProvider);
       await service.setActiveAccount(userId);
       // Per design doc 8.4.1: Reset session state on account switch
-      // TODO: Clear draft state, caches when account changes
+      // Clear draft state when account changes
+      _ref.read(logDraftProvider.notifier).reset();
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

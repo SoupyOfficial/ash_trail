@@ -1,11 +1,13 @@
 import '../models/account.dart';
 import '../repositories/account_repository.dart';
 import 'database_service.dart';
+import 'log_record_service.dart';
 
 class AccountService {
   late final AccountRepository _repository;
+  late final LogRecordService _logRecordService;
 
-  AccountService() {
+  AccountService({LogRecordService? logRecordService}) {
     // Initialize repository with Hive database
     final dbService = DatabaseService.instance;
     final dbBoxes = dbService.boxes;
@@ -14,6 +16,9 @@ class AccountService {
     _repository = createAccountRepository(
       dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
+
+    // Initialize log record service for cascade deletion
+    _logRecordService = logRecordService ?? LogRecordService();
   }
 
   /// Get all accounts
@@ -43,8 +48,9 @@ class AccountService {
 
   /// Delete account and all associated data
   Future<void> deleteAccount(String userId) async {
-    // TODO: Delete all log entries for this account
-    // This will be handled by repository cascade or explicit deletion
+    // Delete all log entries for this account first
+    await _logRecordService.deleteAllByAccount(userId);
+    // Then delete the account
     await _repository.delete(userId);
   }
 

@@ -39,6 +39,9 @@ abstract class LogRecordRepository {
   /// Count log records for account
   Future<int> countByAccount(String accountId);
 
+  /// Delete all log records for an account
+  Future<void> deleteByAccount(String accountId);
+
   /// Watch all log records for account
   Stream<List<LogRecord>> watchByAccount(String accountId);
 

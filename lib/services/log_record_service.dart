@@ -297,6 +297,11 @@ class LogRecordService {
     await _repository.update(record);
   }
 
+  /// Delete all log records for an account (used when deleting account)
+  Future<void> deleteAllByAccount(String accountId) async {
+    await _repository.deleteByAccount(accountId);
+  }
+
   /// Batch create multiple log records
   Future<List<LogRecord>> batchCreateLogRecords(
     List<Map<String, dynamic>> recordData,

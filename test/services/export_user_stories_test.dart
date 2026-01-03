@@ -280,13 +280,12 @@ void main() {
       // THEN: Error result with message
       expect(result.success, false);
       expect(result.importedCount, 0);
-      // Note: Current implementation returns "not yet implemented"
       expect(result.message, isNotEmpty);
     });
 
     test('Import from invalid CSV returns error result', () async {
-      // GIVEN: Invalid CSV content
-      const invalidCsv = 'not,proper,csv\nformat';
+      // GIVEN: Invalid CSV content (missing required headers)
+      const invalidCsv = 'not,proper,csv\nformat,data,here';
 
       // WHEN: Attempting to import
       final result = await exportService.importFromCsv(invalidCsv);
@@ -295,6 +294,466 @@ void main() {
       expect(result.success, false);
       expect(result.importedCount, 0);
       expect(result.message, isNotEmpty);
+    });
+  });
+
+  group('User Story: CSV Import Full Coverage', () {
+    late ExportService exportService;
+
+    setUp(() {
+      exportService = ExportService();
+    });
+
+    test('Import valid CSV with all required fields', () async {
+      // GIVEN: Valid CSV content
+      const validCsv =
+          '''logId,accountId,eventType,eventAt,duration,unit,note,moodRating,physicalRating,latitude,longitude,source,syncState,createdAt,updatedAt
+abc-123,user-1,vape,2024-06-15T10:30:00.000,30.0,seconds,"Morning session",7.0,8.0,37.7749,-122.4194,manual,pending,2024-06-15T10:30:00.000,2024-06-15T10:30:00.000''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(validCsv);
+
+      // THEN: Success with parsed records
+      expect(result.success, true);
+      expect(result.importedCount, 1);
+      expect(result.records, hasLength(1));
+      expect(result.records.first.logId, 'abc-123');
+      expect(result.records.first.accountId, 'user-1');
+      expect(result.records.first.eventType, EventType.vape);
+      expect(result.records.first.duration, 30.0);
+      expect(result.records.first.moodRating, 7.0);
+      expect(result.records.first.physicalRating, 8.0);
+      expect(result.records.first.latitude, 37.7749);
+      expect(result.records.first.longitude, -122.4194);
+    });
+
+    test('Import CSV with minimal required fields', () async {
+      // GIVEN: CSV with only required fields
+      const minimalCsv = '''logId,accountId,eventType,eventAt
+def-456,user-2,inhale,2024-06-15T14:00:00.000''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(minimalCsv);
+
+      // THEN: Success with defaults applied
+      expect(result.success, true);
+      expect(result.records, hasLength(1));
+      expect(result.records.first.logId, 'def-456');
+      expect(result.records.first.duration, 0.0);
+      expect(result.records.first.unit, Unit.seconds);
+    });
+
+    test('Import CSV handles empty file', () async {
+      // GIVEN: Empty CSV
+      const emptyCsv = '';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(emptyCsv);
+
+      // THEN: Error result
+      expect(result.success, false);
+      expect(result.message, contains('empty'));
+    });
+
+    test('Import CSV handles missing required header', () async {
+      // GIVEN: CSV missing accountId header
+      const missingHeader = '''logId,eventType,eventAt
+abc-123,vape,2024-06-15T10:30:00.000''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(missingHeader);
+
+      // THEN: Error result
+      expect(result.success, false);
+      expect(result.message, contains('accountid'));
+    });
+
+    test('Import CSV handles row with insufficient columns', () async {
+      // GIVEN: CSV with incomplete row
+      const incompleteCsv = '''logId,accountId,eventType,eventAt
+abc-123,user-1,vape''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(incompleteCsv);
+
+      // THEN: Row skipped with error
+      expect(result.skippedCount, 1);
+      expect(result.errors, isNotEmpty);
+    });
+
+    test('Import CSV handles quoted fields with commas', () async {
+      // GIVEN: CSV with quoted field containing comma
+      const quotedCsv = '''logId,accountId,eventType,eventAt,duration,unit,note
+abc-123,user-1,vape,2024-06-15T10:30:00.000,30.0,seconds,"Note with, comma inside"''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(quotedCsv);
+
+      // THEN: Parses correctly
+      expect(result.success, true);
+      expect(result.records.first.note, 'Note with, comma inside');
+    });
+
+    test('Import CSV handles escaped quotes', () async {
+      // GIVEN: CSV with escaped quotes
+      const escapedCsv = '''logId,accountId,eventType,eventAt,duration,unit,note
+abc-123,user-1,vape,2024-06-15T10:30:00.000,30.0,seconds,"Note with ""quotes"" inside"''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(escapedCsv);
+
+      // THEN: Parses correctly
+      expect(result.success, true);
+      expect(result.records.first.note, 'Note with "quotes" inside');
+    });
+
+    test('Import CSV handles multiple records', () async {
+      // GIVEN: CSV with multiple records
+      const multiCsv = '''logId,accountId,eventType,eventAt
+abc-123,user-1,vape,2024-06-15T10:30:00.000
+def-456,user-1,inhale,2024-06-15T11:00:00.000
+ghi-789,user-1,exhale,2024-06-15T12:00:00.000''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(multiCsv);
+
+      // THEN: All records parsed
+      expect(result.success, true);
+      expect(result.records, hasLength(3));
+    });
+
+    test('Import CSV handles unknown event type', () async {
+      // GIVEN: CSV with unknown event type
+      const unknownTypeCsv = '''logId,accountId,eventType,eventAt
+abc-123,user-1,unknown_type,2024-06-15T10:30:00.000''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(unknownTypeCsv);
+
+      // THEN: Defaults to custom event type
+      expect(result.success, true);
+      expect(result.records.first.eventType, EventType.custom);
+    });
+
+    test('Import CSV handles unknown unit', () async {
+      // GIVEN: CSV with unknown unit
+      const unknownUnitCsv = '''logId,accountId,eventType,eventAt,duration,unit
+abc-123,user-1,vape,2024-06-15T10:30:00.000,30.0,unknownunit''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(unknownUnitCsv);
+
+      // THEN: Defaults to seconds
+      expect(result.success, true);
+      expect(result.records.first.unit, Unit.seconds);
+    });
+
+    test('Import CSV handles unknown source', () async {
+      // GIVEN: CSV with unknown source
+      const unknownSourceCsv = '''logId,accountId,eventType,eventAt,source
+abc-123,user-1,vape,2024-06-15T10:30:00.000,unknownsource''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(unknownSourceCsv);
+
+      // THEN: Defaults to imported
+      expect(result.success, true);
+      expect(result.records.first.source, Source.imported);
+    });
+
+    test('Import CSV handles escaped newlines in notes', () async {
+      // GIVEN: CSV with escaped newline
+      const newlineCsv = '''logId,accountId,eventType,eventAt,duration,unit,note
+abc-123,user-1,vape,2024-06-15T10:30:00.000,30.0,seconds,"Line1\\nLine2"''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromCsv(newlineCsv);
+
+      // THEN: Newline is unescaped
+      expect(result.success, true);
+      expect(result.records.first.note, contains('\n'));
+    });
+  });
+
+  group('User Story: JSON Import Full Coverage', () {
+    late ExportService exportService;
+
+    setUp(() {
+      exportService = ExportService();
+    });
+
+    test('Import valid JSON with all fields', () async {
+      // GIVEN: Valid JSON content
+      const validJson = '''
+{
+  "version": "1.0.0",
+  "exportedAt": "2024-06-15T12:00:00.000",
+  "recordCount": 1,
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000",
+      "createdAt": "2024-06-15T10:30:00.000",
+      "updatedAt": "2024-06-15T10:30:00.000",
+      "duration": 30.0,
+      "unit": "seconds",
+      "note": "Test note",
+      "reasons": ["stress", "recreational"],
+      "moodRating": 7.5,
+      "physicalRating": 8.0,
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "source": "manual",
+      "deviceId": "device-123",
+      "appVersion": "1.0.0",
+      "timeConfidence": "high",
+      "isDeleted": false,
+      "deletedAt": null,
+      "syncState": "synced",
+      "revision": 1
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(validJson);
+
+      // THEN: Success with all fields parsed
+      expect(result.success, true);
+      expect(result.records, hasLength(1));
+      final record = result.records.first;
+      expect(record.logId, 'abc-123');
+      expect(record.accountId, 'user-1');
+      expect(record.eventType, EventType.vape);
+      expect(record.duration, 30.0);
+      expect(record.unit, Unit.seconds);
+      expect(record.note, 'Test note');
+      expect(record.reasons, isNotNull);
+      expect(record.reasons, contains(LogReason.stress));
+      expect(record.reasons, contains(LogReason.recreational));
+      expect(record.moodRating, 7.5);
+      expect(record.physicalRating, 8.0);
+      expect(record.latitude, 37.7749);
+      expect(record.longitude, -122.4194);
+      expect(record.source, Source.manual);
+      expect(record.deviceId, 'device-123');
+      expect(record.appVersion, '1.0.0');
+      expect(record.timeConfidence, TimeConfidence.high);
+      expect(record.isDeleted, false);
+      expect(record.revision, 1);
+    });
+
+    test('Import JSON with minimal required fields', () async {
+      // GIVEN: JSON with only required fields (including version to avoid warning)
+      const minimalJson = '''
+{
+  "version": "1.0.0",
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000"
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(minimalJson);
+
+      // THEN: Success with defaults applied
+      expect(result.success, true);
+      expect(result.records, hasLength(1));
+      expect(result.records.first.duration, 0.0);
+      expect(result.records.first.unit, Unit.seconds);
+      expect(result.records.first.source, Source.imported);
+    });
+
+    test('Import JSON handles empty records array', () async {
+      // GIVEN: JSON with empty records
+      const emptyJson = '''
+{
+  "version": "1.0.0",
+  "records": []
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(emptyJson);
+
+      // THEN: Error result
+      expect(result.success, false);
+      expect(result.message, contains('No records'));
+    });
+
+    test('Import JSON handles missing records field', () async {
+      // GIVEN: JSON without records field
+      const noRecordsJson = '''
+{
+  "version": "1.0.0",
+  "exportedAt": "2024-06-15T12:00:00.000"
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(noRecordsJson);
+
+      // THEN: Error result
+      expect(result.success, false);
+    });
+
+    test('Import JSON handles record with missing required fields', () async {
+      // GIVEN: JSON record missing logId
+      const missingFieldJson = '''
+{
+  "records": [
+    {
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000"
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(missingFieldJson);
+
+      // THEN: Record skipped
+      expect(result.importedCount, 0);
+      expect(result.errors, isNotEmpty);
+    });
+
+    test('Import JSON handles unknown event type', () async {
+      // GIVEN: JSON with unknown event type
+      const unknownTypeJson = '''
+{
+  "version": "1.0.0",
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "unknown_event",
+      "eventAt": "2024-06-15T10:30:00.000"
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(unknownTypeJson);
+
+      // THEN: Defaults to custom
+      expect(result.success, true);
+      expect(result.records.first.eventType, EventType.custom);
+    });
+
+    test('Import JSON handles unknown reason', () async {
+      // GIVEN: JSON with unknown reason
+      const unknownReasonJson = '''
+{
+  "version": "1.0.0",
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000",
+      "reasons": ["unknown_reason", "stress"]
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(unknownReasonJson);
+
+      // THEN: Unknown defaults to other
+      expect(result.success, true);
+      expect(result.records.first.reasons, contains(LogReason.other));
+      expect(result.records.first.reasons, contains(LogReason.stress));
+    });
+
+    test('Import JSON handles isDeleted and deletedAt', () async {
+      // GIVEN: JSON with deleted record
+      const deletedJson = '''
+{
+  "version": "1.0.0",
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000",
+      "isDeleted": true,
+      "deletedAt": "2024-06-16T10:00:00.000"
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(deletedJson);
+
+      // THEN: Deleted state preserved
+      expect(result.success, true);
+      expect(result.records.first.isDeleted, true);
+      expect(result.records.first.deletedAt, isNotNull);
+    });
+
+    test('Import JSON handles multiple records with some errors', () async {
+      // GIVEN: JSON with good and bad records (include version to reduce warnings)
+      const mixedJson = '''
+{
+  "version": "1.0.0",
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000"
+    },
+    {
+      "accountId": "user-1",
+      "eventType": "vape"
+    },
+    {
+      "logId": "def-456",
+      "accountId": "user-1",
+      "eventType": "inhale",
+      "eventAt": "2024-06-15T11:00:00.000"
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(mixedJson);
+
+      // THEN: Good records imported, bad skipped
+      expect(result.importedCount, 2);
+      expect(result.skippedCount, 1);
+      expect(result.errors, hasLength(1)); // Just the bad record error
+    });
+
+    test('Import JSON handles missing version gracefully', () async {
+      // GIVEN: JSON without version field
+      const noVersionJson = '''
+{
+  "records": [
+    {
+      "logId": "abc-123",
+      "accountId": "user-1",
+      "eventType": "vape",
+      "eventAt": "2024-06-15T10:30:00.000"
+    }
+  ]
+}''';
+
+      // WHEN: Importing
+      final result = await exportService.importFromJson(noVersionJson);
+
+      // THEN: Records still parsed (success is false due to warning)
+      expect(result.records, hasLength(1));
+      expect(
+        result.errors,
+        contains('Warning: No version field found in import file'),
+      );
     });
   });
 

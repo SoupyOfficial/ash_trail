@@ -128,7 +128,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<EventType>(
-                      value: draft.eventType,
+                      initialValue: draft.eventType,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(
@@ -262,7 +262,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                   : Theme.of(context)
                                       .colorScheme
                                       .onPrimaryContainer
-                                      .withOpacity(0.1),
+                                      .withValues(alpha: 0.1),
                           border: Border.all(
                             color: Theme.of(context).colorScheme.primary,
                             width: 2,

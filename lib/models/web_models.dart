@@ -1,5 +1,5 @@
-/// Web-compatible models without Isar dependencies
-/// These are simple data classes that can be serialized to/from JSON
+// Web-compatible models without Isar dependencies
+// These are simple data classes that can be serialized to/from JSON
 
 class WebAccount {
   final String id;

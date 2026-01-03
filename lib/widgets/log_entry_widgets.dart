@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
@@ -39,7 +41,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
             children: [
               // Event Type Dropdown
               DropdownButtonFormField<EventType>(
-                value: _selectedEventType,
+                initialValue: _selectedEventType,
                 decoration: const InputDecoration(
                   labelText: 'Event Type',
                   border: OutlineInputBorder(),
@@ -96,7 +98,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<Unit>(
-                      value: _selectedUnit,
+                      initialValue: _selectedUnit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
@@ -136,13 +138,17 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                     lastDate: DateTime.now(),
                   );
 
-                  if (date != null && mounted) {
+                  if (!mounted) return;
+
+                  if (date != null) {
                     final time = await showTimePicker(
                       context: context,
                       initialTime: TimeOfDay.fromDateTime(_eventTime),
                     );
 
-                    if (time != null && mounted) {
+                    if (time != null) {
+                      if (!mounted) return;
+
                       setState(() {
                         _eventTime = DateTime(
                           date.year,

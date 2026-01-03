@@ -1,21 +1,17 @@
-
-
-
 /// DailyRollup represents aggregated data for a specific day
 /// Used for performance optimization in analytics
-
 class DailyRollup {
   int id = 0;
 
   /// Account this rollup belongs to
-  
+
   late String accountId;
 
   /// Optional profile ID
   String? profileId;
 
   /// Date in YYYY-MM-DD format
-  
+
   late String date;
 
   /// Total aggregated value for the day

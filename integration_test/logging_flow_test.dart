@@ -161,10 +161,10 @@ void main() {
         eventType: EventType.inhale,
         duration: 1.0,
         unit: Unit.hits,
-        reason: LogReason.recreational,
+        reasons: [LogReason.recreational],
       );
 
-      expect(logRecord.reason, LogReason.recreational);
+      expect(logRecord.reasons, contains(LogReason.recreational));
     });
 
     testWidgets('Statistics calculation', (tester) async {

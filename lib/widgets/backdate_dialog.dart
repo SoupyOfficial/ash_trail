@@ -13,11 +13,11 @@ class BackdateDialog extends ConsumerStatefulWidget {
   final Unit? defaultUnit;
 
   const BackdateDialog({
-    Key? key,
+    super.key,
     this.defaultEventType,
     this.defaultDuration,
     this.defaultUnit,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<BackdateDialog> createState() => _BackdateDialogState();
@@ -225,7 +225,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
               // Event Type
               DropdownButtonFormField<EventType>(
-                value: _eventType,
+                initialValue: _eventType,
                 decoration: const InputDecoration(
                   labelText: 'Event Type',
                   border: OutlineInputBorder(),
@@ -271,7 +271,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                   Expanded(
                     flex: 1,
                     child: DropdownButtonFormField<Unit>(
-                      value: _unit,
+                      initialValue: _unit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),

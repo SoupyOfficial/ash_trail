@@ -361,9 +361,6 @@ void main() {
 
       expect(lines.length, greaterThanOrEqualTo(2)); // Header + data rows
 
-      // Count commas in header (columns - 1)
-      final headerCommas = ','.allMatches(lines[0]).length;
-
       // Each data row should have similar structure
       // Note: Quoted fields with commas may affect this, so we just check rows exist
       for (int i = 1; i < lines.length; i++) {

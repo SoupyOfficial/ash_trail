@@ -101,7 +101,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       'Ash Trail',
                       style: theme.textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -109,7 +111,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'Track your journey',
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),

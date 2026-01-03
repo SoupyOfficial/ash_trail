@@ -10,7 +10,7 @@ import '../services/validation_service.dart';
 class EditLogRecordDialog extends ConsumerStatefulWidget {
   final LogRecord record;
 
-  const EditLogRecordDialog({Key? key, required this.record}) : super(key: key);
+  const EditLogRecordDialog({super.key, required this.record});
 
   @override
   ConsumerState<EditLogRecordDialog> createState() =>
@@ -235,7 +235,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
 
               // Event Type Dropdown
               DropdownButtonFormField<EventType>(
-                value: _eventType,
+                initialValue: _eventType,
                 decoration: const InputDecoration(
                   labelText: 'Event Type',
                   border: OutlineInputBorder(),
@@ -300,7 +300,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                   Expanded(
                     flex: 3,
                     child: DropdownButtonFormField<Unit>(
-                      value: _unit,
+                      initialValue: _unit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),

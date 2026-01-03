@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/services/log_record_service.dart';
-import 'package:ash_trail/services/database_service.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/repositories/log_record_repository.dart';
-import '../test_helpers.dart';
 
 /// Mock repository for testing service layer in isolation
 class MockLogRecordRepository implements LogRecordRepository {
@@ -395,7 +393,7 @@ Would rate this session as positive overall.
         final reflection = await service.updateLogRecord(
           documentedLog,
           moodRating: 8.0, // After reflection: session was good
-          note: detailedNotes + '\n\nReflection: Very positive session!',
+          note: '$detailedNotes\n\nReflection: Very positive session!',
         );
 
         // THEN: Updated assessment is saved
@@ -450,8 +448,8 @@ Would rate this session as positive overall.
             allLogs
                 .where(
                   (l) =>
-                      l.reasons?.contains(LogReason.social) ??
-                      false && l.reasons?.length == 1,
+                      (l.reasons?.contains(LogReason.social) ?? false) &&
+                      (l.reasons?.length == 1),
                 )
                 .toList();
         expect(socialOnly.length, 1);

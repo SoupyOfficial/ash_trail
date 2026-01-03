@@ -110,7 +110,7 @@ class AccountsScreen extends ConsumerWidget {
                                         ? Theme.of(context).colorScheme.primary
                                         : Theme.of(
                                           context,
-                                        ).colorScheme.surfaceVariant,
+                                        ).colorScheme.surfaceContainerHighest,
                                 child: Text(
                                   (account.displayName ?? account.email)[0]
                                       .toUpperCase(),
@@ -208,10 +208,12 @@ class AccountsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -375,7 +377,7 @@ class AccountsScreen extends ConsumerWidget {
           Icon(
             Icons.account_circle_outlined,
             size: 100,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 24),
           Text('No Accounts', style: Theme.of(context).textTheme.headlineSmall),
@@ -383,7 +385,9 @@ class AccountsScreen extends ConsumerWidget {
           Text(
             'Your account will appear here',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),

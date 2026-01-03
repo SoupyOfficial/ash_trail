@@ -1,5 +1,4 @@
 import 'database_service.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Hive implementation for all platforms (web, iOS, Android, desktop)
@@ -43,7 +42,6 @@ class HiveDatabaseService implements DatabaseService {
     _templatesBox = await Hive.openBox('templates');
 
     _initialized = true;
-    print('✅ Hive database initialized for web');
   }
 
   @override

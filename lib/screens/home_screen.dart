@@ -7,8 +7,7 @@ import '../providers/log_record_provider.dart'
     show
         logRecordStatsProvider,
         LogRecordsParams,
-        activeAccountLogRecordsProvider,
-        activeAccountIdProvider;
+        activeAccountLogRecordsProvider;
 import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../providers/log_record_provider.dart';
 import '../providers/log_record_provider.dart'
-    show logRecordStatsProvider, LogRecordsParams;
+    show
+        logRecordStatsProvider,
+        LogRecordsParams,
+        activeAccountLogRecordsProvider,
+        logRecordNotifierProvider;
 import '../providers/account_provider.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
@@ -325,37 +328,41 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen>
           ),
     );
 
-    if (confirmed == true && mounted) {
+    if (!mounted) return;
+
+    if (confirmed == true) {
       try {
         await ref
             .read(logRecordNotifierProvider.notifier)
             .deleteLogRecord(record);
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Entry deleted'),
-              duration: const Duration(seconds: 3),
-              action: SnackBarAction(
-                label: 'UNDO',
-                onPressed: () async {
-                  await ref
-                      .read(logRecordNotifierProvider.notifier)
-                      .restoreLogRecord(record);
-                },
-              ),
+        if (!mounted) return;
+
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Entry deleted'),
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'UNDO',
+              onPressed: () async {
+                await ref
+                    .read(logRecordNotifierProvider.notifier)
+                    .restoreLogRecord(record);
+              },
             ),
-          );
-        }
+          ),
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error deleting entry: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        if (!mounted) return;
+
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting entry: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

@@ -42,7 +42,7 @@ class LogDraft {
     required this.eventType,
     this.duration,
     required this.unit,
-    required DateTime eventTime,
+    required this.eventTime,
     this.note,
     this.moodRating,
     this.physicalRating,
@@ -50,7 +50,7 @@ class LogDraft {
     this.latitude,
     this.longitude,
     required this.isValid,
-  }) : eventTime = eventTime;
+  });
 
   /// Create a default draft with current time
   factory LogDraft.empty() => LogDraft(eventTime: DateTime.now());
@@ -99,14 +99,19 @@ class LogDraft {
     double? physicalRating,
   ) {
     // Duration must be non-negative if provided
-    if (duration != null && duration < 0) return false;
+    if (duration != null && duration < 0) {
+      return false;
+    }
 
     // Mood rating: null is valid (not set), or 1-10 (not 0-10)
-    if (moodRating != null && (moodRating < 1 || moodRating > 10)) return false;
+    if (moodRating != null && (moodRating < 1 || moodRating > 10)) {
+      return false;
+    }
 
     // Physical rating: null is valid (not set), or 1-10 (not 0-10)
-    if (physicalRating != null && (physicalRating < 1 || physicalRating > 10))
+    if (physicalRating != null && (physicalRating < 1 || physicalRating > 10)) {
       return false;
+    }
 
     return true;
   }

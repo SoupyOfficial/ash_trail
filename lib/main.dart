@@ -61,7 +61,6 @@ class AshTrailApp extends ConsumerWidget {
           seedColor: royalBlue,
           brightness: Brightness.dark,
           surface: const Color(0xFF121212),
-          background: Colors.black,
         ),
         scaffoldBackgroundColor: Colors.black,
         useMaterial3: true,

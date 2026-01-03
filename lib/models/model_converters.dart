@@ -75,16 +75,14 @@ extension LogRecordWebConversion on LogRecord {
         ),
         note: web.note,
         reasons:
-            web.reasons != null
-                ? web.reasons!
-                    .map(
-                      (r) => LogReason.values.firstWhere(
-                        (reason) => reason.name == r,
-                        orElse: () => LogReason.other,
-                      ),
-                    )
-                    .toList()
-                : null,
+            web.reasons
+                ?.map(
+                  (r) => LogReason.values.firstWhere(
+                    (reason) => reason.name == r,
+                    orElse: () => LogReason.other,
+                  ),
+                )
+                .toList(),
         moodRating: web.moodRating,
         physicalRating: web.physicalRating,
         latitude: web.latitude,

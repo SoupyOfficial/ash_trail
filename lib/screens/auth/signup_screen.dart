@@ -311,7 +311,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     Text(
                       'By signing up, you agree to our Terms of Service and Privacy Policy',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),

@@ -20,7 +20,7 @@ class ExportScreen extends ConsumerStatefulWidget {
 
 class _ExportScreenState extends ConsumerState<ExportScreen> {
   bool _isExporting = false;
-  bool _isImporting = false;
+  final bool _isImporting = false;
 
   @override
   Widget build(BuildContext context) {

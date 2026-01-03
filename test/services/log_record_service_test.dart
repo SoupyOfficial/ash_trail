@@ -6,9 +6,6 @@ import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/repositories/log_record_repository.dart';
 import '../test_helpers.dart';
 
-// Import SyncState enum
-import 'package:ash_trail/models/enums.dart' show SyncState;
-
 /// Mock repository for testing service layer in isolation
 class MockLogRecordRepository implements LogRecordRepository {
   final List<LogRecord> _records = [];

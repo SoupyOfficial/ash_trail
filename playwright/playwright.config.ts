@@ -116,7 +116,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'flutter run -d chrome --web-port=8080 --web-hostname=localhost',
+    command: 'npx serve ../build/web -l 8080',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

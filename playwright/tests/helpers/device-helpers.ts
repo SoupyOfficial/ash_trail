@@ -418,3 +418,124 @@ export async function isElementVisible(
     return false;
   }
 }
+
+/**
+ * Wait for Flutter app to be fully loaded and interactive
+ */
+export async function waitForFlutterReady(page: Page, timeout: number = 30000): Promise<boolean> {
+  const startTime = Date.now();
+  
+  while (Date.now() - startTime < timeout) {
+    // Check if Flutter semantic tree or canvas is present
+    const hasSemantics = await page.locator('flt-semantics-host, flt-glass-pane, canvas').count() > 0;
+    const hasText = await page.evaluate(() => document.body.innerText.length > 10);
+    
+    if (hasSemantics || hasText) {
+      // Additional wait for Flutter to fully render
+      await page.waitForTimeout(2000);
+      return true;
+    }
+    
+    await page.waitForTimeout(500);
+  }
+  return false;
+}
+
+/**
+ * Enable Flutter Web accessibility mode
+ * This is required for semantic elements to be available in the DOM
+ */
+export async function enableFlutterAccessibility(page: Page): Promise<void> {
+  // Look for the "Enable accessibility" button that Flutter Web shows
+  const accessibilityButton = page.locator('[aria-label="Enable accessibility"]');
+  
+  // Wait for it to be available
+  const isPresent = await accessibilityButton.count() > 0;
+  
+  if (isPresent) {
+    // The button is outside viewport, use force click or JavaScript
+    try {
+      await accessibilityButton.click({ force: true, timeout: 5000 });
+      console.log('Clicked Enable accessibility button (force)');
+    } catch {
+      // Fallback: Use JavaScript to trigger click
+      await page.evaluate(() => {
+        const btn = document.querySelector('[aria-label="Enable accessibility"]') as HTMLElement;
+        if (btn) btn.click();
+      });
+      console.log('Clicked Enable accessibility button (JS)');
+    }
+    
+    // Wait for semantics tree to be created
+    await page.waitForTimeout(2000);
+    
+    // Verify semantics are now available
+    const hasChildren = await page.evaluate(() => {
+      const host = document.querySelector('flt-semantics-host');
+      return host ? host.children.length > 0 : false;
+    });
+    
+    if (!hasChildren) {
+      // Try Tab key to trigger semantics
+      await page.keyboard.press('Tab');
+      await page.waitForTimeout(1000);
+    }
+  }
+}
+
+/**
+ * Setup anonymous account and navigate to home screen
+ * Handles the WelcomeScreen flow that appears on first launch
+ */
+export async function setupAnonymousAccount(page: Page): Promise<void> {
+  await page.goto('/');
+  await waitForFlutterReady(page);
+  
+  // Enable accessibility to make Flutter elements accessible
+  await enableFlutterAccessibility(page);
+  
+  // Wait a bit more for the semantics tree
+  await page.waitForTimeout(2000);
+  
+  // Check if we're on the Welcome screen (has "Continue Without Account" button)
+  const onWelcomeScreen = await isElementVisible(page, 'text=Continue Without Account', { timeout: 5000 });
+  
+  if (onWelcomeScreen) {
+    // Click to continue without account (creates anonymous account)
+    await clickElement(page, 'text=Continue Without Account', { timeout: 10000 });
+    
+    // Wait for the home screen to load
+    await page.waitForTimeout(3000);
+  }
+  
+  // Verify we're on the home screen - use OR selector pattern
+  const homeScreen = page.locator('text=Ash Trail').or(
+    page.locator('text=Analytics')
+  ).or(
+    page.locator('text=Recent Entries')
+  ).or(
+    page.locator('[key="add-log-button"]')
+  );
+  
+  await homeScreen.first().waitFor({ state: 'visible', timeout: 15000 });
+}
+
+/**
+ * Navigate to a specific screen from the home screen
+ */
+export async function navigateToScreen(page: Page, screenName: 'History' | 'Analytics' | 'Export' | 'Profile'): Promise<void> {
+  // First ensure we're on the home screen
+  const screenButton = page.locator(`text=${screenName}`).first();
+  
+  try {
+    await screenButton.waitFor({ state: 'visible', timeout: 5000 });
+    await clickElement(page, `text=${screenName}`, { timeout: 5000 });
+    await page.waitForTimeout(1000); // Wait for navigation animation
+  } catch {
+    // If the direct button isn't visible, try looking for it in a different location
+    // Some screens might be accessed via app bar icons
+    const appBarIcon = page.locator(`[key="${screenName.toLowerCase()}-button"], button:has-text("${screenName}")`).first();
+    await appBarIcon.click();
+    await page.waitForTimeout(1000);
+  }
+}

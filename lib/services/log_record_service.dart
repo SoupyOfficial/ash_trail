@@ -393,7 +393,7 @@ class LogRecordService {
     final record = LogRecord.create(
       logId: logId,
       accountId: accountId,
-      eventType: eventType ?? EventType.inhale,
+      eventType: eventType ?? EventType.vape,
       eventAt: now,
       createdAt: now,
       updatedAt: now,
@@ -490,7 +490,7 @@ class LogRecordService {
     final record = LogRecord.create(
       logId: logId,
       accountId: accountId,
-      eventType: eventType ?? EventType.inhale,
+      eventType: eventType ?? EventType.vape,
       eventAt: now, // Release timestamp
       createdAt: now,
       updatedAt: now,

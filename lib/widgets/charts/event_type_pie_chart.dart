@@ -48,16 +48,24 @@ class _EventTypePieChartState extends State<EventTypePieChart> {
                       PieChartData(
                         pieTouchData: PieTouchData(
                           touchCallback: (event, response) {
-                            setState(() {
-                              if (!event.isInterestedForInteractions ||
-                                  response == null ||
-                                  response.touchedSection == null) {
-                                _touchedIndex = -1;
-                                return;
-                              }
-                              _touchedIndex =
-                                  response.touchedSection!.touchedSectionIndex;
-                            });
+                            if (!mounted) return;
+                            final newIndex =
+                                (!event.isInterestedForInteractions ||
+                                        response == null ||
+                                        response.touchedSection == null)
+                                    ? -1
+                                    : response
+                                        .touchedSection!
+                                        .touchedSectionIndex;
+                            if (newIndex != _touchedIndex) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  setState(() {
+                                    _touchedIndex = newIndex;
+                                  });
+                                }
+                              });
+                            }
                           },
                         ),
                         borderData: FlBorderData(show: false),

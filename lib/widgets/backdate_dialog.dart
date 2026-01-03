@@ -25,9 +25,9 @@ class BackdateDialog extends ConsumerStatefulWidget {
 
 class _BackdateDialogState extends ConsumerState<BackdateDialog> {
   DateTime _selectedDateTime = DateTime.now();
-  EventType _eventType = EventType.inhale;
+  EventType _eventType = EventType.vape;
   double _duration = 1.0;
-  Unit _unit = Unit.count;
+  Unit _unit = Unit.seconds;
   final _notesController = TextEditingController();
   double? _moodRating;
   double? _physicalRating;
@@ -35,9 +35,9 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
   @override
   void initState() {
     super.initState();
-    _eventType = widget.defaultEventType ?? EventType.inhale;
+    _eventType = widget.defaultEventType ?? EventType.vape;
     _duration = widget.defaultDuration ?? 1.0;
-    _unit = widget.defaultUnit ?? Unit.count;
+    _unit = widget.defaultUnit ?? Unit.seconds;
   }
 
   @override

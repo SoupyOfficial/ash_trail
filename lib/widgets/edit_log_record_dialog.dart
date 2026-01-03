@@ -253,6 +253,9 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                       _eventType = value;
                       // Auto-select appropriate unit
                       switch (value) {
+                        case EventType.vape:
+                          _unit = Unit.seconds;
+                          break;
                         case EventType.inhale:
                           _unit = Unit.hits;
                           break;

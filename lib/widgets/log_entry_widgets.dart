@@ -15,8 +15,8 @@ class CreateLogEntryDialog extends ConsumerStatefulWidget {
 class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  EventType _selectedEventType = EventType.inhale;
-  Unit _selectedUnit = Unit.hits;
+  EventType _selectedEventType = EventType.vape;
+  Unit _selectedUnit = Unit.seconds;
   double? _duration;
   String? _note;
   DateTime _eventTime = DateTime.now();
@@ -57,6 +57,9 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                       _selectedEventType = value;
                       // Auto-select appropriate unit
                       switch (value) {
+                        case EventType.vape:
+                          _selectedUnit = Unit.seconds;
+                          break;
                         case EventType.inhale:
                           _selectedUnit = Unit.hits;
                           break;

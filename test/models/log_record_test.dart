@@ -230,15 +230,15 @@ void main() {
       expect(record.physicalRating, 8.0);
     });
 
-    test('handles reason field', () {
+    test('handles reasons field', () {
       final record = LogRecord.create(
         logId: 'test-log-123',
         accountId: 'account-123',
         eventType: EventType.inhale,
-        reason: LogReason.recreational,
+        reasons: [LogReason.recreational, LogReason.social],
       );
 
-      expect(record.reason, LogReason.recreational);
+      expect(record.reasons, [LogReason.recreational, LogReason.social]);
     });
   });
 }

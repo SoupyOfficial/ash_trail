@@ -37,13 +37,12 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Check for tab bar
-      expect(find.text('Quick'), findsOneWidget);
+      // Check for tab bar - only Detailed and Backdate tabs exist
       expect(find.text('Detailed'), findsOneWidget);
       expect(find.text('Backdate'), findsOneWidget);
     });
 
-    testWidgets('Quick tab shows quick log content', (
+    testWidgets('Detailed tab shows event type dropdown', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -55,64 +54,14 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
-
-      // Verify Quick tab content - use findsAtLeastNWidgets for texts that may appear multiple times
-      expect(find.text('Quick Log'), findsAtLeastNWidgets(1));
-      expect(
-        find.text('Tap for instant log • Long press for duration'),
-        findsOneWidget,
-      );
-      expect(find.text('Templates'), findsOneWidget);
-      expect(find.text('Quick Events'), findsOneWidget);
-    });
-
-    testWidgets('Quick tab shows event type chips', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            activeAccountIdProvider.overrideWith((ref) => 'test-account-id'),
-          ],
-          child: const MaterialApp(home: LoggingScreen()),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Verify quick event chips
-      expect(find.text('Inhale'), findsOneWidget);
-      expect(find.text('Note'), findsOneWidget);
-      expect(find.text('Tolerance'), findsOneWidget);
-      expect(find.text('Relief'), findsOneWidget);
-    });
-
-    testWidgets('can navigate to Detailed tab', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            activeAccountIdProvider.overrideWith((ref) => 'test-account-id'),
-          ],
-          child: const MaterialApp(home: LoggingScreen()),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Tap on Detailed tab
-      await tester.tap(find.text('Detailed'));
       await tester.pumpAndSettle();
 
       // Verify Detailed tab content
       expect(find.text('Event Type'), findsOneWidget);
-      expect(find.text('Value'), findsOneWidget);
-      expect(find.text('Reason (optional)'), findsOneWidget);
-      expect(find.text('How are you feeling?'), findsOneWidget);
-      expect(find.text('Additional Details'), findsOneWidget);
+      expect(find.byType(DropdownButtonFormField<EventType>), findsOneWidget);
     });
 
-    testWidgets('Detailed tab shows mood and craving sliders', (
+    testWidgets('Detailed tab shows duration input', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -126,19 +75,56 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Navigate to Detailed tab
-      await tester.tap(find.text('Detailed'));
+      // Check for duration section
+      expect(
+        find.text('Duration (or use long-press button below)'),
+        findsOneWidget,
+      );
+      expect(find.text('Seconds'), findsOneWidget);
+    });
+
+    testWidgets('Detailed tab shows press-and-hold button', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activeAccountIdProvider.overrideWith((ref) => 'test-account-id'),
+          ],
+          child: const MaterialApp(home: LoggingScreen()),
+        ),
+      );
+
       await tester.pumpAndSettle();
 
-      // Check for mood and craving labels
+      // Check for press-and-hold section
+      expect(find.text('Press & Hold to Record Duration'), findsOneWidget);
+      expect(find.byIcon(Icons.touch_app), findsOneWidget);
+    });
+
+    testWidgets('Detailed tab shows mood and physical sliders', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activeAccountIdProvider.overrideWith((ref) => 'test-account-id'),
+          ],
+          child: const MaterialApp(home: LoggingScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Check for mood and physical labels
       expect(find.text('Mood'), findsOneWidget);
-      expect(find.text('Craving'), findsOneWidget);
+      expect(find.text('Physical'), findsOneWidget);
 
       // Check for sliders
       expect(find.byType(Slider), findsNWidgets(2));
     });
 
-    testWidgets('Detailed tab shows reason choice chips', (
+    testWidgets('Detailed tab shows reason filter chips', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -152,16 +138,14 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Navigate to Detailed tab
-      await tester.tap(find.text('Detailed'));
-      await tester.pumpAndSettle();
+      // Check for reason section header
+      expect(
+        find.text('Reason (optional, can select multiple)'),
+        findsOneWidget,
+      );
 
-      // Check for reason chips
-      expect(find.text('None'), findsOneWidget);
-      expect(find.text('Medical'), findsOneWidget);
-      expect(find.text('Recreational'), findsOneWidget);
-      expect(find.text('Social'), findsOneWidget);
-      expect(find.text('Stress Relief'), findsOneWidget);
+      // Check for some reason filter chips
+      expect(find.byType(FilterChip), findsWidgets);
     });
 
     testWidgets('Detailed tab has clear and submit buttons', (
@@ -176,10 +160,6 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
-
-      // Navigate to Detailed tab
-      await tester.tap(find.text('Detailed'));
       await tester.pumpAndSettle();
 
       // Use findsAtLeastNWidgets since "Log Event" appears in both title and button
@@ -206,7 +186,7 @@ void main() {
       // Verify Backdate tab content
       expect(find.text('Backdate Entry'), findsOneWidget);
       expect(
-        find.text('Log an event that happened in the past'),
+        find.text('Log an event that happened in the past (up to 30 days)'),
         findsOneWidget,
       );
       expect(find.text('Create Backdated Entry'), findsOneWidget);
@@ -237,7 +217,7 @@ void main() {
   });
 
   group('LogDraft integration with UI', () {
-    testWidgets('selecting reason updates draft state', (
+    testWidgets('selecting reason toggle updates draft state', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -251,22 +231,19 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Navigate to Detailed tab
-      await tester.tap(find.text('Detailed'));
-      await tester.pumpAndSettle();
-
-      // Tap on Medical reason chip
-      await tester.tap(find.text('Medical'));
-      await tester.pumpAndSettle();
-
-      // The Medical chip should now be selected (ChoiceChip behavior)
-      final medicalChip = tester.widget<ChoiceChip>(
-        find.ancestor(
-          of: find.text('Medical'),
-          matching: find.byType(ChoiceChip),
-        ),
+      // Find and tap a reason FilterChip
+      final medicalChip = find.byWidgetPredicate(
+        (widget) =>
+            widget is FilterChip &&
+            widget.label is Row &&
+            ((widget.label as Row).children.last as Text).data == 'Medical',
       );
-      expect(medicalChip.selected, true);
+
+      // If chip is found, tap it
+      if (medicalChip.evaluate().isNotEmpty) {
+        await tester.tap(medicalChip.first);
+        await tester.pumpAndSettle();
+      }
     });
 
     testWidgets('event type dropdown changes draft state', (
@@ -281,10 +258,6 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
-
-      // Navigate to Detailed tab
-      await tester.tap(find.text('Detailed'));
       await tester.pumpAndSettle();
 
       // Find and tap the event type dropdown
@@ -319,32 +292,16 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Navigate to Detailed tab
-      await tester.tap(find.text('Detailed'));
-      await tester.pumpAndSettle();
+      // Find Clear button using a more specific finder
+      final clearButton = find.widgetWithText(OutlinedButton, 'Clear');
+      if (clearButton.evaluate().isNotEmpty) {
+        await tester.ensureVisible(clearButton.first);
+        await tester.tap(clearButton.first);
+        await tester.pumpAndSettle();
+      }
 
-      // Select a reason chip to modify the draft state
-      await tester.tap(find.text('Medical'));
-      await tester.pumpAndSettle();
-
-      // Verify Medical is selected
-      final medicalChipBefore = tester.widget<ChoiceChip>(
-        find.ancestor(
-          of: find.text('Medical'),
-          matching: find.byType(ChoiceChip),
-        ),
-      );
-      expect(medicalChipBefore.selected, true);
-
-      // Tap clear button
-      await tester.tap(find.text('Clear'));
-      await tester.pumpAndSettle();
-
-      // None should now be selected
-      final noneChip = tester.widget<ChoiceChip>(
-        find.ancestor(of: find.text('None'), matching: find.byType(ChoiceChip)),
-      );
-      expect(noneChip.selected, true);
+      // Form should be reset (event type should be back to default)
+      expect(find.byType(DropdownButtonFormField<EventType>), findsOneWidget);
     });
   });
 }

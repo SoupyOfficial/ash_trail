@@ -83,15 +83,22 @@ class _ActivityBarChartState extends State<ActivityBarChart> {
                       },
                     ),
                     touchCallback: (event, response) {
-                      setState(() {
-                        if (!event.isInterestedForInteractions ||
-                            response == null ||
-                            response.spot == null) {
-                          _touchedIndex = -1;
-                          return;
-                        }
-                        _touchedIndex = response.spot!.touchedBarGroupIndex;
-                      });
+                      if (!mounted) return;
+                      final newIndex =
+                          (!event.isInterestedForInteractions ||
+                                  response == null ||
+                                  response.spot == null)
+                              ? -1
+                              : response.spot!.touchedBarGroupIndex;
+                      if (newIndex != _touchedIndex) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            setState(() {
+                              _touchedIndex = newIndex;
+                            });
+                          }
+                        });
+                      }
                     },
                   ),
                   titlesData: _buildTitlesData(context, maxY),

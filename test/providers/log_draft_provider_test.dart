@@ -8,13 +8,13 @@ void main() {
     test('creates with default values', () {
       final draft = LogDraft.empty();
 
-      expect(draft.eventType, EventType.inhale);
+      expect(draft.eventType, EventType.vape);
       expect(draft.duration, isNull);
-      expect(draft.unit, Unit.hits);
+      expect(draft.unit, Unit.seconds);
       expect(draft.note, isNull);
       expect(draft.moodRating, isNull);
       expect(draft.physicalRating, isNull);
-      expect(draft.reason, isNull);
+      expect(draft.reasons, isNull);
       expect(draft.latitude, isNull);
       expect(draft.longitude, isNull);
       expect(draft.isValid, true);
@@ -60,12 +60,14 @@ void main() {
       expect(cleared.physicalRating, isNull);
     });
 
-    test('copyWith with nullable reason using function syntax', () {
-      final draft = LogDraft.empty().copyWith(reason: () => LogReason.medical);
-      expect(draft.reason, LogReason.medical);
+    test('copyWith with nullable reasons using function syntax', () {
+      final draft = LogDraft.empty().copyWith(
+        reasons: () => [LogReason.medical, LogReason.stress],
+      );
+      expect(draft.reasons, [LogReason.medical, LogReason.stress]);
 
-      final cleared = draft.copyWith(reason: () => null);
-      expect(cleared.reason, isNull);
+      final cleared = draft.copyWith(reasons: () => null);
+      expect(cleared.reasons, isNull);
     });
 
     test('copyWith with location coordinates', () {
@@ -151,11 +153,11 @@ void main() {
         final time = DateTime(2025, 1, 1, 12, 0);
         final draft1 = const LogDraft(
           eventType: EventType.inhale,
-          unit: Unit.hits,
+          unit: Unit.seconds,
         ).copyWith(eventTime: time);
         final draft2 = const LogDraft(
           eventType: EventType.inhale,
-          unit: Unit.hits,
+          unit: Unit.seconds,
         ).copyWith(eventTime: time);
 
         expect(draft1.eventType, draft2.eventType);
@@ -180,9 +182,9 @@ void main() {
     test('initial state is empty draft', () {
       final draft = container.read(logDraftProvider);
 
-      expect(draft.eventType, EventType.inhale);
+      expect(draft.eventType, EventType.vape);
       expect(draft.duration, isNull);
-      expect(draft.unit, Unit.hits);
+      expect(draft.unit, Unit.seconds);
     });
 
     group('setEventType', () {
@@ -193,12 +195,12 @@ void main() {
         expect(draft.eventType, EventType.note);
       });
 
-      test('auto-selects hits unit for inhale', () {
+      test('sets unit to seconds for any event type', () {
         notifier.setEventType(EventType.note);
         notifier.setEventType(EventType.inhale);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.unit, Unit.hits);
+        expect(draft.unit, Unit.seconds);
       });
 
       test('auto-selects seconds unit for sessionStart', () {
@@ -311,20 +313,45 @@ void main() {
       });
     });
 
-    group('setReason', () {
-      test('sets reason', () {
-        notifier.setReason(LogReason.medical);
+    group('toggleReason', () {
+      test('adds reason when not present', () {
+        notifier.toggleReason(LogReason.medical);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.reason, LogReason.medical);
+        expect(draft.reasons, [LogReason.medical]);
+      });
+
+      test('removes reason when present', () {
+        notifier.toggleReason(LogReason.medical);
+        notifier.toggleReason(LogReason.medical);
+
+        final draft = container.read(logDraftProvider);
+        expect(draft.reasons, isNull);
+      });
+
+      test('can toggle multiple reasons', () {
+        notifier.toggleReason(LogReason.medical);
+        notifier.toggleReason(LogReason.stress);
+
+        final draft = container.read(logDraftProvider);
+        expect(draft.reasons, [LogReason.medical, LogReason.stress]);
+      });
+    });
+
+    group('setReasons', () {
+      test('sets reasons list', () {
+        notifier.setReasons([LogReason.medical, LogReason.stress]);
+
+        final draft = container.read(logDraftProvider);
+        expect(draft.reasons, [LogReason.medical, LogReason.stress]);
       });
 
       test('can set null', () {
-        notifier.setReason(LogReason.stress);
-        notifier.setReason(null);
+        notifier.setReasons([LogReason.medical]);
+        notifier.setReasons(null);
 
         final draft = container.read(logDraftProvider);
-        expect(draft.reason, isNull);
+        expect(draft.reasons, isNull);
       });
     });
 
@@ -376,20 +403,20 @@ void main() {
         notifier.setNote('Test note');
         notifier.setMoodRating(8.0);
         notifier.setPhysicalRating(6.0);
-        notifier.setReason(LogReason.recreational);
+        notifier.setReasons([LogReason.recreational]);
         notifier.setLocation(37.7749, -122.4194);
 
         // Reset
         notifier.reset();
 
         final draft = container.read(logDraftProvider);
-        expect(draft.eventType, EventType.inhale);
+        expect(draft.eventType, EventType.vape);
         expect(draft.duration, isNull);
-        expect(draft.unit, Unit.hits);
+        expect(draft.unit, Unit.seconds);
         expect(draft.note, isNull);
         expect(draft.moodRating, isNull);
         expect(draft.physicalRating, isNull);
-        expect(draft.reason, isNull);
+        expect(draft.reasons, isNull);
         expect(draft.latitude, isNull);
         expect(draft.longitude, isNull);
       });
@@ -425,8 +452,8 @@ void main() {
         expect(notifier.isDirty, true);
       });
 
-      test('returns true when reason set', () {
-        notifier.setReason(LogReason.stress);
+      test('returns true when reasons set', () {
+        notifier.toggleReason(LogReason.stress);
         expect(notifier.isDirty, true);
       });
 

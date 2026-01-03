@@ -114,11 +114,19 @@ class _ActivityLineChartState extends State<ActivityLineChart> {
                       },
                     ),
                     touchCallback: (event, response) {
+                      if (!mounted) return;
                       if (event is FlTapUpEvent || event is FlPanUpdateEvent) {
-                        setState(() {
-                          _touchedIndex =
-                              response?.lineBarSpots?.firstOrNull?.x.toInt();
-                        });
+                        final newIndex =
+                            response?.lineBarSpots?.firstOrNull?.x.toInt();
+                        if (newIndex != _touchedIndex) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              setState(() {
+                                _touchedIndex = newIndex;
+                              });
+                            }
+                          });
+                        }
                       }
                     },
                     handleBuiltInTouches: true,

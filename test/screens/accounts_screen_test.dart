@@ -203,5 +203,149 @@ void main() {
       expect(find.byIcon(Icons.person), findsOneWidget);
       expect(find.byIcon(Icons.logout), findsOneWidget);
     });
+
+    testWidgets('AccountsScreen displays multiple accounts in list format', (
+      WidgetTester tester,
+    ) async {
+      final accounts = [
+        Account.create(
+          userId: 'user1',
+          email: 'user1@example.com',
+          displayName: 'Alice',
+          authProvider: AuthProvider.devStatic,
+          isActive: true,
+        ),
+        Account.create(
+          userId: 'user2',
+          email: 'user2@example.com',
+          displayName: 'Bob',
+          authProvider: AuthProvider.devStatic,
+        ),
+        Account.create(
+          userId: 'user3',
+          email: 'user3@example.com',
+          displayName: 'Charlie',
+          authProvider: AuthProvider.devStatic,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            allAccountsProvider.overrideWith((ref) => Stream.value(accounts)),
+            activeAccountProvider.overrideWith(
+              (ref) => Stream.value(accounts[0]),
+            ),
+          ],
+          child: const MaterialApp(home: AccountsScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Alice'), findsOneWidget);
+      expect(find.text('Bob'), findsOneWidget);
+      expect(find.text('Charlie'), findsOneWidget);
+      expect(find.text('Active'), findsOneWidget);
+    });
+
+    testWidgets('AccountsScreen shows correct active account highlighting', (
+      WidgetTester tester,
+    ) async {
+      final account1 = Account.create(
+        userId: 'user1',
+        email: 'user1@example.com',
+        displayName: 'First User',
+        authProvider: AuthProvider.devStatic,
+      );
+      final account2 = Account.create(
+        userId: 'user2',
+        email: 'user2@example.com',
+        displayName: 'Second User',
+        authProvider: AuthProvider.devStatic,
+        isActive: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            allAccountsProvider.overrideWith(
+              (ref) => Stream.value([account1, account2]),
+            ),
+            activeAccountProvider.overrideWith((ref) => Stream.value(account2)),
+          ],
+          child: const MaterialApp(home: AccountsScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('First User'), findsOneWidget);
+      expect(find.text('Second User'), findsOneWidget);
+      expect(find.text('Active'), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    });
+
+    testWidgets('AccountsScreen renders list with account details', (
+      WidgetTester tester,
+    ) async {
+      final account = Account.create(
+        userId: 'test-user',
+        email: 'test@example.com',
+        displayName: 'Test Account',
+        authProvider: AuthProvider.gmail,
+        isActive: true,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            allAccountsProvider.overrideWith((ref) => Stream.value([account])),
+            activeAccountProvider.overrideWith((ref) => Stream.value(account)),
+          ],
+          child: const MaterialApp(home: AccountsScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Test Account'), findsOneWidget);
+      expect(find.text('test@example.com'), findsOneWidget);
+      expect(find.text('Active'), findsOneWidget);
+    });
+
+    testWidgets('AccountsScreen scrollable when many accounts present', (
+      WidgetTester tester,
+    ) async {
+      final accounts = List.generate(
+        10,
+        (index) => Account.create(
+          userId: 'user$index',
+          email: 'user$index@example.com',
+          displayName: 'User $index',
+          authProvider: AuthProvider.devStatic,
+          isActive: index == 0,
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            allAccountsProvider.overrideWith((ref) => Stream.value(accounts)),
+            activeAccountProvider.overrideWith(
+              (ref) => Stream.value(accounts[0]),
+            ),
+          ],
+          child: const MaterialApp(home: AccountsScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('User 0'), findsOneWidget);
+
+      // Verify list view is scrollable
+      expect(find.byType(ListView), findsOneWidget);
+    });
   });
 }

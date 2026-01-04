@@ -7,6 +7,7 @@ import 'package:ash_trail/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:async';
 
 void main() {
   Account _buildAccount({
@@ -150,4 +151,184 @@ void main() {
       expect(find.text('Custom event'), findsOneWidget);
     },
   );
+
+  testWidgets('displays correct stats calculations for multiple records', (
+    WidgetTester tester,
+  ) async {
+    final account = _buildAccount();
+    final now = DateTime.now();
+    final records = [
+      LogRecord.create(
+        logId: 'log-1',
+        accountId: account.userId,
+        eventAt: now.subtract(const Duration(hours: 1)),
+        eventType: EventType.vape,
+        duration: 30,
+        unit: Unit.seconds,
+      ),
+      LogRecord.create(
+        logId: 'log-2',
+        accountId: account.userId,
+        eventAt: now.subtract(const Duration(hours: 2)),
+        eventType: EventType.vape,
+        duration: 45,
+        unit: Unit.seconds,
+      ),
+      LogRecord.create(
+        logId: 'log-3',
+        accountId: account.userId,
+        eventAt: now.subtract(const Duration(hours: 3)),
+        eventType: EventType.tolerance,
+        duration: 10,
+        unit: Unit.minutes,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      _pumpHome(
+        tester,
+        activeAccountStream: Stream.value(account),
+        recordsStream: Stream.value(records),
+        statsFn:
+            (_) async => const {
+              'totalCount': 3,
+              'totalDuration': 65.0,
+              'vapingMinutes': 75,
+            },
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(find.text('3'), findsWidgets); // total count shown
+    expect(find.text('65.0'), findsWidgets); // avg duration
+  });
+
+  testWidgets('shows empty state with no records', (WidgetTester tester) async {
+    final account = _buildAccount();
+
+    await tester.pumpWidget(
+      _pumpHome(
+        tester,
+        activeAccountStream: Stream.value(account),
+        recordsStream: Stream.value(const []),
+        statsFn: (_) async => const {'totalCount': 0, 'totalDuration': 0.0},
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(find.text('No entries yet'), findsOneWidget);
+    expect(find.text('Recent Entries'), findsOneWidget);
+  });
+
+  testWidgets('displays FAB for quick logging when account active', (
+    WidgetTester tester,
+  ) async {
+    final account = _buildAccount();
+
+    await tester.pumpWidget(
+      _pumpHome(
+        tester,
+        activeAccountStream: Stream.value(account),
+        recordsStream: Stream.value(const []),
+        statsFn: (_) async => const {},
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+  });
+
+  testWidgets('lists records in reverse chronological order', (
+    WidgetTester tester,
+  ) async {
+    final account = _buildAccount();
+    final now = DateTime.now();
+    final records = [
+      LogRecord.create(
+        logId: 'log-1',
+        accountId: account.userId,
+        eventAt: now.subtract(const Duration(days: 3)),
+        eventType: EventType.vape,
+        duration: 5,
+        unit: Unit.seconds,
+        note: 'Oldest entry',
+      ),
+      LogRecord.create(
+        logId: 'log-2',
+        accountId: account.userId,
+        eventAt: now.subtract(const Duration(minutes: 5)),
+        eventType: EventType.tolerance,
+        duration: 30,
+        unit: Unit.seconds,
+        note: 'Newest entry',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      _pumpHome(
+        tester,
+        activeAccountStream: Stream.value(account),
+        recordsStream: Stream.value(records),
+        statsFn: (_) async => const {'totalCount': 2},
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(find.text('Newest entry'), findsOneWidget);
+    expect(find.text('Oldest entry'), findsOneWidget);
+    final newestIndex = find.text('Newest entry');
+    final oldestIndex = find.text('Oldest entry');
+    expect(
+      newestIndex.evaluate().first.hashCode <
+          oldestIndex.evaluate().first.hashCode,
+      true,
+    );
+  });
+
+  testWidgets('updates display when records stream changes', (
+    WidgetTester tester,
+  ) async {
+    final account = _buildAccount();
+    final now = DateTime.now();
+    final record1 = LogRecord.create(
+      logId: 'log-1',
+      accountId: account.userId,
+      eventAt: now,
+      eventType: EventType.vape,
+      duration: 5,
+      unit: Unit.seconds,
+    );
+
+    final recordsNotifier = StreamController<List<LogRecord>>();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          activeAccountProvider.overrideWith((ref) => Stream.value(account)),
+          activeAccountLogRecordsProvider.overrideWith(
+            (ref) => recordsNotifier.stream,
+          ),
+          logRecordStatsProvider.overrideWith((ref, params) async => const {}),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+
+    recordsNotifier.add([record1]);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(find.text('Recent Entries'), findsOneWidget);
+    expect(find.text('No entries yet'), findsNothing);
+
+    recordsNotifier.close();
+  });
 }

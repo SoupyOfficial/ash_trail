@@ -62,13 +62,15 @@ class AnalyticsService {
     required String accountId,
     required List<LogRecord> records,
     required int days,
+    DateTime? now,
   }) async {
-    final now = DateTime.now();
-    final windowStart = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    ).subtract(Duration(days: days));
+    final referenceNow = now ?? DateTime.now();
+    final today = DateTime(
+      referenceNow.year,
+      referenceNow.month,
+      referenceNow.day,
+    );
+    final windowStart = today.subtract(Duration(days: days));
 
     final windowRecords =
         records.where((r) {
@@ -90,7 +92,7 @@ class AnalyticsService {
     return RollingWindowStats(
       days: days,
       startDate: windowStart,
-      endDate: now,
+      endDate: referenceNow,
       totalEntries: windowRecords.length,
       totalDurationSeconds: _computeTotalDuration(windowRecords),
       averageDailyEntries: windowRecords.length / days,

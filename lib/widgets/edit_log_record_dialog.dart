@@ -235,7 +235,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
 
               // Event Type Dropdown
               DropdownButtonFormField<EventType>(
-                initialValue: _eventType,
+                value: _eventType,
                 decoration: const InputDecoration(
                   labelText: 'Event Type',
                   border: OutlineInputBorder(),
@@ -300,7 +300,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                   Expanded(
                     flex: 3,
                     child: DropdownButtonFormField<Unit>(
-                      initialValue: _unit,
+                      value: _unit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),

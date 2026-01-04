@@ -64,7 +64,7 @@ void main() {
       );
     });
 
-    Future<void> _openDialog(WidgetTester tester) async {
+    Future<void> openDialog(WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -109,7 +109,7 @@ void main() {
     testWidgets('shows validation error when only one coordinate is provided', (
       tester,
     ) async {
-      await _openDialog(tester);
+      await openDialog(tester);
 
       await tester.enterText(find.bySemanticsLabel('Latitude'), '10');
       await tester.ensureVisible(find.text('Update'));
@@ -128,7 +128,7 @@ void main() {
     testWidgets('submits updates through notifier and closes dialog', (
       tester,
     ) async {
-      await _openDialog(tester);
+      await openDialog(tester);
 
       await tester.enterText(find.bySemanticsLabel('Duration'), '5');
       await tester.enterText(find.bySemanticsLabel('Notes'), 'Updated note');

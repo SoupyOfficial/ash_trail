@@ -225,7 +225,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
               // Event Type
               DropdownButtonFormField<EventType>(
-                initialValue: _eventType,
+                value: _eventType,
                 decoration: const InputDecoration(
                   labelText: 'Event Type',
                   border: OutlineInputBorder(),
@@ -271,7 +271,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                   Expanded(
                     flex: 1,
                     child: DropdownButtonFormField<Unit>(
-                      initialValue: _unit,
+                      value: _unit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),

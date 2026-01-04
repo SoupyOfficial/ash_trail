@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'dart:async';
 
 void main() {
-  Account _buildAccount({
+  Account buildAccount({
     String userId = 'user-1',
     String email = 'user@example.com',
     String displayName = 'Test User',
@@ -25,7 +25,7 @@ void main() {
     );
   }
 
-  ProviderScope _pumpHome(
+  ProviderScope pumpHome(
     WidgetTester tester, {
     required Stream<Account?> activeAccountStream,
     required Stream<List<LogRecord>> recordsStream,
@@ -47,7 +47,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      _pumpHome(
+      pumpHome(
         tester,
         activeAccountStream: Stream.value(null),
         recordsStream: Stream.value(const []),
@@ -70,10 +70,10 @@ void main() {
   testWidgets('renders stats and empty recent entries for active account', (
     WidgetTester tester,
   ) async {
-    final account = _buildAccount(displayName: 'River Tester');
+    final account = buildAccount(displayName: 'River Tester');
 
     await tester.pumpWidget(
-      _pumpHome(
+      pumpHome(
         tester,
         activeAccountStream: Stream.value(account),
         recordsStream: Stream.value(const []),
@@ -94,7 +94,7 @@ void main() {
   testWidgets(
     'shows recent entries with icons, durations, and relative times',
     (WidgetTester tester) async {
-      final account = _buildAccount(displayName: 'Iconic User');
+      final account = buildAccount(displayName: 'Iconic User');
       final now = DateTime.now();
       final records = [
         LogRecord.create(
@@ -127,7 +127,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        _pumpHome(
+        pumpHome(
           tester,
           activeAccountStream: Stream.value(account),
           recordsStream: Stream.value(records),
@@ -155,7 +155,7 @@ void main() {
   testWidgets('displays correct stats calculations for multiple records', (
     WidgetTester tester,
   ) async {
-    final account = _buildAccount();
+    final account = buildAccount();
     final now = DateTime.now();
     final records = [
       LogRecord.create(
@@ -185,7 +185,7 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      _pumpHome(
+      pumpHome(
         tester,
         activeAccountStream: Stream.value(account),
         recordsStream: Stream.value(records),
@@ -206,10 +206,10 @@ void main() {
   });
 
   testWidgets('shows empty state with no records', (WidgetTester tester) async {
-    final account = _buildAccount();
+    final account = buildAccount();
 
     await tester.pumpWidget(
-      _pumpHome(
+      pumpHome(
         tester,
         activeAccountStream: Stream.value(account),
         recordsStream: Stream.value(const []),
@@ -227,10 +227,10 @@ void main() {
   testWidgets('displays FAB for quick logging when account active', (
     WidgetTester tester,
   ) async {
-    final account = _buildAccount();
+    final account = buildAccount();
 
     await tester.pumpWidget(
-      _pumpHome(
+      pumpHome(
         tester,
         activeAccountStream: Stream.value(account),
         recordsStream: Stream.value(const []),
@@ -247,7 +247,7 @@ void main() {
   testWidgets('lists records in reverse chronological order', (
     WidgetTester tester,
   ) async {
-    final account = _buildAccount();
+    final account = buildAccount();
     final now = DateTime.now();
     final records = [
       LogRecord.create(
@@ -271,7 +271,7 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      _pumpHome(
+      pumpHome(
         tester,
         activeAccountStream: Stream.value(account),
         recordsStream: Stream.value(records),
@@ -284,19 +284,32 @@ void main() {
 
     expect(find.text('Newest entry'), findsOneWidget);
     expect(find.text('Oldest entry'), findsOneWidget);
-    final newestIndex = find.text('Newest entry');
-    final oldestIndex = find.text('Oldest entry');
+
+    // Check that newest entry appears before oldest entry
+    // by checking their vertical positions
+    final newestWidget = find.ancestor(
+      of: find.text('Newest entry'),
+      matching: find.byType(ListTile),
+    );
+    final oldestWidget = find.ancestor(
+      of: find.text('Oldest entry'),
+      matching: find.byType(ListTile),
+    );
+
+    final newestY = tester.getTopLeft(newestWidget).dy;
+    final oldestY = tester.getTopLeft(oldestWidget).dy;
+
     expect(
-      newestIndex.evaluate().first.hashCode <
-          oldestIndex.evaluate().first.hashCode,
+      newestY < oldestY,
       true,
+      reason: 'Newest entry should appear above oldest entry',
     );
   });
 
   testWidgets('updates display when records stream changes', (
     WidgetTester tester,
   ) async {
-    final account = _buildAccount();
+    final account = buildAccount();
     final now = DateTime.now();
     final record1 = LogRecord.create(
       logId: 'log-1',

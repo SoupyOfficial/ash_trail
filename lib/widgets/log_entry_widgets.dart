@@ -41,7 +41,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
             children: [
               // Event Type Dropdown
               DropdownButtonFormField<EventType>(
-                initialValue: _selectedEventType,
+                value: _selectedEventType,
                 decoration: const InputDecoration(
                   labelText: 'Event Type',
                   border: OutlineInputBorder(),
@@ -98,7 +98,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<Unit>(
-                      initialValue: _selectedUnit,
+                      value: _selectedUnit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),

@@ -92,7 +92,7 @@ void main() {
       fakeService = _FakeAnalyticsService(stats);
     });
 
-    Future<void> _pumpAnalyticsWidget(WidgetTester tester) async {
+    Future<void> pumpAnalyticsWidget(WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [analyticsServiceProvider.overrideWithValue(fakeService)],
@@ -114,7 +114,7 @@ void main() {
     testWidgets('shows loading then renders summary and charts', (
       tester,
     ) async {
-      await _pumpAnalyticsWidget(tester);
+      await pumpAnalyticsWidget(tester);
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
@@ -132,7 +132,7 @@ void main() {
     testWidgets('switches chart type and reloads for new time range', (
       tester,
     ) async {
-      await _pumpAnalyticsWidget(tester);
+      await pumpAnalyticsWidget(tester);
       await tester.pumpAndSettle();
 
       expect(fakeService.callCount, 1);

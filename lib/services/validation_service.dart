@@ -145,8 +145,8 @@ class ValidationService {
     // Not more than 10 years in the past
     if (difference.inDays < -3650) return false;
 
-    // Not more than 1 day in the future
-    if (difference.inDays > 1) return false;
+    // Not more than 1 day (24 hours) in the future
+    if (difference.inHours > 24) return false;
 
     return true;
   }

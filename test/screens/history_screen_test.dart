@@ -33,7 +33,7 @@ void main() {
     physicalRating: 7.0,
   );
 
-  Widget _buildApp({required Stream<List<LogRecord>> stream}) {
+  Widget buildApp({required Stream<List<LogRecord>> stream}) {
     return ProviderScope(
       overrides: [
         activeAccountLogRecordsProvider.overrideWith((ref) => stream),
@@ -43,7 +43,7 @@ void main() {
   }
 
   testWidgets('shows empty state when there are no records', (tester) async {
-    await tester.pumpWidget(_buildApp(stream: Stream.value(const [])));
+    await tester.pumpWidget(buildApp(stream: Stream.value(const [])));
     await tester.pumpAndSettle();
 
     expect(find.text('No entries yet'), findsOneWidget);
@@ -52,7 +52,7 @@ void main() {
 
   testWidgets('displays all records when no filter applied', (tester) async {
     await tester.pumpWidget(
-      _buildApp(stream: Stream.value([recordA, recordB, recordC])),
+      buildApp(stream: Stream.value([recordA, recordB, recordC])),
     );
     await tester.pumpAndSettle();
 
@@ -66,7 +66,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _buildApp(stream: Stream.value([recordA, recordB, recordC])),
+      buildApp(stream: Stream.value([recordA, recordB, recordC])),
     );
     await tester.pumpAndSettle();
 
@@ -86,7 +86,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _buildApp(stream: Stream.value([recordA, recordB, recordC])),
+      buildApp(stream: Stream.value([recordA, recordB, recordC])),
     );
     await tester.pumpAndSettle();
 
@@ -103,7 +103,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _buildApp(stream: Stream.value([recordA, recordB, recordC])),
+      buildApp(stream: Stream.value([recordA, recordB, recordC])),
     );
     await tester.pumpAndSettle();
 
@@ -120,7 +120,7 @@ void main() {
   testWidgets('displays record details including mood and physical ratings', (
     tester,
   ) async {
-    await tester.pumpWidget(_buildApp(stream: Stream.value([recordC])));
+    await tester.pumpWidget(buildApp(stream: Stream.value([recordC])));
     await tester.pumpAndSettle();
 
     expect(find.text('Afternoon vape'), findsOneWidget);
@@ -129,7 +129,7 @@ void main() {
 
   testWidgets('filters by vape event type', (tester) async {
     await tester.pumpWidget(
-      _buildApp(stream: Stream.value([recordA, recordB, recordC])),
+      buildApp(stream: Stream.value([recordA, recordB, recordC])),
     );
     await tester.pumpAndSettle();
 

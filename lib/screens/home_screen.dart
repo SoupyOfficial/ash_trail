@@ -262,7 +262,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 );
               }
 
-              final recentRecords = records.take(5).toList();
+              // Sort records in reverse chronological order (newest first)
+              final sortedRecords =
+                  records.toList()
+                    ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
+              final recentRecords = sortedRecords.take(5).toList();
               return Column(
                 children:
                     recentRecords

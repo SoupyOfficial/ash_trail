@@ -3,6 +3,7 @@ import 'package:ash_trail/screens/auth/login_screen.dart';
 import 'package:ash_trail/screens/auth/signup_screen.dart';
 import 'package:ash_trail/services/account_integration_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

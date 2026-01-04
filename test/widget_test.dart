@@ -18,7 +18,7 @@ void main() {
       // Verify app loads
       expect(find.text('Ash Trail'), findsOneWidget);
     },
-    skip: true, // Requires Firebase and platform plugins initialization
+    skip: true, // Integration test - requires Firebase initialization
   );
 
   testWidgets(
@@ -32,6 +32,6 @@ void main() {
       expect(app.theme?.useMaterial3, true);
       expect(app.darkTheme?.useMaterial3, true);
     },
-    skip: true, // Requires Firebase and platform plugins initialization
+    skip: true, // Integration test - requires Firebase initialization
   );
 }

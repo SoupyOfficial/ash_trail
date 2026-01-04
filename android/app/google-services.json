@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "660497517730",
+    "project_id": "smokelog-17303",
+    "storage_bucket": "smokelog-17303.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:660497517730:android:f8f78923e0a271d2c91bfb",
+        "android_client_info": {
+          "package_name": "com.soup.smokeLog"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "660497517730-f6mls4r57gm55n75d12coof7eqptgniv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNDi4cZWPXDWfSmjIcJdAgU7xRa9sIpbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "660497517730-f6mls4r57gm55n75d12coof7eqptgniv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "660497517730-dlv557f6uvb4ccre13gcrpcqf8cgg2r0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.soup.smokeLog"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

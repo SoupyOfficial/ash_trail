@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/account_integration_service.dart';
+import '../../widgets/auth_button.dart';
 import 'signup_screen.dart';
 
-/// Login screen for email/password and Google authentication
+/// Login screen for email/password, Google, and Apple authentication
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -58,6 +59,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithGoogle();
+      // Navigation handled by auth state change in main.dart
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final integrationService = ref.read(accountIntegrationServiceProvider);
+      await integrationService.signInWithApple();
       // Navigation handled by auth state change in main.dart
     } catch (e) {
       setState(() {
@@ -239,22 +258,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 16),
 
                     // Google sign-in button
-                    OutlinedButton.icon(
-                      onPressed: _isLoading ? null : _signInWithGoogle,
-                      icon: Image.asset(
-                        'assets/google_logo.png',
-                        height: 24,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.g_mobiledata, size: 24);
-                        },
-                      ),
-                      label: const Text('Sign in with Google'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                    AuthButton(
+                      text: 'Continue with Google',
+                      onPressed: _signInWithGoogle,
+                      type: AuthButtonType.google,
+                      isLoading: _isLoading,
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Apple sign-in button
+                    AuthButton(
+                      text: 'Continue with Apple',
+                      onPressed: _signInWithApple,
+                      type: AuthButtonType.apple,
+                      isLoading: _isLoading,
                     ),
                     const SizedBox(height: 24),
 

@@ -318,14 +318,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // All-time statistics
         allTimeStatsAsync.when(
           data: (stats) => _buildStatisticsRow(context, 'All-Time', stats),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading:
+              () => _buildStatisticsRow(context, 'All-Time', {
+                'totalCount': 0,
+                'totalDuration': 0.0,
+              }),
           error: (error, _) => Text('Error loading stats: $error'),
         ),
         const SizedBox(height: 8),
         // 7-day statistics
         sevenDayStatsAsync.when(
           data: (stats) => _buildStatisticsRow(context, 'Last 7 Days', stats),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading:
+              () => _buildStatisticsRow(context, 'Last 7 Days', {
+                'totalCount': 0,
+                'totalDuration': 0.0,
+              }),
           error: (error, _) => Text('Error loading stats: $error'),
         ),
       ],

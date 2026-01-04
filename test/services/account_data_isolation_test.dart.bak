@@ -678,12 +678,58 @@ void main() {
     });
   });
 
-  // NOTE: Database integration tests have been moved to integration_test/database_integration_test.dart
-  // This includes the 'real database maintains account isolation' test which requires
-  // actual database initialization with platform plugins.
-  //
-  // To run database integration tests:
-  //   flutter test integration_test/database_integration_test.dart
+  group('Account Data Isolation - Integration with Real Database', () {
+    /// These tests use the real Hive database for integration testing.
+    /// They verify that account isolation works at the persistence layer.
+    /// Note: Skipped in unit test environment - requires full platform setup.
+
+    test(
+      'real database maintains account isolation',
+      skip:
+          'Integration test - requires Hive platform plugins. Run with: flutter test integration_test/',
+      () async {
+        // Initialize Hive for testing
+        await initializeHiveForTest();
+        final dbService = DatabaseService.instance;
+        await dbService.initialize();
+
+        try {
+          final service = LogRecordService();
+          const accountA = 'dev-test-account-001';
+          const accountB = kSecondTestAccountId;
+
+          // GIVEN: Account A creates a log
+          final accountALog = await service.createLogRecord(
+            accountId: accountA,
+            eventType: EventType.vape,
+            eventAt: DateTime.now(),
+            duration: 30.0,
+          );
+
+          // AND: Account B creates a log
+          final accountBLog = await service.createLogRecord(
+            accountId: accountB,
+            eventType: EventType.inhale,
+            eventAt: DateTime.now(),
+            duration: 20.0,
+          );
+
+          // WHEN: Querying each account's logs
+          final accountALogs = await service.getLogRecords(accountId: accountA);
+          final accountBLogs = await service.getLogRecords(accountId: accountB);
+
+          // THEN: Each account should only see their own log
+          expect(accountALogs.length, 1);
+          expect(accountALogs.first.logId, accountALog.logId);
+
+          expect(accountBLogs.length, 1);
+          expect(accountBLogs.first.logId, accountBLog.logId);
+        } finally {
+          await dbService.close();
+        }
+      },
+    );
+  });
 
   group('Account Data Isolation - Offline-First Account Switching', () {
     late MockMultiAccountLogRecordRepository mockRepo;

@@ -5,13 +5,28 @@ library;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'dart:math';
+import 'dart:io';
 
-/// Initialize Hive for testing
+/// Initialize Flutter bindings and Hive for testing
+/// This ensures platform bindings are available for Hive operations
 /// Works on all platforms (web, iOS, Android, desktop)
 Future<void> initializeHiveForTest() async {
-  final testDir =
-      'test_data_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(999999)}';
-  Hive.init(testDir);
+  // Ensure Flutter bindings are initialized for platform channel access
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Create a temporary directory for test database
+  final testDir = Directory.systemTemp.createTempSync(
+    'hive_test_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(999999)}',
+  );
+
+  // Initialize Hive with the test directory (doesn't use path_provider)
+  Hive.init(testDir.path);
+}
+
+/// Clean up Hive after tests
+Future<void> cleanupHiveForTest() async {
+  await Hive.close();
+  await Hive.deleteFromDisk();
 }
 
 /// Create a test box with a unique name

@@ -262,7 +262,7 @@ void main() {
         // Should reset to initial state
         expect(find.text('Hold to record duration'), findsOneWidget);
       },
-      skip: true, // Long press triggers database access
+      skip: true, // Integration test - long press triggers database access
     );
 
     testWidgets('should handle all reasons selected', (

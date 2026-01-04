@@ -112,6 +112,17 @@ class AccountIntegrationService {
     return await syncAccountFromFirebaseUser(userCredential.user!);
   }
 
+  /// Sign in with Apple and sync local account
+  Future<Account> signInWithApple() async {
+    final userCredential = await authService.signInWithApple();
+
+    if (userCredential.user == null) {
+      throw Exception('Failed to sign in with Apple');
+    }
+
+    return await syncAccountFromFirebaseUser(userCredential.user!);
+  }
+
   /// Sign out and deactivate local account
   Future<void> signOut() async {
     await authService.signOut();

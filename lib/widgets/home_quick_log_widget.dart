@@ -141,6 +141,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
 
         widget.onLogCreated?.call();
         ref.invalidate(activeAccountLogRecordsProvider);
+        ref.invalidate(logRecordStatsProvider);
       }
     } catch (e) {
       if (mounted) {
@@ -193,68 +194,59 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
           children: [
             // Mood Rating
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Mood', style: Theme.of(context).textTheme.labelMedium),
-                if (_moodRating != null)
-                  TextButton(
-                    onPressed: _resetMoodRating,
-                    child: const Text('Reset'),
+                Expanded(
+                  child: Text(
+                    'Mood',
+                    style: Theme.of(context).textTheme.labelMedium,
                   ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Slider(
+                    value: _moodRating ?? 5.5,
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    label: (_moodRating ?? 5.5).toStringAsFixed(0),
+                    onChanged: (value) {
+                      setState(() {
+                        _moodRating = value;
+                      });
+                    },
+                  ),
+                ),
               ],
             ),
-            if (_moodRating != null)
-              Text(
-                _moodRating!.toStringAsFixed(0),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            Slider(
-              value: _moodRating ?? 5.5,
-              min: 1,
-              max: 10,
-              divisions: 9,
-              label: (_moodRating ?? 5.5).toStringAsFixed(0),
-              onChanged: (value) {
-                setState(() {
-                  _moodRating = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // Physical Rating
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Physical',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                if (_physicalRating != null)
-                  TextButton(
-                    onPressed: _resetPhysicalRating,
-                    child: const Text('Reset'),
+                Expanded(
+                  child: Text(
+                    'Physical',
+                    style: Theme.of(context).textTheme.labelMedium,
                   ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Slider(
+                    value: _physicalRating ?? 5.5,
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    label: (_physicalRating ?? 5.5).toStringAsFixed(0),
+                    onChanged: (value) {
+                      setState(() {
+                        _physicalRating = value;
+                      });
+                    },
+                  ),
+                ),
               ],
             ),
-            if (_physicalRating != null)
-              Text(
-                _physicalRating!.toStringAsFixed(0),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            Slider(
-              value: _physicalRating ?? 5.5,
-              min: 1,
-              max: 10,
-              divisions: 9,
-              label: (_physicalRating ?? 5.5).toStringAsFixed(0),
-              onChanged: (value) {
-                setState(() {
-                  _physicalRating = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Reasons
             Text('Reasons', style: Theme.of(context).textTheme.labelMedium),
@@ -276,54 +268,63 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
             const SizedBox(height: 16),
 
             // Press-and-hold duration button
-            GestureDetector(
-              onLongPressStart: _handleLongPressStart,
-              onLongPressEnd: _handleLongPressEnd,
-              onLongPressCancel: _handleTapCancel,
-              child: Container(
-                decoration: BoxDecoration(
-                  color:
-                      _isRecording
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isRecording ? Icons.pause : Icons.touch_app,
-                      size: 32,
-                      color:
-                          _isRecording
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.primary,
+            Center(
+              child: GestureDetector(
+                onLongPressStart: _handleLongPressStart,
+                onLongPressEnd: _handleLongPressEnd,
+                onLongPressCancel: _handleTapCancel,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color:
+                        _isRecording
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
                     ),
-                    const SizedBox(height: 8),
-                    if (_isRecording)
-                      Text(
-                        '${_recordedDuration.inSeconds}s',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.headlineSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      )
-                    else
-                      Text(
-                        'Hold to record duration',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 16,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isRecording ? Icons.pause : Icons.touch_app,
+                        size: 28,
+                        color:
+                            _isRecording
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.primary,
                       ),
-                  ],
+                      const SizedBox(width: 12),
+                      if (_isRecording)
+                        Text(
+                          '${(_recordedDuration.inMilliseconds / 1000).toStringAsFixed(2)}s',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        )
+                      else
+                        Text(
+                          'Hold to record duration',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

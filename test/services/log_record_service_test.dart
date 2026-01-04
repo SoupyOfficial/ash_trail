@@ -139,7 +139,6 @@ void main() {
         // when database is not initialized
         expect(() => LogRecordService(), throwsA(isA<Exception>()));
       },
-      skip: 'Requires platform plugins not available in unit tests',
     );
 
     test('should initialize with mock repository', () {
@@ -147,20 +146,6 @@ void main() {
       final service = LogRecordService(repository: mockRepo);
       expect(service, isNotNull);
     });
-
-    test(
-      'should initialize with database service',
-      () async {
-        await initializeHiveForTest();
-        final dbService = DatabaseService.instance;
-        await dbService.initialize();
-
-        expect(() => LogRecordService(), returnsNormally);
-
-        await dbService.close();
-      },
-      skip: 'Requires platform plugins not available in unit tests',
-    );
   });
 
   group('LogRecordService - CRUD Operations', () {
@@ -431,37 +416,19 @@ void main() {
   });
 
   group('LogRecordService - Context Validation', () {
-    test(
-      'should require database context when no repository provided',
-      () {
-        // This is the bug we fixed - verify it throws helpful error
-        expect(
-          () => LogRecordService(),
-          throwsA(
-            predicate(
-              (e) =>
-                  e.toString().contains('Database') ||
-                  e.toString().contains('initialized'),
-            ),
+    test('should require database context when no repository provided', () {
+      // This is the bug we fixed - verify it throws helpful error
+      expect(
+        () => LogRecordService(),
+        throwsA(
+          predicate(
+            (e) =>
+                e.toString().contains('Database') ||
+                e.toString().contains('initialized'),
           ),
-        );
-      },
-      skip: true, // Requires platform plugins
-    );
-
-    test(
-      'should accept valid database context',
-      () async {
-        await initializeHiveForTest();
-        final dbService = DatabaseService.instance;
-        await dbService.initialize();
-
-        expect(() => LogRecordService(), returnsNormally);
-
-        await dbService.close();
-      },
-      skip: true, // Requires platform plugins
-    );
+        ),
+      );
+    });
   });
 
   group('LogRecordService - Location Validation', () {

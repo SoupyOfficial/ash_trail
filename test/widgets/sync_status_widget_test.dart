@@ -185,6 +185,24 @@ void main() {
         expect(find.byIcon(Icons.cloud_upload), findsOneWidget);
       });
 
+      testWidgets('shows orange cloud when pending and online (small count)', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          createTestWidget(
+            syncStatus: SyncStatus(
+              pendingCount: 2,
+              isOnline: true,
+              isSyncing: false,
+            ),
+            child: const SyncStatusIndicator(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.cloud_upload), findsOneWidget);
+      });
+
       testWidgets('shows grey cloud when offline', (tester) async {
         await tester.pumpWidget(
           createTestWidget(

@@ -148,5 +148,50 @@ void main() {
 
       expect(fakeService.callCount, greaterThanOrEqualTo(2));
     });
+
+    testWidgets('shows no data state when stats are null or records empty', (
+      tester,
+    ) async {
+      // Fake service that returns empty stats
+      final emptyStats = RollingWindowStats(
+        days: 7,
+        startDate: DateTime(2024, 1, 1),
+        endDate: DateTime(2024, 1, 7),
+        totalEntries: 0,
+        totalDurationSeconds: 0,
+        averageDailyEntries: 0,
+        averageMoodRating: null,
+        averagePhysicalRating: null,
+        dailyRollups: const [],
+        eventTypeCounts: const {},
+      );
+
+      final emptyService = _FakeAnalyticsService(emptyStats);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [analyticsServiceProvider.overrideWithValue(emptyService)],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 600,
+                child: AnalyticsChartsWidget(
+                  records: const [],
+                  accountId: 'acct',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Loading spinner first
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.pumpAndSettle();
+
+      // No data state should be shown when stats are empty
+      expect(find.text('No data available'), findsOneWidget);
+      expect(emptyService.callCount, 1);
+    });
   });
 }

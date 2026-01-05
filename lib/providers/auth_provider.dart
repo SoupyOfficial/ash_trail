@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
 
-/// Provider for AuthService instance
+/// Provider for AuthService instance (singleton)
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService();
 });

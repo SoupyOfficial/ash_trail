@@ -5,13 +5,24 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 
 /// Service for handling authentication with Firebase Auth
 /// Supports email/password, Google Sign-In, and Apple Sign-In
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+
+  /// Constructor with optional GoogleSignIn for testing
+  AuthService({GoogleSignIn? googleSignIn})
+    : _googleSignIn =
+          googleSignIn ??
+          GoogleSignIn(
+            scopes: ['email', 'profile'],
+            signInOption: SignInOption.standard,
+            forceCodeForRefreshToken: true,
+          );
 
   // Storage keys
   static const String _keyUserId = 'userId';
@@ -80,12 +91,17 @@ class AuthService {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        throw Exception('Google sign-in was cancelled');
+        throw Exception('Google sign-in was cancelled by user');
       }
 
       // Obtain auth details
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
+      // Validate tokens
+      if (googleAuth.accessToken == null) {
+        throw Exception('Failed to obtain Google access token');
+      }
 
       // Create Firebase credential
       final credential = GoogleAuthProvider.credential(
@@ -96,6 +112,10 @@ class AuthService {
       // Sign in to Firebase
       final userCredential = await _auth.signInWithCredential(credential);
 
+      if (userCredential.user == null) {
+        throw Exception('Firebase authentication failed');
+      }
+
       // Store user info securely
       await _storeUserInfo(userCredential.user);
 
@@ -103,6 +123,10 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
+      // Log the error for debugging
+      if (kDebugMode) {
+        print('Google sign-in error: $e');
+      }
       throw Exception('Failed to sign in with Google: $e');
     }
   }

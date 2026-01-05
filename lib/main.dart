@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'services/hive_database_service.dart';
+import 'services/crash_reporting_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'providers/auth_provider.dart';
@@ -23,6 +24,9 @@ void main() async {
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize crash reporting
+  await CrashReportingService.initialize();
 
   // Initialize Hive database
   final db = HiveDatabaseService();

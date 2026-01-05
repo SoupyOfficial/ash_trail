@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'crash_reporting_service.dart';
 
 /// Service for handling authentication with Firebase Auth
 /// Supports email/password, Google Sign-In, and Apple Sign-In
@@ -87,6 +88,8 @@ class AuthService {
   /// Sign in with Google
   Future<UserCredential> signInWithGoogle() async {
     try {
+      CrashReportingService.logMessage('Starting Google sign-in');
+
       // Trigger Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
@@ -119,10 +122,23 @@ class AuthService {
       // Store user info securely
       await _storeUserInfo(userCredential.user);
 
+      CrashReportingService.logMessage('Google sign-in successful');
       return userCredential;
     } on FirebaseAuthException catch (e) {
+      CrashReportingService.recordError(
+        e,
+        StackTrace.current,
+        reason: 'Firebase auth error during Google sign-in: ${e.code}',
+      );
       throw _handleAuthException(e);
     } catch (e) {
+      // Report the error to Crashlytics
+      CrashReportingService.recordError(
+        e,
+        StackTrace.current,
+        reason: 'Google sign-in failed',
+      );
+
       // Log the error for debugging
       if (kDebugMode) {
         print('Google sign-in error: $e');

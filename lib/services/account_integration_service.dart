@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
 import '../services/account_service.dart';
+import '../services/crash_reporting_service.dart';
 import '../providers/auth_provider.dart';
 import '../models/account.dart';
 
@@ -103,13 +104,28 @@ class AccountIntegrationService {
 
   /// Sign in with Google and sync local account
   Future<Account> signInWithGoogle() async {
-    final userCredential = await authService.signInWithGoogle();
+    try {
+      final userCredential = await authService.signInWithGoogle();
 
-    if (userCredential.user == null) {
-      throw Exception('Failed to sign in with Google');
+      if (userCredential.user == null) {
+        throw Exception('Failed to sign in with Google');
+      }
+
+      final account = await syncAccountFromFirebaseUser(userCredential.user!);
+
+      // Set user ID in crashlytics for crash tracking
+      await CrashReportingService.setUserId(account.userId);
+      CrashReportingService.logMessage('User signed in: ${account.email}');
+
+      return account;
+    } catch (e) {
+      CrashReportingService.recordError(
+        e,
+        StackTrace.current,
+        reason: 'Failed to sign in with Google and sync account',
+      );
+      rethrow;
     }
-
-    return await syncAccountFromFirebaseUser(userCredential.user!);
   }
 
   /// Sign in with Apple and sync local account

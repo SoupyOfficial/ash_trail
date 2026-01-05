@@ -47,12 +47,23 @@ class AccountsScreen extends ConsumerWidget {
             icon: const Icon(Icons.logout),
             tooltip: 'Log Out',
             onPressed: () async {
+              final activeAccount = await ref.read(
+                activeAccountProvider.future,
+              );
+              final isAnonymous = activeAccount?.isAnonymous ?? false;
+
+              if (!context.mounted) return;
+
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder:
                     (context) => AlertDialog(
                       title: const Text('Log Out'),
-                      content: const Text('Are you sure you want to log out?'),
+                      content: Text(
+                        isAnonymous
+                            ? 'Logging out will delete your anonymous account and all data. This cannot be undone.'
+                            : 'Are you sure you want to log out?',
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -60,6 +71,12 @@ class AccountsScreen extends ConsumerWidget {
                         ),
                         FilledButton(
                           onPressed: () => Navigator.pop(context, true),
+                          style:
+                              isAnonymous
+                                  ? FilledButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  )
+                                  : null,
                           child: const Text('Log Out'),
                         ),
                       ],
@@ -68,9 +85,17 @@ class AccountsScreen extends ConsumerWidget {
 
               if (confirmed == true && context.mounted) {
                 try {
-                  final authService = ref.read(authServiceProvider);
-                  await authService.signOut();
-                  // Navigation handled automatically by auth state change
+                  if (isAnonymous && activeAccount != null) {
+                    // For anonymous users, delete the account
+                    await ref
+                        .read(accountSwitcherProvider.notifier)
+                        .deleteAccount(activeAccount.userId);
+                  } else {
+                    // For authenticated users, sign out from Firebase
+                    final authService = ref.read(authServiceProvider);
+                    await authService.signOut();
+                  }
+                  // Navigation handled automatically by auth/account state change
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -89,113 +114,97 @@ class AccountsScreen extends ConsumerWidget {
             return _buildEmptyState(context, ref);
           }
 
-          return activeAccountAsync.when(
-            data:
-                (activeAccount) => Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: accounts.length,
-                        itemBuilder: (context, index) {
-                          final account = accounts[index];
-                          final isActive =
-                              account.userId == activeAccount?.userId;
+          // Read active account synchronously to avoid nested loading states
+          final activeAccount = activeAccountAsync.maybeWhen(
+            data: (account) => account,
+            orElse: () => null,
+          );
 
-                          return Card(
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor:
-                                    isActive
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                child: Text(
-                                  (account.displayName ?? account.email)[0]
-                                      .toUpperCase(),
-                                  style: TextStyle(
-                                    color:
-                                        isActive
-                                            ? Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimary
-                                            : Theme.of(
-                                              context,
-                                            ).colorScheme.onSurfaceVariant,
-                                  ),
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: accounts.length,
+                  itemBuilder: (context, index) {
+                    final account = accounts[index];
+                    final isActive = account.userId == activeAccount?.userId;
+
+                    return Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              isActive
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                          child: Text(
+                            (account.displayName ?? account.email)[0]
+                                .toUpperCase(),
+                            style: TextStyle(
+                              color:
+                                  isActive
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        title: Text(account.displayName ?? account.email),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(account.email),
+                            if (isActive)
+                              Text(
+                                'Active',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              title: Text(account.displayName ?? account.email),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(account.email),
-                                  if (isActive)
-                                    Text(
-                                      'Active',
-                                      style: TextStyle(
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              trailing:
-                                  isActive
-                                      ? Icon(
-                                        Icons.check_circle,
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                      )
-                                      : IconButton(
-                                        icon: const Icon(Icons.more_vert),
-                                        onPressed: () {
-                                          _showAccountOptions(
-                                            context,
-                                            ref,
-                                            account,
-                                          );
-                                        },
-                                      ),
-                              onTap:
-                                  isActive
-                                      ? null
-                                      : () async {
-                                        await ref
-                                            .read(
-                                              accountSwitcherProvider.notifier,
-                                            )
-                                            .switchAccount(account.userId);
+                          ],
+                        ),
+                        trailing:
+                            isActive
+                                ? Icon(
+                                  Icons.check_circle,
+                                  color: Theme.of(context).colorScheme.primary,
+                                )
+                                : IconButton(
+                                  icon: const Icon(Icons.more_vert),
+                                  onPressed: () {
+                                    _showAccountOptions(context, ref, account);
+                                  },
+                                ),
+                        onTap:
+                            isActive
+                                ? null
+                                : () async {
+                                  await ref
+                                      .read(accountSwitcherProvider.notifier)
+                                      .switchAccount(account.userId);
 
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Switched to ${account.displayName ?? account.email}',
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                            ),
-                          );
-                        },
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Switched to ${account.displayName ?? account.email}',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                       ),
-                    ),
-                    // Developer tools section
-                    _buildDevToolsSection(context, ref),
-                  ],
+                    );
+                  },
                 ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Error: $error')),
+              ),
+              // Developer tools section
+              _buildDevToolsSection(context, ref),
+            ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

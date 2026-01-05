@@ -77,7 +77,7 @@ class AshTrailApp extends ConsumerWidget {
           backgroundColor: Colors.black,
         ),
       ),
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.system,
       home: const AuthWrapper(),
     );
   }

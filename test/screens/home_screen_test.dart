@@ -33,7 +33,9 @@ void main() {
   }) {
     final scope = ProviderScope(
       overrides: [
-        activeAccountProvider.overrideWith((ref) => activeAccountStream),
+        activeAccountProvider.overrideWith(
+          (ref) => Stream.fromFuture(activeAccountStream.first),
+        ),
         activeAccountLogRecordsProvider.overrideWith((ref) => recordsStream),
         logRecordStatsProvider.overrideWith((ref, params) => statsFn(params)),
       ],

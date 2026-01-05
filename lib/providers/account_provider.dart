@@ -11,9 +11,9 @@ final accountServiceProvider = Provider<AccountService>((ref) {
 });
 
 // Active account provider
-final activeAccountProvider = FutureProvider<Account?>((ref) async {
+final activeAccountProvider = StreamProvider<Account?>((ref) {
   final service = ref.watch(accountServiceProvider);
-  return await service.getActiveAccount();
+  return service.watchActiveAccount();
 });
 
 // All accounts provider

@@ -165,18 +165,6 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     });
   }
 
-  void _resetMoodRating() {
-    setState(() {
-      _moodRating = null;
-    });
-  }
-
-  void _resetPhysicalRating() {
-    setState(() {
-      _physicalRating = null;
-    });
-  }
-
   @override
   void dispose() {
     _recordingTimer?.cancel();

@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/services/log_record_service.dart';
-import 'package:ash_trail/services/database_service.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/repositories/log_record_repository.dart';
-import '../test_helpers.dart';
 
 /// Mock repository for testing service layer in isolation
 class MockLogRecordRepository implements LogRecordRepository {

@@ -3,7 +3,6 @@ import 'package:ash_trail/screens/auth/login_screen.dart';
 import 'package:ash_trail/screens/auth/signup_screen.dart';
 import 'package:ash_trail/services/account_integration_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -83,7 +82,6 @@ void main() {
       });
 
       final fakeService = _FakeAccountIntegrationService();
-
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -100,7 +98,7 @@ void main() {
       expect(find.byKey(const Key('email-input')), findsOneWidget);
       expect(find.byKey(const Key('password-input')), findsOneWidget);
       expect(find.byKey(const Key('login-button')), findsOneWidget);
-      expect(find.text('Sign in with Google'), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
     });
 
     testWidgets('shows validation errors for empty fields', (tester) async {
@@ -293,7 +291,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Sign in with Google'));
+      await tester.tap(find.text('Continue with Google'));
       await tester.pump();
 
       expect(fakeService.googleCalls, 1);

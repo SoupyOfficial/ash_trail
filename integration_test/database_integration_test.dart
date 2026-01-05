@@ -74,8 +74,8 @@ void main() {
       await logRecordService.updateLogRecord(record);
 
       // THEN: Changes should be persisted
-      final updated = await logRecordService.getLogRecord(record.logId);
-      expect(updated.note, 'Updated note');
+      final updated = await logRecordService.getLogRecordByLogId(record.logId);
+      expect(updated?.note, 'Updated note');
     });
 
     test('should delete log records', () async {
@@ -93,7 +93,7 @@ void main() {
       final initialCount = initialRecords.length;
 
       // WHEN: Delete the record
-      await logRecordService.deleteLogRecord(record.logId);
+      await logRecordService.hardDeleteLogRecord(record);
 
       // THEN: Record should be removed
       final finalRecords = await logRecordService.getLogRecords(

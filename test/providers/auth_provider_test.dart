@@ -200,6 +200,14 @@ class MockAuthService implements AuthService {
   }) async {}
 
   @override
+  Future<UserCredential> signInWithApple() async {
+    if (throwOnSignIn) throw Exception('Mock Apple sign-in error');
+    final user = FakeUser(uid: 'apple-user', email: 'apple@example.com');
+    emitUser(user);
+    return FakeUserCredential(user: user);
+  }
+
+  @override
   Future<void> deleteAccount(String password) async {
     emitUser(null);
   }

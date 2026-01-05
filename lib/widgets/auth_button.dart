@@ -24,6 +24,7 @@ class AuthButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           backgroundColor: _getBackgroundColor(),
           foregroundColor: _getForegroundColor(),
           shape: RoundedRectangleBorder(
@@ -48,17 +49,21 @@ class AuthButton extends StatelessWidget {
                   ),
                 )
                 : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (type != AuthButtonType.email) ...[
                       _getIcon(),
                       const SizedBox(width: 12),
                     ],
-                    Text(
-                      text,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],
@@ -92,7 +97,22 @@ class AuthButton extends StatelessWidget {
   Widget _getIcon() {
     switch (type) {
       case AuthButtonType.google:
-        return Image.asset('assets/google_logo.png', height: 24, width: 24);
+        return SizedBox(
+          width: 24,
+          height: 24,
+          child: Image.asset(
+            'assets/google_logo.png',
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback to Google "G" text if image fails to load
+              return const Text(
+                'G',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              );
+            },
+          ),
+        );
       case AuthButtonType.apple:
         return const Icon(Icons.apple, size: 24);
       case AuthButtonType.email:

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/account_provider.dart';
-import '../providers/auth_provider.dart';
 import '../models/account.dart';
 import '../models/enums.dart';
+import '../services/account_integration_service.dart';
 import '../services/log_record_service.dart';
 import 'profile/profile_screen.dart';
 import 'export_screen.dart';
@@ -91,9 +91,11 @@ class AccountsScreen extends ConsumerWidget {
                         .read(accountSwitcherProvider.notifier)
                         .deleteAccount(activeAccount.userId);
                   } else {
-                    // For authenticated users, sign out from Firebase
-                    final authService = ref.read(authServiceProvider);
-                    await authService.signOut();
+                    // For authenticated users, sign out and deactivate account
+                    final integrationService = ref.read(
+                      accountIntegrationServiceProvider,
+                    );
+                    await integrationService.signOut();
                   }
                   // Navigation handled automatically by auth/account state change
                 } catch (e) {

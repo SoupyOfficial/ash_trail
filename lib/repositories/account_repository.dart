@@ -22,6 +22,9 @@ abstract class AccountRepository {
   /// Set active account (deactivates all others)
   Future<void> setActive(String userId);
 
+  /// Clear active account flag on all accounts
+  Future<void> clearActive();
+
   /// Watch active account changes
   Stream<Account?> watchActive();
 

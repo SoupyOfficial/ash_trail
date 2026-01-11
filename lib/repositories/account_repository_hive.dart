@@ -8,13 +8,15 @@ import 'account_repository.dart';
 /// Web implementation of AccountRepository using Hive
 class AccountRepositoryHive implements AccountRepository {
   late final Box _box;
-  final _controller = StreamController<List<Account>>.broadcast();
+  late final StreamController<List<Account>> _controller;
 
   AccountRepositoryHive(Map<String, dynamic> boxes) {
     _box = boxes['accounts'] as Box;
+    // Ensure new subscribers get an immediate snapshot
+    _controller = StreamController<List<Account>>.broadcast(
+      onListen: _emitChanges,
+    );
     _box.watch().listen((_) => _emitChanges());
-    // Emit initial state
-    _emitChanges();
   }
 
   void _emitChanges() {
@@ -92,6 +94,25 @@ class AccountRepositoryHive implements AccountRepository {
         displayName: webAccount.displayName,
         photoUrl: webAccount.photoUrl,
         isActive: webAccount.userId == userId,
+        createdAt: webAccount.createdAt,
+        updatedAt: DateTime.now(),
+      );
+      await _box.put(key, updated.toJson());
+    }
+  }
+
+  @override
+  Future<void> clearActive() async {
+    for (var key in _box.keys) {
+      final json = Map<String, dynamic>.from(_box.get(key));
+      final webAccount = WebAccount.fromJson(json);
+      final updated = WebAccount(
+        id: webAccount.id,
+        userId: webAccount.userId,
+        email: webAccount.email,
+        displayName: webAccount.displayName,
+        photoUrl: webAccount.photoUrl,
+        isActive: false,
         createdAt: webAccount.createdAt,
         updatedAt: DateTime.now(),
       );

@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
@@ -600,5 +601,89 @@ class LogRecordService {
     }
 
     return record;
+  }
+
+  /// Import multiple legacy log records in batch
+  /// Useful for migrating legacy data from old tables
+  /// Returns count of successfully imported records
+  Future<int> importLegacyRecordsBatch(List<LogRecord> records) async {
+    int importedCount = 0;
+
+    for (final record in records) {
+      try {
+        // Check if record already exists locally
+        final existing = await _repository.getByLogId(record.logId);
+
+        if (existing == null) {
+          // New record - import it
+          final imported = LogRecord.create(
+            logId: record.logId,
+            accountId: record.accountId,
+            eventType: record.eventType,
+            eventAt: record.eventAt,
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt,
+            duration: record.duration,
+            unit: record.unit,
+            note: record.note,
+            source: Source.imported,
+            deviceId: record.deviceId,
+            appVersion: record.appVersion,
+            syncState: SyncState.synced,
+            moodRating: record.moodRating,
+            physicalRating: record.physicalRating,
+            reasons: record.reasons,
+            latitude: record.latitude,
+            longitude: record.longitude,
+          );
+          await _repository.create(imported);
+          importedCount++;
+        } else if (record.updatedAt.isAfter(existing.updatedAt)) {
+          // Update if remote version is newer
+          existing.eventType = record.eventType;
+          existing.eventAt = record.eventAt;
+          existing.duration = record.duration;
+          existing.unit = record.unit;
+          existing.note = record.note;
+          existing.moodRating = record.moodRating;
+          existing.physicalRating = record.physicalRating;
+          existing.reasons = record.reasons;
+          existing.latitude = record.latitude;
+          existing.longitude = record.longitude;
+          existing.updatedAt = record.updatedAt;
+          existing.markDirty();
+
+          await _repository.update(existing);
+          importedCount++;
+        }
+      } catch (e) {
+        debugPrint('Error importing legacy record ${record.logId}: $e');
+      }
+    }
+
+    return importedCount;
+  }
+
+  /// Check if there is legacy data to migrate for an account
+  /// This requires integration with LegacyDataAdapter
+  /// Returns true if legacy data exists
+  Future<bool> hasLegacyDataForAccount(String accountId) async {
+    // Note: This method requires injecting LegacyDataAdapter
+    // For now, it serves as a marker for integration
+    // Implementation depends on how the service is initialized
+    return false;
+  }
+
+  /// Get migration status for legacy data
+  /// Returns a map with status information
+  Future<Map<String, dynamic>> getLegacyMigrationStatus(
+    String accountId,
+  ) async {
+    return {
+      'hasPendingMigration': false,
+      'legacyRecordCount': 0,
+      'localRecordCount': await countLogRecords(accountId: accountId),
+      'lastChecked': DateTime.now(),
+    };
   }
 }

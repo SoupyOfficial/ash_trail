@@ -41,7 +41,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      // Navigation handled by auth state change in main.dart
+      // On success, close the login screen so AuthWrapper can show Home
+      if (mounted) {
+        Navigator.of(context).pop();
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -59,7 +66,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithGoogle();
-      // Navigation handled by auth state change in main.dart
+      // On success, close the login screen so AuthWrapper can show Home
+      if (mounted) {
+        Navigator.of(context).pop();
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -77,7 +91,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithApple();
-      // Navigation handled by auth state change in main.dart
+      // On success, close the login screen so AuthWrapper can show Home
+      if (mounted) {
+        Navigator.of(context).pop();
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

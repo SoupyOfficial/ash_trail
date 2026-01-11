@@ -59,7 +59,7 @@ final firestoreUpdatesProvider = StreamProvider.family<LogRecordUpdate, String>(
   (ref, accountId) {
     final service = ref.read(syncServiceProvider);
     return service
-        .watchAccountLogs(accountId)
+        .watchAccountLogsIncludingLegacy(accountId)
         .map((record) => LogRecordUpdate(record: record));
   },
 );

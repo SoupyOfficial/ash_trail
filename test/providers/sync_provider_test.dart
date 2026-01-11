@@ -71,9 +71,38 @@ class MockSyncService implements SyncService {
   }
 
   @override
-  Stream<LogRecord> watchAccountLogs(String accountId) {
+  Stream<LogRecord> watchAccountLogsIncludingLegacy(String accountId) {
     // Return empty stream for testing
     return const Stream.empty();
+  }
+
+  @override
+  Future<bool> hasLegacyData(String accountId) async {
+    return false;
+  }
+
+  @override
+  Future<int> getLegacyRecordCount(String accountId) async {
+    return 0;
+  }
+
+  @override
+  Future<int> importLegacyDataForAccount({required String accountId}) async {
+    return 0;
+  }
+
+  @override
+  Future<SyncResult> pullRecordsForAccountIncludingLegacy({
+    required String accountId,
+    DateTime? since,
+  }) async {
+    return nextSyncResult ??
+        SyncResult(
+          success: 0,
+          failed: 0,
+          skipped: 0,
+          message: 'Mock pull complete',
+        );
   }
 
   @override

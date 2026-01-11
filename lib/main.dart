@@ -22,15 +22,29 @@ final appInitStateProvider = StateProvider<AppInitState>((ref) {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+  }
 
-  // Initialize crash reporting
-  await CrashReportingService.initialize();
+  try {
+    // Initialize crash reporting
+    await CrashReportingService.initialize();
+  } catch (e) {
+    debugPrint('Crash reporting initialization error: $e');
+  }
 
-  // Initialize Hive database
-  final db = HiveDatabaseService();
-  await db.initialize();
+  try {
+    // Initialize Hive database
+    final db = HiveDatabaseService();
+    await db.initialize();
+  } catch (e) {
+    debugPrint('Hive database initialization error: $e');
+  }
 
   runApp(const ProviderScope(child: AshTrailApp()));
 }
@@ -94,37 +108,49 @@ class AuthWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-    final activeAccount = ref.watch(activeAccountProvider);
+    try {
+      final authState = ref.watch(authStateProvider);
+      final activeAccount = ref.watch(activeAccountProvider);
 
-    return authState.when(
-      data: (user) {
-        // Check if we have an active account (authenticated or anonymous)
-        return activeAccount.when(
-          data: (account) {
-            if (account != null) {
-              // Have an active account (authenticated or anonymous), show home
-              return const HomeScreen();
-            }
-            // No active account - show welcome screen with options
-            return const WelcomeScreen();
-          },
-          loading:
-              () => const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              ),
-          error:
-              (error, _) =>
-                  Scaffold(body: Center(child: Text('Error: $error'))),
-        );
-      },
-      loading:
-          () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error:
-          (error, stack) =>
-              Scaffold(body: Center(child: Text('Error: $error'))),
-    );
+      return authState.when(
+        data: (user) {
+          // Check if we have an active account (authenticated or anonymous)
+          return activeAccount.when(
+            data: (account) {
+              if (account != null) {
+                // Have an active account (authenticated or anonymous), show home
+                return const HomeScreen();
+              }
+              // No active account - show welcome screen with options
+              return const WelcomeScreen();
+            },
+            loading:
+                () => const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                ),
+            error: (error, stack) {
+              debugPrint('Active account provider error: $error\n$stack');
+              return Scaffold(
+                body: Center(child: Text('Error: ${error.toString()}')),
+              );
+            },
+          );
+        },
+        loading:
+            () => const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+        error: (error, stack) {
+          debugPrint('Auth state provider error: $error\n$stack');
+          return Scaffold(
+            body: Center(child: Text('Error: ${error.toString()}')),
+          );
+        },
+      );
+    } catch (e, stack) {
+      debugPrint('AuthWrapper build error: $e\n$stack');
+      return const WelcomeScreen();
+    }
   }
 }
 
@@ -167,12 +193,19 @@ class WelcomeScreen extends ConsumerWidget {
               // Sign in button
               FilledButton.icon(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                  );
+                  try {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  } catch (e) {
+                    debugPrint('Navigation error: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error navigating: $e')),
+                    );
+                  }
                 },
                 icon: const Icon(Icons.login),
                 label: const Text('Sign In'),
@@ -181,8 +214,17 @@ class WelcomeScreen extends ConsumerWidget {
               // Continue anonymously button (per design doc 8.5)
               OutlinedButton.icon(
                 onPressed: () async {
-                  final switcher = ref.read(accountSwitcherProvider.notifier);
-                  await switcher.createAnonymousAccount();
+                  try {
+                    final switcher = ref.read(accountSwitcherProvider.notifier);
+                    await switcher.createAnonymousAccount();
+                  } catch (e) {
+                    debugPrint('Anonymous account creation error: $e');
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  }
                 },
                 icon: const Icon(Icons.person_outline),
                 label: const Text('Continue Without Account'),

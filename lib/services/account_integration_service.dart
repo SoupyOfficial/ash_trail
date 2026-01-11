@@ -142,8 +142,10 @@ class AccountIntegrationService {
   /// Sign out and deactivate local account
   Future<void> signOut() async {
     await authService.signOut();
+    await accountService.deactivateAllAccounts();
     // Local account remains but is no longer active
-    // This allows preserving local data for multi-account scenarios
+    // This allows preserving local data for multi-account scenarios while
+    // ensuring the app does not auto-login on relaunch
   }
 
   /// Update user profile and sync with local account

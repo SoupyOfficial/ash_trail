@@ -46,6 +46,11 @@ class AccountService {
     await _repository.setActive(userId);
   }
 
+  /// Deactivate all accounts (used on sign-out)
+  Future<void> deactivateAllAccounts() async {
+    await _repository.clearActive();
+  }
+
   /// Delete account and all associated data
   Future<void> deleteAccount(String userId) async {
     // Delete all log entries for this account first

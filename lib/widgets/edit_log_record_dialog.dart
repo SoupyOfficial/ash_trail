@@ -348,11 +348,15 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                 children: [
                   Expanded(
                     child: Slider(
-                      value: _moodRating ?? 5.0,
+                      value: _moodRating ?? 5.5,
                       min: 1,
                       max: 10,
                       divisions: 9,
-                      label: _moodRating?.toStringAsFixed(1) ?? 'Not set',
+                      label: _moodRating?.toStringAsFixed(1) ?? 'Tap to set',
+                      inactiveColor:
+                          _moodRating == null
+                              ? theme.colorScheme.surfaceContainerHighest
+                              : null,
                       onChanged: (value) {
                         setState(() {
                           _moodRating = value;
@@ -360,12 +364,37 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                       },
                     ),
                   ),
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      _moodRating?.toStringAsFixed(1) ?? 'Not Set',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            _moodRating == null
+                                ? theme.colorScheme.onSurfaceVariant
+                                : null,
+                      ),
+                    ),
+                  ),
                   TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _moodRating = null;
-                      });
-                    },
+                    onPressed:
+                        _moodRating != null
+                            ? () {
+                              setState(() {
+                                _moodRating = null;
+                              });
+                            }
+                            : () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _moodRating != null
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                                0.3,
+                              ),
+                    ),
                     child: Text(_moodRating == null ? 'Not set' : 'Clear'),
                   ),
                 ],
@@ -382,11 +411,16 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                 children: [
                   Expanded(
                     child: Slider(
-                      value: _physicalRating ?? 5.0,
+                      value: _physicalRating ?? 5.5,
                       min: 1,
                       max: 10,
                       divisions: 9,
-                      label: _physicalRating?.toStringAsFixed(1) ?? 'Not set',
+                      label:
+                          _physicalRating?.toStringAsFixed(1) ?? 'Tap to set',
+                      inactiveColor:
+                          _physicalRating == null
+                              ? theme.colorScheme.surfaceContainerHighest
+                              : null,
                       onChanged: (value) {
                         setState(() {
                           _physicalRating = value;
@@ -394,12 +428,37 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                       },
                     ),
                   ),
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      _physicalRating?.toStringAsFixed(1) ?? 'Not Set',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            _physicalRating == null
+                                ? theme.colorScheme.onSurfaceVariant
+                                : null,
+                      ),
+                    ),
+                  ),
                   TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _physicalRating = null;
-                      });
-                    },
+                    onPressed:
+                        _physicalRating != null
+                            ? () {
+                              setState(() {
+                                _physicalRating = null;
+                              });
+                            }
+                            : () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _physicalRating != null
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                                0.3,
+                              ),
+                    ),
                     child: Text(_physicalRating == null ? 'Not set' : 'Clear'),
                   ),
                 ],

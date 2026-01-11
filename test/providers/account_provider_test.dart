@@ -89,6 +89,16 @@ class MockAccountService implements AccountService {
     _allAccountsController.add(_accounts.toList());
   }
 
+  @override
+  Future<void> deactivateAllAccounts() async {
+    for (var i = 0; i < _accounts.length; i++) {
+      _accounts[i] = _accounts[i].copyWith(isActive: false);
+    }
+    _activeAccount = null;
+    _activeAccountController.add(null);
+    _allAccountsController.add(_accounts.toList());
+  }
+
   void emitActiveAccount(Account? account) {
     _activeAccount = account;
     _activeAccountController.add(account);

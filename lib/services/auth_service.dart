@@ -20,6 +20,8 @@ class AuthService {
     : _googleSignIn =
           googleSignIn ??
           GoogleSignIn(
+            clientId:
+                '660497517730-dlv557f6uvb4ccre13gcrpcqf8cgg2r0.apps.googleusercontent.com',
             scopes: ['email', 'profile'],
             signInOption: SignInOption.standard,
             forceCodeForRefreshToken: true,
@@ -90,12 +92,33 @@ class AuthService {
     try {
       CrashReportingService.logMessage('Starting Google sign-in');
 
+      // Ensure GoogleSignIn is properly initialized
+      if (kDebugMode) {
+        print('GoogleSignIn instance: $_googleSignIn');
+        print('GoogleSignIn scopes: ${_googleSignIn.scopes}');
+      }
+
+      // Sign out first to ensure clean state (prevents cached auth issues)
+      try {
+        await _googleSignIn.signOut();
+      } catch (e) {
+        if (kDebugMode) {
+          print('Warning: Could not sign out before sign-in: $e');
+        }
+      }
+
+      CrashReportingService.logMessage('Calling GoogleSignIn.signIn()');
+
       // Trigger Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         throw Exception('Google sign-in was cancelled by user');
       }
+
+      CrashReportingService.logMessage(
+        'Google user obtained: ${googleUser.email}',
+      );
 
       // Obtain auth details
       final GoogleSignInAuthentication googleAuth =
@@ -105,6 +128,8 @@ class AuthService {
       if (googleAuth.accessToken == null) {
         throw Exception('Failed to obtain Google access token');
       }
+
+      CrashReportingService.logMessage('Google auth tokens obtained');
 
       // Create Firebase credential
       final credential = GoogleAuthProvider.credential(
@@ -142,6 +167,7 @@ class AuthService {
       // Log the error for debugging
       if (kDebugMode) {
         print('Google sign-in error: $e');
+        print('Error type: ${e.runtimeType}');
       }
       throw Exception('Failed to sign in with Google: $e');
     }

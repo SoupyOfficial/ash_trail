@@ -350,74 +350,168 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Mood slider
-                    Row(
+                    // Mood slider section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(width: 80, child: Text('Mood')),
-                        const Icon(Icons.sentiment_very_dissatisfied, size: 20),
-                        Expanded(
-                          child: Slider(
-                            value: draft.moodRating ?? 5.0,
-                            min: 1,
-                            max: 10,
-                            divisions: 9,
-                            label:
-                                draft.moodRating?.toStringAsFixed(1) ??
-                                'Not set',
-                            onChanged:
-                                (value) => draftNotifier.setMoodRating(value),
-                          ),
+                        Row(
+                          children: [
+                            const SizedBox(width: 60, child: Text('Mood')),
+                            const Icon(
+                              Icons.sentiment_very_dissatisfied,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Slider(
+                                value: draft.moodRating ?? 5.5,
+                                min: 1,
+                                max: 10,
+                                divisions: 9,
+                                label:
+                                    draft.moodRating?.toStringAsFixed(1) ??
+                                    'Tap to set',
+                                inactiveColor:
+                                    draft.moodRating == null
+                                        ? Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerHighest
+                                        : null,
+                                onChanged:
+                                    (value) =>
+                                        draftNotifier.setMoodRating(value),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.sentiment_very_satisfied,
+                              size: 18,
+                            ),
+                            SizedBox(
+                              width: 30,
+                              child: Text(
+                                draft.moodRating?.toStringAsFixed(1) ?? '-',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color:
+                                      draft.moodRating == null
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant
+                                          : null,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const Icon(Icons.sentiment_very_satisfied, size: 20),
-                        SizedBox(
-                          width: 50,
-                          child: Text(
-                            draft.moodRating?.toStringAsFixed(1) ?? '-',
-                            textAlign: TextAlign.center,
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed:
+                                draft.moodRating != null
+                                    ? () => draftNotifier.setMoodRating(null)
+                                    : null,
+                            style: TextButton.styleFrom(
+                              foregroundColor:
+                                  draft.moodRating != null
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withOpacity(0.3),
+                            ),
+                            icon: const Icon(Icons.clear, size: 16),
+                            label: Text(
+                              draft.moodRating != null ? 'Clear' : 'Not set',
+                              style: const TextStyle(fontSize: 12),
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          tooltip: 'Reset',
-                          onPressed: () => draftNotifier.setMoodRating(null),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
 
-                    // Physical rating slider
-                    Row(
+                    // Physical rating slider section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(width: 80, child: Text('Physical')),
-                        const Icon(Icons.sentiment_very_dissatisfied, size: 20),
-                        Expanded(
-                          child: Slider(
-                            value: draft.physicalRating ?? 5.0,
-                            min: 1,
-                            max: 10,
-                            divisions: 9,
-                            label:
-                                draft.physicalRating?.toStringAsFixed(1) ??
-                                'Not set',
-                            activeColor:
-                                Theme.of(context).colorScheme.secondary,
-                            onChanged:
-                                (value) =>
-                                    draftNotifier.setPhysicalRating(value),
-                          ),
+                        Row(
+                          children: [
+                            const SizedBox(width: 60, child: Text('Physical')),
+                            const Icon(
+                              Icons.sentiment_very_dissatisfied,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Slider(
+                                value: draft.physicalRating ?? 5.5,
+                                min: 1,
+                                max: 10,
+                                divisions: 9,
+                                label:
+                                    draft.physicalRating?.toStringAsFixed(1) ??
+                                    'Tap to set',
+                                activeColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                inactiveColor:
+                                    draft.physicalRating == null
+                                        ? Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerHighest
+                                        : null,
+                                onChanged:
+                                    (value) =>
+                                        draftNotifier.setPhysicalRating(value),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.sentiment_very_satisfied,
+                              size: 18,
+                            ),
+                            SizedBox(
+                              width: 30,
+                              child: Text(
+                                draft.physicalRating?.toStringAsFixed(1) ?? '-',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color:
+                                      draft.physicalRating == null
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant
+                                          : null,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const Icon(Icons.sentiment_very_satisfied, size: 20),
-                        SizedBox(
-                          width: 50,
-                          child: Text(
-                            draft.physicalRating?.toStringAsFixed(1) ?? '-',
-                            textAlign: TextAlign.center,
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed:
+                                draft.physicalRating != null
+                                    ? () =>
+                                        draftNotifier.setPhysicalRating(null)
+                                    : null,
+                            style: TextButton.styleFrom(
+                              foregroundColor:
+                                  draft.physicalRating != null
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withOpacity(0.3),
+                            ),
+                            icon: const Icon(Icons.clear, size: 16),
+                            label: Text(
+                              draft.physicalRating != null
+                                  ? 'Clear'
+                                  : 'Not set',
+                              style: const TextStyle(fontSize: 12),
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          tooltip: 'Reset',
-                          onPressed:
-                              () => draftNotifier.setPhysicalRating(null),
                         ),
                       ],
                     ),

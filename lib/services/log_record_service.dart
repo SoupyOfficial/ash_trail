@@ -298,6 +298,22 @@ class LogRecordService {
     await _repository.update(record);
   }
 
+  /// Apply a remote deletion state to a local record without marking it dirty
+  /// Used when pulling from Firestore where the remote version is deleted
+  Future<void> applyRemoteDeletion(
+    LogRecord record, {
+    DateTime? deletedAt,
+    required DateTime remoteUpdatedAt,
+  }) async {
+    record.isDeleted = true;
+    record.deletedAt = deletedAt ?? record.deletedAt ?? DateTime.now();
+    // Align local updatedAt to remote for consistency
+    record.updatedAt = remoteUpdatedAt;
+    // Mark as synced with remote update timestamp
+    record.markSynced(remoteUpdatedAt);
+    await _repository.update(record);
+  }
+
   /// Delete all log records for an account (used when deleting account)
   Future<void> deleteAllByAccount(String accountId) async {
     await _repository.deleteByAccount(accountId);

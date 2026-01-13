@@ -18,7 +18,10 @@ Widget _buildApp({
     overrides: [
       activeAccountLogRecordsProvider.overrideWith((ref) => recordsStream),
       activeAccountProvider.overrideWith((ref) => accountStream),
-      logRecordStatsProvider.overrideWith((ref, params) => statsFuture),
+      // Wrap future stats into a stream to match StreamProvider
+      logRecordStatsProvider.overrideWith(
+        (ref, params) => Stream.fromFuture(statsFuture),
+      ),
     ],
     child: const MaterialApp(home: AnalyticsScreen()),
   );

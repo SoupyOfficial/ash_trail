@@ -379,25 +379,49 @@ final logRecordByIdProvider = FutureProvider.family<LogRecord?, String>((
   return await service.getLogRecordByLogId(logId);
 });
 
-/// Provider for log record statistics
-final logRecordStatsProvider =
-    FutureProvider.family<Map<String, dynamic>, LogRecordsParams>((
-      ref,
-      params,
-    ) async {
-      final service = ref.read(logRecordServiceProvider);
-      final accountId = params.accountId ?? ref.read(activeAccountIdProvider);
+/// Provider for log record statistics (stream-based for live updates)
+final logRecordStatsProvider = StreamProvider.family<
+  Map<String, dynamic>,
+  LogRecordsParams
+>((ref, params) {
+  final service = ref.read(logRecordServiceProvider);
+  final accountId = params.accountId ?? ref.read(activeAccountIdProvider);
 
-      if (accountId == null) {
-        return {};
-      }
+  if (accountId == null) {
+    return Stream.value({});
+  }
 
-      return await service.getStatistics(
+  return service
+      .watchLogRecords(
         accountId: accountId,
         startDate: params.startDate,
         endDate: params.endDate,
-      );
-    });
+        includeDeleted: params.includeDeleted,
+      )
+      .map((records) {
+        final totalCount = records.length;
+        final totalDuration = records.fold<double>(
+          0,
+          (sum, record) => sum + (record.duration),
+        );
+
+        // Build event type counts for completeness
+        final eventTypeCounts = <EventType, int>{};
+        for (final record in records) {
+          eventTypeCounts[record.eventType] =
+              (eventTypeCounts[record.eventType] ?? 0) + 1;
+        }
+
+        return {
+          'totalCount': totalCount,
+          'totalDuration': totalDuration,
+          'averageDuration': totalCount > 0 ? totalDuration / totalCount : 0,
+          'eventTypeCounts': eventTypeCounts,
+          'firstEvent': records.isNotEmpty ? records.first.eventAt : null,
+          'lastEvent': records.isNotEmpty ? records.last.eventAt : null,
+        };
+      });
+});
 
 /// Provider for pending sync count
 final pendingSyncCountProvider = FutureProvider<int>((ref) async {

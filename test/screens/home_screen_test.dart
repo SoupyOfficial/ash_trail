@@ -37,7 +37,10 @@ void main() {
           (ref) => Stream.fromFuture(activeAccountStream.first),
         ),
         activeAccountLogRecordsProvider.overrideWith((ref) => recordsStream),
-        logRecordStatsProvider.overrideWith((ref, params) => statsFn(params)),
+        // Wrap future stats into a stream to match StreamProvider
+        logRecordStatsProvider.overrideWith(
+          (ref, params) => Stream.fromFuture(statsFn(params)),
+        ),
       ],
       child: const MaterialApp(home: HomeScreen()),
     );
@@ -333,7 +336,9 @@ void main() {
           activeAccountLogRecordsProvider.overrideWith(
             (ref) => recordsNotifier.stream,
           ),
-          logRecordStatsProvider.overrideWith((ref, params) async => const {}),
+          logRecordStatsProvider.overrideWith(
+            (ref, params) => Stream.value(const {}),
+          ),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),

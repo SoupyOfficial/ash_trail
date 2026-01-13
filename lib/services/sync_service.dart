@@ -198,17 +198,26 @@ class SyncService {
 
     if (localRecord != null) {
       // Update existing local record
-      await _logRecordService.updateLogRecord(
-        localRecord,
-        eventType: remoteRecord.eventType,
-        eventAt: remoteRecord.eventAt,
-        duration: remoteRecord.duration,
-        unit: remoteRecord.unit,
-        note: remoteRecord.note,
-      );
+      if (remoteRecord.isDeleted) {
+        // Apply remote deletion
+        await _logRecordService.applyRemoteDeletion(
+          localRecord,
+          deletedAt: remoteRecord.deletedAt,
+          remoteUpdatedAt: remoteRecord.updatedAt,
+        );
+      } else {
+        await _logRecordService.updateLogRecord(
+          localRecord,
+          eventType: remoteRecord.eventType,
+          eventAt: remoteRecord.eventAt,
+          duration: remoteRecord.duration,
+          unit: remoteRecord.unit,
+          note: remoteRecord.note,
+        );
 
-      // Mark as synced
-      await _logRecordService.markSynced(localRecord, remoteRecord.updatedAt);
+        // Mark as synced
+        await _logRecordService.markSynced(localRecord, remoteRecord.updatedAt);
+      }
     } else {
       // Insert new record from remote
       await _logRecordService.importLogRecord(
@@ -225,6 +234,19 @@ class SyncService {
         deviceId: remoteRecord.deviceId,
         appVersion: remoteRecord.appVersion,
       );
+      // If remote is deleted, reflect deletion locally on imported record
+      if (remoteRecord.isDeleted) {
+        final imported = await _logRecordService.getLogRecordByLogId(
+          remoteRecord.logId,
+        );
+        if (imported != null) {
+          await _logRecordService.applyRemoteDeletion(
+            imported,
+            deletedAt: remoteRecord.deletedAt,
+            remoteUpdatedAt: remoteRecord.updatedAt,
+          );
+        }
+      }
     }
   }
 
@@ -284,23 +306,44 @@ class SyncService {
               deviceId: remoteRecord.deviceId,
               appVersion: remoteRecord.appVersion,
             );
+            // If remote is deleted, reflect deletion on imported record
+            if (remoteRecord.isDeleted) {
+              final imported = await _logRecordService.getLogRecordByLogId(
+                remoteRecord.logId,
+              );
+              if (imported != null) {
+                await _logRecordService.applyRemoteDeletion(
+                  imported,
+                  deletedAt: remoteRecord.deletedAt,
+                  remoteUpdatedAt: remoteRecord.updatedAt,
+                );
+              }
+            }
             successCount++;
           } else {
             // Update existing
             if (remoteRecord.updatedAt.isAfter(localRecord.updatedAt)) {
-              await _logRecordService.updateLogRecord(
-                localRecord,
-                eventType: remoteRecord.eventType,
-                eventAt: remoteRecord.eventAt,
-                duration: remoteRecord.duration,
-                unit: remoteRecord.unit,
-                note: remoteRecord.note,
-              );
+              if (remoteRecord.isDeleted) {
+                await _logRecordService.applyRemoteDeletion(
+                  localRecord,
+                  deletedAt: remoteRecord.deletedAt,
+                  remoteUpdatedAt: remoteRecord.updatedAt,
+                );
+              } else {
+                await _logRecordService.updateLogRecord(
+                  localRecord,
+                  eventType: remoteRecord.eventType,
+                  eventAt: remoteRecord.eventAt,
+                  duration: remoteRecord.duration,
+                  unit: remoteRecord.unit,
+                  note: remoteRecord.note,
+                );
 
-              await _logRecordService.markSynced(
-                localRecord,
-                remoteRecord.updatedAt,
-              );
+                await _logRecordService.markSynced(
+                  localRecord,
+                  remoteRecord.updatedAt,
+                );
+              }
 
               successCount++;
             }
@@ -380,19 +423,27 @@ class SyncService {
           } else {
             // Update existing if remote is newer
             if (remoteRecord.updatedAt.isAfter(localRecord.updatedAt)) {
-              await _logRecordService.updateLogRecord(
-                localRecord,
-                eventType: remoteRecord.eventType,
-                eventAt: remoteRecord.eventAt,
-                duration: remoteRecord.duration,
-                unit: remoteRecord.unit,
-                note: remoteRecord.note,
-              );
+              if (remoteRecord.isDeleted) {
+                await _logRecordService.applyRemoteDeletion(
+                  localRecord,
+                  deletedAt: remoteRecord.deletedAt,
+                  remoteUpdatedAt: remoteRecord.updatedAt,
+                );
+              } else {
+                await _logRecordService.updateLogRecord(
+                  localRecord,
+                  eventType: remoteRecord.eventType,
+                  eventAt: remoteRecord.eventAt,
+                  duration: remoteRecord.duration,
+                  unit: remoteRecord.unit,
+                  note: remoteRecord.note,
+                );
 
-              await _logRecordService.markSynced(
-                localRecord,
-                remoteRecord.updatedAt,
-              );
+                await _logRecordService.markSynced(
+                  localRecord,
+                  remoteRecord.updatedAt,
+                );
+              }
 
               successCount++;
             }

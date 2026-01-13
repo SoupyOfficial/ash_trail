@@ -234,9 +234,7 @@ void main() {
       ];
 
       final todayOnly =
-          records
-              .where((r) => r.eventAt.day == today.day)
-              .toList();
+          records.where((r) => r.eventAt.day == today.day).toList();
 
       expect(todayOnly, hasLength(1));
       expect(todayOnly.first.logId, 'today-1');

@@ -7,10 +7,12 @@ import '../providers/log_record_provider.dart'
     show
         logRecordStatsProvider,
         LogRecordsParams,
-        activeAccountLogRecordsProvider;
+        activeAccountLogRecordsProvider,
+        logRecordNotifierProvider;
 import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';
+import '../widgets/time_since_last_hit_widget.dart';
 import 'analytics_screen.dart';
 import 'accounts_screen.dart';
 import 'history_screen.dart';
@@ -162,6 +164,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 16),
 
+          // Time since last hit clock
+          logRecordsAsync.when(
+            data: (records) => TimeSinceLastHitWidget(records: records),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+          const SizedBox(height: 16),
+
           // Quick action buttons row
           Row(
             children: [
@@ -271,28 +281,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children:
                     recentRecords
                         .map(
-                          (record) => Card(
-                            child: ListTile(
-                              leading: Icon(
-                                _getEventIcon(record.eventType),
-                                size: 12,
+                          (record) => Dismissible(
+                            key: Key(record.logId),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (direction) async {
+                              return await showDialog<bool>(
+                                context: context,
+                                builder:
+                                    (context) => AlertDialog(
+                                      title: const Text('Delete Log Entry'),
+                                      content: Text(
+                                        'Are you sure you want to delete this ${record.eventType.name} entry?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(context, false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        FilledButton(
+                                          onPressed:
+                                              () =>
+                                                  Navigator.pop(context, true),
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                          ),
+                                          child: const Text('Delete'),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            },
+                            onDismissed: (direction) async {
+                              await _deleteLogRecord(record);
+                            },
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              color: Colors.red,
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
                               ),
-                              title: Text(_formatDateTime(record.eventAt)),
-                              subtitle:
-                                  record.note != null
-                                      ? Text(record.note!)
-                                      : null,
-                              trailing:
-                                  record.duration > 0
-                                      ? Text(
-                                        '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
-                                        style:
-                                            Theme.of(
-                                              context,
-                                            ).textTheme.titleMedium,
-                                      )
-                                      : null,
-                              onTap: () => _showEditDialog(context, record),
+                            ),
+                            child: Card(
+                              child: ListTile(
+                                leading: Icon(
+                                  _getEventIcon(record.eventType),
+                                  size: 12,
+                                ),
+                                title: Text(_formatDateTime(record.eventAt)),
+                                subtitle:
+                                    record.note != null
+                                        ? Text(record.note!)
+                                        : null,
+                                trailing:
+                                    record.duration > 0
+                                        ? Text(
+                                          '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.titleMedium,
+                                        )
+                                        : null,
+                                onTap: () => _showEditDialog(context, record),
+                              ),
                             ),
                           ),
                         )
@@ -445,6 +500,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (result == true && mounted) {
       // Record was updated, list will refresh automatically via stream
       ref.invalidate(activeAccountLogRecordsProvider);
+    }
+  }
+
+  Future<void> _deleteLogRecord(LogRecord record) async {
+    try {
+      await ref
+          .read(logRecordNotifierProvider.notifier)
+          .deleteLogRecord(record);
+
+      if (!mounted) return;
+
+      // Invalidate to refresh all widgets including time since last hit
+      ref.invalidate(activeAccountLogRecordsProvider);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Entry deleted'),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () async {
+              await ref
+                  .read(logRecordNotifierProvider.notifier)
+                  .restoreLogRecord(record);
+              // Invalidate again after restore
+              ref.invalidate(activeAccountLogRecordsProvider);
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting entry: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

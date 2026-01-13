@@ -340,6 +340,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               icon: const Icon(Icons.edit_outlined),
               onPressed: () => _showEditDialog(context, record),
             ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: () => _confirmDeleteLogRecord(context, record),
+            ),
           ],
         ),
         isThreeLine: record.note != null && record.note!.isNotEmpty,
@@ -515,6 +519,76 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       // Refresh records after dialog closes
       ref.invalidate(activeAccountLogRecordsProvider);
     });
+  }
+
+  Future<void> _confirmDeleteLogRecord(
+    BuildContext context,
+    LogRecord record,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Log Entry'),
+            content: Text(
+              'Are you sure you want to delete this ${record.eventType.name} entry from ${DateFormat('MMM d, y h:mm a').format(record.eventAt)}?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _deleteLogRecord(record);
+    }
+  }
+
+  Future<void> _deleteLogRecord(LogRecord record) async {
+    try {
+      await ref
+          .read(logRecordNotifierProvider.notifier)
+          .deleteLogRecord(record);
+
+      if (!mounted) return;
+
+      // Invalidate to refresh the list
+      ref.invalidate(activeAccountLogRecordsProvider);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Entry deleted'),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () async {
+              await ref
+                  .read(logRecordNotifierProvider.notifier)
+                  .restoreLogRecord(record);
+              // Invalidate again after restore
+              ref.invalidate(activeAccountLogRecordsProvider);
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting entry: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
 

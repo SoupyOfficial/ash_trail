@@ -90,6 +90,78 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
     }
   }
 
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Log Entry'),
+            content: Text(
+              'Are you sure you want to delete this ${widget.record.eventType.name} entry from ${DateFormat('MMM d, y h:mm a').format(widget.record.eventAt)}?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _deleteLog();
+    }
+  }
+
+  Future<void> _deleteLog() async {
+    setState(() => _isSubmitting = true);
+
+    try {
+      await ref
+          .read(logRecordNotifierProvider.notifier)
+          .deleteLogRecord(widget.record);
+
+      if (!mounted) return;
+
+      Navigator.pop(context, true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Entry deleted'),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'UNDO',
+            onPressed: () async {
+              await ref
+                  .read(logRecordNotifierProvider.notifier)
+                  .restoreLogRecord(widget.record);
+              // Invalidate to refresh all widgets
+              ref.invalidate(activeAccountLogRecordsProvider);
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting entry: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
   Future<void> _updateLog() async {
     if (_isSubmitting) return;
 
@@ -233,45 +305,6 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Event Type Dropdown
-              DropdownButtonFormField<EventType>(
-                value: _eventType,
-                decoration: const InputDecoration(
-                  labelText: 'Event Type',
-                  border: OutlineInputBorder(),
-                ),
-                items:
-                    EventType.values.map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(_formatEnumName(type.name)),
-                      );
-                    }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _eventType = value;
-                      // Auto-select appropriate unit
-                      switch (value) {
-                        case EventType.vape:
-                          _unit = Unit.seconds;
-                          break;
-                        case EventType.inhale:
-                          _unit = Unit.hits;
-                          break;
-                        case EventType.sessionStart:
-                        case EventType.sessionEnd:
-                          _unit = Unit.seconds;
-                          break;
-                        default:
-                          _unit = Unit.none;
-                      }
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-
               // Duration Input
               Row(
                 children: [
@@ -298,27 +331,14 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    flex: 3,
-                    child: DropdownButtonFormField<Unit>(
-                      value: _unit,
-                      decoration: const InputDecoration(
-                        labelText: 'Unit',
-                        border: OutlineInputBorder(),
+                    flex: 1,
+                    child: Center(
+                      child: Text(
+                        _formatEnumName(_unit.name),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                      items:
-                          Unit.values.map((unit) {
-                            return DropdownMenuItem(
-                              value: unit,
-                              child: Text(_formatEnumName(unit.name)),
-                            );
-                          }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _unit = value;
-                          });
-                        }
-                      },
                     ),
                   ),
                 ],
@@ -547,24 +567,38 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
 
               // Action Buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    onPressed:
-                        _isSubmitting ? null : () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                  TextButton.icon(
+                    onPressed: _isSubmitting ? null : _confirmDelete,
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    label: const Text(
+                      'Delete',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: _isSubmitting ? null : _updateLog,
-                    child:
-                        _isSubmitting
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Text('Update'),
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed:
+                            _isSubmitting ? null : () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: _isSubmitting ? null : _updateLog,
+                        child:
+                            _isSubmitting
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Text('Update'),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -89,7 +89,8 @@ void main() {
     expect(find.text('River Tester'), findsOneWidget);
     expect(find.text('3'), findsWidgets);
     expect(find.text('120.5'), findsWidgets);
-    expect(find.text('No entries yet'), findsOneWidget);
+    // "No entries yet" appears in both time since last hit and recent entries
+    expect(find.text('No entries yet'), findsAtLeastNWidgets(1));
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
@@ -222,7 +223,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
 
-    expect(find.text('No entries yet'), findsOneWidget);
+    // "No entries yet" appears in both time since last hit and recent entries
+    expect(find.text('No entries yet'), findsAtLeastNWidgets(1));
     expect(find.text('Recent Entries'), findsOneWidget);
   });
 

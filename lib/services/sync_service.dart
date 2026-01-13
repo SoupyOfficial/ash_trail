@@ -39,27 +39,64 @@ class SyncService {
   final LegacyDataAdapter _legacyAdapter = LegacyDataAdapter();
 
   Timer? _syncTimer;
+  Timer? _pullTimer;
+  String? _currentAccountId;
   bool _isSyncing = false;
 
   /// Sync batch size
   static const int _batchSize = 50;
 
-  /// Sync interval (in seconds)
-  static const int _syncIntervalSeconds = 30;
+  /// Start automatic background sync and periodic pulls for the active account
+  void startAutoSync({
+    String? accountId,
+    Duration pushInterval = const Duration(minutes: 1),
+    Duration pullInterval = const Duration(minutes: 1),
+  }) {
+    _currentAccountId = accountId ?? _currentAccountId;
 
-  /// Start automatic background sync
-  void startAutoSync() {
     _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(
-      Duration(seconds: _syncIntervalSeconds),
-      (_) => syncPendingRecords(),
-    );
+    _pullTimer?.cancel();
+
+    _syncTimer = Timer.periodic(pushInterval, (_) => syncPendingRecords());
+
+    if (_currentAccountId != null) {
+      _pullTimer = Timer.periodic(
+        pullInterval,
+        (_) =>
+            pullRecordsForAccountIncludingLegacy(accountId: _currentAccountId!),
+      );
+    }
   }
 
   /// Stop automatic background sync
   void stopAutoSync() {
     _syncTimer?.cancel();
+    _pullTimer?.cancel();
     _syncTimer = null;
+    _pullTimer = null;
+  }
+
+  /// Run an immediate pull + push cycle for the current account and schedule periodic syncs
+  Future<void> startAccountSync({
+    required String accountId,
+    Duration interval = const Duration(minutes: 1),
+  }) async {
+    _currentAccountId = accountId;
+    stopAutoSync();
+
+    await _runInitialSync(accountId);
+
+    startAutoSync(
+      accountId: accountId,
+      pushInterval: interval,
+      pullInterval: interval,
+    );
+  }
+
+  /// Pull fresh data and push pending local changes immediately
+  Future<void> _runInitialSync(String accountId) async {
+    await pullRecordsForAccountIncludingLegacy(accountId: accountId);
+    await syncPendingRecords();
   }
 
   /// Check if device is online

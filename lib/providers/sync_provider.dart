@@ -4,11 +4,6 @@ import '../services/sync_service.dart';
 /// Provider for SyncService
 final syncServiceProvider = Provider<SyncService>((ref) {
   final service = SyncService();
-
-  // Start auto-sync when service is created
-  service.startAutoSync();
-
-  // Clean up when provider is disposed
   ref.onDispose(() {
     service.dispose();
   });

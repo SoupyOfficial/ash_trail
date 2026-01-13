@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/account.dart';
 import '../models/enums.dart';
 import '../models/log_record.dart';
 import '../providers/account_provider.dart';
@@ -9,6 +12,7 @@ import '../providers/log_record_provider.dart'
         LogRecordsParams,
         activeAccountLogRecordsProvider,
         logRecordNotifierProvider;
+import '../providers/sync_provider.dart';
 import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';
@@ -25,6 +29,46 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String? _lastAccountId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Trigger initial sync after first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final account = ref.read(activeAccountProvider).asData?.value;
+      if (account != null) {
+        _lastAccountId = account.userId;
+        final syncService = ref.read(syncServiceProvider);
+        syncService.startAccountSync(accountId: account.userId);
+      }
+    });
+  }
+
+  void _checkAccountChange(Account? account) {
+    final syncService = ref.read(syncServiceProvider);
+
+    if (account == null) {
+      syncService.stopAutoSync();
+      _lastAccountId = null;
+      return;
+    }
+
+    // Only start sync if account changed
+    if (_lastAccountId != account.userId) {
+      _lastAccountId = account.userId;
+      syncService.startAccountSync(accountId: account.userId);
+    }
+  }
+
+  @override
+  void dispose() {
+    final syncService = ref.read(syncServiceProvider);
+    syncService.stopAutoSync();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeAccountAsync = ref.watch(activeAccountProvider);
@@ -46,6 +90,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: activeAccountAsync.when(
         data: (account) {
+          // Check for account changes and manage sync
+          _checkAccountChange(account);
+
           if (account == null) {
             return _buildNoAccountView(context);
           }

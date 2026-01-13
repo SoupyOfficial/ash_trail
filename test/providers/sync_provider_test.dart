@@ -106,13 +106,25 @@ class MockSyncService implements SyncService {
   }
 
   @override
-  void startAutoSync() {
+  void startAutoSync({
+    String? accountId,
+    Duration pushInterval = const Duration(minutes: 1),
+    Duration pullInterval = const Duration(minutes: 1),
+  }) {
     autoSyncStarted = true;
   }
 
   @override
   void stopAutoSync() {
     autoSyncStarted = false;
+  }
+
+  @override
+  Future<void> startAccountSync({
+    required String accountId,
+    Duration interval = const Duration(minutes: 1),
+  }) async {
+    autoSyncStarted = true;
   }
 
   @override

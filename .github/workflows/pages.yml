@@ -34,7 +34,7 @@ jobs:
         run: flutter test
 
       - name: Build web
-        run: flutter build web --release
+        run: flutter build web --release --base-href=/ash_trail/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

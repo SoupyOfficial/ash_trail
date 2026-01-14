@@ -63,7 +63,6 @@ jobs:
 
       # Install Apple certificate and provisioning profile
       - name: Install Apple Certificate
-        if: ${{ secrets.BUILD_CERTIFICATE_BASE64 != '' }}
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -96,7 +95,6 @@ jobs:
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
 
       - name: Install Provisioning Profile
-        if: ${{ secrets.PROVISIONING_PROFILE_BASE64 != '' }}
         id: install-profile
         env:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}

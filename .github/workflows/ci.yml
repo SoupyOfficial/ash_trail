@@ -121,7 +121,7 @@ jobs:
       # Build Flutter iOS app with code signing (matching TestFlight)
       - name: Build iOS App
         run: |
-          # Build the Flutter iOS app without signing
+          # Build the Flutter iOS app without automatic signing (xcodebuild will sign)
           flutter build ios --release --no-codesign
           
           # Archive with manual signing using xcodebuild

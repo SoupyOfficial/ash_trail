@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/log_record.dart';
+import '../utils/pattern_analysis.dart'
+    show PatternAnalysis, PeakHourData, DayPatternData;
 
 /// Statistics data class for cleaner organization
 class _DailyStats {
@@ -40,6 +42,12 @@ class _TimeSinceLastHitWidgetState
   _DailyStats _yesterdayStats = _DailyStats.empty;
   _DailyStats _weekStats = _DailyStats.empty;
   int _weekCount = 0;
+
+  // Pattern analysis
+  PeakHourData? _peakHour;
+  List<DayPatternData> _dayPatterns = [];
+  ({double weekdayAvg, double weekendAvg, String trend})?
+  _weekdayWeekendComparison;
 
   @override
   void initState() {
@@ -167,6 +175,12 @@ class _TimeSinceLastHitWidgetState
     final weekAvgPerDay =
         weekRecords.isEmpty ? 0.0 : weekTotalDuration / daysCount;
 
+    // Calculate pattern analysis for week data
+    final peakHour = PatternAnalysis.getPeakHour(weekRecords);
+    final dayPatterns = PatternAnalysis.getDayPatternsDetailed(weekRecords);
+    final weekdayWeekendComparison =
+        PatternAnalysis.getWeekdayWeekendComparison(weekRecords);
+
     setState(() {
       _weekStats = _DailyStats(
         count: weekRecords.length,
@@ -174,6 +188,11 @@ class _TimeSinceLastHitWidgetState
         avgDuration: weekAvgPerDay,
       );
       _weekCount = weekRecords.length;
+
+      // Update pattern analysis
+      _peakHour = peakHour;
+      _dayPatterns = dayPatterns;
+      _weekdayWeekendComparison = weekdayWeekendComparison;
     });
   }
 
@@ -295,6 +314,103 @@ class _TimeSinceLastHitWidgetState
     );
   }
 
+  /// Build peak hour display
+  Widget _buildPeakHourSection(BuildContext context) {
+    if (_peakHour == null) {
+      return const SizedBox.shrink();
+    }
+
+    final percentage = _peakHour!.percentage.toStringAsFixed(0);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Peak Hour',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Row(
+            children: [
+              Icon(
+                Icons.schedule,
+                size: 14,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '${_peakHour!.formattedHour} ($percentage%)',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build day-of-week patterns section
+  Widget _buildDayPatternSection(BuildContext context) {
+    if (_dayPatterns.isEmpty || _weekdayWeekendComparison == null) {
+      return const SizedBox.shrink();
+    }
+
+    final comparison = _weekdayWeekendComparison!;
+    final topDay = _dayPatterns.firstOrNull;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Weekly Pattern',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (topDay != null)
+                Text(
+                  'Highest: ${topDay.dayName}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Weekday: ${comparison.weekdayAvg.toStringAsFixed(1)}',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                  Text(
+                    'Weekend: ${comparison.weekendAvg.toStringAsFixed(1)}',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_timeSinceLastHit == null) {
@@ -340,121 +456,127 @@ class _TimeSinceLastHitWidgetState
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Time since last hit header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.timer,
-                  size: 24,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Time Since Last Hit',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Time since last hit header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.timer,
+                    size: 24,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _formatDuration(_timeSinceLastHit!),
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+                  const SizedBox(width: 8),
+                  Text(
+                    'Time Since Last Hit',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Divider(color: Theme.of(context).colorScheme.outlineVariant),
-            const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Text(
+                _formatDuration(_timeSinceLastHit!),
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Divider(color: Theme.of(context).colorScheme.outlineVariant),
+              const SizedBox(height: 12),
 
-            // Count stats row
-            Row(
-              children: [
-                _buildStatCard(
-                  context,
-                  title: 'Today',
-                  value: '${_todayStats.count}',
-                  subtitle: 'hits',
-                ),
-                const SizedBox(width: 8),
-                _buildStatCard(
-                  context,
-                  title: 'This Week',
-                  value: '$_weekCount',
-                  subtitle: 'hits',
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+              // Count stats row
+              Row(
+                children: [
+                  _buildStatCard(
+                    context,
+                    title: 'Today',
+                    value: '${_todayStats.count}',
+                    subtitle: 'hits',
+                  ),
+                  const SizedBox(width: 8),
+                  _buildStatCard(
+                    context,
+                    title: 'This Week',
+                    value: '$_weekCount',
+                    subtitle: 'hits',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
 
-            // Average duration stats row
-            Row(
-              children: [
-                _buildStatCard(
-                  context,
-                  title: 'Avg Today',
-                  value: _todayStats.avgDuration.toStringAsFixed(1),
-                  subtitle: 'sec/hit',
-                  trendWidget: _buildTrendIndicator(todayVsYesterdayTrend),
-                ),
-                const SizedBox(width: 8),
-                _buildStatCard(
-                  context,
-                  title: 'Avg Yesterday',
-                  value: _yesterdayStats.avgDuration.toStringAsFixed(1),
-                  subtitle: 'sec/hit',
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+              // Average duration stats row
+              Row(
+                children: [
+                  _buildStatCard(
+                    context,
+                    title: 'Avg Today',
+                    value: _todayStats.avgDuration.toStringAsFixed(1),
+                    subtitle: 'sec/hit',
+                    trendWidget: _buildTrendIndicator(todayVsYesterdayTrend),
+                  ),
+                  const SizedBox(width: 8),
+                  _buildStatCard(
+                    context,
+                    title: 'Avg Yesterday',
+                    value: _yesterdayStats.avgDuration.toStringAsFixed(1),
+                    subtitle: 'sec/hit',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
 
-            // Week average with trend comparison
-            Row(
-              children: [
-                _buildStatCard(
-                  context,
-                  title: 'Avg/Day (7d)',
-                  value: _weekStats.avgDuration.toStringAsFixed(1),
-                  subtitle: 'sec/day',
-                  trendWidget: _buildTrendIndicator(todayVsWeekTrend),
-                ),
-                const SizedBox(width: 8),
-                // Trend summary card
-                Expanded(
-                  child: Card(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Trend',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodySmall?.copyWith(
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+              // Week average with trend comparison
+              Row(
+                children: [
+                  _buildStatCard(
+                    context,
+                    title: 'Avg/Day (7d)',
+                    value: _weekStats.avgDuration.toStringAsFixed(1),
+                    subtitle: 'sec/day',
+                    trendWidget: _buildTrendIndicator(todayVsWeekTrend),
+                  ),
+                  const SizedBox(width: 8),
+                  // Trend summary card
+                  Expanded(
+                    child: Card(
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Trend',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          _buildTrendSummary(context, todayVsWeekTrend),
-                        ],
+                            const SizedBox(height: 4),
+                            _buildTrendSummary(context, todayVsWeekTrend),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+
+              // Pattern analysis sections
+              _buildPeakHourSection(context),
+              _buildDayPatternSection(context),
+            ],
+          ),
         ),
       ),
     );

@@ -705,5 +705,174 @@ void main() {
         expect(find.byIcon(Icons.trending_up), findsWidgets);
       });
     });
+
+    group('Pattern Analysis', () {
+      testWidgets('shows peak hour analysis', (tester) async {
+        final now = DateTime.now();
+        final records = [
+          // Multiple hits at 4 PM (peak)
+          LogRecord.create(
+            logId: 'log-1',
+            accountId: 'user-1',
+            eventAt: now
+                .subtract(const Duration(days: 3))
+                .copyWith(hour: 16, minute: 0, second: 0, millisecond: 0),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'log-2',
+            accountId: 'user-1',
+            eventAt: now
+                .subtract(const Duration(days: 2))
+                .copyWith(hour: 16, minute: 30, second: 0, millisecond: 0),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'log-3',
+            accountId: 'user-1',
+            eventAt: now
+                .subtract(const Duration(days: 1))
+                .copyWith(hour: 16, minute: 45, second: 0, millisecond: 0),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          // One hit at 10 AM
+          LogRecord.create(
+            logId: 'log-4',
+            accountId: 'user-1',
+            eventAt: now.copyWith(
+              hour: 10,
+              minute: 0,
+              second: 0,
+              millisecond: 0,
+            ),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Check for peak hour display
+        expect(find.text('Peak Hour'), findsOneWidget);
+        expect(find.byIcon(Icons.schedule), findsOneWidget);
+        // The format is now "4 PM (X%)" combined in one text widget
+        expect(find.textContaining('4 PM'), findsWidgets);
+      });
+
+      testWidgets('shows day of week patterns', (tester) async {
+        final now = DateTime.now();
+
+        // Create records spread across different days of the week
+        final records = <LogRecord>[];
+
+        // Add multiple records for different days
+        for (int i = 0; i < 10; i++) {
+          records.add(
+            LogRecord.create(
+              logId: 'log-$i',
+              accountId: 'user-1',
+              eventAt: now.subtract(Duration(days: i)),
+              eventType: EventType.vape,
+              duration: 5,
+              unit: Unit.seconds,
+            ),
+          );
+        }
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Check for weekly pattern display
+        expect(find.text('Weekly Pattern'), findsOneWidget);
+        // The format is now "Highest: DayName" combined in one text
+        expect(find.textContaining('Highest'), findsWidgets);
+      });
+
+      testWidgets('shows weekday vs weekend comparison', (tester) async {
+        final now = DateTime.now();
+
+        // Get Monday of current week
+        final monday = now.subtract(Duration(days: now.weekday - 1));
+
+        final records = <LogRecord>[];
+
+        // Add more records for weekdays
+        for (int i = 0; i < 3; i++) {
+          records.add(
+            LogRecord.create(
+              logId: 'log-wd-$i',
+              accountId: 'user-1',
+              eventAt: monday.add(
+                Duration(days: i),
+              ), // Monday, Tuesday, Wednesday
+              eventType: EventType.vape,
+              duration: 5,
+              unit: Unit.seconds,
+            ),
+          );
+        }
+
+        // Add fewer records for weekend
+        records.add(
+          LogRecord.create(
+            logId: 'log-we-1',
+            accountId: 'user-1',
+            eventAt: monday.add(const Duration(days: 5)), // Saturday
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Check for weekday/weekend comparison
+        // The format is now "Weekday: X.X" and "Weekend: X.X" combined
+        expect(find.textContaining('Weekday'), findsWidgets);
+        expect(find.textContaining('Weekend'), findsWidgets);
+      });
+    });
   });
 }

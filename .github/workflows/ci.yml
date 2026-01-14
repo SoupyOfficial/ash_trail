@@ -163,7 +163,7 @@ jobs:
             -exportPath ../build/ios/ipa \
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates \
-            OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db"
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
       # Cleanup
       - name: Clean up keychain and provisioning profile

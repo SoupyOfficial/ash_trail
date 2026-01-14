@@ -73,15 +73,27 @@ jobs:
         env:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
         run: |
-          # Create variables
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-
           # Import provisioning profile from secrets
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
-          # Apply provisioning profile
+          # Extract UUID from provisioning profile
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(/usr/bin/security cms -D -i $PP_PATH))
+          
+          # Install provisioning profile with UUID filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PP_UUID.mobileprovision
+          
+          echo "Installed provisioning profile with UUID: $PP_UUID"
+
+      # Configure Xcode project for manual signing
+      - name: Configure Xcode Signing
+        run: |
+          cd ios
+          # Disable automatic signing
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' Runner.xcodeproj/project.pbxproj
+          # Set provisioning profile spec
+          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = ""/PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.soup.smokeLog"/g' Runner.xcodeproj/project.pbxproj
 
       # Build Flutter iOS app
       - name: Build iOS App

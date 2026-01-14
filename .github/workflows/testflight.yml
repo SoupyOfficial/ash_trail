@@ -116,8 +116,13 @@ jobs:
             <string>app-store</string>
             <key>signingStyle</key>
             <string>manual</string>
-            <key>provisioningProfileSpecifier</key>
-            <string>match AppStore com.soup.smokeLog</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.soup.smokeLog</key>
+              <string>match AppStore com.soup.smokeLog</string>
+            </dict>
             <key>teamID</key>
             <string>DGQ5P34GS9</string>
             <key>stripSwiftSymbols</key>
@@ -135,13 +140,21 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.event.inputs.build_number || github.run_number }}
         run: |
+          # Build with explicit signing configuration
           flutter build ipa \
             --release \
             --build-number=$BUILD_NUMBER \
             --export-options-plist=ios/ExportOptions.plist \
             --obfuscate \
             --split-debug-info=build/app/infos \
-            --verbose 2>&1 | tee build.log
+            --verbose \
+            --export-method=app-store \
+            -- \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="match AppStore com.soup.smokeLog" \
+            DEVELOPMENT_TEAM=DGQ5P34GS9 \
+            2>&1 | tee build.log
 
       # Upload to TestFlight
       - name: Upload to TestFlight

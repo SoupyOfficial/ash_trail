@@ -31,6 +31,8 @@ jobs:
         run: flutter build web --release
 
   ios:
+    # Only run on non-fork PRs and pushes to avoid secrets issues and reduce costs
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     runs-on: macos-latest
     permissions:
       contents: read
@@ -47,15 +49,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # Setup Ruby for Fastlane (matching TestFlight setup)
+      # Setup Ruby (without bundler-cache since no Gemfile exists)
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: ios
 
-      # Install CocoaPods dependencies (matching TestFlight setup)
+      # Install CocoaPods dependencies
       - name: Install CocoaPods
         run: |
           cd ios
@@ -63,6 +63,7 @@ jobs:
 
       # Install Apple certificate and provisioning profile
       - name: Install Apple Certificate
+        if: ${{ secrets.BUILD_CERTIFICATE_BASE64 != '' }}
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -95,6 +96,7 @@ jobs:
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
 
       - name: Install Provisioning Profile
+        if: ${{ secrets.PROVISIONING_PROFILE_BASE64 != '' }}
         id: install-profile
         env:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
@@ -118,13 +120,14 @@ jobs:
           
           echo "Installed provisioning profile with UUID: $PP_UUID"
 
-      # Build Flutter iOS app with code signing (matching TestFlight)
+      # Build Flutter iOS app with code signing
       - name: Build iOS App
         run: |
           # Build the Flutter iOS app without automatic signing (xcodebuild will sign)
           flutter build ios --release --no-codesign
           
           # Archive with manual signing using xcodebuild
+          # Only apply code signing settings to Runner target, not Pod dependencies
           cd ios
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
@@ -134,9 +137,10 @@ jobs:
             -destination 'generic/platform=iOS' \
             -allowProvisioningUpdates \
             CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="match AppStore com.soup.smokeLog" \
+            CODE_SIGN_IDENTITY[sdk=iphoneos*]="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]="match AppStore com.soup.smokeLog" \
             DEVELOPMENT_TEAM=DGQ5P34GS9 \
+            OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
             archive
 
       # Cleanup

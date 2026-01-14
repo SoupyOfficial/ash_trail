@@ -9,11 +9,11 @@
     <key>signingStyle</key>
     <string>manual</string>
     <key>teamID</key>
-    <string>YOUR_TEAM_ID</string>
+    <string>DGQ5P34GS9</string>
     <key>provisioningProfiles</key>
     <dict>
         <key>com.soup.smokeLog</key>
-        <string>YOUR_PROVISIONING_PROFILE_NAME</string>
+        <string>match AppStore com.soup.smokeLog</string>
     </dict>
     <key>uploadSymbols</key>
     <true/>

@@ -57,7 +57,7 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # Import certificate from secrets
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
 
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -75,10 +75,13 @@ jobs:
         run: |
           # Import provisioning profile from secrets
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > $PP_PATH
 
+          # Verify file was created
+          ls -la $PP_PATH
+          
           # Extract UUID from provisioning profile
-          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(/usr/bin/security cms -D -i $PP_PATH))
+          PP_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(/usr/bin/security cms -D -i $PP_PATH)")
           
           # Install provisioning profile with UUID filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles

@@ -67,7 +67,17 @@ class LogRecordTile extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
         leading: _buildEventIcon(),
-        title: Text(_formatEventType(record.eventType)),
+        title: Row(
+          children: [
+            Expanded(child: Text(_formatEventType(record.eventType))),
+            if (record.hasLocation)
+              Icon(
+                Icons.location_on,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+              ),
+          ],
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -240,10 +250,47 @@ class LogRecordTile extends ConsumerWidget {
                     ),
                   if (record.note != null && record.note!.isNotEmpty)
                     _buildDetailRow('Note', record.note!),
-                  if (record.latitude != null && record.longitude != null)
+                  if (record.moodRating != null)
                     _buildDetailRow(
-                      'Location',
-                      '${record.latitude!.toStringAsFixed(4)}, ${record.longitude!.toStringAsFixed(4)}',
+                      'Mood',
+                      '${record.moodRating!.toStringAsFixed(1)}/10',
+                    ),
+                  if (record.physicalRating != null)
+                    _buildDetailRow(
+                      'Physical',
+                      '${record.physicalRating!.toStringAsFixed(1)}/10',
+                    ),
+                  if (record.reasons != null && record.reasons!.isNotEmpty)
+                    _buildDetailRow(
+                      'Reasons',
+                      record.reasons!.map((r) => r.displayName).join(', '),
+                    ),
+                  if (record.latitude != null && record.longitude != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildDetailRow(
+                          'Location',
+                          'Lat: ${record.latitude!.toStringAsFixed(6)}\nLon: ${record.longitude!.toStringAsFixed(6)}',
+                        ),
+                        const SizedBox(height: 4),
+                        TextButton.icon(
+                          onPressed: () {
+                            // Open in maps - you can customize this URL
+                            final url =
+                                'https://www.google.com/maps/search/?api=1&query=${record.latitude},${record.longitude}';
+                            // For now just show a snackbar - you'd need url_launcher for actual opening
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Map URL: $url')),
+                            );
+                          },
+                          icon: const Icon(Icons.map, size: 16),
+                          label: const Text(
+                            'View on Map',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
                     ),
                   _buildDetailRow('Status', record.syncState.name),
                   _buildDetailRow(

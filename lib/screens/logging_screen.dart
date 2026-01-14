@@ -4,6 +4,7 @@ import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../widgets/backdate_dialog.dart';
 import '../services/log_record_service.dart';
+import '../services/location_service.dart';
 import 'dart:async';
 
 /// Dedicated logging screen for detailed event entry
@@ -90,6 +91,10 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
   Timer? _recordingTimer;
   Duration _recordedDuration = Duration.zero;
   bool _isRecording = false;
+
+  // Location state
+  bool _isFetchingLocation = false;
+  final LocationService _locationService = LocationService();
 
   @override
   void dispose() {
@@ -550,6 +555,95 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+
+            // Location
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          'Location (optional)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (draft.latitude != null && draft.longitude != null)
+                          IconButton(
+                            icon: const Icon(Icons.clear, size: 20),
+                            onPressed:
+                                () => draftNotifier.setLocation(null, null),
+                            tooltip: 'Clear location',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (draft.latitude != null && draft.longitude != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Lat: ${draft.latitude!.toStringAsFixed(6)}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  Text(
+                                    'Lon: ${draft.longitude!.toStringAsFixed(6)}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      FilledButton.icon(
+                        onPressed:
+                            _isFetchingLocation
+                                ? null
+                                : () => _captureLocation(draftNotifier),
+                        icon:
+                            _isFetchingLocation
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Icon(Icons.my_location),
+                        label: Text(
+                          _isFetchingLocation
+                              ? 'Getting location...'
+                              : 'Capture Current Location',
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Submit buttons
@@ -670,6 +764,73 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
       (match) => ' ${match.group(0)}',
     );
     return result[0].toUpperCase() + result.substring(1);
+  }
+
+  Future<void> _captureLocation(LogDraftNotifier draftNotifier) async {
+    setState(() => _isFetchingLocation = true);
+
+    try {
+      final position = await _locationService.getCurrentLocation();
+
+      if (position != null) {
+        draftNotifier.setLocation(position.latitude, position.longitude);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location captured successfully'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          // Show dialog explaining permission needed
+          final shouldRequest = await showDialog<bool>(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: const Text('Location Permission'),
+                  content: const Text(
+                    'Ash Trail needs location permission to tag your logs with location data. '
+                    'This helps you track where events occur.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Grant Permission'),
+                    ),
+                  ],
+                ),
+          );
+
+          if (shouldRequest == true && mounted) {
+            final granted = await _locationService.requestLocationPermission();
+            if (granted && mounted) {
+              // Try again after permission granted
+              _captureLocation(draftNotifier);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error getting location: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isFetchingLocation = false);
+      }
+    }
   }
 
   Future<void> _submitLog(LogDraft draft) async {

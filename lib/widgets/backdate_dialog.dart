@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/enums.dart';
 import '../services/log_record_service.dart';
 import '../services/validation_service.dart';
+import '../services/location_service.dart';
 import '../providers/account_provider.dart';
 
 /// Dialog for backdating a log entry
@@ -31,6 +32,10 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
   final _notesController = TextEditingController();
   double? _moodRating;
   double? _physicalRating;
+  double? _latitude;
+  double? _longitude;
+  bool _isFetchingLocation = false;
+  final LocationService _locationService = LocationService();
 
   @override
   void initState() {
@@ -105,6 +110,8 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
         unit: _unit,
         eventAt: _selectedDateTime,
         note: _notesController.text.isEmpty ? null : _notesController.text,
+        latitude: _latitude,
+        longitude: _longitude,
       );
 
       if (mounted) {
@@ -345,6 +352,71 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                 maxLines: 2,
               ),
 
+              const SizedBox(height: 16),
+
+              // Location
+              Text('Location (optional)', style: theme.textTheme.labelMedium),
+              const SizedBox(height: 8),
+              if (_latitude != null && _longitude != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withOpacity(0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Lat: ${_latitude!.toStringAsFixed(6)}',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            Text(
+                              'Lon: ${_longitude!.toStringAsFixed(6)}',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () {
+                          setState(() {
+                            _latitude = null;
+                            _longitude = null;
+                          });
+                        },
+                        tooltip: 'Clear location',
+                      ),
+                    ],
+                  ),
+                )
+              else
+                OutlinedButton.icon(
+                  onPressed: _isFetchingLocation ? null : _captureLocation,
+                  icon:
+                      _isFetchingLocation
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.my_location),
+                  label: Text(
+                    _isFetchingLocation
+                        ? 'Getting location...'
+                        : 'Capture Current Location',
+                  ),
+                ),
+
               const SizedBox(height: 24),
 
               // Actions
@@ -386,6 +458,74 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
       return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
     } else {
       return 'just now';
+    }
+  }
+
+  Future<void> _captureLocation() async {
+    setState(() => _isFetchingLocation = true);
+
+    try {
+      final position = await _locationService.getCurrentLocation();
+
+      if (position != null) {
+        setState(() {
+          _latitude = position.latitude;
+          _longitude = position.longitude;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location captured successfully'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          // Show dialog explaining permission needed
+          final shouldRequest = await showDialog<bool>(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: const Text('Location Permission'),
+                  content: const Text(
+                    'Ash Trail needs location permission to tag your logs with location data.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Grant Permission'),
+                    ),
+                  ],
+                ),
+          );
+
+          if (shouldRequest == true && mounted) {
+            final granted = await _locationService.requestLocationPermission();
+            if (granted && mounted) {
+              _captureLocation();
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error getting location: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isFetchingLocation = false);
+      }
     }
   }
 }

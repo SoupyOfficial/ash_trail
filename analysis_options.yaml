@@ -14,6 +14,10 @@ analyzer:
     # Suppress deprecation warnings for DropdownButtonFormField 'value' parameter
     # This is deprecated in Flutter 3.33+ but not available in earlier versions
     deprecated_member_use: ignore
+    # Suppress info-level warnings for the following rules
+    dangling_library_doc_comments: ignore
+    use_super_parameters: ignore
+    sort_child_properties_last: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the
@@ -29,10 +33,6 @@ linter:
   rules:
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
-    dangling_library_doc_comments: ignore
-    unnecessary_import: ignore
-    use_super_parameters: ignore
-    sort_child_properties_last: ignore
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

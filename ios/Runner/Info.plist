@@ -65,5 +65,11 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app requires access to your local network to sync data and communicate with devices on your network.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ash Trail needs access to your location to log hiking trails and activities. Your location is only used when you explicitly request it and helps track your outdoor adventures.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Ash Trail needs access to your location to log hiking trails and activities. Your location is only used when you explicitly request it and helps track your outdoor adventures.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Ash Trail needs access to your location to log hiking trails and activities. Your location is only used when you explicitly request it and helps track your outdoor adventures.</string>
 </dict>
 </plist>

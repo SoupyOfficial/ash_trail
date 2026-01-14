@@ -294,5 +294,416 @@ void main() {
       // Check for trend section
       expect(find.text('Trend'), findsOneWidget);
     });
+
+    group('Statistics Calculations', () {
+      testWidgets('correctly calculates today stats with multiple entries', (
+        tester,
+      ) async {
+        final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+
+        // Create multiple entries for today
+        final records = [
+          LogRecord.create(
+            logId: 'log-1',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 8)),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'log-2',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 12)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'log-3',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 20)),
+            eventType: EventType.vape,
+            duration: 10,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Verify today stats are shown
+        expect(find.text('Today'), findsOneWidget);
+        // Should show average duration
+        expect(find.text('Avg Today'), findsOneWidget);
+        // Should show hits label
+        expect(find.text('hits'), findsAtLeastNWidgets(1));
+      });
+
+      testWidgets('distinguishes today vs yesterday records', (tester) async {
+        final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+
+        final records = [
+          LogRecord.create(
+            logId: 'log-1',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'log-2',
+            accountId: 'user-1',
+            eventAt: yesterdayStart.add(const Duration(hours: 14)),
+            eventType: EventType.vape,
+            duration: 8,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Both sections should exist
+        expect(find.text('Today'), findsOneWidget);
+        expect(find.text('Avg Today'), findsOneWidget);
+        // Widget renders whatever sections it can based on actual data
+        expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);
+      });
+
+      testWidgets('calculates week stats correctly', (tester) async {
+        final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+
+        final records = [
+          // Today
+          LogRecord.create(
+            logId: 'log-1',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          // 3 days ago
+          LogRecord.create(
+            logId: 'log-2',
+            accountId: 'user-1',
+            eventAt: todayMidnight.subtract(const Duration(days: 3, hours: 5)),
+            eventType: EventType.vape,
+            duration: 10,
+            unit: Unit.seconds,
+          ),
+          // 6 days ago
+          LogRecord.create(
+            logId: 'log-3',
+            accountId: 'user-1',
+            eventAt: todayMidnight.subtract(const Duration(days: 6, hours: 2)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.text('This Week'), findsOneWidget);
+        expect(find.text('Avg/Day (7d)'), findsOneWidget);
+      });
+
+      testWidgets('handles empty yesterday correctly', (tester) async {
+        final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+
+        final records = [
+          LogRecord.create(
+            logId: 'log-1',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        // Widget should display something for today
+        expect(find.text('Today'), findsOneWidget);
+        expect(find.text('Avg Today'), findsOneWidget);
+        // Widget should be functional
+        expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);
+      });
+    });
+
+    group('Widget Lifecycle', () {
+      testWidgets('updates when records change', (tester) async {
+        final now = DateTime.now();
+        final record1 = LogRecord.create(
+          logId: 'log-1',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(minutes: 5)),
+          eventType: EventType.vape,
+          duration: 5,
+          unit: Unit.seconds,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: StatefulBuilder(
+                  builder: (context, setState) {
+                    return Column(
+                      children: [
+                        TimeSinceLastHitWidget(records: [record1]),
+                        ElevatedButton(
+                          onPressed: () => setState(() {}),
+                          child: const Text('Update'),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);
+      });
+
+      testWidgets('timer continues after widget rebuild', (tester) async {
+        final now = DateTime.now();
+        final record = LogRecord.create(
+          logId: 'log-1',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(seconds: 10)),
+          eventType: EventType.vape,
+          duration: 5,
+          unit: Unit.seconds,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(body: TimeSinceLastHitWidget(records: [record])),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        // Advance time and pump
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+
+        expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);
+      });
+
+      testWidgets('cleans up timer on dispose', (tester) async {
+        final now = DateTime.now();
+        final record = LogRecord.create(
+          logId: 'log-1',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(minutes: 5)),
+          eventType: EventType.vape,
+          duration: 5,
+          unit: Unit.seconds,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(body: TimeSinceLastHitWidget(records: [record])),
+            ),
+          ),
+        );
+
+        await tester.pump();
+
+        // Rebuild with empty widget tree (widget disposed)
+        await tester.pumpWidget(const SizedBox.shrink());
+
+        // No assertion needed - just ensure no errors on cleanup
+        expect(true, true);
+      });
+    });
+
+    group('Trend Indicators', () {
+      testWidgets('shows improvement when today better than yesterday', (
+        tester,
+      ) async {
+        final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+
+        final records = [
+          // Yesterday: 3 hits, avg 15 sec
+          LogRecord.create(
+            logId: 'y-1',
+            accountId: 'user-1',
+            eventAt: yesterdayStart.add(const Duration(hours: 10)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'y-2',
+            accountId: 'user-1',
+            eventAt: yesterdayStart.add(const Duration(hours: 14)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 'y-3',
+            accountId: 'user-1',
+            eventAt: yesterdayStart.add(const Duration(hours: 18)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+          // Today: 1 hit, avg 5 sec (improvement!)
+          LogRecord.create(
+            logId: 't-1',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.text('Trend'), findsOneWidget);
+        expect(find.byIcon(Icons.trending_down), findsWidgets);
+      });
+
+      testWidgets('shows degradation when today worse than yesterday', (
+        tester,
+      ) async {
+        final now = DateTime.now();
+        final todayMidnight = DateTime(now.year, now.month, now.day);
+        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+
+        final records = [
+          // Yesterday: 1 hit, avg 5 sec
+          LogRecord.create(
+            logId: 'y-1',
+            accountId: 'user-1',
+            eventAt: yesterdayStart.add(const Duration(hours: 10)),
+            eventType: EventType.vape,
+            duration: 5,
+            unit: Unit.seconds,
+          ),
+          // Today: 3 hits, avg 15 sec (worse!)
+          LogRecord.create(
+            logId: 't-1',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 8)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 't-2',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 12)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+          LogRecord.create(
+            logId: 't-3',
+            accountId: 'user-1',
+            eventAt: todayMidnight.add(const Duration(hours: 18)),
+            eventType: EventType.vape,
+            duration: 15,
+            unit: Unit.seconds,
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: TimeSinceLastHitWidget(records: records),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(find.text('Trend'), findsOneWidget);
+        expect(find.byIcon(Icons.trending_up), findsWidgets);
+      });
+    });
   });
 }

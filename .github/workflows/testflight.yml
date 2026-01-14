@@ -67,7 +67,16 @@ jobs:
           # Import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          
+          # Set the keychain as default and search list
+          security default-keychain -s $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH $(security list-keychain -d user | sed s/\"//g)
+
+          # Verify certificate was imported
+          security find-identity -v -p codesigning $KEYCHAIN_PATH
+          
+          # Export keychain path for later use
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
 
       - name: Install Provisioning Profile
         id: install-profile
@@ -93,28 +102,35 @@ jobs:
           
           echo "Installed provisioning profile with UUID: $PP_UUID"
 
-      # Configure Xcode project for manual signing
-      - name: Configure Xcode Signing
+      # Create ExportOptions.plist for code signing
+      - name: Create ExportOptions.plist
         env:
           PROVISIONING_PROFILE_UUID: ${{ steps.install-profile.outputs.uuid }}
         run: |
-          cd ios
-          # Set build settings for manual signing
-          xcrun xcodebuild \
-            -project Runner.xcodeproj \
-            -scheme Runner \
-            -configuration Release \
-            -showBuildSettings | grep -E "CODE_SIGN|PROVISIONING" || true
+          cat > ios/ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfileSpecifier</key>
+            <string>match AppStore com.soup.smokeLog</string>
+            <key>teamID</key>
+            <string>DGQ5P34GS9</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>thinning</key>
+            <string>&lt;none&gt;</string>
+          </dict>
+          </plist>
+          EOF
           
-          # Disable automatic signing in project
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' Runner.xcodeproj/project.pbxproj
-          
-          # Set provisioning profile specifier
-          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = ""/PROVISIONING_PROFILE_SPECIFIER = "match AppStore com.soup.smokeLog"/g' Runner.xcodeproj/project.pbxproj
-          
-          echo "Configured Xcode signing with provisioning profile UUID: $PROVISIONING_PROFILE_UUID"
+          cat ios/ExportOptions.plist
 
-      # Build Flutter iOS app with signing parameters
+      # Build Flutter iOS app with code signing
       - name: Build iOS App
         env:
           BUILD_NUMBER: ${{ github.event.inputs.build_number || github.run_number }}
@@ -123,7 +139,9 @@ jobs:
             --release \
             --build-number=$BUILD_NUMBER \
             --export-options-plist=ios/ExportOptions.plist \
-            --verbose
+            --obfuscate \
+            --split-debug-info=build/app/infos \
+            --verbose 2>&1 | tee build.log
 
       # Upload to TestFlight
       - name: Upload to TestFlight

@@ -148,7 +148,11 @@ void main() {
       final durationText =
           textWidgets
               .firstWhere(
-                (w) => w.data != null && w.data!.contains('m'),
+                (w) =>
+                    w.data != null &&
+                    w.data!.contains('m') &&
+                    !w.data!.contains('Avg') &&
+                    !w.data!.contains('hits'),
                 orElse: () => const Text(''),
               )
               .data;
@@ -183,6 +187,112 @@ void main() {
       expect(find.text('Time Since Last Hit'), findsOneWidget);
       // Should show some time in seconds
       expect(find.textContaining('s'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('shows today and week counts', (tester) async {
+      final now = DateTime.now();
+      final records = [
+        LogRecord.create(
+          logId: 'log-1',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(minutes: 10)),
+          eventType: EventType.vape,
+          duration: 5,
+          unit: Unit.seconds,
+        ),
+        LogRecord.create(
+          logId: 'log-2',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(minutes: 30)),
+          eventType: EventType.vape,
+          duration: 10,
+          unit: Unit.seconds,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: TimeSinceLastHitWidget(records: records),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Check for stat labels
+      expect(find.text('Today'), findsOneWidget);
+      expect(find.text('This Week'), findsOneWidget);
+      expect(find.text('hits'), findsNWidgets(2)); // Today hits and Week hits
+    });
+
+    testWidgets('shows average duration stats', (tester) async {
+      final now = DateTime.now();
+      final records = [
+        LogRecord.create(
+          logId: 'log-1',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(minutes: 10)),
+          eventType: EventType.vape,
+          duration: 5,
+          unit: Unit.seconds,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: TimeSinceLastHitWidget(records: records),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Check for avg duration labels
+      expect(find.text('Avg Today'), findsOneWidget);
+      expect(find.text('Avg Yesterday'), findsOneWidget);
+      expect(find.text('Avg/Day (7d)'), findsOneWidget);
+      expect(find.text('sec/hit'), findsNWidgets(2)); // Today and Yesterday avg
+    });
+
+    testWidgets('shows trend indicator', (tester) async {
+      final now = DateTime.now();
+      final records = [
+        LogRecord.create(
+          logId: 'log-1',
+          accountId: 'user-1',
+          eventAt: now.subtract(const Duration(minutes: 10)),
+          eventType: EventType.vape,
+          duration: 5,
+          unit: Unit.seconds,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: TimeSinceLastHitWidget(records: records),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Check for trend section
+      expect(find.text('Trend'), findsOneWidget);
     });
   });
 }

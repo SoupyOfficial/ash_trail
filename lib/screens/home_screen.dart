@@ -7,11 +7,7 @@ import '../models/enums.dart';
 import '../models/log_record.dart';
 import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart'
-    show
-        logRecordStatsProvider,
-        LogRecordsParams,
-        activeAccountLogRecordsProvider,
-        logRecordNotifierProvider;
+    show activeAccountLogRecordsProvider, logRecordNotifierProvider;
 import '../providers/sync_provider.dart';
 import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
@@ -163,18 +159,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     String accountName,
   ) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
-    final allTimeStatsAsync = ref.watch(
-      logRecordStatsProvider(LogRecordsParams(accountId: null)),
-    );
-    final sevenDayStatsAsync = ref.watch(
-      logRecordStatsProvider(
-        LogRecordsParams(
-          accountId: null,
-          startDate: DateTime.now().subtract(const Duration(days: 7)),
-          endDate: DateTime.now(),
-        ),
-      ),
-    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -202,16 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Statistics cards - All-time and 7-day
-          _buildStatisticsSection(
-            context,
-            ref,
-            allTimeStatsAsync,
-            sevenDayStatsAsync,
-          ),
-          const SizedBox(height: 16),
-
-          // Time since last hit clock
+          // Time since last hit clock with integrated stats
           logRecordsAsync.when(
             data: (records) => TimeSinceLastHitWidget(records: records),
             loading: () => const SizedBox.shrink(),
@@ -406,91 +381,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStatisticsSection(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue<Map<String, dynamic>> allTimeStatsAsync,
-    AsyncValue<Map<String, dynamic>> sevenDayStatsAsync,
-  ) {
-    return Column(
-      children: [
-        // All-time statistics
-        allTimeStatsAsync.when(
-          data: (stats) => _buildStatisticsRow(context, 'All-Time', stats),
-          loading:
-              () => _buildStatisticsRow(context, 'All-Time', {
-                'totalCount': 0,
-                'totalDuration': 0.0,
-              }),
-          error: (error, _) => Text('Error loading stats: $error'),
-        ),
-        const SizedBox(height: 8),
-        // 7-day statistics
-        sevenDayStatsAsync.when(
-          data: (stats) => _buildStatisticsRow(context, 'Last 7 Days', stats),
-          loading:
-              () => _buildStatisticsRow(context, 'Last 7 Days', {
-                'totalCount': 0,
-                'totalDuration': 0.0,
-              }),
-          error: (error, _) => Text('Error loading stats: $error'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatisticsRow(
-    BuildContext context,
-    String label,
-    Map<String, dynamic> stats,
-  ) {
-    return Row(
-      children: [
-        Expanded(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    '${stats['totalCount'] ?? 0}',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$label: Count',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    (stats['totalDuration'] as num?)?.toStringAsFixed(1) ?? '0',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$label: Duration (s)',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 

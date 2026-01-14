@@ -1,0 +1,51 @@
+#!/bin/bash
+# Pre-push hook for Flutter project
+# Matches TestFlight CI workflow: pub get -> test -> pods -> build iOS
+
+set -e  # Exit on any error
+
+echo "🚀 Running pre-push checks..."
+
+# Check if we're pushing to main branch (TestFlight workflow trigger)
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$current_branch" == "main" ]]; then
+    echo "📱 Verifying iOS build for TestFlight deployment..."
+    
+    # Step 1: Install dependencies (matches CI)
+    echo "📦 Running flutter pub get..."
+    flutter pub get
+    
+    # Step 2: Run tests (matches CI)
+    echo "🧪 Running flutter test..."
+    if ! flutter test; then
+        echo "❌ Tests failed. Fix tests before pushing to main."
+        exit 1
+    fi
+    
+    # Step 3: Install CocoaPods dependencies (matches CI)
+    echo "🍎 Installing CocoaPods dependencies..."
+    cd ios
+    if ! pod install --repo-update; then
+        echo "❌ CocoaPods installation failed."
+        cd ..
+        exit 1
+    fi
+    cd ..
+    
+    # Step 4: Build iOS without code signing (matches CI build step)
+    # This catches deployment target issues and compile errors
+    echo "🔨 Building iOS release (no code signing)..."
+    if ! flutter build ios --release --no-codesign; then
+        echo "❌ iOS build failed. This would fail in TestFlight CI/CD."
+        echo "Common issues:"
+        echo "  - Check ios/Podfile for deployment target configuration"
+        echo "  - Run 'cd ios && pod install' to update pods"
+        echo "  - Verify all pods support iOS 13.0+"
+        exit 1
+    fi
+    
+    echo "✅ iOS build successful! Ready for TestFlight deployment."
+fi
+
+echo "✅ All pre-push checks passed!"
+exit 0

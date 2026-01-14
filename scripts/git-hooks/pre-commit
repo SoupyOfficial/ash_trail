@@ -1,0 +1,31 @@
+#!/bin/bash
+# Pre-commit hook for Flutter project
+# Matches GitHub Actions workflow: pub get -> test -> analyze
+
+set -e  # Exit on any error
+
+echo "🔍 Running pre-commit checks..."
+
+# Install dependencies (matches CI workflow)
+echo "📦 Running flutter pub get..."
+if ! flutter pub get; then
+    echo "❌ Flutter pub get failed."
+    exit 1
+fi
+
+# Run Flutter tests (matches CI workflow order)
+echo "🧪 Running flutter test..."
+if ! flutter test; then
+    echo "❌ Flutter tests failed. Please fix the tests before committing."
+    exit 1
+fi
+
+# Run Flutter analyze
+echo "📊 Running flutter analyze..."
+if ! flutter analyze; then
+    echo "❌ Flutter analyze failed. Please fix the issues before committing."
+    exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"
+exit 0

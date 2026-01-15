@@ -135,8 +135,8 @@ jobs:
             -destination 'generic/platform=iOS' \
             -allowProvisioningUpdates \
             CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY[sdk=iphoneos*]="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]="match AppStore com.soup.smokeLog" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="match AppStore com.soup.smokeLog" \
             DEVELOPMENT_TEAM=DGQ5P34GS9 \
             OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
             archive

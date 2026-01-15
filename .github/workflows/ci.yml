@@ -118,28 +118,52 @@ jobs:
           
           echo "Installed provisioning profile with UUID: $PP_UUID"
 
-      # Build Flutter iOS app with code signing
+      # Build Flutter iOS app with code signing  
       - name: Build iOS App
         run: |
-          # Build the Flutter iOS app without automatic signing (xcodebuild will sign)
+          # Build the Flutter iOS app without automatic signing
           flutter build ios --release --no-codesign
           
-          # Archive with manual signing using xcodebuild
-          # Only apply code signing settings to Runner target, not Pod dependencies
+          # Create export options plist for code signing
           cd ios
+          cat > ExportOptions.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>DGQ5P34GS9</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.soup.smokeLog</key>
+              <string>match AppStore com.soup.smokeLog</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+          
+          # Archive the app
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -archivePath ../build/ios/archive/Runner.xcarchive \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY[sdk=iphoneos*]="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]="match AppStore com.soup.smokeLog" \
-            DEVELOPMENT_TEAM=DGQ5P34GS9 \
-            OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/app-signing.keychain-db" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
             archive
+          
+          # Export the archive with code signing
+          xcodebuild -exportArchive \
+            -archivePath ../build/ios/archive/Runner.xcarchive \
+            -exportPath ../build/ios/ipa \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
       # Cleanup
       - name: Clean up keychain and provisioning profile

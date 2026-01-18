@@ -1,6 +1,7 @@
 import 'enums.dart';
 
 /// Account represents a user identity in the system per design doc 4.2.1
+/// Supports multi-account sessions - multiple accounts can be logged in simultaneously
 /// Fields: id, remoteId?, email, displayName, firstName?, lastName?,
 /// createdAt, lastModifiedAt
 class Account {
@@ -27,8 +28,14 @@ class Account {
   /// Authentication provider used
   late AuthProvider authProvider;
 
-  /// Currently selected account for logging
+  /// Currently selected account for viewing/logging data
+  /// In multi-account mode, this indicates which account's data is displayed
   late bool isActive;
+
+  /// Whether this account has a valid authenticated session
+  /// Multiple accounts can be logged in (isLoggedIn=true) simultaneously
+  /// but only one is active (isActive=true) for data viewing
+  late bool isLoggedIn;
 
   late DateTime createdAt;
 
@@ -36,6 +43,9 @@ class Account {
   DateTime? lastModifiedAt;
 
   DateTime? lastSyncedAt;
+
+  /// Last time this account was actively used (for session ordering)
+  DateTime? lastAccessedAt;
 
   /// Currently active profile ID (if using multiple profiles)
   String? activeProfileId;
@@ -45,7 +55,9 @@ class Account {
   String? refreshToken;
   DateTime? tokenExpiresAt;
 
-  Account();
+  Account() {
+    isLoggedIn = false;
+  }
 
   Account.create({
     required this.userId,
@@ -57,9 +69,11 @@ class Account {
     this.photoUrl,
     this.authProvider = AuthProvider.anonymous,
     this.isActive = false,
+    this.isLoggedIn = false,
     DateTime? createdAt,
     this.lastModifiedAt,
     this.lastSyncedAt,
+    this.lastAccessedAt,
     this.activeProfileId,
     this.accessToken,
     this.refreshToken,
@@ -79,15 +93,17 @@ class Account {
     String? photoUrl,
     AuthProvider? authProvider,
     bool? isActive,
+    bool? isLoggedIn,
     DateTime? createdAt,
     DateTime? lastModifiedAt,
     DateTime? lastSyncedAt,
+    DateTime? lastAccessedAt,
     String? activeProfileId,
     String? accessToken,
     String? refreshToken,
     DateTime? tokenExpiresAt,
   }) {
-    return Account.create(
+    final account = Account.create(
       userId: userId ?? this.userId,
       remoteId: remoteId ?? this.remoteId,
       email: email ?? this.email,
@@ -97,18 +113,31 @@ class Account {
       photoUrl: photoUrl ?? this.photoUrl,
       authProvider: authProvider ?? this.authProvider,
       isActive: isActive ?? this.isActive,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       createdAt: createdAt ?? this.createdAt,
       lastModifiedAt: lastModifiedAt ?? this.lastModifiedAt,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      lastAccessedAt: lastAccessedAt ?? this.lastAccessedAt,
       activeProfileId: activeProfileId ?? this.activeProfileId,
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
       tokenExpiresAt: tokenExpiresAt ?? this.tokenExpiresAt,
-    )..id = id;
+    );
+    account.id = id;
+    return account;
   }
 
   /// Check if this is an anonymous account
   bool get isAnonymous => authProvider == AuthProvider.anonymous;
+
+  /// Check if session is valid (has refresh token that hasn't expired)
+  bool get hasValidSession {
+    if (isAnonymous) return isLoggedIn;
+    if (refreshToken == null) return false;
+    // If no expiry set, assume valid
+    if (tokenExpiresAt == null) return true;
+    return tokenExpiresAt!.isAfter(DateTime.now());
+  }
 
   /// Get full name from firstName and lastName
   String? get fullName {

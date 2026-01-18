@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../models/account.dart';
 import 'account_repository_hive.dart';
 
@@ -32,7 +33,19 @@ abstract class AccountRepository {
   Stream<List<Account>> watchAll();
 }
 
-/// Factory to create AccountRepository using Hive
+/// Factory to create AccountRepository using Hive (singleton pattern)
 AccountRepository createAccountRepository([dynamic context]) {
-  return AccountRepositoryHive(context as Map<String, dynamic>);
+  debugPrint(
+    '🏭 [createAccountRepository] Called with context type: ${context.runtimeType}',
+  );
+  if (context == null) {
+    debugPrint('   ⚠️ Context is NULL - this may cause issues!');
+  } else {
+    debugPrint(
+      '   ✅ Context is a Map with keys: ${(context as Map).keys.toList()}',
+    );
+  }
+  final repo = AccountRepositoryHive(context as Map<String, dynamic>);
+  debugPrint('   ✅ Created AccountRepositoryHive instance');
+  return repo;
 }

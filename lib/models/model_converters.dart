@@ -14,8 +14,14 @@ extension AccountWebConversion on Account {
       displayName: displayName,
       photoUrl: photoUrl,
       isActive: isActive,
+      isLoggedIn: isLoggedIn,
+      authProvider: authProvider.name,
       createdAt: createdAt,
       updatedAt: lastSyncedAt ?? createdAt,
+      lastAccessedAt: lastAccessedAt,
+      refreshToken: refreshToken,
+      accessToken: accessToken,
+      tokenExpiresAt: tokenExpiresAt,
     );
   }
 
@@ -26,8 +32,17 @@ extension AccountWebConversion on Account {
       displayName: web.displayName,
       photoUrl: web.photoUrl,
       isActive: web.isActive,
+      isLoggedIn: web.isLoggedIn,
+      authProvider: AuthProvider.values.firstWhere(
+        (p) => p.name == web.authProvider,
+        orElse: () => AuthProvider.anonymous,
+      ),
       createdAt: web.createdAt,
       lastSyncedAt: web.updatedAt,
+      lastAccessedAt: web.lastAccessedAt,
+      refreshToken: web.refreshToken,
+      accessToken: web.accessToken,
+      tokenExpiresAt: web.tokenExpiresAt,
     )..id = id ?? 0;
   }
 }

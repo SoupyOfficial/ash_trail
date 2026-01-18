@@ -19,6 +19,7 @@ class _FakeAccountIntegrationService extends Fake
     required String email,
     required String password,
     String? displayName,
+    bool makeActive = true,
   }) async {
     signUpCalls++;
     lastEmail = email;
@@ -30,7 +31,7 @@ class _FakeAccountIntegrationService extends Fake
   }
 
   @override
-  Future<Account> signInWithGoogle() async {
+  Future<Account> signInWithGoogle({bool makeActive = true}) async {
     googleCalls++;
     if (shouldThrowOnGoogle) {
       throw Exception('Google sign-in failed');
@@ -42,12 +43,16 @@ class _FakeAccountIntegrationService extends Fake
   Future<Account> signInWithEmail({
     required String email,
     required String password,
+    bool makeActive = true,
   }) async {
     return Account.create(userId: 'user-1', email: email);
   }
 
   @override
-  Future<Account> syncAccountFromFirebaseUser(firebaseUser) async {
+  Future<Account> syncAccountFromFirebaseUser(
+    firebaseUser, {
+    bool makeActive = true,
+  }) async {
     return Account.create(userId: 'user-1', email: 'user@example.com');
   }
 

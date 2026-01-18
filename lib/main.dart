@@ -20,32 +20,44 @@ final appInitStateProvider = StateProvider<AppInitState>((ref) {
 /// Main entry point for all platforms
 /// Uses Hive database for offline-first storage on web, iOS, Android, and desktop
 void main() async {
+  debugPrint('\n═══════════════════════════════════════════════════');
+  debugPrint('🚀 [main] APP START at ${DateTime.now()}');
+  debugPrint('═══════════════════════════════════════════════════\n');
+
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('✅ [main] WidgetsFlutterBinding initialized\n');
 
   try {
+    debugPrint('🔥 [main] Initializing Firebase...');
     // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    debugPrint('✅ [main] Firebase initialized\n');
   } catch (e) {
-    debugPrint('Firebase initialization error: $e');
+    debugPrint('❌ [main] Firebase initialization error: $e\n');
   }
 
   try {
+    debugPrint('📊 [main] Initializing CrashReportingService...');
     // Initialize crash reporting
     await CrashReportingService.initialize();
+    debugPrint('✅ [main] CrashReportingService initialized\n');
   } catch (e) {
-    debugPrint('Crash reporting initialization error: $e');
+    debugPrint('❌ [main] Crash reporting initialization error: $e\n');
   }
 
   try {
+    debugPrint('📂 [main] Initializing Hive database...');
     // Initialize Hive database
     final db = HiveDatabaseService();
     await db.initialize();
+    debugPrint('✅ [main] Hive database initialized\n');
   } catch (e) {
-    debugPrint('Hive database initialization error: $e');
+    debugPrint('❌ [main] Hive database initialization error: $e\n');
   }
 
+  debugPrint('🎬 [main] Starting ProviderScope and WidgetApp...\n');
   runApp(const ProviderScope(child: AshTrailApp()));
 }
 

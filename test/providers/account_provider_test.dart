@@ -7,6 +7,102 @@ import 'package:ash_trail/models/account.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/providers/account_provider.dart';
 import 'package:ash_trail/services/account_service.dart';
+import 'package:ash_trail/services/account_session_manager.dart';
+
+/// Mock AccountSessionManager for testing
+class MockAccountSessionManager implements AccountSessionManager {
+  final List<Account> _loggedInAccounts = [];
+  bool hasSessionsStored = false;
+  String? _activeUserId;
+  AccountService? _accountService; // Optional reference to mock account service
+  bool throwOnSetActive = false; // For testing error handling
+
+  void setAccountService(AccountService service) {
+    _accountService = service;
+  }
+
+  void setLoggedInAccounts(List<Account> accounts) {
+    _loggedInAccounts.clear();
+    _loggedInAccounts.addAll(accounts);
+  }
+
+  @override
+  Future<List<Account>> getLoggedInAccounts() async => _loggedInAccounts;
+
+  @override
+  Future<bool> hasLoggedInAccounts() async => _loggedInAccounts.isNotEmpty;
+
+  @override
+  Future<void> storeSession({
+    required String userId,
+    required String? refreshToken,
+    required String? accessToken,
+    DateTime? tokenExpiresAt,
+  }) async {
+    hasSessionsStored = true;
+  }
+
+  @override
+  Future<void> clearSession(String userId) async {
+    _loggedInAccounts.removeWhere((a) => a.userId == userId);
+  }
+
+  @override
+  Future<void> clearAllSessions() async {
+    _loggedInAccounts.clear();
+    hasSessionsStored = false;
+  }
+
+  @override
+  Future<void> setActiveAccount(String userId) async {
+    if (throwOnSetActive) throw Exception('Mock setActive error');
+    _activeUserId = userId;
+  }
+
+  @override
+  Future<String?> getActiveUserId() async => _activeUserId;
+
+  @override
+  Future<Account> addAccountSession({
+    required String userId,
+    required String email,
+    String? displayName,
+    String? photoUrl,
+    required AuthProvider authProvider,
+    String? refreshToken,
+    String? accessToken,
+    DateTime? tokenExpiresAt,
+  }) async {
+    final account = Account.create(
+      userId: userId,
+      email: email,
+      displayName: displayName,
+      photoUrl: photoUrl,
+      authProvider: authProvider,
+      isLoggedIn: true,
+    );
+    _loggedInAccounts.add(account);
+    return account;
+  }
+
+  @override
+  Future<void> removeAccountSession(
+    String userId, {
+    bool deleteData = false,
+  }) async {
+    _loggedInAccounts.removeWhere((a) => a.userId == userId);
+    // If deleteData and we have a reference to account service, delete there too
+    if (deleteData && _accountService != null) {
+      await _accountService!.deleteAccount(userId);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getSession(String userId) async => null;
+
+  @override
+  Future<int> getLoggedInCount() async => _loggedInAccounts.length;
+}
 
 /// Mock AccountService for testing
 class MockAccountService implements AccountService {
@@ -119,9 +215,13 @@ class MockAccountService implements AccountService {
 void main() {
   group('Account Provider Tests', () {
     late MockAccountService mockAccountService;
+    late MockAccountSessionManager mockSessionManager;
 
     setUp(() {
       mockAccountService = MockAccountService();
+      mockSessionManager = MockAccountSessionManager();
+      // Link session manager to account service for deleteAccount operations
+      mockSessionManager.setAccountService(mockAccountService);
     });
 
     tearDown(() {
@@ -132,6 +232,14 @@ void main() {
       return ProviderContainer(
         overrides: [
           accountServiceProvider.overrideWithValue(mockAccountService),
+          accountSessionManagerProvider.overrideWithValue(mockSessionManager),
+          // Override FutureProviders that depend on session manager
+          loggedInAccountsProvider.overrideWith((ref) async {
+            return mockSessionManager.getLoggedInAccounts();
+          }),
+          hasLoggedInAccountsProvider.overrideWith((ref) async {
+            return mockSessionManager.hasLoggedInAccounts();
+          }),
         ],
       );
     }
@@ -249,13 +357,14 @@ void main() {
           createTestAccount(userId: 'user-3'),
         ];
 
+        // Add accounts BEFORE subscribing (FutureProvider calls getAllAccounts() once)
+        mockAccountService.emitAllAccounts(accounts);
+
         final subscription = container.listen(
           allAccountsProvider,
           (previous, next) {},
         );
 
-        await Future.delayed(Duration.zero);
-        mockAccountService.emitAllAccounts(accounts);
         await Future.delayed(Duration.zero);
 
         final state = subscription.read();
@@ -266,23 +375,26 @@ void main() {
         final container = createContainer();
         addTearDown(container.dispose);
 
+        // Add initial account BEFORE subscribing
+        mockAccountService.emitAllAccounts([
+          createTestAccount(userId: 'user-1'),
+        ]);
+
         final subscription = container.listen(
           allAccountsProvider,
           (previous, next) {},
         );
 
         await Future.delayed(Duration.zero);
-        mockAccountService.emitAllAccounts([
-          createTestAccount(userId: 'user-1'),
-        ]);
-        await Future.delayed(Duration.zero);
-
         expect(subscription.read().value?.length, equals(1));
 
+        // Update accounts and invalidate provider to refresh (FutureProvider is cached)
         mockAccountService.emitAllAccounts([
           createTestAccount(userId: 'user-1'),
           createTestAccount(userId: 'user-2'),
         ]);
+        // Invalidate to force refresh
+        container.invalidate(allAccountsProvider);
         await Future.delayed(Duration.zero);
 
         expect(subscription.read().value?.length, equals(2));
@@ -396,7 +508,8 @@ void main() {
       test('switchAccount handles errors', () async {
         final container = createContainer();
         addTearDown(container.dispose);
-        mockAccountService.throwOnSetActive = true;
+        // switchAccount now calls sessionManager.setActiveAccount, not accountService
+        mockSessionManager.throwOnSetActive = true;
 
         final switcher = container.read(accountSwitcherProvider.notifier);
         await switcher.switchAccount('user-1');
@@ -588,11 +701,7 @@ void main() {
         final container = createContainer();
         addTearDown(container.dispose);
 
-        // Listen first before emitting
-        final subscription = container.listen(allAccountsProvider, (_, __) {});
-        await Future.delayed(Duration.zero);
-
-        // Now emit accounts
+        // Add accounts BEFORE listening (since it's a FutureProvider that calls getAllAccounts())
         mockAccountService.emitAllAccounts([
           createTestAccount(
             userId: 'email-user',
@@ -607,6 +716,9 @@ void main() {
             authProvider: AuthProvider.anonymous,
           ),
         ]);
+
+        // Listen after emitting
+        final subscription = container.listen(allAccountsProvider, (_, __) {});
         await Future.delayed(Duration.zero);
 
         final accounts = subscription.read().value ?? [];

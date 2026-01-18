@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../services/auth_service.dart';
 import '../services/account_service.dart';
+import '../services/account_session_manager.dart';
 import '../services/crash_reporting_service.dart';
 import '../providers/auth_provider.dart';
 import '../models/account.dart';
+import '../models/enums.dart' as enums;
 
 /// Provider for account service
 final accountIntegrationServiceProvider = Provider<AccountIntegrationService>((
@@ -12,28 +15,52 @@ final accountIntegrationServiceProvider = Provider<AccountIntegrationService>((
 ) {
   return AccountIntegrationService(
     authService: ref.watch(authServiceProvider),
-    accountService: AccountService(),
+    accountService: AccountService.instance,
+    sessionManager: AccountSessionManager.instance,
   );
 });
 
 /// Service to integrate Firebase Auth with local Account management
+/// Supports multi-account: multiple users can be logged in simultaneously
 /// Automatically creates/updates local Account when user authenticates
 class AccountIntegrationService {
   final AuthService authService;
   final AccountService accountService;
+  final AccountSessionManager sessionManager;
 
   AccountIntegrationService({
     required this.authService,
     required this.accountService,
+    required this.sessionManager,
   });
 
   /// Create or update local account from Firebase user
   /// Called after successful authentication
-  Future<Account> syncAccountFromFirebaseUser(User firebaseUser) async {
+  /// In multi-account mode, this adds the account to the logged-in list
+  Future<Account> syncAccountFromFirebaseUser(
+    User firebaseUser, {
+    bool makeActive = true,
+  }) async {
+    debugPrint('\n🔄 [AccountIntegrationService] syncAccountFromFirebaseUser');
+    debugPrint('   User: ${firebaseUser.uid} (${firebaseUser.email})');
+    debugPrint('   Make active: $makeActive');
+
     // Check if account already exists
     Account? existingAccount = await accountService.getAccountByUserId(
       firebaseUser.uid,
     );
+
+    // Determine auth provider from Firebase user
+    enums.AuthProvider authProvider = enums.AuthProvider.email;
+    for (final providerData in firebaseUser.providerData) {
+      if (providerData.providerId == 'google.com') {
+        authProvider = enums.AuthProvider.gmail;
+        break;
+      } else if (providerData.providerId == 'apple.com') {
+        authProvider = enums.AuthProvider.apple;
+        break;
+      }
+    }
 
     if (existingAccount != null) {
       // Update existing account
@@ -42,11 +69,18 @@ class AccountIntegrationService {
           firebaseUser.displayName ?? existingAccount.displayName;
       existingAccount.photoUrl =
           firebaseUser.photoURL ?? existingAccount.photoUrl;
+      existingAccount.authProvider = authProvider;
+      existingAccount.isLoggedIn = true;
       existingAccount.lastSyncedAt = DateTime.now();
+      existingAccount.lastAccessedAt = DateTime.now();
 
       await accountService.saveAccount(existingAccount);
-      await accountService.setActiveAccount(firebaseUser.uid);
 
+      if (makeActive) {
+        await sessionManager.setActiveAccount(firebaseUser.uid);
+      }
+
+      debugPrint('   ✅ Updated existing account');
       return existingAccount;
     } else {
       // Create new account
@@ -55,13 +89,20 @@ class AccountIntegrationService {
         email: firebaseUser.email ?? 'no-email@ashtrail.app',
         displayName: firebaseUser.displayName,
         photoUrl: firebaseUser.photoURL,
-        isActive: true,
+        authProvider: authProvider,
+        isActive: makeActive,
+        isLoggedIn: true,
         createdAt: DateTime.now(),
+        lastAccessedAt: DateTime.now(),
       );
 
       await accountService.saveAccount(newAccount);
-      await accountService.setActiveAccount(firebaseUser.uid);
 
+      if (makeActive) {
+        await sessionManager.setActiveAccount(firebaseUser.uid);
+      }
+
+      debugPrint('   ✅ Created new account');
       return newAccount;
     }
   }
@@ -71,6 +112,7 @@ class AccountIntegrationService {
     required String email,
     required String password,
     String? displayName,
+    bool makeActive = true,
   }) async {
     final userCredential = await authService.signUpWithEmail(
       email: email,
@@ -82,14 +124,21 @@ class AccountIntegrationService {
       throw Exception('Failed to create user');
     }
 
-    return await syncAccountFromFirebaseUser(userCredential.user!);
+    return await syncAccountFromFirebaseUser(
+      userCredential.user!,
+      makeActive: makeActive,
+    );
   }
 
   /// Sign in and sync local account
+  /// In multi-account mode, adds this account to the logged-in list
   Future<Account> signInWithEmail({
     required String email,
     required String password,
+    bool makeActive = true,
   }) async {
+    debugPrint('\n🔐 [AccountIntegrationService] signInWithEmail');
+
     final userCredential = await authService.signInWithEmail(
       email: email,
       password: password,
@@ -99,19 +148,29 @@ class AccountIntegrationService {
       throw Exception('Failed to sign in');
     }
 
-    return await syncAccountFromFirebaseUser(userCredential.user!);
+    return await syncAccountFromFirebaseUser(
+      userCredential.user!,
+      makeActive: makeActive,
+    );
   }
 
   /// Sign in with Google and sync local account
-  Future<Account> signInWithGoogle() async {
+  /// In multi-account mode, adds this account to the logged-in list
+  Future<Account> signInWithGoogle({bool makeActive = true}) async {
     try {
+      debugPrint('\n🔐 [AccountIntegrationService] signInWithGoogle');
+      CrashReportingService.logMessage('Starting Google sign-in');
+
       final userCredential = await authService.signInWithGoogle();
 
       if (userCredential.user == null) {
         throw Exception('Failed to sign in with Google');
       }
 
-      final account = await syncAccountFromFirebaseUser(userCredential.user!);
+      final account = await syncAccountFromFirebaseUser(
+        userCredential.user!,
+        makeActive: makeActive,
+      );
 
       // Set user ID in crashlytics for crash tracking
       await CrashReportingService.setUserId(account.userId);
@@ -129,23 +188,65 @@ class AccountIntegrationService {
   }
 
   /// Sign in with Apple and sync local account
-  Future<Account> signInWithApple() async {
+  /// In multi-account mode, adds this account to the logged-in list
+  Future<Account> signInWithApple({bool makeActive = true}) async {
+    debugPrint('\n🔐 [AccountIntegrationService] signInWithApple');
+
     final userCredential = await authService.signInWithApple();
 
     if (userCredential.user == null) {
       throw Exception('Failed to sign in with Apple');
     }
 
-    return await syncAccountFromFirebaseUser(userCredential.user!);
+    return await syncAccountFromFirebaseUser(
+      userCredential.user!,
+      makeActive: makeActive,
+    );
   }
 
-  /// Sign out and deactivate local account
+  /// Sign out all accounts (clears all sessions)
   Future<void> signOut() async {
+    debugPrint('\n🔐 [AccountIntegrationService] signOut (all accounts)');
+
     await authService.signOut();
+    await sessionManager.clearAllSessions();
     await accountService.deactivateAllAccounts();
-    // Local account remains but is no longer active
-    // This allows preserving local data for multi-account scenarios while
-    // ensuring the app does not auto-login on relaunch
+
+    debugPrint('   ✅ All accounts signed out');
+  }
+
+  /// Sign out a single account while keeping others logged in
+  Future<void> signOutAccount(String userId) async {
+    debugPrint('\n🔐 [AccountIntegrationService] signOutAccount($userId)');
+
+    // Check if this is the current Firebase auth user
+    final currentUser = authService.currentUser;
+    if (currentUser?.uid == userId) {
+      // Sign out from Firebase
+      await authService.signOut();
+    }
+
+    // Clear this account's session
+    await sessionManager.clearSession(userId);
+
+    // Update account state
+    final account = await accountService.getAccountByUserId(userId);
+    if (account != null) {
+      account.isLoggedIn = false;
+      account.isActive = false;
+      await accountService.saveAccount(account);
+    }
+
+    // If this was the active account, switch to another logged-in account
+    final activeAccount = await accountService.getActiveAccount();
+    if (activeAccount == null || activeAccount.userId == userId) {
+      final loggedInAccounts = await sessionManager.getLoggedInAccounts();
+      if (loggedInAccounts.isNotEmpty) {
+        await sessionManager.setActiveAccount(loggedInAccounts.first.userId);
+      }
+    }
+
+    debugPrint('   ✅ Account signed out: $userId');
   }
 
   /// Update user profile and sync with local account

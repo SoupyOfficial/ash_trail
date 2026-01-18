@@ -1,4 +1,5 @@
 import 'database_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Hive implementation for all platforms (web, iOS, Android, desktop)
@@ -26,22 +27,52 @@ class HiveDatabaseService implements DatabaseService {
 
   @override
   Future<void> initialize() async {
-    if (_initialized) return;
+    if (_initialized) {
+      debugPrint(
+        '🏗️ [HiveDatabaseService.initialize] Already initialized, skipping',
+      );
+      return;
+    }
+
+    debugPrint(
+      '\n🏗️ [HiveDatabaseService.initialize] START at ${DateTime.now()}',
+    );
 
     // Initialize Hive for Flutter (works on all platforms)
+    debugPrint('   📦 Calling Hive.initFlutter()...');
     await Hive.initFlutter();
+    debugPrint('   ✅ Hive.initFlutter() completed');
 
     // Open boxes for different data types
+    debugPrint('   📂 Opening Hive boxes...');
     _accountsBox = await Hive.openBox('accounts');
+    debugPrint(
+      '      ✅ Opened accounts box with ${_accountsBox!.length} items',
+    );
+
     _logEntriesBox = await Hive.openBox('log_entries');
+    debugPrint('      ✅ Opened log_entries box');
+
     _logRecordsBox = await Hive.openBox('log_records');
+    debugPrint('      ✅ Opened log_records box');
+
     _profilesBox = await Hive.openBox('profiles');
+    debugPrint('      ✅ Opened profiles box');
+
     _userAccountsBox = await Hive.openBox('user_accounts');
+    debugPrint('      ✅ Opened user_accounts box');
+
     _dailyRollupsBox = await Hive.openBox('daily_rollups');
+    debugPrint('      ✅ Opened daily_rollups box');
+
     _sessionsBox = await Hive.openBox('sessions');
+    debugPrint('      ✅ Opened sessions box');
+
     _templatesBox = await Hive.openBox('templates');
+    debugPrint('      ✅ Opened templates box');
 
     _initialized = true;
+    debugPrint('   ✅ All boxes opened successfully\n');
   }
 
   @override
@@ -49,10 +80,17 @@ class HiveDatabaseService implements DatabaseService {
 
   @override
   dynamic get boxes {
+    debugPrint(
+      '🏗️ [HiveDatabaseService.boxes] Accessing boxes at ${DateTime.now()}',
+    );
     if (!_initialized) {
+      debugPrint('   ❌ CRITICAL: Database not initialized!');
       throw Exception('Database not initialized. Call initialize() first.');
     }
     // Return a map of boxes
+    debugPrint(
+      '   ✅ Returning boxes map with ${_accountsBox!.length} accounts',
+    );
     return {
       'accounts': _accountsBox,
       'logEntries': _logEntriesBox,

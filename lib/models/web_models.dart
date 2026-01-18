@@ -8,8 +8,14 @@ class WebAccount {
   final String? displayName;
   final String? photoUrl;
   final bool isActive;
+  final bool isLoggedIn;
+  final String authProvider;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? lastAccessedAt;
+  final String? refreshToken;
+  final String? accessToken;
+  final DateTime? tokenExpiresAt;
 
   WebAccount({
     required this.id,
@@ -18,8 +24,14 @@ class WebAccount {
     this.displayName,
     this.photoUrl,
     required this.isActive,
+    this.isLoggedIn = false,
+    this.authProvider = 'anonymous',
     required this.createdAt,
     required this.updatedAt,
+    this.lastAccessedAt,
+    this.refreshToken,
+    this.accessToken,
+    this.tokenExpiresAt,
   });
 
   Map<String, dynamic> toJson() => {
@@ -29,8 +41,14 @@ class WebAccount {
     'displayName': displayName,
     'photoUrl': photoUrl,
     'isActive': isActive,
+    'isLoggedIn': isLoggedIn,
+    'authProvider': authProvider,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    'lastAccessedAt': lastAccessedAt?.toIso8601String(),
+    'refreshToken': refreshToken,
+    'accessToken': accessToken,
+    'tokenExpiresAt': tokenExpiresAt?.toIso8601String(),
   };
 
   factory WebAccount.fromJson(Map<String, dynamic> json) => WebAccount(
@@ -40,8 +58,20 @@ class WebAccount {
     displayName: json['displayName'],
     photoUrl: json['photoUrl'],
     isActive: json['isActive'] ?? true,
+    isLoggedIn: json['isLoggedIn'] ?? false,
+    authProvider: json['authProvider'] ?? 'anonymous',
     createdAt: DateTime.parse(json['createdAt']),
     updatedAt: DateTime.parse(json['updatedAt']),
+    lastAccessedAt:
+        json['lastAccessedAt'] != null
+            ? DateTime.parse(json['lastAccessedAt'])
+            : null,
+    refreshToken: json['refreshToken'],
+    accessToken: json['accessToken'],
+    tokenExpiresAt:
+        json['tokenExpiresAt'] != null
+            ? DateTime.parse(json['tokenExpiresAt'])
+            : null,
   );
 }
 

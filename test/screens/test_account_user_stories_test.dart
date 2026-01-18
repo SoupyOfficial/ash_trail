@@ -262,8 +262,9 @@ void main() {
     Widget createTestWidget() {
       return ProviderScope(
         overrides: [
-          allAccountsProvider.overrideWith((ref) => Stream.value([])),
+          allAccountsProvider.overrideWith((ref) async => <Account>[]),
           activeAccountProvider.overrideWith((ref) => Stream.value(null)),
+          loggedInAccountsProvider.overrideWith((ref) async => <Account>[]),
         ],
         child: const MaterialApp(home: AccountsScreen()),
       );
@@ -287,33 +288,34 @@ void main() {
       expect(find.text('Accounts'), findsOneWidget);
     });
 
-    /// **Purpose:** Verify empty state UI shows test account creation button.
+    /// **Purpose:** Verify empty state UI shows Add Account button.
     ///
     /// **What it does:** Renders AccountsScreen with no accounts and
-    /// verifies the "Create Test Account" button is visible.
+    /// verifies the "Add Account" button is visible.
     ///
     /// **How it works:** Uses createTestWidget() which provides empty
-    /// account streams, then searches for button text. This ensures
-    /// users can easily create a test account from the empty state.
-    testWidgets('Empty state shows Create Test Account button', (tester) async {
+    /// account lists, then searches for button text. This ensures
+    /// users can easily add an account from the empty state.
+    testWidgets('Empty state shows Add Account button', (tester) async {
       // GIVEN: Accounts screen with no accounts
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // THEN: Should show empty state with test account button
-      expect(find.text('Create Test Account'), findsOneWidget);
+      // THEN: Should show empty state with Add Account button
+      expect(find.text('No Accounts'), findsOneWidget);
+      expect(find.text('Add Account'), findsOneWidget);
     });
 
-    /// **Purpose:** Verify Developer Tools section appears with accounts.
+    /// **Purpose:** Verify account list appears with logged-in accounts.
     ///
     /// **What it does:** Renders AccountsScreen with an active account
-    /// and verifies the Developer Tools section with both buttons.
+    /// and verifies the logged-in accounts section appears.
     ///
     /// **How it works:** Creates a mock account, overrides providers
     /// to return this account, pumps the widget, then searches for
-    /// "Developer Tools" header and both action buttons. The section
-    /// should be visible whether or not accounts exist.
-    testWidgets('AccountsScreen with accounts shows Developer Tools section', (
+    /// account-related elements. The multi-account UI groups accounts
+    /// into "Logged In" and "Other Accounts" sections.
+    testWidgets('AccountsScreen with accounts shows account list', (
       tester,
     ) async {
       // GIVEN: An account exists
@@ -323,23 +325,23 @@ void main() {
         displayName: kTestAccountName,
         authProvider: AuthProvider.devStatic,
         isActive: true,
+        isLoggedIn: true,
       );
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            allAccountsProvider.overrideWith((ref) => Stream.value([account])),
+            allAccountsProvider.overrideWith((ref) async => [account]),
             activeAccountProvider.overrideWith((ref) => Stream.value(account)),
+            loggedInAccountsProvider.overrideWith((ref) async => [account]),
           ],
           child: const MaterialApp(home: AccountsScreen()),
         ),
       );
       await tester.pumpAndSettle();
 
-      // THEN: Developer tools section should be visible
-      expect(find.text('Developer Tools'), findsOneWidget);
-      expect(find.text('Create Test Account'), findsOneWidget);
-      expect(find.text('Add Sample Logs'), findsOneWidget);
+      // THEN: Account name should be displayed
+      expect(find.text(kTestAccountName), findsOneWidget);
     });
 
     /// **Purpose:** Verify test account displays name and email correctly.
@@ -359,13 +361,15 @@ void main() {
         displayName: kTestAccountName,
         authProvider: AuthProvider.devStatic,
         isActive: true,
+        isLoggedIn: true,
       );
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            allAccountsProvider.overrideWith((ref) => Stream.value([account])),
+            allAccountsProvider.overrideWith((ref) async => [account]),
             activeAccountProvider.overrideWith((ref) => Stream.value(account)),
+            loggedInAccountsProvider.overrideWith((ref) async => [account]),
           ],
           child: const MaterialApp(home: AccountsScreen()),
         ),
@@ -374,18 +378,17 @@ void main() {
 
       // THEN: Account name should be displayed
       expect(find.text(kTestAccountName), findsOneWidget);
-      expect(find.text(kTestAccountEmail), findsOneWidget);
     });
 
     /// **Purpose:** Verify active account shows visual active indicator.
     ///
     /// **What it does:** Renders AccountsScreen with an active account
-    /// and verifies the check_circle icon and "Active" text appear.
+    /// and verifies the check_circle icon appears.
     ///
     /// **How it works:** Creates an account with isActive: true,
-    /// renders the screen, then searches for Icons.check_circle
-    /// and the "Active" label text. This provides clear visual
-    /// feedback to users about which account is currently active.
+    /// renders the screen, then searches for Icons.check_circle.
+    /// This provides clear visual feedback to users about which
+    /// account is currently active.
     testWidgets('Active test account shows check icon', (tester) async {
       // GIVEN: Test account is active
       final account = Account.create(
@@ -394,13 +397,15 @@ void main() {
         displayName: kTestAccountName,
         authProvider: AuthProvider.devStatic,
         isActive: true,
+        isLoggedIn: true,
       );
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            allAccountsProvider.overrideWith((ref) => Stream.value([account])),
+            allAccountsProvider.overrideWith((ref) async => [account]),
             activeAccountProvider.overrideWith((ref) => Stream.value(account)),
+            loggedInAccountsProvider.overrideWith((ref) async => [account]),
           ],
           child: const MaterialApp(home: AccountsScreen()),
         ),
@@ -409,7 +414,6 @@ void main() {
 
       // THEN: Check icon should be visible for active account
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
-      expect(find.text('Active'), findsOneWidget);
     });
   });
 

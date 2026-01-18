@@ -64,7 +64,10 @@ class _FakeAccountIntegrationService extends Fake
 
   // Unused methods for this test suite
   @override
-  Future<Account> syncAccountFromFirebaseUser(User firebaseUser) async {
+  Future<Account> syncAccountFromFirebaseUser(
+    User firebaseUser, {
+    bool makeActive = true,
+  }) async {
     return Account.create(userId: 'acct', email: firebaseUser.email ?? '');
   }
 
@@ -73,6 +76,7 @@ class _FakeAccountIntegrationService extends Fake
     required String email,
     required String password,
     String? displayName,
+    bool makeActive = true,
   }) async {
     return Account.create(userId: 'acct', email: email);
   }
@@ -81,12 +85,13 @@ class _FakeAccountIntegrationService extends Fake
   Future<Account> signInWithEmail({
     required String email,
     required String password,
+    bool makeActive = true,
   }) async {
     return Account.create(userId: 'acct', email: email);
   }
 
   @override
-  Future<Account> signInWithGoogle() async {
+  Future<Account> signInWithGoogle({bool makeActive = true}) async {
     return Account.create(userId: 'acct', email: 'google@example.com');
   }
 

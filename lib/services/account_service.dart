@@ -1,25 +1,51 @@
+import 'package:flutter/foundation.dart';
 import '../models/account.dart';
 import '../repositories/account_repository.dart';
 import 'database_service.dart';
 import 'log_record_service.dart';
 
 class AccountService {
-  late final AccountRepository _repository;
-  late final LogRecordService _logRecordService;
+  // Singleton instance
+  static final AccountService _instance = AccountService._internal();
+  static AccountService get instance => _instance;
 
-  AccountService({LogRecordService? logRecordService}) {
+  factory AccountService({LogRecordService? logRecordService}) => _instance;
+
+  AccountService._internal({LogRecordService? logRecordService}) {
+    debugPrint(
+      '\n🏗️ [AccountService._internal] Initializing at ${DateTime.now()}',
+    );
+
     // Initialize repository with Hive database
+    debugPrint('   📦 Getting DatabaseService instance...');
     final dbService = DatabaseService.instance;
+    debugPrint('   ✅ Got DatabaseService instance: ${dbService.runtimeType}');
+
+    debugPrint('   📦 Getting database boxes...');
     final dbBoxes = dbService.boxes;
+    debugPrint('   📦 Got database boxes type: ${dbBoxes.runtimeType}');
+
+    if (dbBoxes is Map<String, dynamic>) {
+      debugPrint('   ✅ dbBoxes is a Map with keys: ${dbBoxes.keys.toList()}');
+    } else {
+      debugPrint('   ⚠️ dbBoxes is NOT a Map! Type: ${dbBoxes.runtimeType}');
+    }
 
     // Pass Hive boxes map to repository
+    debugPrint('   📞 Calling createAccountRepository...');
     _repository = createAccountRepository(
       dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
+    debugPrint('   ✅ Created AccountRepository: ${_repository.runtimeType}');
 
     // Initialize log record service for cascade deletion
+    debugPrint('   📞 Initializing LogRecordService...');
     _logRecordService = logRecordService ?? LogRecordService();
+    debugPrint('   ✅ Initialized LogRecordService\\n');
   }
+
+  late final AccountRepository _repository;
+  late final LogRecordService _logRecordService;
 
   /// Get all accounts
   Future<List<Account>> getAllAccounts() async {
@@ -61,11 +87,19 @@ class AccountService {
 
   /// Watch active account changes
   Stream<Account?> watchActiveAccount() {
+    debugPrint(
+      '🔴 [AccountService.watchActiveAccount] Called at ${DateTime.now()}',
+    );
+    debugPrint('   📞 Delegating to _repository.watchActive()');
     return _repository.watchActive();
   }
 
   /// Watch all accounts
   Stream<List<Account>> watchAllAccounts() {
+    debugPrint(
+      '🟢 [AccountService.watchAllAccounts] Called at ${DateTime.now()}',
+    );
+    debugPrint('   📞 Delegating to _repository.watchAll()');
     return _repository.watchAll();
   }
 }

@@ -113,13 +113,6 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
                   _buildActivityChart(context, _stats!),
                   const SizedBox(height: 24),
 
-                  // Event type pie chart
-                  EventTypePieChart(
-                    eventTypeCounts: _stats!.eventTypeCounts,
-                    title: 'Event Distribution',
-                  ),
-                  const SizedBox(height: 24),
-
                   // Hourly activity heatmap
                   HourlyHeatmap(
                     records: widget.records,

@@ -304,58 +304,148 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
               const SizedBox(height: 16),
 
-              // Mood rating slider
-              Text(
-                'Mood Rating (optional)',
-                style: theme.textTheme.labelMedium,
-              ),
-              Slider(
-                value: _moodRating ?? 5.0,
-                min: 1,
-                max: 10,
-                divisions: 9,
-                label: _moodRating?.toStringAsFixed(1) ?? 'Not set',
-                onChanged: (value) {
-                  setState(() {
-                    _moodRating = value;
-                  });
-                },
-              ),
-
-              // Physical rating slider
-              Text(
-                'Physical Rating (optional)',
-                style: theme.textTheme.labelMedium,
-              ),
-              Slider(
-                value: _physicalRating ?? 5.0,
-                min: 1,
-                max: 10,
-                divisions: 9,
-                label: _physicalRating?.toStringAsFixed(1) ?? 'Not set',
-                onChanged: (value) {
-                  setState(() {
-                    _physicalRating = value;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 16),
-
               // Notes
               TextField(
                 controller: _notesController,
                 decoration: const InputDecoration(
                   labelText: 'Notes (optional)',
                   border: OutlineInputBorder(),
+                  hintText: 'Add any notes...',
                 ),
-                maxLines: 2,
+                maxLines: 3,
+                textCapitalization: TextCapitalization.sentences,
               ),
+              const SizedBox(height: 24),
 
+              // Mood Rating
+              Text(
+                'Mood Rating (optional)',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _moodRating ?? 5.5,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      label: _moodRating?.toStringAsFixed(1) ?? 'Tap to set',
+                      inactiveColor:
+                          _moodRating == null
+                              ? theme.colorScheme.surfaceContainerHighest
+                              : null,
+                      onChanged: (value) {
+                        setState(() {
+                          _moodRating = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      _moodRating?.toStringAsFixed(1) ?? 'Not Set',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            _moodRating == null
+                                ? theme.colorScheme.onSurfaceVariant
+                                : null,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed:
+                        _moodRating != null
+                            ? () {
+                              setState(() {
+                                _moodRating = null;
+                              });
+                            }
+                            : () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _moodRating != null
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                                0.3,
+                              ),
+                    ),
+                    child: Text(_moodRating == null ? 'Not set' : 'Clear'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
 
+              // Physical Rating
+              Text(
+                'Physical Rating (optional)',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _physicalRating ?? 5.5,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      label:
+                          _physicalRating?.toStringAsFixed(1) ?? 'Tap to set',
+                      inactiveColor:
+                          _physicalRating == null
+                              ? theme.colorScheme.surfaceContainerHighest
+                              : null,
+                      onChanged: (value) {
+                        setState(() {
+                          _physicalRating = value;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                    child: Text(
+                      _physicalRating?.toStringAsFixed(1) ?? 'Not Set',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color:
+                            _physicalRating == null
+                                ? theme.colorScheme.onSurfaceVariant
+                                : null,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed:
+                        _physicalRating != null
+                            ? () {
+                              setState(() {
+                                _physicalRating = null;
+                              });
+                            }
+                            : () {},
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          _physicalRating != null
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                                0.3,
+                              ),
+                    ),
+                    child: Text(_physicalRating == null ? 'Not set' : 'Clear'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
               // Location
-              Text('Location (optional)', style: theme.textTheme.labelMedium),
+              Text('Location (optional)', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
               if (_latitude != null && _longitude != null)
                 Container(

@@ -8,7 +8,10 @@ import '../models/enums.dart' as enums;
 /// - AshleyLogs (legacy personal logs)
 /// - Any other legacy log tables that need to be migrated to current schema
 class LegacyDataAdapter {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+
+  LegacyDataAdapter({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// List of legacy collection names to query
   /// Add more as needed for additional legacy tables

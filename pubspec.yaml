@@ -87,6 +87,9 @@ dev_dependencies:
   integration_test:
     sdk: flutter
 
+  # Firestore test doubles
+  fake_cloud_firestore: ^3.1.0
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

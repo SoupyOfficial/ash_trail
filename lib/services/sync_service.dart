@@ -33,10 +33,23 @@ import 'legacy_data_adapter.dart';
 ///
 /// Implements conflict resolution and batch upload strategies
 class SyncService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final LogRecordService _logRecordService = LogRecordService();
-  final Connectivity _connectivity = Connectivity();
-  final LegacyDataAdapter _legacyAdapter = LegacyDataAdapter();
+  final FirebaseFirestore _firestore;
+  final LogRecordService _logRecordService;
+  final Connectivity _connectivity;
+  final LegacyDataAdapter _legacyAdapter;
+  final Future<List<ConnectivityResult>> Function()? _connectivityCheck;
+
+  SyncService({
+    FirebaseFirestore? firestore,
+    LogRecordService? logRecordService,
+    Connectivity? connectivity,
+    LegacyDataAdapter? legacyAdapter,
+    Future<List<ConnectivityResult>> Function()? connectivityCheck,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _logRecordService = logRecordService ?? LogRecordService(),
+       _connectivity = connectivity ?? Connectivity(),
+       _legacyAdapter = legacyAdapter ?? LegacyDataAdapter(),
+       _connectivityCheck = connectivityCheck;
 
   Timer? _syncTimer;
   Timer? _pullTimer;
@@ -101,7 +114,11 @@ class SyncService {
 
   /// Check if device is online
   Future<bool> isOnline() async {
-    final connectivityResult = await _connectivity.checkConnectivity();
+    final connectivityResult =
+        _connectivityCheck != null
+            ? await _connectivityCheck()
+            : await _connectivity.checkConnectivity();
+
     return connectivityResult.contains(ConnectivityResult.mobile) ||
         connectivityResult.contains(ConnectivityResult.wifi) ||
         connectivityResult.contains(ConnectivityResult.ethernet);

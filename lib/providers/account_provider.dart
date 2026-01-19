@@ -144,22 +144,37 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
   /// Switch to viewing a different account's data
   /// The account must be logged in (have a valid session)
   Future<void> switchAccount(String userId) async {
+    debugPrint('\n🔀🔀🔀 [AccountSwitcher.switchAccount] CALLED 🔀🔀🔀');
+    debugPrint('   🎯 Target userId: $userId');
+    debugPrint('   ⏰ Time: ${DateTime.now()}');
+
     state = const AsyncValue.loading();
     try {
       final sessionManager = _ref.read(accountSessionManagerProvider);
+      debugPrint('   📞 Calling sessionManager.setActiveAccount($userId)...');
       await sessionManager.setActiveAccount(userId);
+      debugPrint('   ✅ sessionManager.setActiveAccount completed');
 
       // Per design doc 8.4.1: Reset session state on account switch
       // Clear draft state when account changes
+      debugPrint('   🔄 Resetting logDraftProvider...');
       _ref.read(logDraftProvider.notifier).reset();
 
       // Invalidate providers to refresh with new account's data
+      debugPrint('   ♻️ Invalidating activeAccountProvider...');
       _ref.invalidate(activeAccountProvider);
+      debugPrint('   ♻️ Invalidating allAccountsProvider...');
       _ref.invalidate(allAccountsProvider);
+      debugPrint('   ♻️ Invalidating loggedInAccountsProvider...');
       _ref.invalidate(loggedInAccountsProvider);
+
+      debugPrint(
+        '🔀🔀🔀 [AccountSwitcher.switchAccount] COMPLETE for $userId 🔀🔀🔀\n',
+      );
 
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      debugPrint('   ❌ ERROR in switchAccount: $e');
       state = AsyncValue.error(e, st);
     }
   }

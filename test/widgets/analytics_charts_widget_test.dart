@@ -5,7 +5,6 @@ import 'package:ash_trail/services/analytics_service.dart';
 import 'package:ash_trail/widgets/analytics_charts.dart';
 import 'package:ash_trail/widgets/charts/activity_bar_chart.dart';
 import 'package:ash_trail/widgets/charts/activity_line_chart.dart';
-import 'package:ash_trail/widgets/charts/event_type_pie_chart.dart';
 import 'package:ash_trail/widgets/charts/hourly_heatmap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -125,7 +124,6 @@ void main() {
       expect(find.text('5'), findsOneWidget);
       expect(find.text('Daily Avg'), findsOneWidget);
       expect(find.byType(ActivityBarChart), findsOneWidget);
-      expect(find.byType(EventTypePieChart), findsOneWidget);
       expect(find.byType(HourlyHeatmap), findsOneWidget);
     });
 
@@ -230,13 +228,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(fakeService.callCount, greaterThan(initialCallCount));
-    });
-
-    testWidgets('shows event type breakdown', (tester) async {
-      await pumpAnalyticsWidget(tester);
-      await tester.pumpAndSettle();
-
-      expect(find.byType(EventTypePieChart), findsOneWidget);
     });
 
     testWidgets('shows mood rating information when available', (tester) async {
@@ -355,18 +346,6 @@ void main() {
 
       // THEN: The data updates to show 30-day view
       expect(fakeService.callCount, greaterThan(1));
-    });
-
-    testWidgets('As a user, I want to see event type breakdown', (
-      tester,
-    ) async {
-      // GIVEN: I have logged different event types
-      // WHEN: I view the analytics
-      await pumpAnalyticsWidget(tester);
-      await tester.pumpAndSettle();
-
-      // THEN: I can see the breakdown by event type
-      expect(find.byType(EventTypePieChart), findsOneWidget);
     });
 
     testWidgets(

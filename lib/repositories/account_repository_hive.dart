@@ -235,16 +235,25 @@ class AccountRepositoryHive implements AccountRepository {
 
   @override
   Future<void> setActive(String userId) async {
+    debugPrint(
+      '\n🎯🎯🎯 [HiveRepo.setActive] CALLED with userId: $userId 🎯🎯🎯',
+    );
+    debugPrint('   ⏰ Time: ${DateTime.now()}');
+
     // Deactivate all accounts first, then activate the target one
     final keysToUpdate = <dynamic>[];
     for (var key in _box.keys) {
       keysToUpdate.add(key);
     }
+    debugPrint('   📊 Total accounts in box: ${keysToUpdate.length}');
 
     for (var key in keysToUpdate) {
       final json = Map<String, dynamic>.from(_box.get(key));
       final webAccount = WebAccount.fromJson(json);
       final isTargetAccount = webAccount.userId == userId;
+      debugPrint(
+        '   📝 Processing ${webAccount.userId}: isTarget=$isTargetAccount, wasActive=${webAccount.isActive}',
+      );
       final updated = WebAccount(
         id: webAccount.id,
         userId: webAccount.userId,
@@ -265,8 +274,11 @@ class AccountRepositoryHive implements AccountRepository {
       await _box.put(key, updated.toJson());
     }
 
+    debugPrint('   ✅ All accounts updated in Hive');
+    debugPrint('   📢 Calling _emitChanges()...');
     // Explicitly emit changes after setActive
     _emitChanges();
+    debugPrint('🎯🎯🎯 [HiveRepo.setActive] COMPLETE 🎯🎯🎯\n');
   }
 
   @override

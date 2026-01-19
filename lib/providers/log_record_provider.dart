@@ -276,29 +276,75 @@ final logRecordServiceProvider = Provider<LogRecordService>((ref) {
 
 /// Provider for active account ID (derived from activeAccountProvider)
 final activeAccountIdProvider = Provider<String?>((ref) {
+  debugPrint('\n🆔 [activeAccountIdProvider] REBUILDING at ${DateTime.now()}');
   final activeAccount = ref.watch(activeAccountProvider);
-  return activeAccount.when(
-    data: (account) => account?.userId,
-    loading: () => null,
-    error: (_, __) => null,
+  final result = activeAccount.when(
+    data: (account) {
+      debugPrint('   📦 activeAccount has data: ${account?.userId ?? "null"}');
+      return account?.userId;
+    },
+    loading: () {
+      debugPrint('   ⏳ activeAccount is loading');
+      return null;
+    },
+    error: (e, __) {
+      debugPrint('   ❌ activeAccount has error: $e');
+      return null;
+    },
   );
+  debugPrint('🆔 [activeAccountIdProvider] RETURNING: $result');
+  return result;
 });
 
 /// Provider for watching log records for active account (convenience wrapper)
 final activeAccountLogRecordsProvider = StreamProvider<List<LogRecord>>((ref) {
+  debugPrint(
+    '\n📋 [activeAccountLogRecordsProvider] REBUILDING at ${DateTime.now()}',
+  );
   final accountId = ref.watch(activeAccountIdProvider);
+  debugPrint('   👤 Watched accountId: $accountId');
 
   if (accountId == null) {
+    debugPrint('   ⚠️ accountId is null, returning empty stream');
     return Stream.value([]);
   }
 
-  return ref
-      .watch(logRecordsProvider(const LogRecordsParams()))
-      .when(
-        data: (records) => Stream.value(records),
-        loading: () => Stream.value([]),
-        error: (_, __) => Stream.value([]),
+  debugPrint('   📦 Creating LogRecordsParams with accountId: $accountId');
+  final params = LogRecordsParams(accountId: accountId);
+  debugPrint(
+    '   🔗 Watching logRecordsProvider with params.accountId: ${params.accountId}',
+  );
+
+  // IMPORTANT: Pass the accountId explicitly so the provider refreshes when account changes
+  final innerProvider = ref.watch(logRecordsProvider(params));
+  debugPrint(
+    '   📊 Inner provider state: ${innerProvider.isLoading
+        ? "loading"
+        : innerProvider.hasValue
+        ? "has ${innerProvider.value?.length ?? 0} records"
+        : "error"}',
+  );
+
+  return innerProvider.when(
+    data: (records) {
+      debugPrint(
+        '📋 [activeAccountLogRecordsProvider] EMITTING ${records.length} records for account $accountId',
       );
+      return Stream.value(records);
+    },
+    loading: () {
+      debugPrint(
+        '📋 [activeAccountLogRecordsProvider] LOADING for account $accountId',
+      );
+      return Stream.value([]);
+    },
+    error: (e, __) {
+      debugPrint(
+        '📋 [activeAccountLogRecordsProvider] ERROR for account $accountId: $e',
+      );
+      return Stream.value([]);
+    },
+  );
 });
 
 /// Provider for creating a new log record
@@ -331,22 +377,37 @@ final createLogRecordProvider =
     });
 
 /// Provider for watching log records
-final logRecordsProvider =
-    StreamProvider.family<List<LogRecord>, LogRecordsParams>((ref, params) {
-      final service = ref.read(logRecordServiceProvider);
-      final accountId = params.accountId ?? ref.read(activeAccountIdProvider);
+final logRecordsProvider = StreamProvider.family<
+  List<LogRecord>,
+  LogRecordsParams
+>((ref, params) {
+  debugPrint(
+    '\n📦 [logRecordsProvider] CREATED for params.accountId=${params.accountId} at ${DateTime.now()}',
+  );
+  final service = ref.read(logRecordServiceProvider);
+  final accountId = params.accountId ?? ref.read(activeAccountIdProvider);
+  debugPrint('   🔑 Final accountId to use: $accountId');
 
-      if (accountId == null) {
-        return Stream.value([]);
-      }
+  if (accountId == null) {
+    debugPrint('   ⚠️ accountId is null, returning empty stream');
+    return Stream.value([]);
+  }
 
-      return service.watchLogRecords(
+  debugPrint('   📡 Calling service.watchLogRecords(accountId: $accountId)');
+  return service
+      .watchLogRecords(
         accountId: accountId,
         startDate: params.startDate,
         endDate: params.endDate,
         includeDeleted: params.includeDeleted,
-      );
-    });
+      )
+      .map((records) {
+        debugPrint(
+          '📦 [logRecordsProvider] STREAM EMIT: ${records.length} records for account $accountId',
+        );
+        return records;
+      });
+});
 
 /// Provider for getting log records (one-time fetch)
 final getLogRecordsProvider =

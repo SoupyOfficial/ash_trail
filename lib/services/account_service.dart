@@ -102,4 +102,16 @@ class AccountService {
     debugPrint('   📞 Delegating to _repository.watchAll()');
     return _repository.watchAll();
   }
+
+  /// Check if an account exists by userId
+  Future<bool> accountExists(String userId) async {
+    final account = await _repository.getByUserId(userId);
+    return account != null;
+  }
+
+  /// Get all account IDs (for data integrity checks)
+  Future<Set<String>> getAllAccountIds() async {
+    final accounts = await _repository.getAll();
+    return accounts.map((a) => a.userId).toSet();
+  }
 }

@@ -108,6 +108,11 @@ class LogRecordRepositoryHive implements LogRecordRepository {
   }
 
   @override
+  Future<List<LogRecord>> getAll() async {
+    return _getAllRecords();
+  }
+
+  @override
   Future<List<LogRecord>> getByAccount(String accountId) async {
     final records =
         _getAllRecords().where((r) => r.accountId == accountId).toList();

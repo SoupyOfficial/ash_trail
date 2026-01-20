@@ -5,6 +5,7 @@ import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
 import 'validation_service.dart';
 import 'database_service.dart';
+import 'account_service.dart';
 
 /// LogRecordService handles all CRUD operations for log records
 /// Implements offline-first with sync queue management
@@ -12,7 +13,19 @@ class LogRecordService {
   late final LogRecordRepository _repository;
   final Uuid _uuid = const Uuid();
 
-  LogRecordService({LogRecordRepository? repository}) {
+  /// Optional AccountService for validating accountId before saving
+  /// When null, validation is skipped (useful for tests)
+  final AccountService? _accountService;
+
+  /// Whether to validate accountId exists before creating records
+  /// Default: true in production, can be disabled for tests
+  final bool validateAccountId;
+
+  LogRecordService({
+    LogRecordRepository? repository,
+    AccountService? accountService,
+    this.validateAccountId = true,
+  }) : _accountService = accountService {
     if (repository != null) {
       _repository = repository;
     } else {
@@ -55,6 +68,20 @@ class LogRecordService {
     double? latitude,
     double? longitude,
   }) async {
+    // Validate accountId exists (if validation enabled and service available)
+    if (validateAccountId && _accountService != null) {
+      final exists = await _accountService.accountExists(accountId);
+      if (!exists) {
+        debugPrint(
+          '❌ [LogRecordService] Attempted to create log for non-existent account: $accountId',
+        );
+        throw ArgumentError(
+          'Cannot create log record: Account "$accountId" does not exist. '
+          'Please ensure the account is created before logging.',
+        );
+      }
+    }
+
     // Validate location cross-field constraint: both present or both null
     if (!ValidationService.isValidLocationPair(latitude, longitude)) {
       throw ArgumentError(

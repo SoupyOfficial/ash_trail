@@ -420,4 +420,9 @@ class _MockSyncRepository implements LogRecordRepository {
           .toList(),
     );
   }
+
+  @override
+  Future<List<LogRecord>> getAll() async {
+    return List.from(_localRecords);
+  }
 }

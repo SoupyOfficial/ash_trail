@@ -129,6 +129,11 @@ class _InMemoryLogRecordRepository implements LogRecordRepository {
           .toList(),
     );
   }
+
+  @override
+  Future<List<LogRecord>> getAll() async {
+    return List.from(_records);
+  }
 }
 
 void main() {

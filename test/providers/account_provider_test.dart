@@ -210,6 +210,17 @@ class MockAccountService implements AccountService {
     _activeAccountController.close();
     _allAccountsController.close();
   }
+
+  @override
+  Future<bool> accountExists(String userId) async {
+    return await getAccountByUserId(userId) != null;
+  }
+
+  @override
+  Future<Set<String>> getAllAccountIds() async {
+    final accounts = await getAllAccounts();
+    return accounts.map((a) => a.userId).toSet();
+  }
 }
 
 void main() {

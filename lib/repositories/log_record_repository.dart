@@ -17,6 +17,9 @@ abstract class LogRecordRepository {
   /// Get log record by logId
   Future<LogRecord?> getByLogId(String logId);
 
+  /// Get all log records (for integrity checks)
+  Future<List<LogRecord>> getAll();
+
   /// Get all log records for an account
   Future<List<LogRecord>> getByAccount(String accountId);
 

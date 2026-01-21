@@ -106,23 +106,15 @@ void main() {
       ).read(logRecordNotifierProvider);
     }
 
-    testWidgets('shows validation error when only one coordinate is provided', (
+    testWidgets('shows location picker button when no location set', (
       tester,
     ) async {
       await openDialog(tester);
 
-      await tester.enterText(find.bySemanticsLabel('Latitude'), '10');
-      await tester.ensureVisible(find.text('Update'));
-
-      await tester.tap(find.text('Update'));
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Location must have both latitude and longitude, or neither'),
-        findsOneWidget,
-      );
+      // The dialog uses a map picker, not text fields for location
+      // Verify the "Select Location on Map" button is present
+      expect(find.text('Select Location on Map'), findsOneWidget);
       expect(notifier.updateCallCount, 0);
-      expect(find.byType(EditLogRecordDialog), findsOneWidget);
     });
 
     testWidgets('submits updates through notifier and closes dialog', (
@@ -130,10 +122,14 @@ void main() {
     ) async {
       await openDialog(tester);
 
-      await tester.enterText(find.bySemanticsLabel('Duration'), '5');
-      await tester.enterText(find.bySemanticsLabel('Notes'), 'Updated note');
-      await tester.enterText(find.bySemanticsLabel('Latitude'), '10');
-      await tester.enterText(find.bySemanticsLabel('Longitude'), '20');
+      // Find and update the Duration field
+      final durationField = find.widgetWithText(TextFormField, 'Duration');
+      await tester.enterText(durationField, '5');
+
+      // Find and update the Notes field
+      final notesField = find.widgetWithText(TextField, 'Notes');
+      await tester.enterText(notesField, 'Updated note');
+
       await tester.ensureVisible(find.text('Update'));
 
       await tester.tap(find.text('Update'));
@@ -142,8 +138,7 @@ void main() {
       expect(notifier.updateCallCount, 1);
       expect(notifier.lastPayload?['duration'], 5);
       expect(notifier.lastPayload?['note'], 'Updated note');
-      expect(notifier.lastPayload?['latitude'], 10); // parsed double
-      expect(notifier.lastPayload?['longitude'], 20);
+      // Location is not set via text fields, it uses a map picker
       expect(find.byType(EditLogRecordDialog), findsNothing);
     });
   });

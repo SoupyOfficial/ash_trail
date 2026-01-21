@@ -71,6 +71,9 @@ dependencies:
   # Location permissions and access
   geolocator: ^12.0.0
   permission_handler: ^12.0.1
+  
+  # Maps for iOS
+  google_maps_flutter: ^2.9.0
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +92,10 @@ dev_dependencies:
 
   # Firestore test doubles
   fake_cloud_firestore: ^3.1.0
+  
+  # Native E2E testing with iOS simulator support
+  patrol: ^3.13.0
+  patrol_finders: ^2.5.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

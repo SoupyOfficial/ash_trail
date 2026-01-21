@@ -33,6 +33,9 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   RollingWindowStats? _stats;
   bool _isLoading = true;
   ChartViewType _chartType = ChartViewType.bar;
+  List<LogRecord>?
+  _currentFilteredRecords; // Cache filtered records for heatmaps
+  int? _pendingLoadId; // Track async load requests to prevent race conditions
 
   @override
   void initState() {
@@ -43,7 +46,15 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   @override
   void didUpdateWidget(covariant AnalyticsChartsWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.records != widget.records) {
+    // Reload stats if records change OR account changes
+    if (oldWidget.records != widget.records ||
+        oldWidget.accountId != widget.accountId) {
+      // Clear custom date range when switching accounts to prevent confusion
+      if (oldWidget.accountId != widget.accountId) {
+        _selectedRange = ChartTimeRange.last7Days;
+        _customRange = null;
+        _currentFilteredRecords = null;
+      }
       _loadStats();
     }
   }
@@ -65,17 +76,68 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   }
 
   Future<void> _loadStats() async {
+    // Assign unique ID to this load request to prevent race conditions
+    final loadId = DateTime.now().millisecondsSinceEpoch;
+    _pendingLoadId = loadId;
+
     setState(() => _isLoading = true);
 
     final analyticsService = ref.read(analyticsServiceProvider);
 
-    final stats = await analyticsService.computeRollingWindow(
+    late RollingWindowStats stats;
+    late List<LogRecord> recordsToUse;
+
+    if (_selectedRange == ChartTimeRange.custom && _customRange != null) {
+      // Validate date range: ensure end date >= start date
+      if (_customRange!.end.isBefore(_customRange!.start)) {
+        if (mounted) {
+          setState(() {
+            _stats = null;
+            _isLoading = false;
+            _currentFilteredRecords = [];
+          });
+        }
+        return;
+      }
+
+      // For custom range, filter records by date range
+      // Use inclusive boundaries: [start 00:00, end 23:59:59]
+      final startOfDay = DateTime(
+        _customRange!.start.year,
+        _customRange!.start.month,
+        _customRange!.start.day,
+      );
+      final endOfDay = DateTime(
+        _customRange!.end.year,
+        _customRange!.end.month,
+        _customRange!.end.day,
+        23,
+        59,
+        59,
+      );
+
+      recordsToUse =
+          widget.records.where((record) {
+            // Inclusive bounds: record time must be within [startOfDay, endOfDay]
+            return !record.eventAt.isBefore(startOfDay) &&
+                !record.eventAt.isAfter(endOfDay);
+          }).toList();
+    } else {
+      // For preset ranges, use the full record set
+      recordsToUse = widget.records;
+    }
+
+    // Cache filtered records for use in heatmaps
+    _currentFilteredRecords = recordsToUse;
+
+    stats = await analyticsService.computeRollingWindow(
       accountId: widget.accountId,
-      records: widget.records,
+      records: recordsToUse,
       days: _currentDays,
     );
 
-    if (mounted) {
+    // Only update state if this is still the latest load request
+    if (mounted && _pendingLoadId == loadId) {
       setState(() {
         _stats = stats;
         _isLoading = false;
@@ -114,16 +176,18 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
                   const SizedBox(height: 24),
 
                   // Hourly activity heatmap
+                  // Use filtered records to match the selected date range
                   HourlyHeatmap(
-                    records: widget.records,
+                    records: _currentFilteredRecords ?? widget.records,
                     title: 'Activity by Hour',
                     baseColor: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 24),
 
                   // Weekly pattern heatmap
+                  // Use filtered records to match the selected date range
                   WeeklyHeatmap(
-                    records: widget.records,
+                    records: _currentFilteredRecords ?? widget.records,
                     title: 'Weekly Pattern',
                     baseColor: Colors.green,
                   ),
@@ -141,29 +205,45 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   }
 
   Widget _buildTimeRangeSelector(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildTimeChip(ChartTimeRange.last7Days, '7 Days'),
-                const SizedBox(width: 8),
-                _buildTimeChip(ChartTimeRange.last14Days, '14 Days'),
-                const SizedBox(width: 8),
-                _buildTimeChip(ChartTimeRange.last30Days, '30 Days'),
-                const SizedBox(width: 8),
-                _buildTimeChip(ChartTimeRange.custom, 'Custom'),
-              ],
+        Row(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildTimeChip(ChartTimeRange.last7Days, '7 Days'),
+                    const SizedBox(width: 8),
+                    _buildTimeChip(ChartTimeRange.last14Days, '14 Days'),
+                    const SizedBox(width: 8),
+                    _buildTimeChip(ChartTimeRange.last30Days, '30 Days'),
+                    const SizedBox(width: 8),
+                    _buildTimeChip(ChartTimeRange.custom, 'Custom'),
+                  ],
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.date_range),
+              tooltip: 'Custom Date Range',
+              onPressed: _showCustomRangePicker,
+            ),
+          ],
+        ),
+        if (_selectedRange == ChartTimeRange.custom && _customRange != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Range: ${DateFormat('MMM d, yyyy').format(_customRange!.start)} - ${DateFormat('MMM d, yyyy').format(_customRange!.end)}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.date_range),
-          tooltip: 'Custom Date Range',
-          onPressed: _showCustomRangePicker,
-        ),
       ],
     );
   }
@@ -173,8 +253,11 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
     String displayLabel = label;
 
     if (range == ChartTimeRange.custom && _customRange != null) {
-      displayLabel =
-          '${DateFormat.MMMd().format(_customRange!.start)} - ${DateFormat.MMMd().format(_customRange!.end)}';
+      // Only show formatted range if it's valid
+      if (!_customRange!.end.isBefore(_customRange!.start)) {
+        displayLabel =
+            '${DateFormat.MMMd().format(_customRange!.start)} - ${DateFormat.MMMd().format(_customRange!.end)}';
+      }
     }
 
     return FilterChip(
@@ -188,6 +271,7 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
             setState(() {
               _selectedRange = range;
               _customRange = null;
+              _currentFilteredRecords = null; // Clear filtered records cache
             });
             _loadStats();
           }
@@ -197,13 +281,40 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
   }
 
   Future<void> _showCustomRangePicker() async {
+    final now = DateTime.now();
+    final initialStart =
+        _customRange?.start ?? now.subtract(const Duration(days: 7));
+    final initialEnd = _customRange?.end ?? now;
+
     final result = await showTimeRangePicker(
       context: context,
-      initialStart: _customRange?.start,
-      initialEnd: _customRange?.end,
+      initialStart: initialStart,
+      initialEnd: initialEnd,
     );
 
     if (result != null && mounted) {
+      // Validate: reject if end date is before start date
+      if (result.end.isBefore(result.start)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('End date must be on or after the start date'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
+      // Reject if start date is in the future
+      if (result.start.isAfter(now)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Start date cannot be in the future'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
       setState(() {
         _selectedRange = ChartTimeRange.custom;
         _customRange = result;
@@ -321,6 +432,8 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
       metric: 'duration',
     );
 
+    String rangeLabel = _getDateRangeLabel();
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -332,7 +445,7 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
               children: [
                 Text('Trends', style: Theme.of(context).textTheme.titleMedium),
                 Text(
-                  'Last $_currentDays days',
+                  rangeLabel,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -357,6 +470,19 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
         ),
       ),
     );
+  }
+
+  String _getDateRangeLabel() {
+    if (_selectedRange == ChartTimeRange.custom && _customRange != null) {
+      // Validate range to prevent showing negative day counts
+      if (_customRange!.end.isBefore(_customRange!.start)) {
+        return 'Invalid range';
+      }
+      final daysDiff =
+          _customRange!.end.difference(_customRange!.start).inDays + 1;
+      return '$daysDiff days';
+    }
+    return 'Last $_currentDays days';
   }
 }
 

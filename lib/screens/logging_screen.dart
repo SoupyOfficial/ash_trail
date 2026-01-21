@@ -5,6 +5,8 @@ import '../providers/log_record_provider.dart';
 import '../widgets/backdate_dialog.dart';
 import '../services/log_record_service.dart';
 import '../services/location_service.dart';
+import '../widgets/location_map_picker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 
 /// Dedicated logging screen for detailed event entry
@@ -95,6 +97,82 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
   // Location state
   bool _isFetchingLocation = false;
   final LocationService _locationService = LocationService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Automatically check and capture location when screen opens
+    _checkAndCaptureInitialLocation();
+  }
+
+  /// Check for location permission and capture location automatically
+  Future<void> _checkAndCaptureInitialLocation() async {
+    final draftNotifier = ref.read(logDraftProvider.notifier);
+
+    // Check if we already have location permission
+    final hasPermission = await _locationService.hasLocationPermission();
+
+    if (hasPermission) {
+      // Silently capture location in the background
+      _captureLocationSilently(draftNotifier);
+    } else {
+      // Prompt user for permission
+      if (mounted) {
+        _promptForLocationPermission(draftNotifier);
+      }
+    }
+  }
+
+  /// Silently capture location without showing dialogs
+  Future<void> _captureLocationSilently(LogDraftNotifier draftNotifier) async {
+    try {
+      final position = await _locationService.getCurrentLocation();
+      if (position != null && mounted) {
+        draftNotifier.setLocation(position.latitude, position.longitude);
+        debugPrint(
+          '✅ Location auto-captured: ${position.latitude}, ${position.longitude}',
+        );
+      }
+    } catch (e) {
+      debugPrint('⚠️ Failed to auto-capture location: $e');
+    }
+  }
+
+  /// Prompt user for location permission with explanation
+  Future<void> _promptForLocationPermission(
+    LogDraftNotifier draftNotifier,
+  ) async {
+    final shouldRequest = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Location Access'),
+            content: const Text(
+              'Ash Trail requires location access to automatically tag your logs. '
+              'This helps you track where events occur. '
+              'Location will be collected automatically when you create logs.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Not Now'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Allow'),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldRequest == true && mounted) {
+      final granted = await _locationService.requestLocationPermission();
+      if (granted && mounted) {
+        // Capture location after permission granted
+        _captureLocationSilently(draftNotifier);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -567,78 +645,162 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                     Row(
                       children: [
                         const Text(
-                          'Location (optional)',
+                          'Location (auto-collected)',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const Spacer(),
-                        if (draft.latitude != null && draft.longitude != null)
-                          IconButton(
-                            icon: const Icon(Icons.clear, size: 20),
-                            onPressed:
-                                () => draftNotifier.setLocation(null, null),
-                            tooltip: 'Clear location',
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     if (draft.latitude != null && draft.longitude != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color:
-                              Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on, size: 20),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Lat: ${draft.latitude!.toStringAsFixed(6)}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  Text(
-                                    'Lon: ${draft.longitude!.toStringAsFixed(6)}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ],
-                        ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on,
+                                  size: 24,
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Location Captured',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${draft.latitude!.toStringAsFixed(6)}, ${draft.longitude!.toStringAsFixed(6)}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimaryContainer
+                                              .withOpacity(0.8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.check_circle,
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed:
+                                      () => _openMapPicker(draftNotifier),
+                                  icon: const Icon(Icons.map, size: 18),
+                                  label: const Text('Edit on Map'),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed:
+                                      () => _captureLocation(draftNotifier),
+                                  icon: const Icon(Icons.my_location, size: 18),
+                                  label: const Text('Recapture'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       )
                     else
-                      FilledButton.icon(
-                        onPressed:
-                            _isFetchingLocation
-                                ? null
-                                : () => _captureLocation(draftNotifier),
-                        icon:
-                            _isFetchingLocation
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.errorContainer.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Location not available',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
                                   ),
-                                )
-                                : const Icon(Icons.my_location),
-                        label: Text(
-                          _isFetchingLocation
-                              ? 'Getting location...'
-                              : 'Capture Current Location',
-                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          FilledButton.icon(
+                            onPressed:
+                                _isFetchingLocation
+                                    ? null
+                                    : () => _captureLocation(draftNotifier),
+                            icon:
+                                _isFetchingLocation
+                                    ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                    : const Icon(Icons.my_location),
+                            label: Text(
+                              _isFetchingLocation
+                                  ? 'Getting location...'
+                                  : 'Enable Location',
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -764,6 +926,42 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
       (match) => ' ${match.group(0)}',
     );
     return result[0].toUpperCase() + result.substring(1);
+  }
+
+  /// Open map picker to select or edit location
+  Future<void> _openMapPicker(LogDraftNotifier draftNotifier) async {
+    final draft = ref.read(logDraftProvider);
+
+    final result = await Navigator.push<LatLng?>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => LocationMapPicker(
+              initialLatitude: draft.latitude,
+              initialLongitude: draft.longitude,
+              title: 'Select Location',
+            ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      draftNotifier.setLocation(result.latitude, result.longitude);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location updated'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else if (result == null && mounted) {
+      // User cleared location
+      draftNotifier.setLocation(null, null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location cleared'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _captureLocation(LogDraftNotifier draftNotifier) async {

@@ -1,0 +1,18 @@
+app_name: AshTrail
+package_name: com.soup.smokeLog
+bundle_id: com.soup.smokeLog
+
+# Patrol configuration for E2E testing
+patrol:
+  # Test directory containing Patrol tests
+  test_dir: integration_test
+  
+  # iOS configuration
+  ios:
+    # iOS simulator for testing
+    flavor: Runner
+    bundle_id: com.soup.smokeLog
+    
+  # Android configuration (for future use)
+  android:
+    app_id: com.soup.smokeLog

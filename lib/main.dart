@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'services/hive_database_service.dart';
 import 'services/crash_reporting_service.dart';
+import 'services/location_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'providers/auth_provider.dart';
@@ -53,6 +54,18 @@ void main() async {
     final db = HiveDatabaseService();
     await db.initialize();
     debugPrint('✅ [main] Hive database initialized\n');
+
+    debugPrint('📍 [main] Checking location permissions...');
+    // Check location permissions on startup (iOS-focused)
+    final locationService = LocationService();
+    final hasPermission = await locationService.hasLocationPermission();
+    if (hasPermission) {
+      debugPrint('✅ [main] Location permission already granted\n');
+    } else {
+      debugPrint(
+        '⚠️  [main] Location permission not granted - will prompt user\n',
+      );
+    }
   } catch (e) {
     debugPrint('❌ [main] Hive database initialization error: $e\n');
   }

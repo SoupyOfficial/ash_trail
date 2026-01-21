@@ -5,6 +5,8 @@ import '../models/enums.dart';
 import '../models/log_record.dart';
 import '../providers/log_record_provider.dart';
 import '../services/validation_service.dart';
+import 'location_map_picker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Dialog for editing an existing log record
 class EditLogRecordDialog extends ConsumerStatefulWidget {
@@ -513,56 +515,92 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
               const SizedBox(height: 24),
 
               // Location (Latitude/Longitude)
-              Text(
-                'Location (optional - both or neither)',
-                style: theme.textTheme.titleMedium,
-              ),
+              Text('Location', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _latitudeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Latitude',
-                        border: OutlineInputBorder(),
-                        hintText: '-90 to 90',
+              if (_latitude != null && _longitude != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                        signed: true,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 24,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Location Set',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onPrimaryContainer
+                                        .withOpacity(0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.check_circle,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ],
                       ),
-                      onChanged: (value) {
-                        final parsed = double.tryParse(value);
-                        setState(() {
-                          _latitude = parsed;
-                        });
-                      },
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _longitudeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Longitude',
-                        border: OutlineInputBorder(),
-                        hintText: '-180 to 180',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                        signed: true,
-                      ),
-                      onChanged: (value) {
-                        final parsed = double.tryParse(value);
-                        setState(() {
-                          _longitude = parsed;
-                        });
-                      },
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _openMapPicker,
+                            icon: const Icon(Icons.map, size: 18),
+                            label: const Text('Edit on Map'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _latitude = null;
+                                _longitude = null;
+                                _latitudeController.clear();
+                                _longitudeController.clear();
+                              });
+                            },
+                            icon: const Icon(Icons.clear, size: 18),
+                            label: const Text('Clear'),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                FilledButton.icon(
+                  onPressed: _openMapPicker,
+                  icon: const Icon(Icons.map),
+                  label: const Text('Select Location on Map'),
+                ),
               const SizedBox(height: 24),
 
               // Action Buttons
@@ -607,5 +645,49 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
         ),
       ),
     );
+  }
+
+  /// Open map picker to select or edit location
+  Future<void> _openMapPicker() async {
+    final result = await Navigator.push<LatLng?>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => LocationMapPicker(
+              initialLatitude: _latitude,
+              initialLongitude: _longitude,
+              title: 'Select Location',
+            ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _latitude = result.latitude;
+        _longitude = result.longitude;
+        _latitudeController.text = result.latitude.toString();
+        _longitudeController.text = result.longitude.toString();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location updated'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } else if (result == null && mounted) {
+      // User cleared location
+      setState(() {
+        _latitude = null;
+        _longitude = null;
+        _latitudeController.clear();
+        _longitudeController.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location cleared'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

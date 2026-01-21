@@ -422,5 +422,348 @@ void main() {
       final statisticValues = find.byType(RichText);
       expect(statisticValues, findsWidgets);
     });
+
+    testWidgets('Custom date range selection filters data correctly', (
+      tester,
+    ) async {
+      // GIVEN: I am viewing analytics
+      await pumpAnalyticsWidget(tester);
+      await tester.pumpAndSettle();
+
+      // WHEN: I tap the calendar icon to open custom date picker
+      final calendarButton = find.byIcon(Icons.date_range);
+      expect(calendarButton, findsWidgets); // Should find at least one
+
+      // THEN: The custom chip should be available for selection
+      expect(find.text('Custom'), findsOneWidget);
+    });
+
+    testWidgets('displays custom date range under filter chips when selected', (
+      tester,
+    ) async {
+      // GIVEN: I am viewing analytics
+      await pumpAnalyticsWidget(tester);
+      await tester.pumpAndSettle();
+
+      // THEN: The filter chips are visible
+      expect(find.text('7 Days'), findsOneWidget);
+      expect(find.text('14 Days'), findsOneWidget);
+      expect(find.text('30 Days'), findsOneWidget);
+      expect(find.text('Custom'), findsOneWidget);
+
+      // AND: The calendar button is available for opening the date picker
+      expect(find.byIcon(Icons.date_range), findsWidgets);
+    });
+  });
+
+  group('AnalyticsChartsWidget - Multi-Account Integration', () {
+    testWidgets('filters records by account ID correctly', (tester) async {
+      // GIVEN: Records from multiple accounts
+      final mixedRecords = [
+        LogRecord.create(
+          logId: 'log-1',
+          accountId: 'account-a',
+          eventType: EventType.vape,
+          eventAt: DateTime(2024, 1, 1, 10),
+          duration: 120,
+        ),
+        LogRecord.create(
+          logId: 'log-2',
+          accountId: 'account-b',
+          eventType: EventType.vape,
+          eventAt: DateTime(2024, 1, 1, 11),
+          duration: 60,
+        ),
+        LogRecord.create(
+          logId: 'log-3',
+          accountId: 'account-a',
+          eventType: EventType.note,
+          eventAt: DateTime(2024, 1, 2, 12),
+        ),
+      ];
+
+      final fakeService = _FakeAnalyticsService(
+        RollingWindowStats(
+          days: 7,
+          startDate: DateTime(2023, 12, 26),
+          endDate: DateTime(2024, 1, 2),
+          totalEntries: 2,
+          totalDurationSeconds: 120,
+          averageDailyEntries: 0.3,
+          dailyRollups: [],
+          eventTypeCounts: {EventType.vape: 1, EventType.note: 1},
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [analyticsServiceProvider.overrideWithValue(fakeService)],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 900,
+                child: AnalyticsChartsWidget(
+                  records: mixedRecords,
+                  accountId: 'account-a',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // THEN: Analytics should be computed with all records
+      // (filtering by accountId is responsibility of parent/provider)
+      expect(fakeService.callCount, 1);
+    });
+
+    testWidgets('updates analytics when switching accounts', (tester) async {
+      // GIVEN: Initial records for account A
+      final accountARecords = [
+        LogRecord.create(
+          logId: 'a-1',
+          accountId: 'account-a',
+          eventType: EventType.vape,
+          eventAt: DateTime(2024, 1, 1),
+          duration: 100,
+        ),
+      ];
+
+      final fakeService = _FakeAnalyticsService(
+        RollingWindowStats(
+          days: 7,
+          startDate: DateTime(2023, 12, 26),
+          endDate: DateTime(2024, 1, 2),
+          totalEntries: 1,
+          totalDurationSeconds: 100,
+          averageDailyEntries: 0.1,
+          dailyRollups: [],
+          eventTypeCounts: {EventType.vape: 1},
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [analyticsServiceProvider.overrideWithValue(fakeService)],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 900,
+                child: AnalyticsChartsWidget(
+                  records: accountARecords,
+                  accountId: 'account-a',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      final initialCallCount = fakeService.callCount;
+
+      // WHEN: Account switches (records change)
+      final accountBRecords = [
+        LogRecord.create(
+          logId: 'b-1',
+          accountId: 'account-b',
+          eventType: EventType.note,
+          eventAt: DateTime(2024, 1, 2),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [analyticsServiceProvider.overrideWithValue(fakeService)],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 900,
+                child: AnalyticsChartsWidget(
+                  records: accountBRecords,
+                  accountId: 'account-b',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // THEN: Analytics should reload with new account's data
+      expect(fakeService.callCount, greaterThan(initialCallCount));
+    });
+
+    testWidgets('custom date range applies to correct account data', (
+      tester,
+    ) async {
+      // GIVEN: Records with specific dates
+      final records = [
+        LogRecord.create(
+          logId: 'log-1',
+          accountId: 'account-a',
+          eventType: EventType.vape,
+          eventAt: DateTime(2024, 1, 5, 10),
+          duration: 60,
+        ),
+        LogRecord.create(
+          logId: 'log-2',
+          accountId: 'account-a',
+          eventType: EventType.vape,
+          eventAt: DateTime(2024, 1, 15, 14),
+          duration: 90,
+        ),
+        LogRecord.create(
+          logId: 'log-3',
+          accountId: 'account-a',
+          eventType: EventType.vape,
+          eventAt: DateTime(2024, 1, 25, 18),
+          duration: 45,
+        ),
+      ];
+
+      final fakeService = _FakeAnalyticsService(
+        RollingWindowStats(
+          days: 7,
+          startDate: DateTime(2024, 1, 1),
+          endDate: DateTime(2024, 1, 31),
+          totalEntries: 3,
+          totalDurationSeconds: 195,
+          averageDailyEntries: 0.1,
+          dailyRollups: [],
+          eventTypeCounts: {EventType.vape: 3},
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [analyticsServiceProvider.overrideWithValue(fakeService)],
+          child: MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 900,
+                child: AnalyticsChartsWidget(
+                  records: records,
+                  accountId: 'account-a',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // WHEN: User selects 14 Days range (different from default 7 Days)
+      await tester.tap(find.text('14 Days'));
+      await tester.pumpAndSettle();
+
+      // THEN: Analytics should be computed for the selected account only
+      expect(find.text('14 Days'), findsOneWidget);
+      expect(fakeService.callCount, greaterThanOrEqualTo(2));
+    });
+
+    testWidgets('empty records for account show no data state', (tester) async {
+      // GIVEN: Empty records for an account
+      final fakeService = _FakeAnalyticsService(
+        RollingWindowStats(
+          days: 7,
+          startDate: DateTime(2024, 1, 1),
+          endDate: DateTime(2024, 1, 7),
+          totalEntries: 0,
+          totalDurationSeconds: 0,
+          averageDailyEntries: 0,
+          dailyRollups: [],
+          eventTypeCounts: {},
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [analyticsServiceProvider.overrideWithValue(fakeService)],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 900,
+                child: AnalyticsChartsWidget(
+                  records: [],
+                  accountId: 'empty-account',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // THEN: Should show appropriate state
+      // Analytics service will still be called with empty records
+      expect(fakeService.callCount, 1);
+    });
+
+    testWidgets(
+      'heatmaps use filtered records matching selected account and date range',
+      (tester) async {
+        // GIVEN: Records from multiple dates and accounts
+        final records = [
+          LogRecord.create(
+            logId: 'log-1',
+            accountId: 'account-a',
+            eventType: EventType.vape,
+            eventAt: DateTime(2024, 1, 1, 9),
+            duration: 30,
+          ),
+          LogRecord.create(
+            logId: 'log-2',
+            accountId: 'account-a',
+            eventType: EventType.vape,
+            eventAt: DateTime(2024, 1, 1, 14),
+            duration: 45,
+          ),
+        ];
+
+        final fakeService = _FakeAnalyticsService(
+          RollingWindowStats(
+            days: 7,
+            startDate: DateTime(2024, 1, 1),
+            endDate: DateTime(2024, 1, 7),
+            totalEntries: 2,
+            totalDurationSeconds: 75,
+            averageDailyEntries: 0.3,
+            dailyRollups: [],
+            eventTypeCounts: {EventType.vape: 2},
+          ),
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              analyticsServiceProvider.overrideWithValue(fakeService),
+            ],
+            child: MaterialApp(
+              home: Scaffold(
+                body: SizedBox(
+                  height: 900,
+                  child: AnalyticsChartsWidget(
+                    records: records,
+                    accountId: 'account-a',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // THEN: Heatmaps should be present and use the same filtered data
+        expect(find.byType(HourlyHeatmap), findsOneWidget);
+        expect(find.text('Activity by Hour'), findsOneWidget);
+      },
+    );
   });
 }

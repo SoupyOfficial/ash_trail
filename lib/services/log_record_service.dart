@@ -267,9 +267,22 @@ class LogRecordService {
     }).toList();
   }
 
-  /// Get log records that need syncing
-  Future<List<LogRecord>> getPendingSync({int limit = 100}) async {
-    final records = await _repository.getPendingSync();
+  /// Get log records that need syncing.
+  ///
+  /// If [accountId] is provided, only returns pending records for that account.
+  /// This is important for multi-account support to ensure we only sync records
+  /// that belong to the currently authenticated Firebase user.
+  Future<List<LogRecord>> getPendingSync({
+    String? accountId,
+    int limit = 100,
+  }) async {
+    var records = await _repository.getPendingSync();
+
+    // Filter by accountId if provided
+    if (accountId != null) {
+      records = records.where((r) => r.accountId == accountId).toList();
+    }
+
     return records.take(limit).toList();
   }
 

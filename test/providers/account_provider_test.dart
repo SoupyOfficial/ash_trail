@@ -102,6 +102,32 @@ class MockAccountSessionManager implements AccountSessionManager {
 
   @override
   Future<int> getLoggedInCount() async => _loggedInAccounts.length;
+
+  // Custom token management methods for multi-account switching
+  final Map<String, String> _customTokens = {};
+  final Map<String, int> _customTokenTimestamps = {};
+
+  @override
+  Future<void> storeCustomToken(String uid, String customToken) async {
+    _customTokens[uid] = customToken;
+    _customTokenTimestamps[uid] = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  @override
+  Future<String?> getValidCustomToken(String uid) async {
+    return _customTokens[uid];
+  }
+
+  @override
+  Future<void> removeCustomToken(String uid) async {
+    _customTokens.remove(uid);
+    _customTokenTimestamps.remove(uid);
+  }
+
+  @override
+  Future<bool> hasValidCustomToken(String uid) async {
+    return _customTokens.containsKey(uid);
+  }
 }
 
 /// Mock AccountService for testing

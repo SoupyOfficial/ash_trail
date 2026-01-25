@@ -8,14 +8,18 @@ import 'account_service.dart';
 /// Manages multiple authenticated sessions for multi-account support.
 ///
 /// Firebase Auth only supports one active user at a time, so this service:
-/// 1. Stores refresh tokens for each logged-in account securely
+/// 1. Stores custom Firebase tokens for each logged-in account securely
 /// 2. Tracks which accounts have valid sessions
-/// 3. Enables quick switching between accounts by restoring sessions
+/// 3. Enables seamless switching between accounts using signInWithCustomToken()
+///
+/// Custom tokens are generated via a Cloud Function and are valid for 48 hours.
+/// When switching accounts, we use the stored custom token to instantly
+/// authenticate as that user without requiring any user interaction.
 ///
 /// Data isolation is maintained by:
 /// - All data queries filter by the active account's userId
 /// - Each account's data syncs independently to Firestore
-/// - Switching accounts changes which data is displayed, not who is authenticated
+/// - Switching accounts changes both the displayed data AND the Firebase Auth user
 class AccountSessionManager {
   // Singleton instance
   static final AccountSessionManager _instance =
@@ -33,6 +37,10 @@ class AccountSessionManager {
   static const String _sessionPrefix = 'session_';
   static const String _activeSessionKey = 'active_session_user_id';
   static const String _loggedInAccountsKey = 'logged_in_accounts';
+  
+  // Custom token storage keys (for seamless multi-account switching)
+  static const String _customTokenPrefix = 'custom_token_';
+  static const String _customTokenTimestampPrefix = 'custom_token_timestamp_';
 
   /// Get list of all accounts that have active sessions (logged in)
   Future<List<Account>> getLoggedInAccounts() async {
@@ -99,11 +107,127 @@ class AccountSessionManager {
     }
   }
 
+  // ============================================
+  // Custom Token Management (for seamless switching)
+  // ============================================
+
+  /// Store a custom Firebase token for an account.
+  ///
+  /// Custom tokens enable seamless account switching without user interaction.
+  /// They are valid for 48 hours from the time they were generated.
+  Future<void> storeCustomToken(String uid, String customToken) async {
+    try {
+      debugPrint('🔑 [AccountSessionManager] Storing custom token for $uid');
+
+      // Store the custom token
+      await _secureStorage.write(
+        key: '$_customTokenPrefix$uid',
+        value: customToken,
+      );
+
+      // Store the timestamp when this token was received
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      await _secureStorage.write(
+        key: '$_customTokenTimestampPrefix$uid',
+        value: timestamp,
+      );
+
+      debugPrint('🔑 [AccountSessionManager] ✅ Custom token stored for $uid');
+    } catch (e) {
+      debugPrint('🔑 [AccountSessionManager] ❌ Error storing custom token: $e');
+      rethrow;
+    }
+  }
+
+  /// Retrieve a valid (non-expired) custom token for an account.
+  ///
+  /// Returns null if:
+  /// - No token is stored for this user
+  /// - The token has expired (older than 47 hours - 1 hour buffer before 48hr expiry)
+  ///
+  /// If the token is expired, it will be automatically removed from storage.
+  Future<String?> getValidCustomToken(String uid) async {
+    try {
+      // Get the token
+      final customToken = await _secureStorage.read(
+        key: '$_customTokenPrefix$uid',
+      );
+      if (customToken == null) {
+        debugPrint('🔑 [AccountSessionManager] No custom token found for $uid');
+        return null;
+      }
+
+      // Get the timestamp
+      final timestampStr = await _secureStorage.read(
+        key: '$_customTokenTimestampPrefix$uid',
+      );
+      if (timestampStr == null) {
+        debugPrint(
+          '🔑 [AccountSessionManager] No timestamp found for custom token $uid',
+        );
+        return null;
+      }
+
+      // Check if token is still valid (within 47 hours to have buffer time)
+      final timestamp = int.parse(timestampStr);
+      final tokenAge = DateTime.now().millisecondsSinceEpoch - timestamp;
+      const maxAge = 47 * 60 * 60 * 1000; // 47 hours in milliseconds
+
+      if (tokenAge > maxAge) {
+        final ageHours = tokenAge / 3600000;
+        debugPrint(
+          '🔑 [AccountSessionManager] Custom token for $uid has expired (age: ${ageHours.toStringAsFixed(1)} hours)',
+        );
+        // Remove expired token
+        await removeCustomToken(uid);
+        return null;
+      }
+
+      final ageHours = tokenAge / 3600000;
+      debugPrint(
+        '🔑 [AccountSessionManager] Retrieved valid custom token for $uid (age: ${ageHours.toStringAsFixed(1)} hours)',
+      );
+      return customToken;
+    } catch (e) {
+      debugPrint(
+        '🔑 [AccountSessionManager] ❌ Error retrieving custom token: $e',
+      );
+      return null;
+    }
+  }
+
+  /// Remove custom token for an account.
+  ///
+  /// Called when:
+  /// - Token has expired
+  /// - User explicitly signs out of an account
+  /// - Account is deleted
+  Future<void> removeCustomToken(String uid) async {
+    try {
+      await _secureStorage.delete(key: '$_customTokenPrefix$uid');
+      await _secureStorage.delete(key: '$_customTokenTimestampPrefix$uid');
+      debugPrint('🔑 [AccountSessionManager] Removed custom token for $uid');
+    } catch (e) {
+      debugPrint(
+        '🔑 [AccountSessionManager] ❌ Error removing custom token: $e',
+      );
+    }
+  }
+
+  /// Check if a valid custom token exists for an account.
+  Future<bool> hasValidCustomToken(String uid) async {
+    final token = await getValidCustomToken(uid);
+    return token != null;
+  }
+
   /// Clear session for a specific account (sign out single account)
   Future<void> clearSession(String userId) async {
     debugPrint('\n🔐 [AccountSessionManager] clearSession($userId)');
 
     await _secureStorage.delete(key: '$_sessionPrefix$userId');
+    
+    // Also remove custom token for this account
+    await removeCustomToken(userId);
 
     // Update account state
     final account = await _accountService.getAccountByUserId(userId);
@@ -128,6 +252,9 @@ class AccountSessionManager {
     final loggedInUserIds = await _getLoggedInList();
     for (final userId in loggedInUserIds) {
       await _secureStorage.delete(key: '$_sessionPrefix$userId');
+      
+      // Also remove custom tokens
+      await removeCustomToken(userId);
 
       final account = await _accountService.getAccountByUserId(userId);
       if (account != null) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -7,6 +8,16 @@ import 'log_record_service.dart';
 import 'legacy_data_adapter.dart';
 
 /// SyncService handles bidirectional synchronization with Firestore
+///
+/// **Multi-Account Support:**
+/// Sync operations are account-scoped and only process records for the currently
+/// authenticated Firebase user. This ensures:
+/// - Firestore security rules validate correctly (request.auth.uid must match accountId)
+/// - No cross-account data leakage
+/// - Seamless account switching via Firebase Custom Tokens
+///
+/// When switching accounts, the Firebase Auth user changes via signInWithCustomToken(),
+/// and sync automatically filters to only process records for that user.
 ///
 /// **Conflict Resolution Strategy:**
 /// Current implementation assumes SINGLE-WRITER MODEL per account:
@@ -125,6 +136,14 @@ class SyncService {
   }
 
   /// Sync pending records to Firestore
+  ///
+  /// IMPORTANT: Only syncs records that belong to the currently authenticated
+  /// Firebase user. This ensures:
+  /// 1. Firestore security rules won't reject the write (auth.uid must match)
+  /// 2. Records for other accounts stay pending until that user authenticates
+  ///
+  /// With seamless account switching via custom tokens, the authenticated user
+  /// should always match the active account.
   Future<SyncResult> syncPendingRecords() async {
     if (_isSyncing) {
       return SyncResult(
@@ -134,6 +153,21 @@ class SyncService {
         message: 'Sync already in progress',
       );
     }
+
+    // Safety check: Only sync records for the authenticated Firebase user
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser == null) {
+      debugPrint('⚠️ [SyncService] No authenticated user, skipping sync');
+      return SyncResult(
+        success: 0,
+        failed: 0,
+        skipped: 0,
+        message: 'No authenticated user',
+      );
+    }
+
+    final authenticatedUid = firebaseUser.uid;
+    debugPrint('🔄 [SyncService] Syncing records for authenticated user: $authenticatedUid');
 
     if (!await isOnline()) {
       return SyncResult(
@@ -147,7 +181,9 @@ class SyncService {
     _isSyncing = true;
 
     try {
+      // Get pending records filtered by authenticated user
       final pendingRecords = await _logRecordService.getPendingSync(
+        accountId: authenticatedUid,  // Only sync records for this user
         limit: _batchSize,
       );
 
@@ -160,10 +196,18 @@ class SyncService {
         );
       }
 
+      debugPrint('🔄 [SyncService] Found ${pendingRecords.length} pending records for $authenticatedUid');
+
       int successCount = 0;
       int failedCount = 0;
 
       for (final record in pendingRecords) {
+        // Double-check record belongs to authenticated user (safety net)
+        if (record.accountId != authenticatedUid) {
+          debugPrint('⚠️ [SyncService] Skipping record ${record.logId} - account mismatch');
+          continue;
+        }
+
         try {
           await _uploadRecord(record);
           successCount++;

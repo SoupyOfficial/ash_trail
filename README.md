@@ -6,7 +6,11 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
 
 ### 🚀 Fast Logging First
 
-- **Multi-account support** - Switch between accounts seamlessly
+- **Multi-account support** - Switch between accounts seamlessly without re-authentication
+  - Seamless account switching using Firebase Custom Tokens
+  - 48-hour token validity for instant switching
+  - All accounts remain logged in simultaneously
+  - Data isolation per account with automatic sync filtering
 - **Home screen logging** - Press-and-hold duration recording directly from home
 - **Vape tracking (MVP)** - Focus on vape session tracking with duration in seconds
 - **Optional context** - Add mood, physical ratings, and reasons (8 categories)
@@ -30,9 +34,12 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
 
 ### ☁️ Cloud Integration
 
-- **Firestore sync** - Cloud backup of all log entries
-- **Custom auth service** - ~48-hour sessions for easy multi-device use
-- **Conflict resolution** - Smart handling of sync conflicts
+- **Firestore sync** - Cloud backup of all log entries with account-scoped isolation
+- **Firebase Custom Tokens** - Seamless multi-account switching via Cloud Function
+  - Custom token generation service for instant account switching
+  - No re-authentication required when switching between logged-in accounts
+  - Automatic token refresh when expired
+- **Conflict resolution** - Smart handling of sync conflicts with last-write-wins strategy
 
 ## Architecture
 
@@ -52,9 +59,10 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
 - **Flutter** - Cross-platform UI framework
 - **Riverpod** - State management
 - **Isar** (native) / **Hive** (web) - Local database (offline-first)
-- **Firestore** - Cloud sync target
+- **Firestore** - Cloud sync target with security rules enforcing account isolation
 - **FL Chart** - Analytics visualization
-- **Firebase Auth** - Authentication (with custom refresh token service)
+- **Firebase Auth** - Authentication with Custom Token support
+- **Google Cloud Functions** - Custom token generation service for multi-account switching
 
 ### Repository Pattern
 
@@ -126,9 +134,19 @@ Or watch for changes:
 dart run build_runner watch --delete-conflicting-outputs
 ```
 
-### Adding Accounts
+### Multi-Account Support
 
-Currently accounts are added manually through the UI. Firebase Authentication integration coming soon for automatic account creation.
+The app supports multiple authenticated accounts with seamless switching:
+
+- **Sign in** with Google, Apple, or Email to add accounts
+- **Switch accounts** instantly without re-authentication using Firebase Custom Tokens
+- **Data isolation** - each account's data is kept separate
+- **Automatic sync** - only syncs records for the currently authenticated account
+
+**Documentation**:
+- [Multi-Account Architecture](docs/MULTI_ACCOUNT_ARCHITECTURE.md) - Complete architecture and design
+- [Multi-Account Implementation Guide](docs/MULTI_ACCOUNT_IMPLEMENTATION.md) - Developer quick reference
+- [Authentication & Accounts Design Doc](docs/plan/8.%20Authentication%20&%20Accounts.md) - Design specifications
 
 ## LogRecord System
 
@@ -193,9 +211,9 @@ Quick logging templates for common actions:
 
 ## Roadmap
 
-- [ ] Firebase Authentication integration
-- [ ] Custom Flask refresh token service on Google Cloud Functions
-- [ ] Complete Firestore sync implementation
+- [x] Firebase Authentication integration
+- [x] Custom token service on Google Cloud Functions for multi-account switching
+- [x] Complete Firestore sync implementation with account isolation
 - [ ] Chart implementations (cumulative, daily/weekly, rolling windows)
 - [ ] Export functionality
 - [ ] Session grouping and analysis

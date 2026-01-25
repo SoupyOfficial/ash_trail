@@ -1,12 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../models/account.dart';
-import '../models/enums.dart';
+import '../models/enums.dart' as enums;
 import '../services/account_service.dart';
 import '../services/account_session_manager.dart';
 import '../services/log_record_service.dart';
+import '../services/token_service.dart';
 import 'log_record_provider.dart';
+
+// Token service provider
+final tokenServiceProvider = Provider<TokenService>((ref) {
+  debugPrint('🔧 [tokenServiceProvider] Creating/Getting TokenService instance');
+  return TokenService.instance;
+});
 
 // Service provider - ensure singleton AccountService is used
 final accountServiceProvider = Provider<AccountService>((ref) {
@@ -141,8 +149,17 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
 
   AccountSwitcher(this._ref) : super(const AsyncValue.data(null));
 
-  /// Switch to viewing a different account's data
-  /// The account must be logged in (have a valid session)
+  /// Switch to viewing a different account's data AND authenticate as that user.
+  ///
+  /// This method uses Firebase Custom Tokens to seamlessly switch the Firebase Auth
+  /// user without requiring any user interaction. The flow is:
+  /// 1. Check if already authenticated as this user (skip auth if so)
+  /// 2. Try to get a valid custom token from secure storage
+  /// 3. If no valid token, generate a new one via Cloud Function
+  /// 4. Sign in with the custom token
+  /// 5. Update the active account
+  ///
+  /// The account must be logged in (have a valid session).
   Future<void> switchAccount(String userId) async {
     debugPrint('\n🔀🔀🔀 [AccountSwitcher.switchAccount] CALLED 🔀🔀🔀');
     debugPrint('   🎯 Target userId: $userId');
@@ -151,6 +168,69 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final sessionManager = _ref.read(accountSessionManagerProvider);
+      final tokenService = _ref.read(tokenServiceProvider);
+      final auth = FirebaseAuth.instance;
+
+      // Check if already authenticated as this user
+      final currentAuthUid = auth.currentUser?.uid;
+      debugPrint('   🔐 Current Firebase Auth UID: $currentAuthUid');
+
+      if (currentAuthUid != userId) {
+        debugPrint('   🔄 Need to switch Firebase Auth user...');
+
+        // Try to get a valid custom token from storage
+        String? customToken = await sessionManager.getValidCustomToken(userId);
+
+        if (customToken == null) {
+          // No valid token - generate a new one via Cloud Function
+          debugPrint('   🔑 No valid custom token found, generating new one...');
+          try {
+            final tokenData = await tokenService.generateCustomToken(userId);
+            customToken = tokenData['customToken'] as String;
+            await sessionManager.storeCustomToken(userId, customToken);
+            debugPrint('   ✅ New custom token generated and stored');
+          } catch (e) {
+            debugPrint('   ⚠️ Failed to generate custom token: $e');
+            // Continue anyway - the account switch will still work locally
+            // but sync may fail until we can get a valid token
+          }
+        } else {
+          debugPrint('   ✅ Valid custom token found in storage');
+        }
+
+        // Sign in with custom token if we have one
+        if (customToken != null) {
+          debugPrint('   🔐 Signing in with custom token...');
+          try {
+            await auth.signInWithCustomToken(customToken);
+            debugPrint(
+              '   ✅ Firebase Auth switched to user: ${auth.currentUser?.uid}',
+            );
+          } catch (e) {
+            debugPrint('   ⚠️ Failed to sign in with custom token: $e');
+            // Token might be invalid - remove it and continue
+            await sessionManager.removeCustomToken(userId);
+            // Try to regenerate token
+            try {
+              debugPrint('   🔄 Retrying with fresh token...');
+              final tokenData = await tokenService.generateCustomToken(userId);
+              customToken = tokenData['customToken'] as String;
+              await sessionManager.storeCustomToken(userId, customToken);
+              await auth.signInWithCustomToken(customToken);
+              debugPrint(
+                '   ✅ Firebase Auth switched to user: ${auth.currentUser?.uid}',
+              );
+            } catch (retryError) {
+              debugPrint('   ❌ Retry failed: $retryError');
+              // Continue anyway - local switch will work but sync won't
+            }
+          }
+        }
+      } else {
+        debugPrint('   ✅ Already authenticated as target user');
+      }
+
+      // Update active account in local storage
       debugPrint('   📞 Calling sessionManager.setActiveAccount($userId)...');
       await sessionManager.setActiveAccount(userId);
       debugPrint('   ✅ sessionManager.setActiveAccount completed');
@@ -161,12 +241,7 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
       _ref.read(logDraftProvider.notifier).reset();
 
       // Invalidate providers to refresh with new account's data
-      debugPrint('   ♻️ Invalidating activeAccountProvider...');
-      _ref.invalidate(activeAccountProvider);
-      debugPrint('   ♻️ Invalidating allAccountsProvider...');
-      _ref.invalidate(allAccountsProvider);
-      debugPrint('   ♻️ Invalidating loggedInAccountsProvider...');
-      _ref.invalidate(loggedInAccountsProvider);
+      _invalidateProviders();
 
       debugPrint(
         '🔀🔀🔀 [AccountSwitcher.switchAccount] COMPLETE for $userId 🔀🔀🔀\n',
@@ -177,6 +252,16 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
       debugPrint('   ❌ ERROR in switchAccount: $e');
       state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Helper to invalidate all account-related providers
+  void _invalidateProviders() {
+    debugPrint('   ♻️ Invalidating activeAccountProvider...');
+    _ref.invalidate(activeAccountProvider);
+    debugPrint('   ♻️ Invalidating allAccountsProvider...');
+    _ref.invalidate(allAccountsProvider);
+    debugPrint('   ♻️ Invalidating loggedInAccountsProvider...');
+    _ref.invalidate(loggedInAccountsProvider);
   }
 
   /// Create and activate an anonymous account (per design doc 8.5)
@@ -192,7 +277,7 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
         userId: userId,
         email: 'anonymous@local',
         displayName: 'Anonymous User',
-        authProvider: AuthProvider.anonymous,
+        authProvider: enums.AuthProvider.anonymous,
         isActive: true,
         isLoggedIn: true,
         lastAccessedAt: DateTime.now(),
@@ -239,7 +324,7 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
       // 2. Update each record's accountId to authenticated account
       for (final record in anonymousRecords) {
         record.accountId = authenticatedUserId;
-        record.syncState = SyncState.pending; // Mark for sync
+        record.syncState = enums.SyncState.pending; // Mark for sync
         record.updatedAt = DateTime.now();
         await logRecordService.updateLogRecord(record);
       }

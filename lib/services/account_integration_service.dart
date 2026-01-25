@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../services/account_service.dart';
 import '../services/account_session_manager.dart';
 import '../services/crash_reporting_service.dart';
+import '../services/token_service.dart';
 import '../providers/auth_provider.dart';
 import '../models/account.dart';
 import '../models/enums.dart' as enums;
@@ -37,6 +38,7 @@ class AccountIntegrationService {
   /// Create or update local account from Firebase user
   /// Called after successful authentication
   /// In multi-account mode, this adds the account to the logged-in list
+  /// Also generates a custom token for seamless future account switching
   Future<Account> syncAccountFromFirebaseUser(
     User firebaseUser, {
     bool makeActive = true,
@@ -62,6 +64,8 @@ class AccountIntegrationService {
       }
     }
 
+    Account resultAccount;
+
     if (existingAccount != null) {
       // Update existing account
       existingAccount.email = firebaseUser.email ?? existingAccount.email;
@@ -81,7 +85,7 @@ class AccountIntegrationService {
       }
 
       debugPrint('   ✅ Updated existing account');
-      return existingAccount;
+      resultAccount = existingAccount;
     } else {
       // Create new account
       final newAccount = Account.create(
@@ -103,7 +107,34 @@ class AccountIntegrationService {
       }
 
       debugPrint('   ✅ Created new account');
-      return newAccount;
+      resultAccount = newAccount;
+    }
+
+    // Generate and store custom token for seamless multi-account switching
+    // This allows switching to this account later without re-authentication
+    await _generateAndStoreCustomToken(firebaseUser.uid);
+
+    return resultAccount;
+  }
+
+  /// Generate a custom Firebase token and store it for future account switching.
+  ///
+  /// This is called after successful authentication to enable seamless
+  /// switching back to this account later without user interaction.
+  /// Custom tokens are valid for 48 hours.
+  Future<void> _generateAndStoreCustomToken(String uid) async {
+    try {
+      debugPrint('   🔑 Generating custom token for seamless switching...');
+      final tokenService = TokenService.instance;
+      final tokenData = await tokenService.generateCustomToken(uid);
+      final customToken = tokenData['customToken'] as String;
+      await sessionManager.storeCustomToken(uid, customToken);
+      debugPrint('   ✅ Custom token generated and stored for $uid');
+    } catch (e) {
+      // Non-fatal: User can still use the app, but may need to re-auth on switch
+      debugPrint('   ⚠️ Failed to generate custom token: $e');
+      debugPrint('   ⚠️ Account switching may require re-authentication');
+      // Don't rethrow - this is not critical to sign-in success
     }
   }
 

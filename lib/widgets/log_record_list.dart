@@ -345,7 +345,12 @@ class LogRecordTile extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Text(
+              value,
+              softWrap: true,
+            ),
+          ),
         ],
       ),
     );

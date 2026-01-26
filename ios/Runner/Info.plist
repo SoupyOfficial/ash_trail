@@ -71,5 +71,7 @@
 	<string>Ash Trail needs access to your location to log hiking trails and activities. Your location is only used when you explicitly request it and helps track your outdoor adventures.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Ash Trail needs access to your location to log hiking trails and activities. Your location is only used when you explicitly request it and helps track your outdoor adventures.</string>
+	<key>GOOGLE_MAPS_API_KEY</key>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
 </dict>
 </plist>

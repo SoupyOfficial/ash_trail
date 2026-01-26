@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
+import '../services/location_service.dart';
 
 /// Dialog for creating a new log entry
 class CreateLogEntryDialog extends ConsumerStatefulWidget {
@@ -452,17 +453,36 @@ class QuickLogButton extends ConsumerWidget {
         }
 
         try {
+          // Capture location before creating log
+          final locationService = LocationService();
+          double? latitude;
+          double? longitude;
+          try {
+            final position = await locationService.getCurrentLocation();
+            if (position != null) {
+              latitude = position.latitude;
+              longitude = position.longitude;
+            }
+          } catch (e) {
+            debugPrint('⚠️ Failed to capture location for quick log: $e');
+          }
+
           await service.createLogRecord(
             accountId: accountId,
             eventType: eventType,
             duration: defaultDuration ?? 0,
             unit: defaultUnit ?? Unit.none,
+            latitude: latitude,
+            longitude: longitude,
           );
 
           if (context.mounted) {
+            final locationMessage = latitude != null && longitude != null
+                ? '$label logged. Location captured.'
+                : '$label logged';
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text('$label logged')));
+            ).showSnackBar(SnackBar(content: Text(locationMessage)));
           }
         } catch (e) {
           if (context.mounted) {

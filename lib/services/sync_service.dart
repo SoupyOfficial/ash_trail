@@ -4,8 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../models/log_record.dart';
+import '../models/account.dart';
+import '../models/enums.dart';
 import 'log_record_service.dart';
 import 'legacy_data_adapter.dart';
+import 'account_session_manager.dart';
+import 'token_service.dart';
 
 /// SyncService handles bidirectional synchronization with Firestore
 ///
@@ -49,6 +53,8 @@ class SyncService {
   final Connectivity _connectivity;
   final LegacyDataAdapter _legacyAdapter;
   final Future<List<ConnectivityResult>> Function()? _connectivityCheck;
+  final AccountSessionManager _sessionManager;
+  final TokenService _tokenService;
 
   SyncService({
     FirebaseFirestore? firestore,
@@ -56,11 +62,15 @@ class SyncService {
     Connectivity? connectivity,
     LegacyDataAdapter? legacyAdapter,
     Future<List<ConnectivityResult>> Function()? connectivityCheck,
+    AccountSessionManager? sessionManager,
+    TokenService? tokenService,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
        _logRecordService = logRecordService ?? LogRecordService(),
        _connectivity = connectivity ?? Connectivity(),
        _legacyAdapter = legacyAdapter ?? LegacyDataAdapter(),
-       _connectivityCheck = connectivityCheck;
+       _connectivityCheck = connectivityCheck,
+       _sessionManager = sessionManager ?? AccountSessionManager.instance,
+       _tokenService = tokenService ?? TokenService.instance;
 
   Timer? _syncTimer;
   Timer? _pullTimer;
@@ -70,26 +80,25 @@ class SyncService {
   /// Sync batch size
   static const int _batchSize = 50;
 
-  /// Start automatic background sync and periodic pulls for the active account
+  /// Start automatic background sync and periodic pulls for all logged-in accounts
   void startAutoSync({
     String? accountId,
-    Duration pushInterval = const Duration(minutes: 1),
-    Duration pullInterval = const Duration(minutes: 1),
+    Duration pushInterval = const Duration(seconds: 30),
+    Duration pullInterval = const Duration(seconds: 30),
   }) {
     _currentAccountId = accountId ?? _currentAccountId;
 
     _syncTimer?.cancel();
     _pullTimer?.cancel();
 
-    _syncTimer = Timer.periodic(pushInterval, (_) => syncPendingRecords());
+    // Sync all logged-in accounts periodically
+    _syncTimer = Timer.periodic(pushInterval, (_) => syncAllLoggedInAccounts());
 
-    if (_currentAccountId != null) {
-      _pullTimer = Timer.periodic(
-        pullInterval,
-        (_) =>
-            pullRecordsForAccountIncludingLegacy(accountId: _currentAccountId!),
-      );
-    }
+    // Pull records for all logged-in accounts periodically
+    _pullTimer = Timer.periodic(
+      pullInterval,
+      (_) => pullAllLoggedInAccounts(),
+    );
   }
 
   /// Stop automatic background sync
@@ -103,7 +112,7 @@ class SyncService {
   /// Run an immediate pull + push cycle for the current account and schedule periodic syncs
   Future<void> startAccountSync({
     required String accountId,
-    Duration interval = const Duration(minutes: 1),
+    Duration interval = const Duration(seconds: 30),
   }) async {
     _currentAccountId = accountId;
     stopAutoSync();
@@ -144,8 +153,10 @@ class SyncService {
   ///
   /// With seamless account switching via custom tokens, the authenticated user
   /// should always match the active account.
-  Future<SyncResult> syncPendingRecords() async {
-    if (_isSyncing) {
+  ///
+  /// [skipLockCheck] - If true, skips the _isSyncing lock check (for internal use when syncing multiple accounts)
+  Future<SyncResult> syncPendingRecords({bool skipLockCheck = false}) async {
+    if (!skipLockCheck && _isSyncing) {
       return SyncResult(
         success: 0,
         failed: 0,
@@ -178,7 +189,9 @@ class SyncService {
       );
     }
 
-    _isSyncing = true;
+    if (!skipLockCheck) {
+      _isSyncing = true;
+    }
 
     try {
       // Get pending records filtered by authenticated user
@@ -200,18 +213,62 @@ class SyncService {
 
       int successCount = 0;
       int failedCount = 0;
+      int skippedCount = 0;
 
       for (final record in pendingRecords) {
         // Double-check record belongs to authenticated user (safety net)
         if (record.accountId != authenticatedUid) {
           debugPrint('⚠️ [SyncService] Skipping record ${record.logId} - account mismatch');
+          skippedCount++;
           continue;
         }
 
         try {
-          await _uploadRecord(record);
-          successCount++;
+          // Re-fetch the record to check if it's been modified since we fetched the list
+          final currentRecord = await _logRecordService.getLogRecordByLogId(record.logId);
+          
+          if (currentRecord == null) {
+            debugPrint('⚠️ [SyncService] Record ${record.logId} no longer exists, skipping');
+            skippedCount++;
+            continue;
+          }
+
+          // Check if record is still in a syncable state (pending or error)
+          // If it's been synced or modified (revision changed), skip it
+          if (currentRecord.syncState != SyncState.pending && 
+              currentRecord.syncState != SyncState.error) {
+            debugPrint('🔄 [SyncService] Record ${record.logId} is no longer syncable (state: ${currentRecord.syncState}), skipping');
+            skippedCount++;
+            continue;
+          }
+
+          // Check if record has been modified since we fetched it (revision or updatedAt changed)
+          if (currentRecord.revision != record.revision || 
+              currentRecord.updatedAt != record.updatedAt) {
+            debugPrint('🔄 [SyncService] Record ${record.logId} was modified during sync (revision: ${record.revision} -> ${currentRecord.revision}), skipping to preserve changes');
+            skippedCount++;
+            continue;
+          }
+
+          // Record is still in syncable state and hasn't been modified, proceed with upload
+          try {
+            await _uploadRecord(currentRecord);
+            successCount++;
+          } catch (e) {
+            // Check if this is a "modified during upload" error - these should be skipped, not failed
+            if (e.toString().contains('modified during upload') ||
+                e.toString().contains('not in syncable state')) {
+              debugPrint('🔄 [SyncService] Record ${record.logId} was modified during upload, skipping');
+              skippedCount++;
+            } else {
+              // Real error - mark as failed
+              failedCount++;
+              await _logRecordService.markSyncError(record, e.toString());
+            }
+          }
         } catch (e) {
+          // Catch any errors from re-fetching or validation
+          debugPrint('⚠️ [SyncService] Error processing record ${record.logId}: $e');
           failedCount++;
           await _logRecordService.markSyncError(record, e.toString());
         }
@@ -220,16 +277,29 @@ class SyncService {
       return SyncResult(
         success: successCount,
         failed: failedCount,
-        skipped: 0,
-        message: 'Synced $successCount records, $failedCount failed',
+        skipped: skippedCount,
+        message: 'Synced $successCount records, $failedCount failed, $skippedCount skipped (modified during sync)',
       );
     } finally {
-      _isSyncing = false;
+      if (!skipLockCheck) {
+        _isSyncing = false;
+      }
     }
   }
 
   /// Upload a single record to Firestore
+  /// 
+  /// IMPORTANT: This method assumes the record is still in a syncable state.
+  /// The caller should verify the record hasn't been modified before calling this.
   Future<void> _uploadRecord(LogRecord record) async {
+    // Final safety check: Verify record is still in syncable state before uploading
+    // This prevents race conditions where a record is modified between the check and upload
+    if (record.syncState != SyncState.pending && record.syncState != SyncState.error) {
+      throw Exception(
+        'Cannot upload record ${record.logId}: not in syncable state (current: ${record.syncState})',
+      );
+    }
+
     final docRef = _firestore
         .collection('accounts')
         .doc(record.accountId)
@@ -263,8 +333,25 @@ class SyncService {
       await docRef.set(record.toFirestore());
     }
 
-    // Mark as synced
-    await _logRecordService.markSynced(record, DateTime.now());
+    // Final check before marking as synced: Re-fetch to ensure record wasn't modified during upload
+    final freshRecord = await _logRecordService.getLogRecordByLogId(record.logId);
+    if (freshRecord == null) {
+      throw Exception('Record ${record.logId} was deleted during upload');
+    }
+
+    // If record was modified (revision or updatedAt changed), don't mark as synced
+    // This preserves the user's changes which will be synced in the next cycle
+    if (freshRecord.revision != record.revision || 
+        freshRecord.updatedAt != record.updatedAt) {
+      debugPrint(
+        '⚠️ [SyncService] Record ${record.logId} was modified during upload. '
+        'Skipping markSynced to preserve changes (revision: ${record.revision} -> ${freshRecord.revision})',
+      );
+      throw Exception('Record was modified during upload - preserving changes');
+    }
+
+    // Record is still unchanged, safe to mark as synced
+    await _logRecordService.markSynced(freshRecord, DateTime.now());
   }
 
   /// Check if there's a conflict between local and remote records
@@ -760,7 +847,216 @@ class SyncService {
 
   /// Force sync now (manual trigger)
   Future<SyncResult> forceSyncNow() async {
-    return await syncPendingRecords();
+    return await syncAllLoggedInAccounts();
+  }
+
+  /// Sync all logged-in accounts
+  /// Switches Firebase auth to each account temporarily to sync their data
+  Future<SyncResult> syncAllLoggedInAccounts() async {
+    if (_isSyncing) {
+      return SyncResult(
+        success: 0,
+        failed: 0,
+        skipped: 0,
+        message: 'Sync already in progress',
+      );
+    }
+
+    _isSyncing = true;
+
+    try {
+      if (!await isOnline()) {
+        return SyncResult(
+          success: 0,
+          failed: 0,
+          skipped: 0,
+          message: 'Device is offline',
+        );
+      }
+
+      final loggedInAccounts = await _sessionManager.getLoggedInAccounts();
+      
+      if (loggedInAccounts.isEmpty) {
+        debugPrint('🔄 [SyncService] No logged-in accounts to sync');
+        return SyncResult(
+          success: 0,
+          failed: 0,
+          skipped: 0,
+          message: 'No logged-in accounts',
+        );
+      }
+
+      debugPrint('🔄 [SyncService] Syncing ${loggedInAccounts.length} logged-in accounts');
+
+      final auth = FirebaseAuth.instance;
+      final originalUser = auth.currentUser;
+      int totalSuccess = 0;
+      int totalFailed = 0;
+
+      for (final account in loggedInAccounts) {
+        try {
+          // Temporarily switch Firebase auth to this account
+          await _switchToAccount(account);
+          
+          // Sync pending records for this account (skip lock check since we're managing it here)
+          final result = await syncPendingRecords(skipLockCheck: true);
+          totalSuccess += result.success;
+          totalFailed += result.failed;
+        } catch (e) {
+          debugPrint('⚠️ [SyncService] Error syncing account ${account.userId}: $e');
+          totalFailed++;
+        }
+      }
+
+      // Restore original Firebase auth state
+      if (originalUser != null && auth.currentUser?.uid != originalUser.uid) {
+        try {
+          final originalToken = await _sessionManager.getValidCustomToken(originalUser.uid);
+          if (originalToken != null) {
+            await auth.signInWithCustomToken(originalToken);
+          }
+        } catch (e) {
+          debugPrint('⚠️ [SyncService] Could not restore original auth state: $e');
+        }
+      }
+
+      return SyncResult(
+        success: totalSuccess,
+        failed: totalFailed,
+        skipped: 0,
+        message: 'Synced ${loggedInAccounts.length} accounts: $totalSuccess success, $totalFailed failed',
+      );
+    } catch (e) {
+      debugPrint('❌ [SyncService] Error in syncAllLoggedInAccounts: $e');
+      return SyncResult(
+        success: 0,
+        failed: 0,
+        skipped: 0,
+        message: 'Error syncing accounts: $e',
+      );
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
+  /// Pull records for all logged-in accounts
+  Future<SyncResult> pullAllLoggedInAccounts() async {
+    if (!await isOnline()) {
+      return SyncResult(
+        success: 0,
+        failed: 0,
+        skipped: 0,
+        message: 'Device is offline',
+      );
+    }
+
+    try {
+      final loggedInAccounts = await _sessionManager.getLoggedInAccounts();
+      
+      if (loggedInAccounts.isEmpty) {
+        return SyncResult(
+          success: 0,
+          failed: 0,
+          skipped: 0,
+          message: 'No logged-in accounts',
+        );
+      }
+
+      debugPrint('🔄 [SyncService] Pulling records for ${loggedInAccounts.length} logged-in accounts');
+
+      final auth = FirebaseAuth.instance;
+      final originalUser = auth.currentUser;
+      int totalSuccess = 0;
+      int totalFailed = 0;
+
+      for (final account in loggedInAccounts) {
+        try {
+          // Temporarily switch Firebase auth to this account
+          await _switchToAccount(account);
+          
+          // Pull records for this account
+          final result = await pullRecordsForAccountIncludingLegacy(
+            accountId: account.userId,
+          );
+          totalSuccess += result.success;
+          totalFailed += result.failed;
+        } catch (e) {
+          debugPrint('⚠️ [SyncService] Error pulling records for account ${account.userId}: $e');
+          totalFailed++;
+        }
+      }
+
+      // Restore original Firebase auth state
+      if (originalUser != null && auth.currentUser?.uid != originalUser.uid) {
+        try {
+          final originalToken = await _sessionManager.getValidCustomToken(originalUser.uid);
+          if (originalToken != null) {
+            await auth.signInWithCustomToken(originalToken);
+          }
+        } catch (e) {
+          debugPrint('⚠️ [SyncService] Could not restore original auth state: $e');
+        }
+      }
+
+      return SyncResult(
+        success: totalSuccess,
+        failed: totalFailed,
+        skipped: 0,
+        message: 'Pulled records for ${loggedInAccounts.length} accounts: $totalSuccess success, $totalFailed failed',
+      );
+    } catch (e) {
+      debugPrint('❌ [SyncService] Error in pullAllLoggedInAccounts: $e');
+      return SyncResult(
+        success: 0,
+        failed: 0,
+        skipped: 0,
+        message: 'Error pulling accounts: $e',
+      );
+    }
+  }
+
+  /// Temporarily switch Firebase auth to the specified account
+  Future<void> _switchToAccount(Account account) async {
+    final auth = FirebaseAuth.instance;
+    
+    // Check if already authenticated as this account
+    if (auth.currentUser?.uid == account.userId) {
+      return;
+    }
+
+    // Get or generate custom token
+    String? customToken = await _sessionManager.getValidCustomToken(account.userId);
+    
+    if (customToken == null) {
+      // Try to generate a new token
+      try {
+        final tokenData = await _tokenService.generateCustomToken(account.userId);
+        customToken = tokenData['customToken'] as String;
+        await _sessionManager.storeCustomToken(account.userId, customToken);
+      } catch (e) {
+        debugPrint('⚠️ [SyncService] Could not generate token for ${account.userId}: $e');
+        throw Exception('Could not get custom token for account ${account.userId}');
+      }
+    }
+
+    // Sign in with custom token
+    try {
+      await auth.signInWithCustomToken(customToken);
+      debugPrint('🔄 [SyncService] Switched to account ${account.userId} for sync');
+    } catch (e) {
+      debugPrint('⚠️ [SyncService] Failed to sign in with custom token for ${account.userId}: $e');
+      // Token might be invalid, try to regenerate
+      try {
+        final tokenData = await _tokenService.generateCustomToken(account.userId);
+        customToken = tokenData['customToken'] as String;
+        await _sessionManager.storeCustomToken(account.userId, customToken);
+        await auth.signInWithCustomToken(customToken);
+        debugPrint('🔄 [SyncService] Switched to account ${account.userId} after token refresh');
+      } catch (retryError) {
+        debugPrint('❌ [SyncService] Failed to switch to account ${account.userId} after retry: $retryError');
+        throw Exception('Could not switch to account ${account.userId}');
+      }
+    }
   }
 
   /// Cleanup

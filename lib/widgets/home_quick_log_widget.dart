@@ -5,6 +5,7 @@ import '../models/enums.dart';
 import '../services/log_record_service.dart';
 import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
+import '../services/location_service.dart';
 
 /// Minimal quick-log widget for home screen
 /// Features:
@@ -33,6 +34,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
   double? _moodRating;
   double? _physicalRating;
   final Set<LogReason> _selectedReasons = {};
+  
+  // Location service
+  final LocationService _locationService = LocationService();
 
   void _handleLongPressStart(LongPressStartDetails details) {
     setState(() {
@@ -107,6 +111,19 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
 
       final durationSeconds = durationMs / 1000.0;
 
+      // Capture location before creating log
+      double? latitude;
+      double? longitude;
+      try {
+        final position = await _locationService.getCurrentLocation();
+        if (position != null) {
+          latitude = position.latitude;
+          longitude = position.longitude;
+        }
+      } catch (e) {
+        debugPrint('⚠️ Failed to capture location for quick log: $e');
+      }
+
       final record = await service.createLogRecord(
         accountId: activeAccount.userId,
         eventType: EventType.vape,
@@ -115,13 +132,19 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         moodRating: _moodRating,
         physicalRating: _physicalRating,
         reasons: _selectedReasons.isNotEmpty ? _selectedReasons.toList() : null,
+        latitude: latitude,
+        longitude: longitude,
       );
 
       if (mounted) {
         final durationStr = durationSeconds.toStringAsFixed(1);
+        final locationMessage = latitude != null && longitude != null
+            ? 'Logged vape (${durationStr}s). Location captured.'
+            : 'Logged vape (${durationStr}s)';
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Logged vape (${durationStr}s)'),
+            content: Text(locationMessage),
             duration: const Duration(seconds: 3),
             action: SnackBarAction(
               label: 'UNDO',

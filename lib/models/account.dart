@@ -55,8 +55,15 @@ class Account {
   String? refreshToken;
   DateTime? tokenExpiresAt;
 
+  /// Default constructor - initializes all late fields to safe defaults
+  /// Use Account.create() for creating new accounts with proper values
   Account() {
+    userId = '';
+    email = '';
+    authProvider = AuthProvider.anonymous;
+    isActive = false;
     isLoggedIn = false;
+    createdAt = DateTime.now();
   }
 
   Account.create({

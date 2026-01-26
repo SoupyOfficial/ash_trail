@@ -116,11 +116,12 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
       if (mounted) {
         Navigator.pop(context, record);
+        final locationMessage = _latitude != null && _longitude != null
+            ? 'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}. Location captured.'
+            : 'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}',
-            ),
+            content: Text(locationMessage),
             duration: const Duration(seconds: 3),
             action: SnackBarAction(
               label: 'UNDO',

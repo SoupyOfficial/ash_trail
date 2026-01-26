@@ -54,7 +54,11 @@ void main() async {
     final db = HiveDatabaseService();
     await db.initialize();
     debugPrint('✅ [main] Hive database initialized\n');
+  } catch (e) {
+    debugPrint('❌ [main] Hive database initialization error: $e\n');
+  }
 
+  try {
     debugPrint('📍 [main] Checking location permissions...');
     // Check location permissions on startup (iOS-focused)
     final locationService = LocationService();
@@ -67,7 +71,7 @@ void main() async {
       );
     }
   } catch (e) {
-    debugPrint('❌ [main] Hive database initialization error: $e\n');
+    debugPrint('❌ [main] Location service initialization error: $e\n');
   }
 
   debugPrint('🎬 [main] Starting ProviderScope and WidgetApp...\n');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/log_record.dart';
@@ -48,6 +49,10 @@ class _TimeSinceLastHitWidgetState
   List<DayPatternData> _dayPatterns = [];
   ({double weekdayAvg, double weekendAvg, String trend})?
   _weekdayWeekendComparison;
+
+  // Collapsible section state
+  bool _statsSectionExpanded = true;
+  bool _patternSectionExpanded = false;
 
   @override
   void initState() {
@@ -228,6 +233,43 @@ class _TimeSinceLastHitWidgetState
     }
   }
 
+  /// Format duration as relative time (e.g., "Just now", "5m ago", "2h ago")
+  String _formatRelativeDuration(Duration duration) {
+    if (duration.inMinutes < 1) {
+      return 'Just now';
+    } else if (duration.inHours < 1) {
+      return '${duration.inMinutes}m ago';
+    } else if (duration.inDays < 1) {
+      return '${duration.inHours}h ago';
+    } else if (duration.inDays < 7) {
+      return '${duration.inDays}d ago';
+    } else {
+      final weeks = (duration.inDays / 7).floor();
+      if (weeks < 4) {
+        return '${weeks}w ago';
+      } else {
+        // Fall back to absolute format for very long durations (> 1 month)
+        return _formatDuration(duration);
+      }
+    }
+  }
+
+  /// Format seconds (double) to a readable duration string
+  String _formatSeconds(double seconds) {
+    final duration = Duration(seconds: seconds.toInt());
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    final secs = duration.inSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m ${secs}s';
+    } else {
+      return '${secs}s';
+    }
+  }
+
   /// Calculate trend comparing today's avg to yesterday or week avg
   /// Returns: positive = increasing, negative = decreasing, 0 = no change
   double _calculateTrend(double currentAvg, double comparisonAvg) {
@@ -267,47 +309,193 @@ class _TimeSinceLastHitWidgetState
     required String value,
     required String subtitle,
     Widget? trendWidget,
+    String? tooltipDescription,
+    VoidCallback? onTap,
   }) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+    Widget cardContent = Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 2),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (trendWidget != null) ...[
+                  const SizedBox(width: 4),
+                  trendWidget,
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Wrap with gesture detector for tooltip and tap
+    if (tooltipDescription != null || onTap != null) {
+      return Expanded(
+        child: GestureDetector(
+          onLongPress: tooltipDescription != null
+              ? () {
+                  HapticFeedback.mediumImpact();
+                  _showTooltip(context, title, tooltipDescription);
+                }
+              : null,
+          onTap: onTap != null
+              ? () {
+                  HapticFeedback.lightImpact();
+                  onTap();
+                }
+              : null,
+          child: cardContent,
+        ),
+      );
+    }
+
+    return Expanded(child: cardContent);
+  }
+
+  void _showTooltip(BuildContext context, String title, String description) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(description),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDetailView(
+    BuildContext context,
+    String title,
+    String value,
+    String subtitle,
+    Map<String, dynamic>? additionalData,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  if (trendWidget != null) ...[
-                    const SizedBox(width: 4),
-                    trendWidget,
+                ),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      value,
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
                   ],
+                ),
+                if (additionalData != null) ...[
+                  const SizedBox(height: 24),
+                  ...additionalData.entries.map((entry) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                entry.key,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                                softWrap: true,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                entry.value.toString(),
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                softWrap: true,
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
                 ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -324,32 +512,81 @@ class _TimeSinceLastHitWidgetState
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
+      child: GestureDetector(
+        onLongPress: () {
+          HapticFeedback.mediumImpact();
+          _showTooltip(
+            context,
             'Peak Hour',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            'The hour of day when you most frequently log hits. This is calculated from your activity over the last 7 days.',
+          );
+        },
+        onTap: () {
+          HapticFeedback.lightImpact();
+          // Get hour distribution for detail view
+          final weekRecords = widget.records.where((r) {
+            final now = DateTime.now();
+            final todayStart = DateTime(now.year, now.month, now.day);
+            final weekStart = todayStart.subtract(const Duration(days: 7));
+            return r.eventAt.isAfter(weekStart) ||
+                r.eventAt.isAtSameMomentAs(weekStart);
+          }).toList();
+          
+          final hourDistribution = <int, int>{};
+          for (final record in weekRecords) {
+            final hour = record.eventAt.hour;
+            hourDistribution[hour] = (hourDistribution[hour] ?? 0) + 1;
+          }
+          
+          final topHours = hourDistribution.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
+          
+          final topHoursText = topHours.take(3).map((entry) {
+            final hour12 = entry.key % 12 == 0 ? 12 : entry.key % 12;
+            final period = entry.key < 12 ? 'AM' : 'PM';
+            return '$hour12 $period (${entry.value} hits)';
+          }).join(', ');
+          
+          _showDetailView(
+            context,
+            'Peak Hour',
+            _peakHour!.formattedHour,
+            '$percentage% of hits',
+            {
+              'Total Hits in Peak Hour': _peakHour!.count,
+              'Total Hits (7d)': weekRecords.length,
+              'Top 3 Hours': topHoursText,
+              'Analysis': 'Most of your activity occurs during $_peakHour!.formattedHour.toLowerCase(), which represents $percentage% of your hits in the last 7 days.',
+            },
+          );
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Peak Hour',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-          Row(
-            children: [
-              Icon(
-                Icons.schedule,
-                size: 14,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '${_peakHour!.formattedHour} ($percentage%)',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ],
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${_peakHour!.formattedHour} ($percentage%)',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -365,48 +602,80 @@ class _TimeSinceLastHitWidgetState
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Weekly Pattern',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (topDay != null)
+      child: GestureDetector(
+        onLongPress: () => _showTooltip(
+          context,
+          'Weekly Pattern',
+          'Shows your usage patterns across days of the week. Compares weekday vs weekend averages and identifies which day has the highest activity.',
+        ),
+        onTap: () {
+          final dayBreakdown = _dayPatterns.map((day) => 
+            '${day.dayName}: ${day.average.toStringAsFixed(1)}'
+          ).join(', ');
+          
+          final weekdayWeekendDiff = (comparison.weekdayAvg - comparison.weekendAvg).abs();
+          final weekdayHigher = comparison.weekdayAvg > comparison.weekendAvg;
+          
+          _showDetailView(
+            context,
+            'Weekly Pattern',
+            topDay != null ? topDay.dayName : 'N/A',
+            'Highest activity day',
+            {
+              'Weekday Average': '${comparison.weekdayAvg.toStringAsFixed(1)} sec/day',
+              'Weekend Average': '${comparison.weekendAvg.toStringAsFixed(1)} sec/day',
+              'Trend': comparison.trend,
+              'Difference': '${weekdayWeekendDiff.toStringAsFixed(1)} sec (${weekdayHigher ? "weekdays" : "weekends"} higher)',
+              'Day Breakdown': dayBreakdown,
+              'Analysis': weekdayHigher
+                  ? 'You tend to use more on weekdays than weekends'
+                  : 'You tend to use more on weekends than weekdays',
+            },
+          );
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Text(
-                  'Highest: ${topDay.dayName}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+                  'Weekly Pattern',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+                if (topDay != null)
                   Text(
-                    'Weekday: ${comparison.weekdayAvg.toStringAsFixed(1)}',
-                    style: Theme.of(context).textTheme.labelSmall,
+                    'Highest: ${topDay.dayName}',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    'Weekend: ${comparison.weekendAvg.toStringAsFixed(1)}',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Weekday: ${comparison.weekdayAvg.toStringAsFixed(1)}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    Text(
+                      'Weekend: ${comparison.weekendAvg.toStringAsFixed(1)}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -460,121 +729,341 @@ class _TimeSinceLastHitWidgetState
           child: Column(
             children: [
               // Time since last hit header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.timer,
-                    size: 24,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
+              GestureDetector(
+                onLongPress: () {
+                  HapticFeedback.mediumImpact();
+                  _showTooltip(
+                    context,
                     'Time Since Last Hit',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+                    'Shows how long it has been since your most recent log entry. This timer updates every second.',
+                  );
+                },
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  final sortedRecords = widget.records.toList()
+                    ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
+                  final mostRecentRecord = sortedRecords.isNotEmpty
+                      ? sortedRecords.first
+                      : null;
+                  
+                  _showDetailView(
+                    context,
+                    'Time Since Last Hit',
+                    _formatDuration(_timeSinceLastHit!),
+                    'since last entry',
+                    mostRecentRecord != null
+                        ? {
+                            'Last Entry Time': mostRecentRecord.eventAt.toString().split('.')[0],
+                            'Last Entry Duration': '${mostRecentRecord.duration.toStringAsFixed(1)} sec',
+                            'Total Entries': widget.records.length,
+                          }
+                        : null,
+                  );
+                },
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.timer,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Time Since Last Hit',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _formatDuration(_timeSinceLastHit!),
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                    const SizedBox(height: 8),
+                    Text(
+                      _formatRelativeDuration(_timeSinceLastHit!),
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
               Divider(color: Theme.of(context).colorScheme.outlineVariant),
               const SizedBox(height: 12),
 
-              // Count stats row
-              Row(
-                children: [
-                  _buildStatCard(
-                    context,
-                    title: 'Today',
-                    value: '${_todayStats.count}',
-                    subtitle: 'hits',
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatCard(
-                    context,
-                    title: 'This Week',
-                    value: '$_weekCount',
-                    subtitle: 'hits',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
+              // Statistics section (collapsible)
+              _buildCollapsibleSection(
+                context: context,
+                title: 'Statistics',
+                isExpanded: _statsSectionExpanded,
+                onToggle: () {
+                  setState(() {
+                    _statsSectionExpanded = !_statsSectionExpanded;
+                  });
+                },
+                content: Column(
+                  children: [
+                    // Count stats row
+                    Row(
+                      children: [
+                        _buildStatCard(
+                          context,
+                          title: 'Today',
+                          value: '${_todayStats.count}',
+                          subtitle: 'hits',
+                          tooltipDescription:
+                              'Total number of hits logged today.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'Today',
+                            '${_todayStats.count}',
+                            'hits',
+                            {
+                              'Total Duration': _formatSeconds(_todayStats.totalDuration),
+                              'Average Duration': '${_todayStats.avgDuration.toStringAsFixed(1)} sec/hit',
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildStatCard(
+                          context,
+                          title: 'This Week',
+                          value: '$_weekCount',
+                          subtitle: 'hits',
+                          tooltipDescription:
+                              'Total number of hits logged in the last 7 days.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'This Week',
+                            '$_weekCount',
+                            'hits',
+                            {
+                              'Total Duration (7d)': _formatSeconds(_weekStats.totalDuration),
+                              'Average per Day': '${_weekStats.avgDuration.toStringAsFixed(1)} sec/day',
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
 
-              // Average duration stats row
-              Row(
-                children: [
-                  _buildStatCard(
-                    context,
-                    title: 'Avg Today',
-                    value: _todayStats.avgDuration.toStringAsFixed(1),
-                    subtitle: 'sec/hit',
-                    trendWidget: _buildTrendIndicator(todayVsYesterdayTrend),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildStatCard(
-                    context,
-                    title: 'Avg Yesterday',
-                    value: _yesterdayStats.avgDuration.toStringAsFixed(1),
-                    subtitle: 'sec/hit',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
+                    // Average duration stats row
+                    Row(
+                      children: [
+                        _buildStatCard(
+                          context,
+                          title: 'Avg Today',
+                          value: _todayStats.avgDuration.toStringAsFixed(1),
+                          subtitle: 'sec/hit',
+                          trendWidget: _buildTrendIndicator(todayVsYesterdayTrend),
+                          tooltipDescription:
+                              'Average duration per hit today. Calculated by dividing total duration by number of hits.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'Avg Today',
+                            _todayStats.avgDuration.toStringAsFixed(1),
+                            'sec/hit',
+                            {
+                              'Total Hits': _todayStats.count,
+                              'Total Duration': _formatSeconds(_todayStats.totalDuration),
+                              'Comparison': todayVsYesterdayTrend == 0
+                                  ? 'No change'
+                                  : todayVsYesterdayTrend > 0
+                                      ? '${todayVsYesterdayTrend.toStringAsFixed(0)}% higher than yesterday'
+                                      : '${todayVsYesterdayTrend.abs().toStringAsFixed(0)}% lower than yesterday',
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildStatCard(
+                          context,
+                          title: 'Avg Yesterday',
+                          value: _yesterdayStats.avgDuration.toStringAsFixed(1),
+                          subtitle: 'sec/hit',
+                          tooltipDescription:
+                              'Average duration per hit yesterday. Calculated by dividing total duration by number of hits.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'Avg Yesterday',
+                            _yesterdayStats.avgDuration.toStringAsFixed(1),
+                            'sec/hit',
+                            {
+                              'Total Hits': _yesterdayStats.count,
+                              'Total Duration': _formatSeconds(_yesterdayStats.totalDuration),
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
 
-              // Week average with trend comparison
-              Row(
-                children: [
-                  _buildStatCard(
-                    context,
-                    title: 'Avg/Day (7d)',
-                    value: _weekStats.avgDuration.toStringAsFixed(1),
-                    subtitle: 'sec/day',
-                    trendWidget: _buildTrendIndicator(todayVsWeekTrend),
-                  ),
-                  const SizedBox(width: 8),
-                  // Trend summary card
-                  Expanded(
-                    child: Card(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Trend',
-                              style: Theme.of(
+                    // Total duration stats row
+                    Row(
+                      children: [
+                        _buildStatCard(
+                          context,
+                          title: 'Total Today',
+                          value: _formatSeconds(_todayStats.totalDuration),
+                          subtitle: 'duration',
+                          tooltipDescription:
+                              'Total duration of all hits today. Sum of all individual hit durations.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'Total Today',
+                            _formatSeconds(_todayStats.totalDuration),
+                            'total duration',
+                            {
+                              'Total Hits': _todayStats.count,
+                              'Average per Hit': '${_todayStats.avgDuration.toStringAsFixed(1)} sec',
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildStatCard(
+                          context,
+                          title: 'Total Yesterday',
+                          value: _formatSeconds(_yesterdayStats.totalDuration),
+                          subtitle: 'duration',
+                          tooltipDescription:
+                              'Total duration of all hits yesterday. Sum of all individual hit durations.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'Total Yesterday',
+                            _formatSeconds(_yesterdayStats.totalDuration),
+                            'total duration',
+                            {
+                              'Total Hits': _yesterdayStats.count,
+                              'Average per Hit': '${_yesterdayStats.avgDuration.toStringAsFixed(1)} sec',
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Week average with trend comparison
+                    Row(
+                      children: [
+                        _buildStatCard(
+                          context,
+                          title: 'Avg/Day (7d)',
+                          value: _weekStats.avgDuration.toStringAsFixed(1),
+                          subtitle: 'sec/day',
+                          trendWidget: _buildTrendIndicator(todayVsWeekTrend),
+                          tooltipDescription:
+                              'Average duration per day over the last 7 days. Calculated by dividing total duration by number of days with data.',
+                          onTap: () => _showDetailView(
+                            context,
+                            'Avg/Day (7d)',
+                            _weekStats.avgDuration.toStringAsFixed(1),
+                            'sec/day',
+                            {
+                              'Total Hits (7d)': _weekCount,
+                              'Total Duration (7d)': _formatSeconds(_weekStats.totalDuration),
+                              'Comparison': todayVsWeekTrend == 0
+                                  ? 'No change'
+                                  : todayVsWeekTrend > 0
+                                      ? '${todayVsWeekTrend.toStringAsFixed(0)}% higher than 7-day avg'
+                                      : '${todayVsWeekTrend.abs().toStringAsFixed(0)}% lower than 7-day avg',
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Trend summary card
+                        Expanded(
+                          child: GestureDetector(
+                            onLongPress: () {
+                              HapticFeedback.mediumImpact();
+                              _showTooltip(
                                 context,
-                              ).textTheme.bodySmall?.copyWith(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
+                                'Trend',
+                                'Shows how today\'s average duration compares to the 7-day average. Higher means you\'re using more per hit than usual, lower means less.',
+                              );
+                            },
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              final trendPercent = todayVsWeekTrend;
+                              final isUp = trendPercent > 0;
+                              final trendText = trendPercent == 0
+                                  ? 'No change'
+                                  : isUp
+                                      ? '${trendPercent.toStringAsFixed(0)}% higher'
+                                      : '${trendPercent.abs().toStringAsFixed(0)}% lower';
+                              
+                              _showDetailView(
+                                context,
+                                'Trend',
+                                trendText,
+                                'vs 7-day average',
+                                {
+                                  'Today\'s Avg': '${_todayStats.avgDuration.toStringAsFixed(1)} sec/hit',
+                                  '7-Day Avg': '${_weekStats.avgDuration.toStringAsFixed(1)} sec/day',
+                                  'Today\'s Hits': _todayStats.count,
+                                  'Week Total Hits': _weekCount,
+                                  'Interpretation': trendPercent == 0
+                                      ? 'Your usage today matches your 7-day average'
+                                      : isUp
+                                          ? 'You\'re using more per hit than your recent average'
+                                          : 'You\'re using less per hit than your recent average',
+                                },
+                              );
+                            },
+                            child: Card(
+                              color:
+                                  Theme.of(context).colorScheme.surfaceContainerHighest,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Trend',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall?.copyWith(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    _buildTrendSummary(context, todayVsWeekTrend),
+                                  ],
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            _buildTrendSummary(context, todayVsWeekTrend),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
-              // Pattern analysis sections
-              _buildPeakHourSection(context),
-              _buildDayPatternSection(context),
+              // Pattern analysis section (collapsible)
+              if (_peakHour != null || (_dayPatterns.isNotEmpty && _weekdayWeekendComparison != null)) ...[
+                const SizedBox(height: 16),
+                _buildCollapsibleSection(
+                  context: context,
+                  title: 'Patterns',
+                  isExpanded: _patternSectionExpanded,
+                  onToggle: () {
+                    setState(() {
+                      _patternSectionExpanded = !_patternSectionExpanded;
+                    });
+                  },
+                  content: Column(
+                    children: [
+                      _buildPeakHourSection(context),
+                      _buildDayPatternSection(context),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -611,6 +1100,57 @@ class _TimeSinceLastHitWidgetState
             ),
             overflow: TextOverflow.ellipsis,
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Build a collapsible section with header and content
+  Widget _buildCollapsibleSection({
+    required BuildContext context,
+    required String title,
+    required Widget content,
+    required bool isExpanded,
+    required VoidCallback onToggle,
+  }) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onToggle();
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.expand_more,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          child: isExpanded
+              ? content
+              : const SizedBox.shrink(),
         ),
       ],
     );

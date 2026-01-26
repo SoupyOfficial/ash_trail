@@ -132,6 +132,15 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
         debugPrint(
           '✅ Location auto-captured: ${position.latitude}, ${position.longitude}',
         );
+        // Show notification that location was captured
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location captured'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('⚠️ Failed to auto-capture location: $e');
@@ -1067,8 +1076,13 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
           _recordedDuration = Duration.zero;
         });
 
+        // Show success message with location info if available
+        final locationMessage = draft.latitude != null && draft.longitude != null
+            ? 'Event logged successfully! Location captured.'
+            : 'Event logged successfully!';
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Event logged successfully!')),
+          SnackBar(content: Text(locationMessage)),
         );
       }
     } catch (e) {

@@ -45,7 +45,7 @@ class MockSyncService implements SyncService {
   }
 
   @override
-  Future<SyncResult> syncPendingRecords() async {
+  Future<SyncResult> syncPendingRecords({bool skipLockCheck = false}) async {
     if (throwOnSync) throw Exception('Mock sync error');
     return nextSyncResult ??
         SyncResult(
@@ -53,6 +53,29 @@ class MockSyncService implements SyncService {
           failed: 0,
           skipped: 0,
           message: 'Mock sync complete',
+        );
+  }
+
+  @override
+  Future<SyncResult> syncAllLoggedInAccounts() async {
+    if (throwOnSync) throw Exception('Mock sync error');
+    return nextSyncResult ??
+        SyncResult(
+          success: 0,
+          failed: 0,
+          skipped: 0,
+          message: 'Mock sync all accounts complete',
+        );
+  }
+
+  @override
+  Future<SyncResult> pullAllLoggedInAccounts() async {
+    return nextSyncResult ??
+        SyncResult(
+          success: 0,
+          failed: 0,
+          skipped: 0,
+          message: 'Mock pull all accounts complete',
         );
   }
 

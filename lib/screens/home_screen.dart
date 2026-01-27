@@ -13,9 +13,8 @@ import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import '../widgets/time_since_last_hit_widget.dart';
-import 'analytics_screen.dart';
+import '../utils/design_constants.dart';
 import 'accounts_screen.dart';
-import 'history_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -71,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ash Trail'),
+        title: const Text('Home'),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
@@ -81,25 +80,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 MaterialPageRoute(builder: (context) => const AccountsScreen()),
               );
             },
+            tooltip: 'Accounts',
           ),
         ],
       ),
-      body: activeAccountAsync.when(
-        data: (account) {
-          // Check for account changes and manage sync
-          _checkAccountChange(account);
-
-          if (account == null) {
-            return _buildNoAccountView(context);
+      body: RefreshIndicator(
+        onRefresh: () async {
+          final account = ref.read(activeAccountProvider).asData?.value;
+          if (account != null) {
+            ref.invalidate(activeAccountLogRecordsProvider);
+            await Future.delayed(const Duration(milliseconds: 500));
           }
-          return _buildMainView(
-            context,
-            ref,
-            account.displayName ?? account.email,
-          );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        child: activeAccountAsync.when(
+          data: (account) {
+            // Check for account changes and manage sync
+            _checkAccountChange(account);
+
+            if (account == null) {
+              return _buildNoAccountView(context);
+            }
+            return _buildMainView(context, ref);
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Error: $error')),
+        ),
       ),
       floatingActionButton: activeAccountAsync.maybeWhen(
         data: (account) {
@@ -107,6 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return FloatingActionButton.small(
             heroTag: 'backdate',
             onPressed: () => _showBackdateDialog(context),
+            tooltip: 'Backdate Entry',
             child: const Icon(Icons.history),
           );
         },
@@ -156,79 +162,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildMainView(
     BuildContext context,
     WidgetRef ref,
-    String accountName,
   ) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Active account card
-          Card(
-            child: ListTile(
-              leading: CircleAvatar(child: Text(accountName[0].toUpperCase())),
-              title: Text(accountName),
-              subtitle: const Text('Active Account'),
-              trailing: IconButton(
-                icon: const Icon(Icons.swap_horiz),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AccountsScreen(),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Time since last hit clock with integrated stats
+          // Time since last hit clock with integrated stats (Hero Section)
           logRecordsAsync.when(
             data: (records) => TimeSinceLastHitWidget(records: records),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
-          const SizedBox(height: 16),
-
-          // Quick action buttons row
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AnalyticsScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.analytics),
-                  label: const Text('Analytics'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HistoryScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.history),
-                  label: const Text('History'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
+          SizedBox(height: Spacing.xl.value),
 
           // Quick log widget
           HomeQuickLogWidget(
@@ -236,7 +191,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ref.invalidate(activeAccountLogRecordsProvider);
             },
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Spacing.xl.value),
 
           // Recent entries
           Row(
@@ -244,48 +199,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Text(
                 'Recent Entries',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HistoryScreen(),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
-                child: const Text('View All'),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: Spacing.md.value),
 
           logRecordsAsync.when(
             data: (records) {
               if (records.isEmpty) {
                 return Card(
+                  elevation: ElevationLevel.sm.value,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadii.md,
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: Paddings.xxl,
                     child: Center(
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.inbox_outlined,
-                            size: 64,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.3),
+                            size: IconSize.xxl.value,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.3),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: Spacing.lg.value),
                           Text(
                             'No entries yet',
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: Spacing.sm.value),
                           Text(
                             'Hold the duration button above to log your first session',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
@@ -300,39 +259,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
               final recentRecords = sortedRecords.take(5).toList();
               return Column(
-                children:
-                    recentRecords
-                        .map(
-                          (record) => Dismissible(
+                children: recentRecords
+                    .asMap()
+                    .entries
+                    .map(
+                      (entry) {
+                        final record = entry.value;
+                        final isLast = entry.key == recentRecords.length - 1;
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            bottom: isLast ? 0 : Spacing.sm.value,
+                          ),
+                          child: Dismissible(
                             key: Key(record.logId),
                             direction: DismissDirection.endToStart,
                             confirmDismiss: (direction) async {
                               return await showDialog<bool>(
                                 context: context,
-                                builder:
-                                    (context) => AlertDialog(
-                                      title: const Text('Delete Log Entry'),
-                                      content: Text(
-                                        'Are you sure you want to delete this ${record.eventType.name} entry?',
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed:
-                                              () =>
-                                                  Navigator.pop(context, false),
-                                          child: const Text('Cancel'),
-                                        ),
-                                        FilledButton(
-                                          onPressed:
-                                              () =>
-                                                  Navigator.pop(context, true),
-                                          style: FilledButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                          ),
-                                          child: const Text('Delete'),
-                                        ),
-                                      ],
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Delete Log Entry'),
+                                  content: Text(
+                                    'Are you sure you want to delete this ${record.eventType.name} entry?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Cancel'),
                                     ),
+                                    FilledButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                      ),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
                               );
                             },
                             onDismissed: (direction) async {
@@ -340,44 +304,129 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             },
                             background: Container(
                               alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              color: Colors.red,
+                              padding: EdgeInsets.only(
+                                right: Spacing.lg.value,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadii.md,
+                              ),
                               child: const Icon(
                                 Icons.delete,
                                 color: Colors.white,
                               ),
                             ),
                             child: Card(
+                              elevation: ElevationLevel.sm.value,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadii.md,
+                              ),
                               child: ListTile(
-                                leading: Icon(
-                                  _getEventIcon(record.eventType),
-                                  size: 12,
+                                contentPadding: Paddings.md,
+                                leading: CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer,
+                                  child: Icon(
+                                    _getEventIcon(record.eventType),
+                                    size: IconSize.md.value,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                                 ),
-                                title: Text(_formatDateTime(record.eventAt)),
-                                subtitle:
-                                    record.note != null
-                                        ? Text(record.note!)
-                                        : null,
-                                trailing:
-                                    record.duration > 0
-                                        ? Text(
+                                title: Text(
+                                  _formatDateTime(record.eventAt),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                subtitle: record.note != null &&
+                                        record.note!.isNotEmpty
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                          top: Spacing.xs.value,
+                                        ),
+                                        child: Text(
+                                          record.note!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall,
+                                        ),
+                                      )
+                                    : null,
+                                trailing: record.duration > 0
+                                    ? Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: Spacing.sm.value,
+                                          vertical: Spacing.xs.value,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primaryContainer,
+                                          borderRadius: BorderRadii.sm,
+                                        ),
+                                        child: Text(
                                           '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
-                                          style:
-                                              Theme.of(
-                                                context,
-                                              ).textTheme.titleMedium,
-                                        )
-                                        : null,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimaryContainer,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      )
+                                    : null,
                                 onTap: () => _showEditDialog(context, record),
                               ),
                             ),
                           ),
-                        )
-                        .toList(),
+                        );
+                      },
+                    )
+                    .toList(),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Text('Error loading entries: $error'),
+            error: (error, _) => Card(
+                  child: Padding(
+                    padding: Paddings.lg,
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Theme.of(context).colorScheme.error,
+                            size: IconSize.xl.value,
+                          ),
+                          SizedBox(height: Spacing.md.value),
+                          Text(
+                            'Error loading entries',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          SizedBox(height: Spacing.xs.value),
+                          Text(
+                            error.toString(),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
           ),
         ],
       ),

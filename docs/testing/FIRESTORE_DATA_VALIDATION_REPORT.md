@@ -447,7 +447,7 @@ print('${status['imported']} records imported');
 3. **Documentation**:
    - [LEGACY_DATA_SUPPORT.md](LEGACY_DATA_SUPPORT.md) - Feature overview
    - [LEGACY_DATA_IMPLEMENTATION.md](LEGACY_DATA_IMPLEMENTATION.md) - Implementation details
-   - [LEGACY_DATA_ARCHITECTURE.md](LEGACY_DATA_ARCHITECTURE.md) - Architecture diagrams
+   - [LEGACY_DATA_ARCHITECTURE.md](../features/LEGACY_DATA_ARCHITECTURE.md) - Architecture diagrams
 
 ## Conclusion
 

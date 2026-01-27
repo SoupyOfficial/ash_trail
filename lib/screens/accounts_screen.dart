@@ -6,6 +6,7 @@ import '../services/account_integration_service.dart';
 import 'profile/profile_screen.dart';
 import 'export_screen.dart';
 import 'auth/login_screen.dart';
+import '../utils/design_constants.dart';
 
 /// Static test account ID for persistence testing
 const kTestAccountId = 'dev-test-account-001';
@@ -130,12 +131,13 @@ class AccountsScreen extends ConsumerWidget {
               // Logged-in accounts section
               if (loggedInAccounts.isNotEmpty) ...[
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: Spacing.sm.value),
                   child: Text(
                     'Logged In (${loggedInAccounts.length})',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
                 ...loggedInAccounts.map((account) {
@@ -232,16 +234,20 @@ class AccountsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Card(
-      elevation: isActive ? 4 : 1,
+      elevation: isActive
+          ? ElevationLevel.lg.value
+          : ElevationLevel.sm.value,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side:
-            isActive
-                ? BorderSide(color: theme.colorScheme.primary, width: 2)
-                : BorderSide.none,
+        borderRadius: BorderRadii.md,
+        side: isActive
+            ? BorderSide(
+                color: theme.colorScheme.primary,
+                width: 2,
+              )
+            : BorderSide.none,
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadii.md,
         onTap:
             isActive
                 ? null
@@ -564,36 +570,48 @@ class AccountsScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.account_circle_outlined,
-            size: 100,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 24),
-          Text('No Accounts', style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          Text(
-            'Sign in to start tracking',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.6),
+      child: Padding(
+        padding: Paddings.xl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.account_circle_outlined,
+              size: IconSize.xxxl.value,
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.5),
             ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
-            },
-            icon: const Icon(Icons.person_add),
-            label: const Text('Add Account'),
-          ),
-        ],
+            SizedBox(height: Spacing.xl.value),
+            Text(
+              'No Accounts',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            SizedBox(height: Spacing.sm.value),
+            Text(
+              'Sign in to start tracking',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
+                  ),
+            ),
+            SizedBox(height: Spacing.xl.value),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
+              icon: const Icon(Icons.person_add),
+              label: const Text('Add Account'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,10 +5,10 @@ import 'firebase_options.dart';
 import 'services/hive_database_service.dart';
 import 'services/crash_reporting_service.dart';
 import 'services/location_service.dart';
-import 'screens/home_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
+import 'navigation/main_navigation.dart';
 
 /// App initialization state per design doc 6.1.1
 enum AppInitState { uninitialized, initializing, ready, failed }
@@ -147,8 +147,8 @@ class AuthWrapper extends ConsumerWidget {
           return activeAccount.when(
             data: (account) {
               if (account != null) {
-                // Have an active account (authenticated or anonymous), show home
-                return const HomeScreen();
+                // Have an active account (authenticated or anonymous), show main navigation
+                return const MainNavigation();
               }
               // No active account - show welcome screen with options
               return const WelcomeScreen();

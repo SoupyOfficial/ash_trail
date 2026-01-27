@@ -12,6 +12,8 @@ import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import '../widgets/analytics_charts.dart';
+import '../utils/design_constants.dart';
+import '../utils/responsive_layout.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -20,22 +22,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
   ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
-class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
@@ -46,216 +33,356 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Analytics'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.table_chart), text: 'Data'),
-            Tab(icon: Icon(Icons.analytics), text: 'Charts'),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Data tab
-          logRecordsAsync.when(
-            data: (records) => _buildDataView(context, records),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Error: $error')),
-          ),
-          // Charts tab
-          statisticsAsync.when(
-            data: (stats) => _buildChartsView(context, stats),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(child: Text('Error: $error')),
-          ),
-        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(activeAccountLogRecordsProvider);
+          ref.invalidate(
+            logRecordStatsProvider(LogRecordsParams(accountId: null)),
+          );
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
+        child: logRecordsAsync.when(
+          data: (records) {
+            return statisticsAsync.when(
+              data: (stats) => _buildAnalyticsView(context, records, stats),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(child: Text('Error: $error')),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('Error: $error')),
+        ),
       ),
     );
   }
 
-  Widget _buildDataView(BuildContext context, List<LogRecord> records) {
+  Widget _buildAnalyticsView(
+    BuildContext context,
+    List<LogRecord> records,
+    Map<String, dynamic> stats,
+  ) {
     if (records.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 100,
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No entries yet',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ],
-        ),
-      );
+      return _buildEmptyView(context);
     }
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Summary card
-          Card(
-            margin: const EdgeInsets.all(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatItem(context, 'Total', records.length.toString()),
-                  _buildStatItem(
-                    context,
-                    'Synced',
-                    records
-                        .where((r) => r.syncState == SyncState.synced)
-                        .length
-                        .toString(),
-                  ),
-                  _buildStatItem(
-                    context,
-                    'Pending',
-                    records
-                        .where((r) => r.syncState == SyncState.pending)
-                        .length
-                        .toString(),
-                  ),
-                ],
-              ),
-            ),
-          ),
+    final activeAccountAsync = ref.watch(activeAccountProvider);
 
-          // Recent entries list
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Recent Entries',
-                  style: Theme.of(context).textTheme.titleLarge,
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Summary stats cards
+          _buildSummaryStats(context, records),
+          SizedBox(height: Spacing.xl.value),
+
+          // Charts section
+          Text(
+            'Charts',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 8),
-                ...records.map(
-                  (record) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
+          ),
+          SizedBox(height: Spacing.md.value),
+          activeAccountAsync.when(
+            data: (account) {
+              if (account == null) {
+                return const SizedBox.shrink();
+              }
+              return Card(
+                elevation: ElevationLevel.sm.value,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadii.md,
+                ),
+                child: Padding(
+                  padding: Paddings.lg,
+                  child: AnalyticsChartsWidget(
+                    records: records,
+                    accountId: account.userId,
+                  ),
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Error: $e')),
+          ),
+          SizedBox(height: Spacing.xl.value),
+
+          // Recent entries section
+          Text(
+            'Recent Entries',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: Spacing.md.value),
+          ...records.take(10).map(
+                (record) => Padding(
+                  padding: EdgeInsets.only(bottom: Spacing.sm.value),
+                  child: Card(
+                    elevation: ElevationLevel.sm.value,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadii.md,
+                    ),
                     child: ListTile(
-                      leading: _getSyncStateIcon(record.syncState),
+                      contentPadding: Paddings.md,
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .primaryContainer,
+                        child: _getSyncStateIcon(record.syncState),
+                      ),
                       title: Text(
                         DateFormat('MMM dd, yyyy HH:mm').format(record.eventAt),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (record.note != null) Text(record.note!),
-                          Text(
-                            'Type: ${record.eventType.name} | Sync: ${record.syncState.name}',
-                            style: Theme.of(context).textTheme.bodySmall,
+                          if (record.note != null && record.note!.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(top: Spacing.xs.value),
+                              child: Text(
+                                record.note!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          Padding(
+                            padding: EdgeInsets.only(top: Spacing.xs.value),
+                            child: Text(
+                              '${record.eventType.name} • ${record.syncState.name}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
                           ),
                         ],
                       ),
-                      trailing:
-                          record.duration > 0
-                              ? Text(
+                      trailing: record.duration > 0
+                          ? Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Spacing.sm.value,
+                                vertical: Spacing.xs.value,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                                borderRadius: BorderRadii.sm,
+                              ),
+                              child: Text(
                                 '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
-                                style: Theme.of(context).textTheme.titleMedium,
-                              )
-                              : null,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            )
+                          : null,
                       onTap: () => _showLogRecordActions(context, record),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChartsView(BuildContext context, Map<String, dynamic> stats) {
-    final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
-    final activeAccountAsync = ref.watch(activeAccountProvider);
-
-    return logRecordsAsync.when(
-      data: (records) {
-        return activeAccountAsync.when(
-          data: (account) {
-            if (account == null || records.isEmpty) {
-              return _buildEmptyChartsView(context);
-            }
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: AnalyticsChartsWidget(
-                records: records,
-                accountId: account.userId,
               ),
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-    );
-  }
-
-  Widget _buildEmptyChartsView(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.analytics_outlined,
-            size: 80,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No data for charts',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Start logging to see your analytics',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String label, String value) {
-    return Column(
+  Widget _buildSummaryStats(BuildContext context, List<LogRecord> records) {
+    final syncedCount =
+        records.where((r) => r.syncState == SyncState.synced).length;
+    final pendingCount =
+        records.where((r) => r.syncState == SyncState.pending).length;
+    final totalDuration = records.fold<double>(
+      0,
+      (sum, r) => sum + r.duration,
+    );
+
+    return ResponsiveGrid(
+      mobileColumns: 2,
+      tabletColumns: 4,
+      desktopColumns: 4,
+      spacing: Spacing.md.value,
       children: [
-        Text(value, style: Theme.of(context).textTheme.headlineMedium),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        _buildStatCard(
+          context,
+          'Total',
+          records.length.toString(),
+          Icons.list_alt,
+        ),
+        _buildStatCard(
+          context,
+          'Synced',
+          syncedCount.toString(),
+          Icons.cloud_done,
+          Colors.green,
+        ),
+        _buildStatCard(
+          context,
+          'Pending',
+          pendingCount.toString(),
+          Icons.cloud_upload,
+          Colors.orange,
+        ),
+        _buildStatCard(
+          context,
+          'Total Duration',
+          _formatDuration(totalDuration),
+          Icons.timer,
+        ),
       ],
     );
   }
 
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon, [
+    Color? iconColor,
+  ]) {
+    return Card(
+      elevation: ElevationLevel.sm.value,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadii.md,
+      ),
+      child: Padding(
+        padding: Paddings.md,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: IconSize.lg.value,
+              color: iconColor ?? Theme.of(context).colorScheme.primary,
+            ),
+            SizedBox(height: Spacing.sm.value),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            SizedBox(height: Spacing.xs.value),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(double seconds) {
+    final duration = Duration(seconds: seconds.toInt());
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    final secs = duration.inSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m ${secs}s';
+    } else {
+      return '${secs}s';
+    }
+  }
+
+  Widget _buildEmptyView(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: Paddings.xl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.analytics_outlined,
+              size: IconSize.xxxl.value,
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.3),
+            ),
+            SizedBox(height: Spacing.lg.value),
+            Text(
+              'No data yet',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            SizedBox(height: Spacing.sm.value),
+            Text(
+              'Start logging to see your analytics',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _getSyncStateIcon(SyncState state) {
+    IconData icon;
+    Color color;
+
     switch (state) {
       case SyncState.synced:
-        return const Icon(Icons.cloud_done, color: Colors.green);
+        icon = Icons.cloud_done;
+        color = Colors.green;
+        break;
       case SyncState.pending:
-        return const Icon(Icons.cloud_upload, color: Colors.orange);
+        icon = Icons.cloud_upload;
+        color = Colors.orange;
+        break;
       case SyncState.syncing:
-        return const Icon(Icons.cloud_sync, color: Colors.blue);
+        icon = Icons.cloud_sync;
+        color = Colors.blue;
+        break;
       case SyncState.error:
-        return const Icon(Icons.error, color: Colors.red);
+        icon = Icons.error;
+        color = Colors.red;
+        break;
       case SyncState.conflict:
-        return const Icon(Icons.warning, color: Colors.amber);
+        icon = Icons.warning;
+        color = Colors.amber;
+        break;
     }
+
+    return Icon(icon, size: IconSize.md.value, color: color);
   }
 
   void _showLogRecordActions(BuildContext context, LogRecord record) {

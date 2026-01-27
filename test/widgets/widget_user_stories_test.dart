@@ -122,10 +122,9 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      // THEN: The widget shows the time elapsed
+      // THEN: The widget shows the time elapsed (relative format: "2h ago")
       expect(find.text('Time Since Last Hit'), findsOneWidget);
-      // Time format includes seconds
-      expect(find.textContaining('2h 30m'), findsOneWidget);
+      expect(find.textContaining('2h ago'), findsOneWidget);
     });
 
     testWidgets(

@@ -44,8 +44,8 @@ void main() {
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
       expect(find.byIcon(Icons.timer), findsOneWidget);
-      // Should show seconds - look for the actual time display (not in title)
-      expect(find.text('30s'), findsOneWidget);
+      // Widget uses relative format: < 1 min -> "Just now"
+      expect(find.text('Just now'), findsOneWidget);
     });
 
     testWidgets('formats duration correctly for hours', (tester) async {
@@ -72,8 +72,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
-      // Should show hours, minutes, and seconds - verify the format
-      expect(find.textContaining('2h 15m'), findsOneWidget);
+      // Widget uses relative format for main display: "2h ago"
+      expect(find.textContaining('2h ago'), findsOneWidget);
     });
 
     testWidgets('formats duration correctly for days', (tester) async {
@@ -98,8 +98,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
-      // Should show days, hours, and minutes (no seconds for days)
-      expect(find.textContaining('1d 3h 45m'), findsOneWidget);
+      // Widget uses relative format for main display: "1d ago" (< 7 days)
+      expect(find.textContaining('1d ago'), findsOneWidget);
     });
 
     testWidgets('uses most recent record when multiple exist', (tester) async {
@@ -185,8 +185,8 @@ void main() {
       await tester.pump();
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
-      // Should show some time in seconds
-      expect(find.textContaining('s'), findsAtLeastNWidgets(1));
+      // < 1 min shows "Just now"
+      expect(find.text('Just now'), findsOneWidget);
     });
 
     testWidgets('shows today and week counts', (tester) async {
@@ -502,18 +502,20 @@ void main() {
           ProviderScope(
             child: MaterialApp(
               home: Scaffold(
-                body: StatefulBuilder(
-                  builder: (context, setState) {
-                    return Column(
-                      children: [
-                        TimeSinceLastHitWidget(records: [record1]),
-                        ElevatedButton(
-                          onPressed: () => setState(() {}),
-                          child: const Text('Update'),
-                        ),
-                      ],
-                    );
-                  },
+                body: SingleChildScrollView(
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      return Column(
+                        children: [
+                          TimeSinceLastHitWidget(records: [record1]),
+                          ElevatedButton(
+                            onPressed: () => setState(() {}),
+                            child: const Text('Update'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -770,6 +772,12 @@ void main() {
         );
 
         await tester.pump(const Duration(milliseconds: 100));
+
+        // Patterns section is collapsed and may be off-screen; scroll into view then expand
+        await tester.ensureVisible(find.text('Patterns'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Patterns'));
+        await tester.pumpAndSettle();
 
         // Check for peak hour display
         expect(find.text('Peak Hour'), findsOneWidget);

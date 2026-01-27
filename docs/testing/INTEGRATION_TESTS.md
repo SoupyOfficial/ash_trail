@@ -1,10 +1,26 @@
 # Integration Tests - Comprehensive Guide
 
+> **Last Updated**: January 26, 2026  
+> **Test Status**: ✅ **722 unit tests passing**, 6 integration tests skipped  
+> **Related Documentation**: [E2E_TESTING_GUIDE.md](./E2E_TESTING_GUIDE.md), [TESTING_STRATEGY.md](../TESTING_STRATEGY.md)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Why Some Tests Are Skipped](#why-some-tests-are-skipped)
+- [Skipped Tests](#skipped-tests)
+- [Running Integration Tests](#running-integration-tests)
+- [Recommended Approach](#recommended-approach)
+- [Best Practices](#best-practices)
+- [Future Work](#future-work)
+
 ## Overview
 
-This project has **6 integration tests** that are intentionally skipped during regular unit test runs. These tests require platform-specific plugins (like Hive database with `path_provider`) and/or Firebase initialization.
+This document provides a comprehensive guide to integration testing in the Ash Trail project. The project currently has **6 integration tests** that are intentionally skipped during regular unit test runs. These tests require platform-specific plugins (like Hive database with `path_provider`) and/or Firebase initialization.
 
-**Test Status:** ✅ **722 unit tests passing**, 6 integration tests skipped
+**Current Test Status:**
+- ✅ **722 unit tests passing**
+- ⏭️ **6 integration tests skipped** (require platform plugins)
 
 ## Why Some Tests Are Skipped
 
@@ -193,4 +209,33 @@ The skipped tests are marked with clear messages indicating they are integration
 
 ## Future Work
 
-Consider moving these integration tests to the `integration_test/` directory where they belong, allowing them to run in a proper integration test environment with all necessary plugins initialized.
+### Planned Improvements
+
+1. **Move Integration Tests to Proper Directory**
+   - Consider moving these integration tests to the `integration_test/` directory where they belong
+   - This will allow them to run in a proper integration test environment with all necessary plugins initialized
+
+2. **CI/CD Integration**
+   - Set up automated integration test runs in CI/CD pipeline
+   - Configure device/emulator provisioning for integration tests
+
+3. **Test Coverage Expansion**
+   - Add more integration tests for critical user flows
+   - Implement end-to-end tests for authentication flows
+   - Add integration tests for sync functionality
+
+4. **Test Infrastructure**
+   - Create test fixtures and helpers for integration tests
+   - Set up test data management for integration tests
+   - Implement test isolation and cleanup strategies
+
+## Additional Resources
+
+- [Flutter Integration Testing Guide](https://docs.flutter.dev/testing/integration-tests)
+- [Flutter Testing Best Practices](https://docs.flutter.dev/testing/best-practices)
+- [Dart Testing Documentation](https://dart.dev/guides/testing)
+
+---
+
+**Documentation Version**: 1.0  
+**Maintained By**: Ash Trail Development Team

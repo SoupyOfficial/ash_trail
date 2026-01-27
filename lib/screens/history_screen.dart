@@ -5,6 +5,7 @@ import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../widgets/edit_log_record_dialog.dart';
+import '../utils/design_constants.dart';
 
 /// History View per design doc 9.2.2
 /// Displays persisted logs with support for filtering and grouping
@@ -72,13 +73,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         children: [
           // Search bar
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(
+              ResponsiveSize.responsive(
+                context: context,
+                mobile: Spacing.lg.value,
+                tablet: Spacing.xl.value,
+                desktop: Spacing.xl.value,
+              ),
+            ),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search entries...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadii.md,
                 ),
                 filled: true,
               ),
@@ -91,16 +99,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           if (_hasActiveFilters) _buildActiveFilters(),
           // Records list
           Expanded(
-            child: logRecordsAsync.when(
-              data: (records) {
-                final filtered = _applyFilters(records);
-                if (filtered.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-                return _buildGroupedList(context, filtered);
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(activeAccountLogRecordsProvider);
+                await Future.delayed(const Duration(milliseconds: 500));
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Error: $error')),
+              child: logRecordsAsync.when(
+                data: (records) {
+                  final filtered = _applyFilters(records);
+                  if (filtered.isEmpty) {
+                    return _buildEmptyState(context);
+                  }
+                  return _buildGroupedList(context, filtered);
+                },
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('Error: $error')),
+              ),
             ),
           ),
         ],
@@ -177,27 +192,43 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.history,
-            size: 100,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _hasActiveFilters ? 'No matching entries' : 'No entries yet',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          if (_hasActiveFilters) ...[
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: _clearFilters,
-              child: const Text('Clear filters'),
+      child: Padding(
+        padding: Paddings.xl,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history,
+              size: IconSize.xxxl.value,
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.3),
             ),
+            SizedBox(height: Spacing.lg.value),
+            Text(
+              _hasActiveFilters ? 'No matching entries' : 'No entries yet',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            if (_hasActiveFilters) ...[
+              SizedBox(height: Spacing.sm.value),
+              Text(
+                'Try adjusting your filters',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              SizedBox(height: Spacing.md.value),
+              FilledButton.icon(
+                onPressed: _clearFilters,
+                icon: const Icon(Icons.clear_all),
+                label: const Text('Clear filters'),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -229,16 +260,34 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildDayGroupedList(List<LogRecord> records) {
     final grouped = _groupByDay(records);
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       itemCount: grouped.length,
       itemBuilder: (context, index) {
         final entry = grouped.entries.elementAt(index);
+        final isLast = index == grouped.length - 1;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildGroupHeader(DateFormat.yMMMMd().format(entry.key)),
-            ...entry.value.map((r) => _buildRecordTile(context, r)),
-            const SizedBox(height: 16),
+            ...entry.value.asMap().entries.map((mapEntry) {
+              final recordList = entry.value;
+              final isLastInGroup =
+                  mapEntry.key == recordList.length - 1 && isLast;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: isLastInGroup ? 0 : Spacing.sm.value,
+                ),
+                child: _buildRecordTile(context, mapEntry.value),
+              );
+            }),
+            if (!isLast) SizedBox(height: Spacing.lg.value),
           ],
         );
       },
@@ -248,16 +297,34 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildWeekGroupedList(List<LogRecord> records) {
     final grouped = _groupByWeek(records);
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       itemCount: grouped.length,
       itemBuilder: (context, index) {
         final entry = grouped.entries.elementAt(index);
+        final isLast = index == grouped.length - 1;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildGroupHeader('Week of ${DateFormat.MMMd().format(entry.key)}'),
-            ...entry.value.map((r) => _buildRecordTile(context, r)),
-            const SizedBox(height: 16),
+            ...entry.value.asMap().entries.map((mapEntry) {
+              final recordList = entry.value;
+              final isLastInGroup =
+                  mapEntry.key == recordList.length - 1 && isLast;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: isLastInGroup ? 0 : Spacing.sm.value,
+                ),
+                child: _buildRecordTile(context, mapEntry.value),
+              );
+            }),
+            if (!isLast) SizedBox(height: Spacing.lg.value),
           ],
         );
       },
@@ -267,16 +334,34 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildMonthGroupedList(List<LogRecord> records) {
     final grouped = _groupByMonth(records);
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       itemCount: grouped.length,
       itemBuilder: (context, index) {
         final entry = grouped.entries.elementAt(index);
+        final isLast = index == grouped.length - 1;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildGroupHeader(DateFormat.yMMMM().format(entry.key)),
-            ...entry.value.map((r) => _buildRecordTile(context, r)),
-            const SizedBox(height: 16),
+            ...entry.value.asMap().entries.map((mapEntry) {
+              final recordList = entry.value;
+              final isLastInGroup =
+                  mapEntry.key == recordList.length - 1 && isLast;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: isLastInGroup ? 0 : Spacing.sm.value,
+                ),
+                child: _buildRecordTile(context, mapEntry.value),
+              );
+            }),
+            if (!isLast) SizedBox(height: Spacing.lg.value),
           ],
         );
       },
@@ -286,16 +371,34 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildEventTypeGroupedList(List<LogRecord> records) {
     final grouped = _groupByEventType(records);
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       itemCount: grouped.length,
       itemBuilder: (context, index) {
         final entry = grouped.entries.elementAt(index);
+        final isLast = index == grouped.length - 1;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildGroupHeader(entry.key.name.toUpperCase()),
-            ...entry.value.map((r) => _buildRecordTile(context, r)),
-            const SizedBox(height: 16),
+            ...entry.value.asMap().entries.map((mapEntry) {
+              final recordList = entry.value;
+              final isLastInGroup =
+                  mapEntry.key == recordList.length - 1 && isLast;
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: isLastInGroup ? 0 : Spacing.sm.value,
+                ),
+                child: _buildRecordTile(context, mapEntry.value),
+              );
+            }),
+            if (!isLast) SizedBox(height: Spacing.lg.value),
           ],
         );
       },
@@ -304,13 +407,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Widget _buildGroupHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 8),
+      padding: EdgeInsets.only(
+        bottom: Spacing.sm.value,
+        top: Spacing.md.value,
+      ),
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
       ),
     );
   }
@@ -428,7 +534,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         break;
     }
 
-    return Icon(icon, size: 16, color: color);
+    return Icon(icon, size: IconSize.sm.value, color: color);
   }
 
   // Grouping helpers

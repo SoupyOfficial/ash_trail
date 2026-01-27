@@ -8,6 +8,7 @@ import '../services/location_service.dart';
 import '../widgets/location_map_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
+import '../utils/design_constants.dart';
 
 /// Dedicated logging screen for detailed event entry
 /// Primary interface: Long-press to record duration (design-recommended pattern)
@@ -198,7 +199,14 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
     final draftNotifier = ref.read(logDraftProvider.notifier);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -206,35 +214,39 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
           children: [
             // Event Type
             Card(
+              elevation: ElevationLevel.sm.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadii.md,
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: Paddings.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Event Type',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Spacing.md.value),
                     DropdownButtonFormField<EventType>(
                       value: draft.eventType,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadii.sm,
+                        ),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: Spacing.md.value,
+                          vertical: Spacing.sm.value,
                         ),
                       ),
-                      items:
-                          EventType.values.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(_formatEnumName(type.name)),
-                            );
-                          }).toList(),
+                      items: EventType.values.map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(_formatEnumName(type.name)),
+                        );
+                      }).toList(),
                       onChanged: (value) {
                         if (value != null) {
                           draftNotifier.setEventType(value);
@@ -245,32 +257,37 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Spacing.lg.value),
 
             // Duration and Unit (manual entry)
             Card(
+              elevation: ElevationLevel.sm.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadii.md,
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: Paddings.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Duration (or use long-press button below)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Spacing.md.value),
                     Row(
                       children: [
                         Expanded(
                           flex: 2,
                           child: TextFormField(
                             controller: _durationController,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Seconds',
-                              border: OutlineInputBorder(),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadii.sm,
+                              ),
                             ),
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
@@ -310,76 +327,88 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Spacing.lg.value),
 
             // Press-and-Hold Duration Recording Button (Primary pattern)
             Card(
+              elevation: ElevationLevel.md.value,
               color: Theme.of(context).colorScheme.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadii.lg,
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: Paddings.xl,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
+                    Text(
                       'Press & Hold to Record Duration',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Spacing.sm.value),
                     Text(
                       _isRecording ? 'Recording...' : 'Hold down the button',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontSize: 12,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
-                    GestureDetector(
-                      onLongPressStart:
-                          (_) => _startDurationRecording(draftNotifier),
-                      onLongPressEnd:
-                          (_) => _endDurationRecording(draft, draftNotifier),
-                      onLongPressCancel: () => _cancelDurationRecording(),
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color:
-                              _isRecording
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer
-                                      .withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.primary,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _isRecording ? Icons.pause : Icons.touch_app,
-                              size: 48,
+                    SizedBox(height: Spacing.lg.value),
+                    Center(
+                      child: GestureDetector(
+                        onLongPressStart:
+                            (_) => _startDurationRecording(draftNotifier),
+                        onLongPressEnd:
+                            (_) => _endDurationRecording(draft, draftNotifier),
+                        onLongPressCancel: () => _cancelDurationRecording(),
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          padding: Paddings.lg,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _isRecording
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withValues(alpha: 0.1),
+                            border: Border.all(
                               color: Theme.of(context).colorScheme.primary,
+                              width: 3,
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _recordedDuration.inSeconds > 0
-                                  ? '${_recordedDuration.inSeconds}s'
-                                  : 'Hold',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _isRecording ? Icons.pause : Icons.touch_app,
+                                  size: IconSize.xl.value,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                SizedBox(height: Spacing.sm.value),
+                                Text(
+                                  _recordedDuration.inSeconds > 0
+                                      ? '${_recordedDuration.inSeconds}s'
+                                      : 'Hold',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -387,44 +416,45 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Spacing.lg.value),
 
             // Reason
             Card(
+              elevation: ElevationLevel.sm.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadii.md,
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: Paddings.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Reason (optional, can select multiple)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Spacing.md.value),
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children:
-                          LogReason.values.map((reason) {
-                            final isSelected =
-                                draft.reasons?.contains(reason) ?? false;
-                            return FilterChip(
-                              avatar: Icon(reason.icon, size: 18),
-                              label: Text(reason.displayName),
-                              selected: isSelected,
-                              onSelected:
-                                  (_) => draftNotifier.toggleReason(reason),
-                            );
-                          }).toList(),
+                      spacing: Spacing.sm.value,
+                      runSpacing: Spacing.sm.value,
+                      children: LogReason.values.map((reason) {
+                        final isSelected =
+                            draft.reasons?.contains(reason) ?? false;
+                        return FilterChip(
+                          avatar: Icon(reason.icon, size: IconSize.sm.value),
+                          label: Text(reason.displayName),
+                          selected: isSelected,
+                          onSelected: (_) => draftNotifier.toggleReason(reason),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Spacing.lg.value),
 
             // Mood and Physical Rating (optional, null by default per design)
             Card(
@@ -521,7 +551,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: Spacing.md.value),
 
                     // Physical rating slider section
                     Column(
@@ -611,28 +641,33 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Spacing.lg.value),
 
             // Notes
             Card(
+              elevation: ElevationLevel.sm.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadii.md,
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: Paddings.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Notes',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Spacing.md.value),
                     TextFormField(
                       controller: _noteController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Notes',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadii.sm,
+                        ),
                         hintText: 'Add any notes...',
                       ),
                       maxLines: 3,
@@ -642,108 +677,102 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Spacing.lg.value),
 
             // Location
             Card(
+              elevation: ElevationLevel.sm.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadii.md,
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: Paddings.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          'Location (auto-collected)',
-                          style: TextStyle(
-                            fontSize: 16,
+                    Text(
+                      'Location (auto-collected)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        const Spacer(),
-                      ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Spacing.md.value),
                     if (draft.latitude != null && draft.longitude != null)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: Paddings.md,
                             decoration: BoxDecoration(
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(8),
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              borderRadius: BorderRadii.sm,
                             ),
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.location_on,
-                                  size: 24,
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
+                                  size: IconSize.md.value,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: Spacing.md.value),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Location Captured',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimaryContainer,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimaryContainer,
+                                            ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      SizedBox(height: Spacing.xs.value),
                                       Text(
                                         '${draft.latitude!.toStringAsFixed(6)}, ${draft.longitude!.toStringAsFixed(6)}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer
-                                              .withOpacity(0.8),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimaryContainer
+                                                  .withOpacity(0.8),
+                                            ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 Icon(
                                   Icons.check_circle,
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
+                                  size: IconSize.md.value,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: Spacing.sm.value),
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed:
-                                      () => _openMapPicker(draftNotifier),
+                                  onPressed: () => _openMapPicker(draftNotifier),
                                   icon: const Icon(Icons.map, size: 18),
                                   label: const Text('Edit on Map'),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: Spacing.sm.value),
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed:
-                                      () => _captureLocation(draftNotifier),
+                                  onPressed: () => _captureLocation(draftNotifier),
                                   icon: const Icon(Icons.my_location, size: 18),
                                   label: const Text('Recapture'),
                                 ),
@@ -815,45 +844,51 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Spacing.xl.value),
 
             // Submit buttons
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed:
-                        _isSubmitting
-                            ? null
-                            : () {
-                              draftNotifier.reset();
-                              _durationController.clear();
-                              _noteController.clear();
-                              setState(() {
-                                _recordedDuration = Duration.zero;
-                              });
-                            },
+                    onPressed: _isSubmitting
+                        ? null
+                        : () {
+                            draftNotifier.reset();
+                            _durationController.clear();
+                            _noteController.clear();
+                            setState(() {
+                              _recordedDuration = Duration.zero;
+                            });
+                          },
                     child: const Text('Clear'),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: Spacing.lg.value),
                 Expanded(
                   flex: 2,
                   child: FilledButton(
                     onPressed: _isSubmitting ? null : () => _submitLog(draft),
-                    child:
-                        _isSubmitting
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Text('Log Event'),
+                    style: FilledButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        vertical: Spacing.md.value,
+                      ),
+                    ),
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          )
+                        : const Text('Log Event'),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: Spacing.lg.value),
           ],
         ),
       ),
@@ -1108,28 +1143,47 @@ class _BackdateLogTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(
+        ResponsiveSize.responsive(
+          context: context,
+          mobile: Spacing.lg.value,
+          tablet: Spacing.xl.value,
+          desktop: Spacing.xl.value,
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Card(
+            elevation: ElevationLevel.sm.value,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadii.md,
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: Paddings.xl,
               child: Column(
                 children: [
-                  const Icon(Icons.history, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Backdate Entry',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Icon(
+                    Icons.history,
+                    size: IconSize.xxl.value,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
+                  SizedBox(height: Spacing.lg.value),
+                  Text(
+                    'Backdate Entry',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  SizedBox(height: Spacing.sm.value),
+                  Text(
                     'Log an event that happened in the past (up to 30 days)',
-                    style: TextStyle(color: Colors.grey),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: Spacing.xl.value),
                   FilledButton.icon(
                     onPressed: () {
                       showDialog(
@@ -1144,26 +1198,33 @@ class _BackdateLogTab extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: Spacing.lg.value),
 
           // Info card
           Card(
+            elevation: ElevationLevel.sm.value,
             color: Theme.of(context).colorScheme.primaryContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadii.md,
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: Paddings.lg,
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
+                    size: IconSize.md.value,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: Spacing.md.value),
                   Expanded(
                     child: Text(
                       'Backdated entries are marked with lower time confidence and will be clearly identified in your timeline.',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
                     ),
                   ),
                 ],

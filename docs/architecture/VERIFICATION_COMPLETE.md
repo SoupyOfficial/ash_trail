@@ -250,7 +250,7 @@ flutter test integration_test/legacy_data_integration_test.dart
 
 ### Documentation 2: Architecture & Design ✅
 
-**File**: [LEGACY_DATA_ARCHITECTURE.md](LEGACY_DATA_ARCHITECTURE.md) (402 lines)
+**File**: [LEGACY_DATA_ARCHITECTURE.md](../features/LEGACY_DATA_ARCHITECTURE.md) (402 lines)
 
 **Covers**:
 - System architecture diagram
@@ -488,7 +488,7 @@ The system is ready for immediate deployment to production.
 - ✅ [lib/utils/verify_legacy_data.dart](lib/utils/verify_legacy_data.dart)
 - ✅ [integration_test/legacy_data_integration_test.dart](integration_test/legacy_data_integration_test.dart)
 - ✅ [LEGACY_DATA_SUPPORT.md](LEGACY_DATA_SUPPORT.md)
-- ✅ [LEGACY_DATA_ARCHITECTURE.md](LEGACY_DATA_ARCHITECTURE.md)
+- ✅ [LEGACY_DATA_ARCHITECTURE.md](../features/LEGACY_DATA_ARCHITECTURE.md)
 - ✅ [LEGACY_DATA_IMPLEMENTATION.md](LEGACY_DATA_IMPLEMENTATION.md)
 - ✅ [LEGACY_DATA_QUICK_REFERENCE.md](LEGACY_DATA_QUICK_REFERENCE.md)
 - ✅ [LEGACY_DATA_COMPLETION.md](LEGACY_DATA_COMPLETION.md)

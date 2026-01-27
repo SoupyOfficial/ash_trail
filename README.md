@@ -144,8 +144,10 @@ The app supports multiple authenticated accounts with seamless switching:
 - **Automatic sync** - only syncs records for the currently authenticated account
 
 **Documentation**:
+- [📚 Complete Documentation Index](docs/README.md) - Comprehensive documentation guide
 - [Multi-Account Architecture](docs/MULTI_ACCOUNT_ARCHITECTURE.md) - Complete architecture and design
 - [Multi-Account Implementation Guide](docs/MULTI_ACCOUNT_IMPLEMENTATION.md) - Developer quick reference
+- [Authentication Setup Guide](docs/setup/AUTHENTICATION_SETUP.md) - Authentication implementation guide
 - [Authentication & Accounts Design Doc](docs/plan/8.%20Authentication%20&%20Accounts.md) - Design specifications
 
 ## LogRecord System
@@ -208,6 +210,18 @@ Quick logging templates for common actions:
 - **Web**: Hive database
 - Same API surface via repository pattern
 - Automatic platform detection at build time
+
+## Documentation
+
+Comprehensive documentation is organized in the [`docs/`](docs/) directory:
+
+- **[📚 Documentation Index](docs/README.md)** - Master index of all documentation
+- **[Setup Guides](docs/setup/)** - Authentication, configuration, and setup instructions
+- **[Testing Documentation](docs/testing/)** - Testing guides, coverage reports, and strategies
+- **[Feature Documentation](docs/features/)** - Feature-specific implementation guides
+- **[Architecture Documentation](docs/architecture/)** - Architecture decisions and technical details
+- **[Deployment Guides](docs/deployment/)** - CI/CD, TestFlight, and deployment documentation
+- **[Project Planning](docs/plan/)** - Comprehensive design and planning documents
 
 ## Roadmap
 

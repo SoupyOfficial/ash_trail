@@ -148,3 +148,7 @@ pubspec.lock
 
 # VS Code (uncomment if you want to ignore VS Code settings)
 .vscode/
+
+# Screenshots for Figma workflow
+screenshots/
+!screenshots/.gitkeep

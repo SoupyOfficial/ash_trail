@@ -97,16 +97,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               if (account == null) {
                 return const SizedBox.shrink();
               }
-              return Card(
-                elevation: ElevationLevel.sm.value,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadii.md,
-                ),
-                child: Padding(
-                  padding: Paddings.lg,
-                  child: AnalyticsChartsWidget(
-                    records: records,
-                    accountId: account.userId,
+              // AnalyticsChartsWidget uses Expanded and needs bounded height.
+              // SingleChildScrollView provides unbounded height, so we wrap
+              // the charts in a SizedBox to avoid "RenderBox was not laid out" errors.
+              return SizedBox(
+                height: 600,
+                child: Card(
+                  elevation: ElevationLevel.sm.value,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadii.md,
+                  ),
+                  child: Padding(
+                    padding: Paddings.lg,
+                    child: AnalyticsChartsWidget(
+                      records: records,
+                      accountId: account.userId,
+                    ),
                   ),
                 ),
               );
@@ -151,6 +157,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                       ),
                       subtitle: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (record.note != null && record.note!.isNotEmpty)

@@ -1,5 +1,6 @@
 # Global platform requirement
-platform :ios, '13.0'
+# Updated to 14.0 for GoogleMaps compatibility
+platform :ios, '14.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -41,16 +42,16 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
   
-  # Force iOS 13.0 minimum deployment target for all pods
-  # This matches the platform requirement above
+  # Force iOS 14.0 minimum deployment target for all pods
+  # This matches the platform requirement above and GoogleMaps requirements
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
     end
   end
   
   # Also set on the project level
   installer.pods_project.build_configurations.each do |config|
-    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
   end
 end

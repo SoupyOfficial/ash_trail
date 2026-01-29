@@ -14,10 +14,16 @@ import '../models/enums.dart' as enums;
 final accountIntegrationServiceProvider = Provider<AccountIntegrationService>((
   ref,
 ) {
+  // Create services with dependency injection
+  final accountService = AccountService();
+  final sessionManager = AccountSessionManager(accountService: accountService);
+  final tokenService = TokenService();
+  
   return AccountIntegrationService(
     authService: ref.watch(authServiceProvider),
-    accountService: AccountService.instance,
-    sessionManager: AccountSessionManager.instance,
+    accountService: accountService,
+    sessionManager: sessionManager,
+    tokenService: tokenService,
   );
 });
 
@@ -28,11 +34,13 @@ class AccountIntegrationService {
   final AuthService authService;
   final AccountService accountService;
   final AccountSessionManager sessionManager;
+  final TokenService tokenService;
 
   AccountIntegrationService({
     required this.authService,
     required this.accountService,
     required this.sessionManager,
+    required this.tokenService,
   });
 
   /// Create or update local account from Firebase user
@@ -125,7 +133,6 @@ class AccountIntegrationService {
   Future<void> _generateAndStoreCustomToken(String uid) async {
     try {
       debugPrint('   🔑 Generating custom token for seamless switching...');
-      final tokenService = TokenService.instance;
       final tokenData = await tokenService.generateCustomToken(uid);
       final customToken = tokenData['customToken'] as String;
       await sessionManager.storeCustomToken(uid, customToken);

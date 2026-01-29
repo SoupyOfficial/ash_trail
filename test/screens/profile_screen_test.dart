@@ -1,6 +1,6 @@
 import 'package:ash_trail/models/account.dart';
 import 'package:ash_trail/providers/auth_provider.dart';
-import 'package:ash_trail/screens/profile/profile_screen.dart';
+import 'package:ash_trail/screens/profile_screen.dart';
 import 'package:ash_trail/services/account_integration_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

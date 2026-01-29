@@ -14,7 +14,7 @@ AshTrail now supports full **Create, Read, Update, Delete (CRUD)** operations fo
 - Automatic local account record creation
 - Email validation and password requirements
 
-**Location:** [login_screen.dart](lib/screens/auth/login_screen.dart), [signup_screen.dart](lib/screens/auth/signup_screen.dart)
+**Location:** [login_screen.dart](lib/screens/login_screen.dart), [signup_screen.dart](lib/screens/signup_screen.dart)
 
 **Test Keys:**
 - `email-input`
@@ -34,7 +34,7 @@ AshTrail now supports full **Create, Read, Update, Delete (CRUD)** operations fo
 - Authentication providers (Google, Email/Password)
 - Account metadata
 
-**Location:** [profile_screen.dart](lib/screens/profile/profile_screen.dart)
+**Location:** [profile_screen.dart](lib/screens/profile_screen.dart)
 
 **Access:** Accounts Screen → Profile Icon (top right)
 
@@ -60,7 +60,7 @@ AshTrail now supports full **Create, Read, Update, Delete (CRUD)** operations fo
 - ✅ Password strength requirements enforced
 - ✅ Secure re-authentication
 
-**Location:** [profile_screen.dart](lib/screens/profile/profile_screen.dart)
+**Location:** [profile_screen.dart](lib/screens/profile_screen.dart)
 
 ---
 
@@ -72,7 +72,7 @@ AshTrail now supports full **Create, Read, Update, Delete (CRUD)** operations fo
 - ✅ Deletes all local data
 - ✅ Cannot be undone - user warned
 
-**Location:** [profile_screen.dart](lib/screens/profile/profile_screen.dart) - Danger Zone section
+**Location:** [profile_screen.dart](lib/screens/profile_screen.dart) - Danger Zone section
 
 ---
 

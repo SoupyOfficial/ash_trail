@@ -5,18 +5,25 @@ import 'database_service.dart';
 import 'log_record_service.dart';
 
 class AccountService {
-  // Singleton instance
-  static final AccountService _instance = AccountService._internal();
-  static AccountService get instance => _instance;
+  final AccountRepository _repository;
+  final LogRecordService _logRecordService;
 
-  factory AccountService({LogRecordService? logRecordService}) => _instance;
-
-  AccountService._internal({LogRecordService? logRecordService}) {
+  /// Create an AccountService with the given dependencies.
+  /// 
+  /// If [repository] is not provided, it will be created from DatabaseService.
+  /// If [logRecordService] is not provided, a new instance will be created.
+  AccountService({
+    AccountRepository? repository,
+    LogRecordService? logRecordService,
+  }) : _repository = repository ?? _createDefaultRepository(),
+       _logRecordService = logRecordService ?? LogRecordService() {
     debugPrint(
-      '\n🏗️ [AccountService._internal] Initializing at ${DateTime.now()}',
+      '\n🏗️ [AccountService] Initialized at ${DateTime.now()}',
     );
+  }
 
-    // Initialize repository with Hive database
+  /// Create the default repository using DatabaseService
+  static AccountRepository _createDefaultRepository() {
     debugPrint('   📦 Getting DatabaseService instance...');
     final dbService = DatabaseService.instance;
     debugPrint('   ✅ Got DatabaseService instance: ${dbService.runtimeType}');
@@ -31,21 +38,13 @@ class AccountService {
       debugPrint('   ⚠️ dbBoxes is NOT a Map! Type: ${dbBoxes.runtimeType}');
     }
 
-    // Pass Hive boxes map to repository
     debugPrint('   📞 Calling createAccountRepository...');
-    _repository = createAccountRepository(
+    final repo = createAccountRepository(
       dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
-    debugPrint('   ✅ Created AccountRepository: ${_repository.runtimeType}');
-
-    // Initialize log record service for cascade deletion
-    debugPrint('   📞 Initializing LogRecordService...');
-    _logRecordService = logRecordService ?? LogRecordService();
-    debugPrint('   ✅ Initialized LogRecordService\\n');
+    debugPrint('   ✅ Created AccountRepository: ${repo.runtimeType}');
+    return repo;
   }
-
-  late final AccountRepository _repository;
-  late final LogRecordService _logRecordService;
 
   /// Get all accounts
   Future<List<Account>> getAllAccounts() async {

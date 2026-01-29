@@ -1,14 +1,13 @@
-# Widget Unit Tests and End-to-End User Story Tests
+# Widget Unit Tests and Flow Tests
 **Date Created:** January 13, 2026
 **Coverage:** Comprehensive widget testing with 150+ test cases
 
 ## Overview
 
-This document describes the complete test suite for AshTrail's widgets and user workflows. The tests are organized into three categories:
+This document describes the complete test suite for AshTrail's widgets and user workflows. The tests are organized into two categories:
 
 1. **Unit Tests** - Individual widget behavior in isolation
-2. **User Story Tests** - Multi-widget workflows matching real user scenarios  
-3. **Integration Tests** - Complete app workflows and edge cases
+2. **Flow Tests** - In-process multi-widget workflows (test/flows/quick_log_workflow_test.dart)
 
 ## Test Files
 
@@ -87,54 +86,23 @@ This document describes the complete test suite for AshTrail's widgets and user 
 ```
 - Basic Display Tests (loading, chart rendering)
 - Interaction Tests (time range changes, chart type switching)
-- User Story Tests (analytics workflow)
+- Flow tests (analytics workflow)
 ```
 
-### 2. User Story Tests - Widget Workflows
+### 2. Flow Tests - Widget Workflows
 
-#### [test/widgets/widget_user_stories_test.dart](../../test/widgets/widget_user_stories_test.dart)
-**Purpose:** Test realistic user workflows across multiple widgets
-**Test Count:** 25+ tests
+#### [test/flows/quick_log_workflow_test.dart](../../test/flows/quick_log_workflow_test.dart)
+**Purpose:** In-process flow tests for quick-log and analytics workflows
+**Test Count:** 18+ tests
 **Coverage:**
-- Quick log workflow
+- Quick log and home screen workflow
 - Time tracking and statistics
 - Multi-day progress tracking
 - Analytics dashboard usage
 - Form interactions (mood, physical, reasons)
 - Edge cases (empty data, large datasets, rapid interactions)
 
-**Key User Stories Tested:**
-```
-1. Quick log flow - User logs a session quickly
-2. Time since last hit - User sees when they last logged
-3. Statistics display - User sees today/yesterday/week stats
-4. Trend analysis - User sees improvement/degradation trends
-5. Weekly tracking - User sees week statistics
-6. Empty states - User sees helpful messages with no data
-7. Form interactions - User rates mood/physical and selects reasons
-8. Analytics dashboard - User views charts and trends
-9. Time range switching - User views different time periods
-10. Multi-widget sync - Widgets update together
-11. Large datasets - App handles 365+ days of data
-12. Rapid interactions - App handles user interaction bursts
-```
-
-### 3. Integration Tests
-
-#### [test/integration/widget_integration_test.dart](../../test/integration/widget_integration_test.dart)
-**Purpose:** Test complete user workflows and multi-widget interactions
-**Test Count:** 18+ tests
-**Coverage:**
-- First-time user journey
-- Regular user multi-day tracking
-- Analytics dashboard workflow
-- Time widget updates with new logs
-- Quick log + time since together
-- Empty data handling
-- Large dataset performance
-- Rapid interaction handling
-
-**Key Integration Workflows:**
+**Key Flow Workflows:**
 ```
 1. First-time user logs first session and sees immediate feedback
 2. Regular user tracks multiple sessions with stats
@@ -163,8 +131,7 @@ TimeSinceLastHitWidget:      20 tests
 SyncStatusWidget:             20 tests
 HomeQuickLogWidget:           15 tests
 AnalyticsChartsWidget:        18 tests
-Multi-Widget Workflows:       25 tests
-Integration Workflows:        18 tests
+Flow Workflows:              18 tests (test/flows/)
 ```
 
 ## Running the Tests
@@ -195,11 +162,8 @@ flutter test test/widgets/home_quick_log_widget_test.dart
 # Analytics charts widget tests
 flutter test test/widgets/analytics_charts_widget_test.dart
 
-# User story tests
-flutter test test/widgets/widget_user_stories_test.dart
-
-# Integration tests
-flutter test test/integration/widget_integration_test.dart
+# Flow tests
+flutter test test/flows/quick_log_workflow_test.dart
 ```
 
 ### Run Specific Test Group
@@ -207,11 +171,8 @@ flutter test test/integration/widget_integration_test.dart
 # Run only TimeSinceLastHitWidget tests
 flutter test test/widgets/time_since_last_hit_widget_test.dart -k "TimeSinceLastHitWidget"
 
-# Run only user story tests
-flutter test test/widgets/widget_user_stories_test.dart -k "User Story"
-
-# Run only integration tests
-flutter test test/integration/widget_integration_test.dart -k "Integration"
+# Run only flow tests
+flutter test test/flows/quick_log_workflow_test.dart
 
 # Run with verbose output
 flutter test -v test/widgets/
@@ -393,7 +354,7 @@ test('debug example', (tester) async {
 
 ## Related Documentation
 
-- [User Story Tests](../../docs/USER_STORY_TESTS.md) - Original user story tests
+- [Flow tests](../../test/flows/quick_log_workflow_test.dart) - Quick log and analytics workflows
 - [Testing Strategy](../../docs/TESTING_STRATEGY.md) - Overall testing approach
 - [CRUD Test Coverage](../../CRUD_TEST_COVERAGE.md) - CRUD operation tests
 - [Test Improvements](../../docs/TEST_IMPROVEMENTS.md) - Test enhancement history

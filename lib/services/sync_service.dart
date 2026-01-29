@@ -62,15 +62,15 @@ class SyncService {
     Connectivity? connectivity,
     LegacyDataAdapter? legacyAdapter,
     Future<List<ConnectivityResult>> Function()? connectivityCheck,
-    AccountSessionManager? sessionManager,
-    TokenService? tokenService,
+    required AccountSessionManager sessionManager,
+    required TokenService tokenService,
   }) : _firestore = firestore ?? FirebaseFirestore.instance,
        _logRecordService = logRecordService ?? LogRecordService(),
        _connectivity = connectivity ?? Connectivity(),
        _legacyAdapter = legacyAdapter ?? LegacyDataAdapter(),
        _connectivityCheck = connectivityCheck,
-       _sessionManager = sessionManager ?? AccountSessionManager.instance,
-       _tokenService = tokenService ?? TokenService.instance;
+       _sessionManager = sessionManager,
+       _tokenService = tokenService;
 
   Timer? _syncTimer;
   Timer? _pullTimer;

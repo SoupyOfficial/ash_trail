@@ -155,20 +155,19 @@ void main() {
   group('Responsive Layout - ResponsiveBuilder', () {
     testWidgets(
       'ResponsiveBuilder receives correct form factor on mobile',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         DeviceFormFactor? detectedFormFactor;
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: ResponsiveBuilder(
-              builder: (context, formFactor) {
-                detectedFormFactor = formFactor;
-                return const Text('Built');
-              },
+          MediaQuery(
+            data: const MediaQueryData(size: Size(400, 800)),
+            child: MaterialApp(
+              home: ResponsiveBuilder(
+                builder: (context, formFactor) {
+                  detectedFormFactor = formFactor;
+                  return const Text('Built');
+                },
+              ),
             ),
           ),
         );
@@ -201,20 +200,19 @@ void main() {
 
     testWidgets(
       'ResponsiveBuilder receives correct form factor on desktop',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(1400, 900));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         DeviceFormFactor? detectedFormFactor;
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: ResponsiveBuilder(
-              builder: (context, formFactor) {
-                detectedFormFactor = formFactor;
-                return const Text('Built');
-              },
+          MediaQuery(
+            data: const MediaQueryData(size: Size(1400, 900)),
+            child: MaterialApp(
+              home: ResponsiveBuilder(
+                builder: (context, formFactor) {
+                  detectedFormFactor = formFactor;
+                  return const Text('Built');
+                },
+              ),
             ),
           ),
         );
@@ -227,20 +225,19 @@ void main() {
   group('Responsive Layout - OrientationAwareBuilder', () {
     testWidgets(
       'Detects portrait orientation',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         DeviceOrientation? detectedOrientation;
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: OrientationAwareBuilder(
-              builder: (context, formFactor, orientation) {
-                detectedOrientation = orientation;
-                return const Text('Built');
-              },
+          MediaQuery(
+            data: const MediaQueryData(size: Size(400, 800)),
+            child: MaterialApp(
+              home: OrientationAwareBuilder(
+                builder: (context, formFactor, orientation) {
+                  detectedOrientation = orientation;
+                  return const Text('Built');
+                },
+              ),
             ),
           ),
         );
@@ -271,21 +268,21 @@ void main() {
   });
 
   group('Responsive Layout - ResponsiveContainer', () {
+    // Skipped: ResponsiveContainer uses LayoutBuilder; in widget tests the
+    // parent provides unbounded or viewport constraints, not MediaQuery size,
+    // so maxWidth behavior is not testable without a real viewport.
     testWidgets(
       'Constrains content to maxWidth',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(
-          const Size(1600, 900),
-        ); // Very wide desktop
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: ResponsiveContainer(
-                maxWidth: 500,
-                child: Container(color: Colors.blue),
+          MediaQuery(
+            data: const MediaQueryData(size: Size(1600, 900)),
+            child: MaterialApp(
+              home: Scaffold(
+                body: ResponsiveContainer(
+                  maxWidth: 500,
+                  child: Container(color: Colors.blue),
+                ),
               ),
             ),
           ),
@@ -294,9 +291,16 @@ void main() {
         final container = find.byType(Container);
         expect(container, findsWidgets);
 
-        // The constrained box should limit width
-        final constraints = tester.getSize(find.byType(ConstrainedBox).first);
-        expect(constraints.width, lessThanOrEqualTo(500));
+        // ResponsiveContainer wraps child in Center > ConstrainedBox(maxWidth: 500)
+        final constrainedBox = find.descendant(
+          of: find.byType(ResponsiveContainer),
+          matching: find.byWidgetPredicate(
+            (w) => w is ConstrainedBox && w.constraints.maxWidth == 500,
+          ),
+        );
+        expect(constrainedBox, findsOneWidget);
+        final size = tester.getSize(constrainedBox);
+        expect(size.width, lessThanOrEqualTo(500));
       },
     );
   });
@@ -304,16 +308,15 @@ void main() {
   group('Responsive Layout - ResponsiveVisibility', () {
     testWidgets(
       'Hides widget on mobile when hiddenMobile is true',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         await tester.pumpWidget(
-          MaterialApp(
-            home: ResponsiveVisibility(
-              hiddenMobile: true,
-              child: const Text('Hidden on mobile'),
+          MediaQuery(
+            data: const MediaQueryData(size: Size(400, 800)),
+            child: MaterialApp(
+              home: ResponsiveVisibility(
+                hiddenMobile: true,
+                child: const Text('Hidden on mobile'),
+              ),
             ),
           ),
         );
@@ -342,17 +345,16 @@ void main() {
 
     testWidgets(
       'Shows replacement widget when hidden',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         await tester.pumpWidget(
-          MaterialApp(
-            home: ResponsiveVisibility(
-              hiddenMobile: true,
-              child: const Text('Original'),
-              replacement: const Text('Replacement'),
+          MediaQuery(
+            data: const MediaQueryData(size: Size(400, 800)),
+            child: MaterialApp(
+              home: ResponsiveVisibility(
+                hiddenMobile: true,
+                child: const Text('Original'),
+                replacement: const Text('Replacement'),
+              ),
             ),
           ),
         );
@@ -366,18 +368,17 @@ void main() {
   group('Responsive Layout - VisibleOnBreakpoint', () {
     testWidgets(
       'Shows widget only on specified breakpoints',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         await tester.pumpWidget(
-          MaterialApp(
-            home: VisibleOnBreakpoint(
-              visibleMobile: true,
-              visibleTablet: false,
-              visibleDesktop: false,
-              child: const Text('Mobile only'),
+          MediaQuery(
+            data: const MediaQueryData(size: Size(400, 800)),
+            child: MaterialApp(
+              home: VisibleOnBreakpoint(
+                visibleMobile: true,
+                visibleTablet: false,
+                visibleDesktop: false,
+                child: const Text('Mobile only'),
+              ),
             ),
           ),
         );
@@ -577,24 +578,28 @@ void main() {
   group('Responsive Layout - AdaptiveNavigation', () {
     testWidgets(
       'AdaptiveNavigation renders on mobile',
-      skip: true,
       (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: AdaptiveNavigation(
-                items: [
-                  NavigationItem(
-                    icon: Icons.home,
-                    label: 'Home',
-                    destination: const Text('Home'),
-                  ),
-                ],
-                selectedIndex: 0,
-                onItemSelected: (_) {},
+          MediaQuery(
+            data: const MediaQueryData(size: Size(400, 800)),
+            child: MaterialApp(
+              home: Scaffold(
+                body: AdaptiveNavigation(
+                  items: [
+                    NavigationItem(
+                      icon: Icons.home,
+                      label: 'Home',
+                      destination: const Text('Home'),
+                    ),
+                    NavigationItem(
+                      icon: Icons.settings,
+                      label: 'Settings',
+                      destination: const Text('Settings'),
+                    ),
+                  ],
+                  selectedIndex: 0,
+                  onItemSelected: (_) {},
+                ),
               ),
             ),
           ),

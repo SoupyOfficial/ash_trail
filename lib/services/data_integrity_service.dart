@@ -132,11 +132,14 @@ class DataIntegrityService {
   final AccountIntegrityValidator _accountValidator;
   final LogRecordRepository _repository;
 
+  /// Create a DataIntegrityService with the given dependencies.
+  /// 
+  /// Requires [accountValidator] to check account existence.
+  /// If [repository] is not provided, creates a default one from DatabaseService.
   DataIntegrityService({
-    AccountIntegrityValidator? accountValidator,
+    required AccountIntegrityValidator accountValidator,
     LogRecordRepository? repository,
-  }) : _accountValidator =
-           accountValidator ?? AccountServiceValidator(AccountService.instance),
+  }) : _accountValidator = accountValidator,
        _repository = repository ?? _createDefaultRepository();
 
   static LogRecordRepository _createDefaultRepository() {

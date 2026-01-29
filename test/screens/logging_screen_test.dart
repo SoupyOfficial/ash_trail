@@ -144,8 +144,8 @@ void main() {
         findsOneWidget,
       );
 
-      // Check for some reason filter chips
-      expect(find.byType(FilterChip), findsWidgets);
+      // LoggingScreen uses ReasonChipsGrid (custom chip buttons), not FilterChip
+      expect(find.text('Medical'), findsOneWidget);
     });
 
     testWidgets('Detailed tab has clear and submit buttons', (

@@ -34,18 +34,9 @@ We have successfully created comprehensive unit tests and end-to-end user story 
 - Empty data handling
 - User story workflows for analytics
 
-### 2. **New User Story Tests**
-✅ [test/widgets/widget_user_stories_test.dart](../../test/widgets/widget_user_stories_test.dart)
-- **22 tests** covering realistic multi-widget workflows
-- Quick log workflow
-- Time tracking and statistics display
-- Multi-day progress tracking
-- Form interactions with reasons, mood, physical ratings
-- Edge cases: empty data, large datasets, rapid interactions
-
-### 3. **New Integration Tests**
-✅ [test/integration/widget_integration_test.dart](../../test/integration/widget_integration_test.dart)
-- **18 tests** covering complete user workflows
+### 2. **Flow Tests**
+✅ [test/flows/quick_log_workflow_test.dart](../../test/flows/quick_log_workflow_test.dart)
+- **18 tests** covering quick-log and analytics workflows (in-process; run with `flutter test`)
 - First-time user journey
 - Regular user tracking across days
 - Analytics dashboard workflows
@@ -69,8 +60,7 @@ Lines of Test Code:                 3000+
 
 Breakdown by Category:
 ├── Unit Tests:                     73
-├── User Story Tests:               22  
-└── Integration Tests:              18
+└── Flow Tests:                    18 (test/flows/quick_log_workflow_test.dart)
 ```
 
 ## Test Execution Results
@@ -170,11 +160,8 @@ flutter test test/widgets/sync_status_widget_test.dart
 flutter test test/widgets/home_quick_log_widget_test.dart
 flutter test test/widgets/analytics_charts_widget_test.dart
 
-# Run user story tests
-flutter test test/widgets/widget_user_stories_test.dart
-
-# Run integration tests
-flutter test test/integration/widget_integration_test.dart
+# Run flow tests
+flutter test test/flows/quick_log_workflow_test.dart
 
 # Run with verbose output
 flutter test test/widgets/ -v

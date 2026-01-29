@@ -109,7 +109,7 @@ flutter logs
 ## Files Involved
 - [lib/services/auth_service.dart](lib/services/auth_service.dart) - Google Sign-In logic
 - [lib/services/account_integration_service.dart](lib/services/account_integration_service.dart) - Account sync
-- [lib/screens/auth/login_screen.dart](lib/screens/auth/login_screen.dart) - UI
+- [lib/screens/login_screen.dart](lib/screens/login_screen.dart) - UI
 - [ios/Runner/GoogleService-Info.plist](ios/Runner/GoogleService-Info.plist) - Firebase config
 - [ios/Runner/Info.plist](ios/Runner/Info.plist) - URL schemes
 - [lib/firebase_options.dart](lib/firebase_options.dart) - Firebase setup

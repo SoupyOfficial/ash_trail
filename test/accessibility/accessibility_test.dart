@@ -54,36 +54,7 @@ void main() {
     });
   });
 
-  group('Accessibility - Device Form Factor Detection', () {
-    test('Correctly identifies mobile form factor', () {
-      final formFactor = DeviceFormFactor.fromWidth(400);
-      expect(formFactor, equals(DeviceFormFactor.mobile));
-    });
-
-    test('Correctly identifies tablet form factor', () {
-      final formFactor = DeviceFormFactor.fromWidth(800);
-      expect(formFactor, equals(DeviceFormFactor.tablet));
-    });
-
-    test('Correctly identifies desktop form factor', () {
-      final formFactor = DeviceFormFactor.fromWidth(1400);
-      expect(formFactor, equals(DeviceFormFactor.desktop));
-    });
-
-    test('Boundary condition: mobile/tablet', () {
-      final formFactor = DeviceFormFactor.fromWidth(
-        Breakpoints.tabletBreakpoint,
-      );
-      expect(formFactor, equals(DeviceFormFactor.tablet));
-    });
-
-    test('Boundary condition: tablet/desktop', () {
-      final formFactor = DeviceFormFactor.fromWidth(
-        Breakpoints.desktopBreakpoint,
-      );
-      expect(formFactor, equals(DeviceFormFactor.desktop));
-    });
-  });
+  // DeviceFormFactor/Breakpoints are tested in test/responsive/responsive_design_test.dart.
 
   group('Accessibility - Semantic Label Builder', () {
     test('Button label has correct prefix', () {
@@ -196,31 +167,8 @@ void main() {
   });
 
   group('Accessibility - Responsive Size Helpers', () {
-    testWidgets(
-      'Responsive returns mobile value on mobile screen',
-      skip: true,
-      (WidgetTester tester) async {
-        await tester.binding.setSurfaceSize(const Size(360, 800)); // Mobile
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Builder(
-              builder: (context) {
-                final value = ResponsiveSize.responsive(
-                  context: context,
-                  mobile: 10,
-                  tablet: 20,
-                  desktop: 30,
-                );
-                expect(value, equals(10));
-                return const SizedBox();
-              },
-            ),
-          ),
-        );
-      },
-    );
+    // Mobile-by-surface-size test removed: setSurfaceSize does not affect MediaQuery in widget tests.
+    // Use MediaQuery override (below) or test on device for layout-by-size.
 
     testWidgets('Responsive returns tablet value on tablet screen', (
       WidgetTester tester,

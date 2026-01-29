@@ -1,5 +1,5 @@
 import 'package:ash_trail/models/account.dart';
-import 'package:ash_trail/screens/auth/signup_screen.dart';
+import 'package:ash_trail/screens/signup_screen.dart';
 import 'package:ash_trail/services/account_integration_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

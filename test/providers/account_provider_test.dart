@@ -544,43 +544,8 @@ void main() {
     });
 
     group('AccountSwitcher', () {
-      test('switchAccount changes active account', () async {
-        // Skip: switchAccount uses FirebaseAuth; Firebase cannot be initialized in unit-test VM.
-        return;
-        // ignore: dead_code
-        final container = createContainer();
-        addTearDown(container.dispose);
-
-        // Setup accounts
-        mockAccountService.emitAllAccounts([
-          createTestAccount(userId: 'user-1', isActive: true),
-          createTestAccount(userId: 'user-2', isActive: false),
-        ]);
-        await Future.delayed(Duration.zero);
-
-        // Switch account
-        final switcher = container.read(accountSwitcherProvider.notifier);
-        await switcher.switchAccount('user-2');
-        await Future.delayed(Duration.zero);
-
-        // Verify state is data (successful)
-        final state = container.read(accountSwitcherProvider);
-        expect(state.hasError, isFalse);
-      });
-
-      test('switchAccount handles errors', () async {
-        // Skip: switchAccount uses FirebaseAuth; Firebase cannot be initialized in unit-test VM.
-        return;
-        // ignore: dead_code
-        final container = createContainer();
-        addTearDown(container.dispose);
-        mockSessionManager.throwOnSetActive = true;
-        final switcher = container.read(accountSwitcherProvider.notifier);
-        await switcher.switchAccount('user-1');
-        await Future.delayed(Duration.zero);
-        final state = container.read(accountSwitcherProvider);
-        expect(state.hasError, isTrue);
-      });
+      // Note: switchAccount tests removed - they require FirebaseAuth which cannot
+      // be initialized in unit tests. Account switching is tested in integration tests.
 
       test('addAccount creates new account', () async {
         final container = createContainer();
@@ -702,19 +667,6 @@ void main() {
 
         final accounts = await mockAccountService.getAllAccounts();
         expect(accounts.length, equals(3));
-      });
-
-      test('switching to non-existent account', () async {
-        // Skip: switchAccount uses FirebaseAuth; Firebase cannot be initialized in unit-test VM.
-        return;
-        // ignore: dead_code
-        final container = createContainer();
-        addTearDown(container.dispose);
-        final switcher = container.read(accountSwitcherProvider.notifier);
-        await switcher.switchAccount('non-existent-user');
-        await Future.delayed(Duration.zero);
-        final state = container.read(accountSwitcherProvider);
-        expect(state.hasError, isFalse);
       });
 
       test('deleting active account clears active state', () async {

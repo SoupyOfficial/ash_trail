@@ -37,8 +37,8 @@ This document provides a comprehensive guide to the authentication system implem
 - ✅ Firebase configuration for all platforms (web, Android, iOS, macOS, Windows)
 
 ### 2. **Authentication Screens**
-- ✅ [login_screen.dart](lib/screens/auth/login_screen.dart) - Login with email/password and Google
-- ✅ [signup_screen.dart](lib/screens/auth/signup_screen.dart) - Account creation with validation
+- ✅ [login_screen.dart](lib/screens/login_screen.dart) - Login with email/password and Google
+- ✅ [signup_screen.dart](lib/screens/signup_screen.dart) - Account creation with validation
 - ✅ Test keys match Playwright selectors (`email-input`, `password-input`, etc.)
 
 ### 3. **Auth Services & Providers**

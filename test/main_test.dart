@@ -26,6 +26,26 @@ void main() {
       expect(materialApp.debugShowCheckedModeBanner, false);
       expect(materialApp.themeMode, ThemeMode.system);
     });
+
+    testWidgets('has proper Material 3 theming', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authStateProvider.overrideWith(
+              (ref) => Stream.value(_FakeUser(uid: 'test-user')),
+            ),
+            activeAccountProvider.overrideWith((ref) => Stream.value(null)),
+          ],
+          child: const AshTrailApp(),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final MaterialApp app = tester.widget(find.byType(MaterialApp));
+      expect(app.theme?.useMaterial3, true);
+      expect(app.darkTheme?.useMaterial3, true);
+    });
   });
 
   group('AuthWrapper', () {

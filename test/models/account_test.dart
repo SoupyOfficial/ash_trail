@@ -215,81 +215,48 @@ void main() {
     });
 
     group('copyWith', () {
-      test('creates copy with updated userId', () {
+      test('updates multiple fields while preserving unchanged ones', () {
+        final tokenExpiry = DateTime.now().add(const Duration(days: 7));
         final original = Account.create(
           userId: 'user-123',
-          email: 'test@example.com',
-        );
-
-        final copy = original.copyWith(userId: 'user-456');
-
-        expect(copy.userId, 'user-456');
-        expect(copy.email, original.email);
-      });
-
-      test('creates copy with updated email', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'old@example.com',
-        );
-
-        final copy = original.copyWith(email: 'new@example.com');
-
-        expect(copy.email, 'new@example.com');
-        expect(copy.userId, original.userId);
-      });
-
-      test('creates copy with updated displayName', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
-          displayName: 'Old Name',
-        );
-
-        final copy = original.copyWith(displayName: 'New Name');
-
-        expect(copy.displayName, 'New Name');
-      });
-
-      test('creates copy with updated firstName and lastName', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
+          email: 'original@example.com',
+          displayName: 'Original Name',
           firstName: 'John',
           lastName: 'Doe',
-        );
-
-        final copy = original.copyWith(firstName: 'Jane', lastName: 'Smith');
-
-        expect(copy.firstName, 'Jane');
-        expect(copy.lastName, 'Smith');
-      });
-
-      test('creates copy with updated authProvider', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
           authProvider: AuthProvider.anonymous,
-        );
-
-        final copy = original.copyWith(authProvider: AuthProvider.gmail);
-
-        expect(copy.authProvider, AuthProvider.gmail);
-      });
-
-      test('creates copy with updated isActive', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
           isActive: false,
+          accessToken: 'old-access',
+          refreshToken: 'old-refresh',
+        );
+        original.id = 42;
+
+        final copy = original.copyWith(
+          email: 'new@example.com',
+          displayName: 'New Name',
+          authProvider: AuthProvider.gmail,
+          isActive: true,
+          accessToken: 'new-access',
+          refreshToken: 'new-refresh',
+          tokenExpiresAt: tokenExpiry,
         );
 
-        final copy = original.copyWith(isActive: true);
-
+        // Updated fields
+        expect(copy.email, 'new@example.com');
+        expect(copy.displayName, 'New Name');
+        expect(copy.authProvider, AuthProvider.gmail);
         expect(copy.isActive, true);
+        expect(copy.accessToken, 'new-access');
+        expect(copy.refreshToken, 'new-refresh');
+        expect(copy.tokenExpiresAt, tokenExpiry);
+
+        // Preserved fields
+        expect(copy.id, 42);
+        expect(copy.userId, 'user-123');
+        expect(copy.firstName, 'John');
+        expect(copy.lastName, 'Doe');
       });
 
-      test('creates copy with updated timestamps', () {
+      test('updates timestamps and metadata fields', () {
         final original = Account.create(
           userId: 'user-123',
           email: 'test@example.com',
@@ -298,95 +265,18 @@ void main() {
         final newModified = DateTime(2025, 2, 1);
         final newSynced = DateTime(2025, 2, 2);
         final copy = original.copyWith(
+          remoteId: 'remote-789',
+          photoUrl: 'https://example.com/photo.jpg',
+          activeProfileId: 'profile-999',
           lastModifiedAt: newModified,
           lastSyncedAt: newSynced,
         );
 
+        expect(copy.remoteId, 'remote-789');
+        expect(copy.photoUrl, 'https://example.com/photo.jpg');
+        expect(copy.activeProfileId, 'profile-999');
         expect(copy.lastModifiedAt, newModified);
         expect(copy.lastSyncedAt, newSynced);
-      });
-
-      test('creates copy with updated tokens', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
-          accessToken: 'old-access',
-          refreshToken: 'old-refresh',
-        );
-
-        final newExpiry = DateTime.now().add(const Duration(days: 7));
-        final copy = original.copyWith(
-          accessToken: 'new-access',
-          refreshToken: 'new-refresh',
-          tokenExpiresAt: newExpiry,
-        );
-
-        expect(copy.accessToken, 'new-access');
-        expect(copy.refreshToken, 'new-refresh');
-        expect(copy.tokenExpiresAt, newExpiry);
-      });
-
-      test('creates copy with updated remoteId', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
-        );
-
-        final copy = original.copyWith(remoteId: 'remote-789');
-
-        expect(copy.remoteId, 'remote-789');
-      });
-
-      test('creates copy with updated photoUrl', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
-        );
-
-        final copy = original.copyWith(
-          photoUrl: 'https://example.com/new-photo.jpg',
-        );
-
-        expect(copy.photoUrl, 'https://example.com/new-photo.jpg');
-      });
-
-      test('creates copy with updated activeProfileId', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
-        );
-
-        final copy = original.copyWith(activeProfileId: 'profile-999');
-
-        expect(copy.activeProfileId, 'profile-999');
-      });
-
-      test('preserves id when copying', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'test@example.com',
-        );
-        original.id = 42;
-
-        final copy = original.copyWith(displayName: 'New Name');
-
-        expect(copy.id, 42);
-      });
-
-      test('preserves unchanged fields', () {
-        final original = Account.create(
-          userId: 'user-123',
-          email: 'original@example.com',
-          displayName: 'Original Name',
-          authProvider: AuthProvider.gmail,
-        );
-
-        final copy = original.copyWith(displayName: 'New Name');
-
-        expect(copy.userId, original.userId);
-        expect(copy.email, original.email);
-        expect(copy.authProvider, original.authProvider);
-        expect(copy.displayName, 'New Name');
       });
     });
   });

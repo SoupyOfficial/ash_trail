@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/account_provider.dart';
 import '../models/account.dart';
 import '../services/account_integration_service.dart';
-import 'profile/profile_screen.dart';
+import 'profile_screen.dart';
 import 'export_screen.dart';
-import 'auth/login_screen.dart';
+import 'login_screen.dart';
 import '../utils/design_constants.dart';
 
 /// Static test account ID for persistence testing

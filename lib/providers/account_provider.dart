@@ -10,26 +10,24 @@ import '../services/log_record_service.dart';
 import '../services/token_service.dart';
 import 'log_record_provider.dart';
 
-// Token service provider
+// Token service provider - creates a new instance (stateless service)
 final tokenServiceProvider = Provider<TokenService>((ref) {
-  debugPrint('🔧 [tokenServiceProvider] Creating/Getting TokenService instance');
-  return TokenService.instance;
+  debugPrint('🔧 [tokenServiceProvider] Creating TokenService instance');
+  return TokenService();
 });
 
-// Service provider - ensure singleton AccountService is used
+// Service provider - creates AccountService with dependencies
 final accountServiceProvider = Provider<AccountService>((ref) {
-  debugPrint(
-    '🔧 [accountServiceProvider] Creating/Getting AccountService instance',
-  );
-  return AccountService.instance;
+  debugPrint('🔧 [accountServiceProvider] Creating AccountService instance');
+  // LogRecordService is created internally by AccountService if not provided
+  return AccountService();
 });
 
-// Session manager provider
+// Session manager provider - creates AccountSessionManager with dependencies
 final accountSessionManagerProvider = Provider<AccountSessionManager>((ref) {
-  debugPrint(
-    '🔧 [accountSessionManagerProvider] Creating/Getting AccountSessionManager instance',
-  );
-  return AccountSessionManager.instance;
+  debugPrint('🔧 [accountSessionManagerProvider] Creating AccountSessionManager instance');
+  final accountService = ref.watch(accountServiceProvider);
+  return AccountSessionManager(accountService: accountService);
 });
 
 // Active account provider - cache the stream to avoid multiple subscriptions

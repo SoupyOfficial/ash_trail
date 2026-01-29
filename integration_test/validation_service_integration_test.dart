@@ -1,5 +1,8 @@
+import 'package:ash_trail/services/account_service.dart';
+import 'package:ash_trail/services/account_session_manager.dart';
 import 'package:ash_trail/services/legacy_data_adapter.dart';
 import 'package:ash_trail/services/sync_service.dart';
+import 'package:ash_trail/services/token_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -8,7 +11,13 @@ void main() {
     late LegacyDataAdapter adapter;
 
     setUp(() {
-      syncService = SyncService();
+      final accountService = AccountService();
+      final sessionManager = AccountSessionManager(accountService: accountService);
+      final tokenService = TokenService();
+      syncService = SyncService(
+        sessionManager: sessionManager,
+        tokenService: tokenService,
+      );
       adapter = LegacyDataAdapter();
     });
 

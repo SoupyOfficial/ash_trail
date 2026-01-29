@@ -10,8 +10,8 @@ import 'package:ash_trail/widgets/analytics_charts.dart';
 import 'package:ash_trail/widgets/sync_status_widget.dart';
 import 'package:uuid/uuid.dart';
 
-/// Comprehensive integration tests for user workflows
-/// Tests multiple widgets working together in realistic scenarios
+/// Flow tests for quick-log and analytics workflows.
+/// In-process widget composition tests (run with `flutter test`), not device integration tests.
 void main() {
   const uuid = Uuid();
 

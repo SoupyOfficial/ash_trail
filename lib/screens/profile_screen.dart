@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/account_integration_service.dart';
+import '../providers/auth_provider.dart';
+import '../services/account_integration_service.dart';
 
 /// Profile screen for viewing and editing account information
 class ProfileScreen extends ConsumerStatefulWidget {

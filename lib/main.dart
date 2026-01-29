@@ -6,7 +6,7 @@ import 'firebase_options.dart';
 import 'services/hive_database_service.dart';
 import 'services/crash_reporting_service.dart';
 import 'services/location_service.dart';
-import 'screens/auth/login_screen.dart';
+import 'screens/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
 import 'providers/home_widget_config_provider.dart';

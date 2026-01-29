@@ -53,7 +53,7 @@ New reusable authentication button component:
   - 50px height, full width
   - Rounded corners (8px)
 
-### 4. Login Screen (`lib/screens/auth/login_screen.dart`)
+### 4. Login Screen (`lib/screens/login_screen.dart`)
 Updated with multi-auth support:
 - Email/password authentication
 - "Continue with Google" button
@@ -61,7 +61,7 @@ Updated with multi-auth support:
 - Industry-standard layout with divider
 - Consistent error handling
 
-### 5. Signup Screen (`lib/screens/auth/signup_screen.dart`)
+### 5. Signup Screen (`lib/screens/signup_screen.dart`)
 Updated with multi-auth support:
 - Email/password signup
 - "Continue with Google" button

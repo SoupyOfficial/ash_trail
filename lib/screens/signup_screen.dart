@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/account_integration_service.dart';
-import '../../widgets/auth_button.dart';
+import '../services/account_integration_service.dart';
+import '../widgets/auth_button.dart';
 
 /// Signup screen for creating new accounts with email, Google, or Apple
 class SignupScreen extends ConsumerStatefulWidget {

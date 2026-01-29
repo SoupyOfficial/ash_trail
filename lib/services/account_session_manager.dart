@@ -21,17 +21,15 @@ import 'account_service.dart';
 /// - Each account's data syncs independently to Firestore
 /// - Switching accounts changes both the displayed data AND the Firebase Auth user
 class AccountSessionManager {
-  // Singleton instance
-  static final AccountSessionManager _instance =
-      AccountSessionManager._internal();
-  static AccountSessionManager get instance => _instance;
+  final FlutterSecureStorage _secureStorage;
+  final AccountService _accountService;
 
-  factory AccountSessionManager() => _instance;
-
-  AccountSessionManager._internal();
-
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  final AccountService _accountService = AccountService.instance;
+  /// Create an AccountSessionManager with the given dependencies.
+  AccountSessionManager({
+    required AccountService accountService,
+    FlutterSecureStorage? secureStorage,
+  }) : _accountService = accountService,
+       _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   // Storage keys
   static const String _sessionPrefix = 'session_';

@@ -2,39 +2,11 @@
 
 ## Test Summary
 
-Comprehensive testing has been implemented for the location collection feature covering unit tests, widget tests, and integration tests.
+Comprehensive testing has been implemented for the location collection feature covering widget tests and integration tests. (Unit tests for LocationService were removed; they required platform channel mocking and are better covered by integration tests on device/simulator.)
 
 ## Test Files Created
 
-### 1. Unit Tests: `test/services/location_service_test.dart`
-Tests for the LocationService class functionality.
-
-**Test Groups:**
-- **LocationService basics**
-  - ✅ Singleton pattern verification
-  - ✅ Service initialization
-  
-- **Permission checks**
-  - ✅ `isLocationServiceEnabled()` - Checks if location services are enabled on device
-  - ✅ `checkPermissionStatus()` - Returns current permission status
-  - ✅ `hasLocationPermission()` - Boolean check for whileInUse or always permission
-  - ✅ `getPermissionStatusString()` - Returns user-friendly permission status
-
-- **Permission scenarios**
-  - ✅ Handles denied permission gracefully
-  - ✅ Handles deniedForever permission (opens settings)
-  
-- **Location capture**
-  - ✅ Returns null when permission not granted
-  - ✅ Returns valid Position when permission granted
-  - ✅ Validates coordinate ranges (-90 to 90 for lat, -180 to 180 for lon)
-
-- **Stream functionality**
-  - ✅ getPositionStream returns Stream<Position>
-
-**Note:** Some tests require platform channel mocking and are marked for integration testing.
-
-### 2. Widget Tests: `test/widgets/location_map_picker_test.dart`
+### 1. Widget Tests: `test/widgets/location_map_picker_test.dart`
 Tests for the LocationMapPicker widget UI and behavior.
 
 **Test Groups:**
@@ -55,7 +27,7 @@ Tests for the LocationMapPicker widget UI and behavior.
 
 **Test Results:** ✅ **10/10 tests passed**
 
-### 3. Integration Tests: `integration_test/location_collection_test.dart`
+### 2. Integration Tests: `integration_test/location_collection_test.dart`
 End-to-end tests for the complete location collection workflow.
 
 **Test Groups:**
@@ -86,11 +58,6 @@ End-to-end tests for the complete location collection workflow.
 - Log submitted after long press includes location
 
 ## Test Execution
-
-### Run Unit Tests
-```bash
-flutter test test/services/location_service_test.dart
-```
 
 ### Run Widget Tests
 ```bash
@@ -169,11 +136,6 @@ flutter test
 
 ## Known Limitations
 
-### Unit Test Limitations
-- Some LocationService tests require platform channel mocking
-- Geolocator plugin methods need native iOS implementation for full testing
-- Tests marked with `MissingPluginException` need integration test environment
-
 ### Integration Test Considerations
 - Requires actual device or simulator with location services
 - Permission dialogs depend on system state
@@ -207,7 +169,6 @@ Beyond automated tests, manually verify:
    - Update test coverage documentation
 
 2. **When modifying LocationService:**
-   - Update unit tests to match new behavior
    - Verify integration tests still pass
 
 3. **When changing UI:**
@@ -254,12 +215,11 @@ jobs:
 ## Test Coverage Goals
 
 Current coverage:
-- ✅ LocationService: Basic coverage (platform-dependent)
 - ✅ LocationMapPicker: 100% (10/10 tests passing)
 - ✅ Integration flows: Comprehensive scenarios covered
 
 Future improvements:
-- Mock platform channels for complete unit test coverage
+- Unit tests for LocationService (with platform channel mocks) if needed
 - Add performance benchmarks
 - Automated screenshot testing for map UI
 - Accessibility testing for location features

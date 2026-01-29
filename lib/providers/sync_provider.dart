@@ -1,9 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/sync_service.dart';
+import 'account_provider.dart';
 
 /// Provider for SyncService
 final syncServiceProvider = Provider<SyncService>((ref) {
-  final service = SyncService();
+  final sessionManager = ref.watch(accountSessionManagerProvider);
+  final tokenService = ref.watch(tokenServiceProvider);
+  
+  final service = SyncService(
+    sessionManager: sessionManager,
+    tokenService: tokenService,
+  );
+  
   ref.onDispose(() {
     service.dispose();
   });

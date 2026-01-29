@@ -11,13 +11,9 @@ class TokenService {
   static const String _tokenEndpoint =
       'https://us-central1-smokelog-17303.cloudfunctions.net/generate_refresh_token';
 
-  // Singleton pattern
-  static final TokenService _instance = TokenService._internal();
-  static TokenService get instance => _instance;
-
-  factory TokenService() => _instance;
-
-  TokenService._internal();
+  /// Create a TokenService instance.
+  /// This is a stateless service, so creating multiple instances is fine.
+  TokenService();
 
   /// Generate a custom Firebase token valid for 48 hours for the given user ID.
   ///

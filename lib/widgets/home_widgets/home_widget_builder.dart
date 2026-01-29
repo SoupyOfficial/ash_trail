@@ -6,6 +6,7 @@ import '../../models/log_record.dart';
 import '../../models/enums.dart';
 import '../../services/home_metrics_service.dart';
 import '../../utils/design_constants.dart';
+import '../../utils/day_boundary.dart';
 import '../home_quick_log_widget.dart';
 import 'widget_catalog.dart';
 import 'stat_card_widget.dart';
@@ -241,9 +242,9 @@ class HomeWidgetBuilder extends ConsumerWidget {
     final todayAvg = metrics.getAverageDurationToday(records);
     final yesterdayAvg = metrics.getAverageDuration(
       records.where((r) {
-        final now = DateTime.now();
-        final todayStart = DateTime(now.year, now.month, now.day);
-        final yesterdayStart = todayStart.subtract(const Duration(days: 1));
+        // Use 6am day boundary for more natural grouping
+        final todayStart = DayBoundary.getTodayStart();
+        final yesterdayStart = DayBoundary.getYesterdayStart();
         return r.eventAt.isAfter(yesterdayStart) && r.eventAt.isBefore(todayStart);
       }).toList(),
     );
@@ -569,10 +570,9 @@ class HomeWidgetBuilder extends ConsumerWidget {
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     final dayCounts = List.filled(7, 0);
 
+    // Use 6am day boundary for more natural grouping of late-night activity
+    final weekStart = DayBoundary.getDayStartDaysAgo(6);
     for (final record in records.where((r) => !r.isDeleted)) {
-      final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day);
-      final weekStart = todayStart.subtract(const Duration(days: 6));
       if (record.eventAt.isAfter(weekStart)) {
         final dayIndex = record.eventAt.weekday - 1;
         dayCounts[dayIndex]++;

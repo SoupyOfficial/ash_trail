@@ -2,19 +2,20 @@ import 'dart:convert';
 import '../models/log_record.dart';
 import '../models/daily_rollup.dart';
 import '../models/enums.dart';
+import '../utils/day_boundary.dart';
 
 /// Analytics service per design doc 10. Analytics & Aggregation
 /// Provides client-side computation of aggregated metrics
 class AnalyticsService {
   /// Compute daily aggregation per design doc 10.4.1
-  /// Fixed calendar day buckets
+  /// Uses 6am day boundary to group late-night activity with previous day
   Future<DailyRollup> computeDailyRollup({
     required String accountId,
     required DateTime date,
     required List<LogRecord> records,
   }) async {
-    // Filter records for the specific day
-    final dayStart = DateTime(date.year, date.month, date.day);
+    // Filter records for the specific day (using 6am day boundary)
+    final dayStart = DayBoundary.getDayStart(date);
     final dayEnd = dayStart.add(const Duration(days: 1));
 
     final dayRecords =
@@ -57,7 +58,7 @@ class AnalyticsService {
   }
 
   /// Compute rolling window aggregates per design doc 10.4.2
-  /// Returns aggregated data for last N days
+  /// Returns aggregated data for last N days (using 6am day boundary)
   Future<RollingWindowStats> computeRollingWindow({
     required String accountId,
     required List<LogRecord> records,
@@ -65,11 +66,8 @@ class AnalyticsService {
     DateTime? now,
   }) async {
     final referenceNow = now ?? DateTime.now();
-    final today = DateTime(
-      referenceNow.year,
-      referenceNow.month,
-      referenceNow.day,
-    );
+    // Use 6am day boundary for more natural grouping of late-night activity
+    final today = DayBoundary.getDayStart(referenceNow);
     final windowStart = today.subtract(Duration(days: days));
 
     final windowRecords =

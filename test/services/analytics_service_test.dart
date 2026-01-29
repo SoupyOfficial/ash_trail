@@ -4,6 +4,7 @@ import 'package:ash_trail/models/daily_rollup.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/services/analytics_service.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,7 +14,8 @@ void main() {
     test(
       'aggregates records for a single day and ignores deleted/out-of-range',
       () async {
-        final date = DateTime(2024, 1, 1);
+        // Use a time after 6am so it's within the same day per day boundary
+        final date = DateTime(2024, 1, 1, 12); // noon on Jan 1
         final records = [
           LogRecord.create(
             logId: 'a',
@@ -38,11 +40,11 @@ void main() {
             eventType: EventType.inhale,
             duration: 30,
           ),
-          // Outside day window
+          // Outside day window (after 6am on Jan 2, so in Jan 2's day)
           LogRecord.create(
             logId: 'd',
             accountId: 'acct',
-            eventAt: DateTime(2024, 1, 2, 1),
+            eventAt: DateTime(2024, 1, 2, 8), // 8am is after 6am boundary
             eventType: EventType.vape,
           ),
           // Deleted within day
@@ -75,12 +77,13 @@ void main() {
     );
 
     test('returns empty aggregates when no records in range', () async {
-      final date = DateTime(2024, 1, 1);
+      // Use a time after 6am so it's within the same day per day boundary
+      final date = DateTime(2024, 1, 1, 12); // noon on Jan 1
       final records = [
         LogRecord.create(
           logId: 'ignored',
           accountId: 'acct',
-          eventAt: DateTime(2024, 1, 2, 1),
+          eventAt: DateTime(2024, 1, 2, 8), // 8am on Jan 2 (after 6am, so in Jan 2's day)
           eventType: EventType.vape,
         ),
         LogRecord.create(
@@ -158,7 +161,8 @@ void main() {
         );
 
         expect(stats.days, 7);
-        expect(stats.startDate, DateTime(2024, 1, 3));
+        // With 6am day boundary, startDate is at 6am
+        expect(stats.startDate, DateTime(2024, 1, 3, DayBoundary.dayStartHour));
         expect(stats.endDate, now);
         expect(stats.totalEntries, 3);
         expect(stats.totalDurationSeconds, 420);
@@ -173,7 +177,8 @@ void main() {
     );
 
     test('handles empty input gracefully', () async {
-      final now = DateTime(2024, 1, 10);
+      // Use a time after 6am so it's within the same day per day boundary
+      final now = DateTime(2024, 1, 10, 12); // noon on Jan 10
 
       final stats = await service.computeRollingWindow(
         accountId: 'acct',
@@ -189,7 +194,8 @@ void main() {
       expect(stats.averagePhysicalRating, isNull);
       expect(stats.dailyRollups, hasLength(7));
       expect(stats.eventTypeCounts, isEmpty);
-      expect(stats.startDate, DateTime(2024, 1, 3));
+      // With 6am day boundary, startDate is at 6am
+      expect(stats.startDate, DateTime(2024, 1, 3, DayBoundary.dayStartHour));
       expect(stats.endDate, now);
     });
   });

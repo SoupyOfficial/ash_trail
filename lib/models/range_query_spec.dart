@@ -1,4 +1,5 @@
 import 'enums.dart';
+import '../utils/day_boundary.dart';
 
 /// RangeQuerySpec defines parameters for querying and aggregating log records
 /// This is typically used as a transient object for UI state, not persisted
@@ -46,11 +47,11 @@ class RangeQuerySpec {
     this.includeDeleted = false,
   });
 
-  /// Create a range spec for today
+  /// Create a range spec for today (using 6am day boundary)
   factory RangeQuerySpec.today({GroupBy? groupBy}) {
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
-    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    // Use 6am day boundary for more natural grouping of late-night activity
+    final startOfDay = DayBoundary.getTodayStart();
+    final endOfDay = DayBoundary.getTodayEnd();
 
     return RangeQuerySpec(
       rangeType: RangeType.today,
@@ -60,19 +61,15 @@ class RangeQuerySpec {
     );
   }
 
-  /// Create a range spec for this week
+  /// Create a range spec for this week (using 6am day boundary)
   factory RangeQuerySpec.week({GroupBy? groupBy}) {
     final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final startOfDay = DateTime(
-      startOfWeek.year,
-      startOfWeek.month,
-      startOfWeek.day,
-    );
+    // Use 6am day boundary for week start
+    final startOfWeek = DayBoundary.getWeekStart(now);
 
     return RangeQuerySpec(
       rangeType: RangeType.week,
-      startAt: startOfDay,
+      startAt: startOfWeek,
       endAt: now,
       groupBy: groupBy ?? GroupBy.day,
     );

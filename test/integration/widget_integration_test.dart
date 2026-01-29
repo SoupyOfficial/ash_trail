@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 import 'package:ash_trail/widgets/home_quick_log_widget.dart';
 import 'package:ash_trail/widgets/time_since_last_hit_widget.dart';
 import 'package:ash_trail/widgets/analytics_charts.dart';
@@ -95,14 +96,14 @@ void main() {
       'Complete user journey: Regular user tracks progress over multiple sessions',
       (tester) async {
         // GIVEN: A user with logs from today
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         final logs = [
           LogRecord.create(
             logId: uuid.v4(),
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 8)),
+            eventAt: todayStart.add(const Duration(hours: 8)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -111,7 +112,7 @@ void main() {
           LogRecord.create(
             logId: uuid.v4(),
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 12)),
+            eventAt: todayStart.add(const Duration(hours: 12)),
             eventType: EventType.vape,
             duration: 8,
             unit: Unit.seconds,
@@ -120,7 +121,7 @@ void main() {
           LogRecord.create(
             logId: uuid.v4(),
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 18)),
+            eventAt: todayStart.add(const Duration(hours: 18)),
             eventType: EventType.vape,
             duration: 6,
             unit: Unit.seconds,
@@ -148,9 +149,9 @@ void main() {
       'Complete user journey: User tracks multi-day progress with trend analysis',
       (tester) async {
         // GIVEN: A user with logs from multiple days
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
-        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
+        final yesterdayStart = DayBoundary.getYesterdayStart();
 
         final logs = [
           // Yesterday - 3 sessions
@@ -182,7 +183,7 @@ void main() {
           LogRecord.create(
             logId: uuid.v4(),
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventAt: todayStart.add(const Duration(hours: 10)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -190,7 +191,7 @@ void main() {
           LogRecord.create(
             logId: uuid.v4(),
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 16)),
+            eventAt: todayStart.add(const Duration(hours: 16)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,

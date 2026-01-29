@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../utils/day_boundary.dart';
 
 /// Custom time range picker dialog for analytics
 /// Allows users to select preset ranges or custom date ranges
@@ -151,51 +152,53 @@ class _TimeRangePickerState extends State<TimeRangePicker> {
 
   void _applyPreset(TimeRangePreset preset) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    // Use 6am day boundary for more natural grouping of late-night activity
+    final todayStart = DayBoundary.getTodayStart();
 
     setState(() {
       _selectedPreset = preset;
-      _endDate = today
-          .add(const Duration(days: 1))
-          .subtract(const Duration(seconds: 1));
+      _endDate = DayBoundary.getTodayEnd();
 
       switch (preset) {
         case TimeRangePreset.today:
-          _startDate = today;
+          _startDate = todayStart;
           break;
         case TimeRangePreset.yesterday:
-          _startDate = today.subtract(const Duration(days: 1));
-          _endDate = today.subtract(const Duration(seconds: 1));
+          _startDate = DayBoundary.getYesterdayStart();
+          _endDate = todayStart.subtract(const Duration(seconds: 1));
           break;
         case TimeRangePreset.last7Days:
-          _startDate = today.subtract(const Duration(days: 6));
+          _startDate = DayBoundary.getDayStartDaysAgo(6);
           break;
         case TimeRangePreset.last14Days:
-          _startDate = today.subtract(const Duration(days: 13));
+          _startDate = DayBoundary.getDayStartDaysAgo(13);
           break;
         case TimeRangePreset.last30Days:
-          _startDate = today.subtract(const Duration(days: 29));
+          _startDate = DayBoundary.getDayStartDaysAgo(29);
           break;
         case TimeRangePreset.last90Days:
-          _startDate = today.subtract(const Duration(days: 89));
+          _startDate = DayBoundary.getDayStartDaysAgo(89);
           break;
         case TimeRangePreset.thisWeek:
-          _startDate = today.subtract(Duration(days: today.weekday - 1));
+          _startDate = DayBoundary.getThisWeekStart();
           break;
         case TimeRangePreset.thisMonth:
-          _startDate = DateTime(now.year, now.month, 1);
+          // For month boundaries, keep calendar month for clarity
+          _startDate = DateTime(now.year, now.month, 1, DayBoundary.dayStartHour);
           break;
         case TimeRangePreset.lastMonth:
-          final lastMonth = DateTime(now.year, now.month - 1, 1);
+          // For month boundaries, keep calendar month for clarity
+          final lastMonth = DateTime(now.year, now.month - 1, 1, DayBoundary.dayStartHour);
           _startDate = lastMonth;
           _endDate = DateTime(
             now.year,
             now.month,
             1,
+            DayBoundary.dayStartHour,
           ).subtract(const Duration(seconds: 1));
           break;
         case TimeRangePreset.allTime:
-          _startDate = DateTime(2020, 1, 1);
+          _startDate = DateTime(2020, 1, 1, DayBoundary.dayStartHour);
           break;
       }
     });

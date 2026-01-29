@@ -1,15 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/models/range_query_spec.dart';
 import 'package:ash_trail/models/enums.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 
 void main() {
   group('RangeQuerySpec Factory Methods', () {
     test('today creates correct range', () {
       final spec = RangeQuerySpec.today();
+      final todayStart = DayBoundary.getTodayStart();
 
       expect(spec.rangeType, RangeType.today);
-      expect(spec.startAt.day, DateTime.now().day);
-      expect(spec.endAt.day, DateTime.now().day);
+      // Uses 6am day boundary - day may differ if before 6am
+      expect(spec.startAt.day, todayStart.day);
+      expect(spec.startAt.hour, DayBoundary.dayStartHour);
       expect(spec.groupBy, GroupBy.hour);
     });
 

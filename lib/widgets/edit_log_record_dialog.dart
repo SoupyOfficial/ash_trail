@@ -493,6 +493,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
               const SizedBox(height: 8),
               ReasonChipsGrid(
                 selected: Set.from(_reasons),
+                showIcons: true,
                 onToggle: (reason) {
                   setState(() {
                     if (_reasons.contains(reason)) {

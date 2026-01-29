@@ -337,6 +337,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
             ReasonChipsGrid(
               selected: _selectedReasons,
               onToggle: _toggleReason,
+              showIcons: true,
             ),
             const SizedBox(height: 16),
 

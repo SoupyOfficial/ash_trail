@@ -198,6 +198,7 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                   const SizedBox(height: 8),
                   ReasonChipsGrid(
                     selected: Set.from(_reasons ?? []),
+                    showIcons: true,
                     onToggle: (reason) {
                       setState(() {
                         final currentReasons = _reasons ?? [];
@@ -211,7 +212,6 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                         }
                       });
                     },
-                    showIcons: true,
                   ),
                 ],
               ),

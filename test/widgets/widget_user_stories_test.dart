@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 import 'package:ash_trail/widgets/home_quick_log_widget.dart';
 import 'package:ash_trail/widgets/time_since_last_hit_widget.dart';
 import 'package:uuid/uuid.dart';
@@ -131,14 +132,14 @@ void main() {
       'As a user, I want to see today\'s statistics for my sessions',
       (tester) async {
         // GIVEN: I have multiple log entries from today
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         final records = [
           LogRecord.create(
             logId: 'log-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 9)),
+            eventAt: todayStart.add(const Duration(hours: 9)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -146,7 +147,7 @@ void main() {
           LogRecord.create(
             logId: 'log-2',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 14)),
+            eventAt: todayStart.add(const Duration(hours: 14)),
             eventType: EventType.vape,
             duration: 10,
             unit: Unit.seconds,
@@ -154,7 +155,7 @@ void main() {
           LogRecord.create(
             logId: 'log-3',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 20)),
+            eventAt: todayStart.add(const Duration(hours: 20)),
             eventType: EventType.vape,
             duration: 8,
             unit: Unit.seconds,
@@ -179,9 +180,9 @@ void main() {
       tester,
     ) async {
       // GIVEN: I have logs from today and yesterday
-      final now = DateTime.now();
-      final todayMidnight = DateTime(now.year, now.month, now.day);
-      final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+      // Use 6am day boundary for test data
+      final todayStart = DayBoundary.getTodayStart();
+      final yesterdayStart = DayBoundary.getYesterdayStart();
 
       final records = [
         // Yesterday: 2 hits
@@ -205,7 +206,7 @@ void main() {
         LogRecord.create(
           logId: 't-1',
           accountId: 'user-1',
-          eventAt: todayMidnight.add(const Duration(hours: 12)),
+          eventAt: todayStart.add(const Duration(hours: 12)),
           eventType: EventType.vape,
           duration: 5,
           unit: Unit.seconds,
@@ -225,8 +226,8 @@ void main() {
 
     testWidgets('As a user, I want to see weekly statistics', (tester) async {
       // GIVEN: I have logs from the past week
-      final now = DateTime.now();
-      final todayMidnight = DateTime(now.year, now.month, now.day);
+      // Use 6am day boundary for test data
+      final todayStart = DayBoundary.getTodayStart();
 
       final records = <LogRecord>[];
       for (int i = 0; i < 7; i++) {
@@ -234,7 +235,7 @@ void main() {
           LogRecord.create(
             logId: 'log-$i',
             accountId: 'user-1',
-            eventAt: todayMidnight.subtract(Duration(days: i)),
+            eventAt: todayStart.subtract(Duration(days: i)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -320,14 +321,14 @@ void main() {
       'As a user, I want to see stats update as I log more sessions',
       (tester) async {
         // GIVEN: I have one log entry
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         var records = [
           LogRecord.create(
             logId: 'log-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventAt: todayStart.add(const Duration(hours: 10)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -353,7 +354,7 @@ void main() {
           LogRecord.create(
             logId: 'log-2',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 15)),
+            eventAt: todayStart.add(const Duration(hours: 15)),
             eventType: EventType.vape,
             duration: 10,
             unit: Unit.seconds,
@@ -379,15 +380,15 @@ void main() {
       tester,
     ) async {
       // GIVEN: I have logs from multiple days
-      final now = DateTime.now();
-      final todayMidnight = DateTime(now.year, now.month, now.day);
-      final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+      // Use 6am day boundary for test data
+      final todayStart = DayBoundary.getTodayStart();
+      final yesterdayStart = DayBoundary.getYesterdayStart();
 
       final records = [
         LogRecord.create(
           logId: uuid.v4(),
           accountId: 'user-1',
-          eventAt: todayMidnight.add(const Duration(hours: 8)),
+          eventAt: todayStart.add(const Duration(hours: 8)),
           eventType: EventType.vape,
           duration: 5,
           unit: Unit.seconds,
@@ -395,7 +396,7 @@ void main() {
         LogRecord.create(
           logId: uuid.v4(),
           accountId: 'user-1',
-          eventAt: todayMidnight.add(const Duration(hours: 18)),
+          eventAt: todayStart.add(const Duration(hours: 18)),
           eventType: EventType.vape,
           duration: 8,
           unit: Unit.seconds,

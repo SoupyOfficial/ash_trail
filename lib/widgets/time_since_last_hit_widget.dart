@@ -6,6 +6,7 @@ import '../models/log_record.dart';
 import '../utils/pattern_analysis.dart'
     show PatternAnalysis, PeakHourData, DayPatternData;
 import '../utils/design_constants.dart';
+import '../utils/day_boundary.dart';
 
 /// Statistics data class for cleaner organization
 class _DailyStats {
@@ -115,10 +116,10 @@ class _TimeSinceLastHitWidgetState
       return;
     }
 
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day);
-    final yesterdayStart = todayStart.subtract(const Duration(days: 1));
-    final weekStart = todayStart.subtract(const Duration(days: 7));
+    // Use 6am day boundary for more natural grouping of late-night activity
+    final todayStart = DayBoundary.getTodayStart();
+    final yesterdayStart = DayBoundary.getYesterdayStart();
+    final weekStart = DayBoundary.getDayStartDaysAgo(7);
 
     // Filter records for each period
     final todayRecords =
@@ -588,11 +589,9 @@ class _TimeSinceLastHitWidgetState
         },
         onTap: () {
           HapticFeedback.lightImpact();
-          // Get hour distribution for detail view
+          // Get hour distribution for detail view (using 6am day boundary)
           final weekRecords = widget.records.where((r) {
-            final now = DateTime.now();
-            final todayStart = DateTime(now.year, now.month, now.day);
-            final weekStart = todayStart.subtract(const Duration(days: 7));
+            final weekStart = DayBoundary.getDayStartDaysAgo(7);
             return r.eventAt.isAfter(weekStart) ||
                 r.eventAt.isAtSameMomentAs(weekStart);
           }).toList();

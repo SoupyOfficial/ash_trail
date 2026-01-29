@@ -1,5 +1,6 @@
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/models/log_record.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 import 'package:ash_trail/widgets/time_since_last_hit_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -298,15 +299,15 @@ void main() {
       testWidgets('correctly calculates today stats with multiple entries', (
         tester,
       ) async {
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
-        // Create multiple entries for today
+        // Create multiple entries for today (after 6am boundary)
         final records = [
           LogRecord.create(
             logId: 'log-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 8)),
+            eventAt: todayStart.add(const Duration(hours: 2)), // 8am
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -314,7 +315,7 @@ void main() {
           LogRecord.create(
             logId: 'log-2',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 12)),
+            eventAt: todayStart.add(const Duration(hours: 6)), // 12pm
             eventType: EventType.vape,
             duration: 15,
             unit: Unit.seconds,
@@ -322,7 +323,7 @@ void main() {
           LogRecord.create(
             logId: 'log-3',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 20)),
+            eventAt: todayStart.add(const Duration(hours: 14)), // 8pm
             eventType: EventType.vape,
             duration: 10,
             unit: Unit.seconds,
@@ -352,15 +353,15 @@ void main() {
       });
 
       testWidgets('distinguishes today vs yesterday records', (tester) async {
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
-        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
+        final yesterdayStart = todayStart.subtract(const Duration(days: 1));
 
         final records = [
           LogRecord.create(
             logId: 'log-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventAt: todayStart.add(const Duration(hours: 10)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -398,15 +399,15 @@ void main() {
       });
 
       testWidgets('calculates week stats correctly', (tester) async {
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         final records = [
           // Today
           LogRecord.create(
             logId: 'log-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventAt: todayStart.add(const Duration(hours: 10)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -415,7 +416,7 @@ void main() {
           LogRecord.create(
             logId: 'log-2',
             accountId: 'user-1',
-            eventAt: todayMidnight.subtract(const Duration(days: 3, hours: 5)),
+            eventAt: todayStart.subtract(const Duration(days: 3, hours: 5)),
             eventType: EventType.vape,
             duration: 10,
             unit: Unit.seconds,
@@ -424,7 +425,7 @@ void main() {
           LogRecord.create(
             logId: 'log-3',
             accountId: 'user-1',
-            eventAt: todayMidnight.subtract(const Duration(days: 6, hours: 2)),
+            eventAt: todayStart.subtract(const Duration(days: 6, hours: 2)),
             eventType: EventType.vape,
             duration: 15,
             unit: Unit.seconds,
@@ -451,14 +452,14 @@ void main() {
       });
 
       testWidgets('handles empty yesterday correctly', (tester) async {
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         final records = [
           LogRecord.create(
             logId: 'log-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventAt: todayStart.add(const Duration(hours: 10)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -587,9 +588,9 @@ void main() {
       testWidgets('shows improvement when today better than yesterday', (
         tester,
       ) async {
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
-        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
+        final yesterdayStart = todayStart.subtract(const Duration(days: 1));
 
         final records = [
           // Yesterday: 3 hits, avg 15 sec
@@ -621,7 +622,7 @@ void main() {
           LogRecord.create(
             logId: 't-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 10)),
+            eventAt: todayStart.add(const Duration(hours: 10)),
             eventType: EventType.vape,
             duration: 5,
             unit: Unit.seconds,
@@ -651,9 +652,9 @@ void main() {
       testWidgets('shows degradation when today worse than yesterday', (
         tester,
       ) async {
-        final now = DateTime.now();
-        final todayMidnight = DateTime(now.year, now.month, now.day);
-        final yesterdayStart = todayMidnight.subtract(const Duration(days: 1));
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
+        final yesterdayStart = todayStart.subtract(const Duration(days: 1));
 
         final records = [
           // Yesterday: 1 hit, avg 5 sec
@@ -669,7 +670,7 @@ void main() {
           LogRecord.create(
             logId: 't-1',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 8)),
+            eventAt: todayStart.add(const Duration(hours: 8)),
             eventType: EventType.vape,
             duration: 15,
             unit: Unit.seconds,
@@ -677,7 +678,7 @@ void main() {
           LogRecord.create(
             logId: 't-2',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 12)),
+            eventAt: todayStart.add(const Duration(hours: 12)),
             eventType: EventType.vape,
             duration: 15,
             unit: Unit.seconds,
@@ -685,7 +686,7 @@ void main() {
           LogRecord.create(
             logId: 't-3',
             accountId: 'user-1',
-            eventAt: todayMidnight.add(const Duration(hours: 18)),
+            eventAt: todayStart.add(const Duration(hours: 18)),
             eventType: EventType.vape,
             duration: 15,
             unit: Unit.seconds,
@@ -792,8 +793,8 @@ void main() {
       });
 
       testWidgets('shows day of week patterns', (tester) async {
-        final now = DateTime.now();
-        final todayStart = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         // Create records spread across different days of the week (within last 7 days)
         final records = <LogRecord>[];
@@ -858,8 +859,8 @@ void main() {
       });
 
       testWidgets('shows weekday vs weekend comparison', (tester) async {
-        final now = DateTime.now();
-        final todayStart = DateTime(now.year, now.month, now.day);
+        // Use 6am day boundary for test data
+        final todayStart = DayBoundary.getTodayStart();
 
         final records = <LogRecord>[];
 

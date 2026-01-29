@@ -1,5 +1,6 @@
 import '../models/log_record.dart';
 import '../models/enums.dart';
+import '../utils/day_boundary.dart';
 
 /// Centralized service for computing home widget metrics
 /// Focuses on time and duration as primary data dimensions
@@ -225,15 +226,13 @@ class HomeMetricsService {
     final filtered = _filterByDays(records, days);
     final count = filtered.where((r) => !r.isDeleted).length;
 
-    // Count unique days with data
+    // Count unique days with data (using 6am day boundary)
     final daysWithData = <int>{};
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final todayStart = DayBoundary.getTodayStart();
 
     for (final record in filtered.where((r) => !r.isDeleted)) {
-      final dayOffset = today.difference(
-        DateTime(record.eventAt.year, record.eventAt.month, record.eventAt.day),
-      ).inDays;
+      final recordDayStart = DayBoundary.getDayStart(record.eventAt);
+      final dayOffset = todayStart.difference(recordDayStart).inDays;
       if (dayOffset >= 0 && dayOffset < days) {
         daysWithData.add(dayOffset);
       }
@@ -262,11 +261,9 @@ class HomeMetricsService {
     required int currentDays,
     required int previousDays,
   }) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
+    // Use 6am day boundary for more natural period comparisons
     // Current period
-    final currentStart = today.subtract(Duration(days: currentDays - 1));
+    final currentStart = DayBoundary.getDayStartDaysAgo(currentDays - 1);
     final currentRecords = records.where((r) =>
         !r.isDeleted &&
         r.eventAt.isAfter(currentStart.subtract(const Duration(seconds: 1)))).toList();
@@ -355,14 +352,13 @@ class HomeMetricsService {
     final weekdayRecords = nonDeleted.where((r) => r.eventAt.weekday <= 5).toList();
     final weekendRecords = nonDeleted.where((r) => r.eventAt.weekday > 5).toList();
 
-    // Count unique weekdays and weekend days
+    // Count unique weekdays and weekend days (using 6am day boundary)
     final weekdayDays = <int>{};
     final weekendDays = <int>{};
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final todayStart = DayBoundary.getTodayStart();
 
     for (int i = 0; i < days; i++) {
-      final day = today.subtract(Duration(days: i));
+      final day = todayStart.subtract(Duration(days: i));
       if (day.weekday <= 5) {
         weekdayDays.add(i);
       } else {
@@ -434,31 +430,27 @@ class HomeMetricsService {
       ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
   }
 
-  /// Filter records to today only
+  /// Filter records to today only (using 6am day boundary)
   List<LogRecord> _filterToday(List<LogRecord> records) {
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day);
+    final todayStart = DayBoundary.getTodayStart();
     return records.where((r) =>
         r.eventAt.isAfter(todayStart.subtract(const Duration(seconds: 1))) ||
         r.eventAt.isAtSameMomentAs(todayStart)).toList();
   }
 
-  /// Filter records to yesterday only
+  /// Filter records to yesterday only (using 6am day boundary)
   List<LogRecord> _filterYesterday(List<LogRecord> records) {
-    final now = DateTime.now();
-    final todayStart = DateTime(now.year, now.month, now.day);
-    final yesterdayStart = todayStart.subtract(const Duration(days: 1));
+    final todayStart = DayBoundary.getTodayStart();
+    final yesterdayStart = DayBoundary.getYesterdayStart();
     return records.where((r) =>
         (r.eventAt.isAfter(yesterdayStart.subtract(const Duration(seconds: 1))) ||
             r.eventAt.isAtSameMomentAs(yesterdayStart)) &&
         r.eventAt.isBefore(todayStart)).toList();
   }
 
-  /// Filter records to last N days
+  /// Filter records to last N days (using 6am day boundary)
   List<LogRecord> _filterByDays(List<LogRecord> records, int days) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final startDate = today.subtract(Duration(days: days - 1));
+    final startDate = DayBoundary.getDayStartDaysAgo(days - 1);
     return records.where((r) =>
         r.eventAt.isAfter(startDate.subtract(const Duration(seconds: 1))) ||
         r.eventAt.isAtSameMomentAs(startDate)).toList();

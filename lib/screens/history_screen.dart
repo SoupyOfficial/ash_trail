@@ -6,6 +6,7 @@ import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import '../utils/design_constants.dart';
+import '../utils/day_boundary.dart';
 
 /// History View per design doc 9.2.2
 /// Displays persisted logs with support for filtering and grouping
@@ -556,11 +557,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Map<DateTime, List<LogRecord>> _groupByWeek(List<LogRecord> records) {
     final grouped = <DateTime, List<LogRecord>>{};
     for (final record in records) {
-      final weekStart = record.eventAt.subtract(
-        Duration(days: record.eventAt.weekday - 1),
-      );
-      final week = DateTime(weekStart.year, weekStart.month, weekStart.day);
-      grouped.putIfAbsent(week, () => []).add(record);
+      // Use 6am day boundary for more natural grouping of late-night activity
+      final weekStart = DayBoundary.getWeekStart(record.eventAt);
+      grouped.putIfAbsent(weekStart, () => []).add(record);
     }
     return Map.fromEntries(
       grouped.entries.toList()..sort((a, b) => b.key.compareTo(a.key)),

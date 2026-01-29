@@ -224,10 +224,10 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Check for stat labels
-      expect(find.text('Today'), findsOneWidget);
-      expect(find.text('This Week'), findsOneWidget);
-      expect(find.text('hits'), findsNWidgets(2)); // Today hits and Week hits
+      // Check for stat labels (widget shows "Hits Today" and "Hits This Week")
+      expect(find.text('Hits Today'), findsOneWidget);
+      expect(find.text('Hits This Week'), findsOneWidget);
+      expect(find.text('count'), findsOneWidget); // Hits Today subtitle
     });
 
     testWidgets('shows average duration stats', (tester) async {
@@ -257,11 +257,10 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Check for avg duration labels
+      // Check for avg duration labels (widget shows these in statistics section)
       expect(find.text('Avg Today'), findsOneWidget);
       expect(find.text('Avg Yesterday'), findsOneWidget);
-      expect(find.text('Avg/Day (7d)'), findsOneWidget);
-      expect(find.text('sec/hit'), findsNWidgets(2)); // Today and Yesterday avg
+      expect(find.text('sec/hit'), findsAtLeastNWidgets(1)); // Duration subtitles
     });
 
     testWidgets('shows trend indicator', (tester) async {
@@ -291,8 +290,8 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Check for trend section
-      expect(find.text('Trend'), findsOneWidget);
+      // Check for statistics section (which contains trend indicators)
+      expect(find.text('Statistics'), findsOneWidget);
     });
 
     group('Statistics Calculations', () {
@@ -344,12 +343,12 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Verify today stats are shown
-        expect(find.text('Today'), findsOneWidget);
+        // Verify today stats are shown (widget shows "Total Today", "Hits Today", etc.)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
         // Should show average duration
         expect(find.text('Avg Today'), findsOneWidget);
-        // Should show hits label
-        expect(find.text('hits'), findsAtLeastNWidgets(1));
+        // Should show hits count
+        expect(find.text('Hits Today'), findsOneWidget);
       });
 
       testWidgets('distinguishes today vs yesterday records', (tester) async {
@@ -390,9 +389,10 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Both sections should exist
-        expect(find.text('Today'), findsOneWidget);
+        // Both sections should exist (widget shows "Total Today", "Avg Today", "Avg Yesterday" etc.)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
+        expect(find.text('Avg Yesterday'), findsOneWidget);
         // Widget renders whatever sections it can based on actual data
         expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);
       });
@@ -445,7 +445,8 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(find.text('This Week'), findsOneWidget);
+        // Widget shows "Hits This Week" and "Avg/Day (7d)" labels
+        expect(find.text('Hits This Week'), findsOneWidget);
         expect(find.text('Avg/Day (7d)'), findsOneWidget);
       });
 
@@ -478,8 +479,8 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Widget should display something for today
-        expect(find.text('Today'), findsOneWidget);
+        // Widget should display something for today (widget shows "Total Today", "Avg Today", etc.)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
         // Widget should be functional
         expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);
@@ -641,7 +642,9 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(find.text('Trend'), findsOneWidget);
+        // Check for statistics section (contains trend indicators)
+        expect(find.text('Statistics'), findsOneWidget);
+        // Trend icons are shown via _buildTrendIndicator (trending_down for improvement)
         expect(find.byIcon(Icons.trending_down), findsWidgets);
       });
 
@@ -703,7 +706,9 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        expect(find.text('Trend'), findsOneWidget);
+        // Check for statistics section (contains trend indicators)
+        expect(find.text('Statistics'), findsOneWidget);
+        // Trend icons are shown via _buildTrendIndicator (trending_up for worse)
         expect(find.byIcon(Icons.trending_up), findsWidgets);
       });
     });

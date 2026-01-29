@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../services/location_service.dart';
+import 'reason_chips_grid.dart';
 
 /// Dialog for creating a new log entry
 class CreateLogEntryDialog extends ConsumerStatefulWidget {
@@ -195,50 +196,22 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children:
-                        LogReason.values.map((reason) {
-                          final isSelected =
-                              _reasons?.contains(reason) ?? false;
-                          return FilterChip(
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  reason.icon,
-                                  size: 16,
-                                  color:
-                                      isSelected
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary
-                                          : Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(reason.displayName),
-                              ],
-                            ),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                final currentReasons = _reasons ?? [];
-                                if (selected) {
-                                  _reasons = [...currentReasons, reason];
-                                } else {
-                                  _reasons =
-                                      currentReasons
-                                          .where((r) => r != reason)
-                                          .toList();
-                                  if (_reasons!.isEmpty) _reasons = null;
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
+                  ReasonChipsGrid(
+                    selected: Set.from(_reasons ?? []),
+                    onToggle: (reason) {
+                      setState(() {
+                        final currentReasons = _reasons ?? [];
+                        if (currentReasons.contains(reason)) {
+                          _reasons = currentReasons
+                              .where((r) => r != reason)
+                              .toList();
+                          if (_reasons!.isEmpty) _reasons = null;
+                        } else {
+                          _reasons = [...currentReasons, reason];
+                        }
+                      });
+                    },
+                    showIcons: true,
                   ),
                 ],
               ),

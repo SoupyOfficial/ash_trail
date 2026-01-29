@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'services/hive_database_service.dart';
 import 'services/crash_reporting_service.dart';
@@ -8,6 +9,7 @@ import 'services/location_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
+import 'providers/home_widget_config_provider.dart';
 import 'navigation/main_navigation.dart';
 
 /// App initialization state per design doc 6.1.1
@@ -74,8 +76,26 @@ void main() async {
     debugPrint('❌ [main] Location service initialization error: $e\n');
   }
 
+  // Initialize SharedPreferences for home widget config
+  SharedPreferences? sharedPrefs;
+  try {
+    debugPrint('⚙️  [main] Initializing SharedPreferences...');
+    sharedPrefs = await SharedPreferences.getInstance();
+    debugPrint('✅ [main] SharedPreferences initialized\n');
+  } catch (e) {
+    debugPrint('❌ [main] SharedPreferences initialization error: $e\n');
+  }
+
   debugPrint('🎬 [main] Starting ProviderScope and WidgetApp...\n');
-  runApp(const ProviderScope(child: AshTrailApp()));
+  runApp(
+    ProviderScope(
+      overrides: [
+        if (sharedPrefs != null)
+          sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+      ],
+      child: const AshTrailApp(),
+    ),
+  );
 }
 
 class AshTrailApp extends ConsumerWidget {

@@ -157,6 +157,10 @@ class ResponsiveGrid extends StatelessWidget {
   final int tabletColumns;
   final int desktopColumns;
   final double spacing;
+  final double? childAspectRatio;
+  final double? mobileAspectRatio;
+  final double? tabletAspectRatio;
+  final double? desktopAspectRatio;
 
   const ResponsiveGrid({
     required this.children,
@@ -164,6 +168,10 @@ class ResponsiveGrid extends StatelessWidget {
     this.tabletColumns = 2,
     this.desktopColumns = 3,
     this.spacing = 16,
+    this.childAspectRatio,
+    this.mobileAspectRatio,
+    this.tabletAspectRatio,
+    this.desktopAspectRatio,
     Key? key,
   }) : super(key: key);
 
@@ -177,10 +185,17 @@ class ResponsiveGrid extends StatelessWidget {
           DeviceFormFactor.desktop => desktopColumns,
         };
 
+        final aspectRatio = switch (formFactor) {
+          DeviceFormFactor.mobile => mobileAspectRatio ?? childAspectRatio ?? 1.0,
+          DeviceFormFactor.tablet => tabletAspectRatio ?? childAspectRatio ?? 1.0,
+          DeviceFormFactor.desktop => desktopAspectRatio ?? childAspectRatio ?? 1.0,
+        };
+
         return GridView.count(
           crossAxisCount: columns,
           mainAxisSpacing: spacing,
           crossAxisSpacing: spacing,
+          childAspectRatio: aspectRatio,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           children: children,

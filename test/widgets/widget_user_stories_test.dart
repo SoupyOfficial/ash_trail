@@ -167,10 +167,10 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 100));
 
-        // THEN: I can see today's statistics
-        expect(find.text('Today'), findsOneWidget);
+        // THEN: I can see today's statistics (widget shows "Total Today", "Hits Today", etc.)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
-        // Should show hit count
+        // Should show timer icon
         expect(find.byIcon(Icons.timer), findsOneWidget);
       },
     );
@@ -218,8 +218,8 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      // THEN: I can see trend indicators
-      expect(find.text('Trend'), findsOneWidget);
+      // THEN: I can see trend indicators (widget shows Statistics section with trend arrows)
+      expect(find.text('Statistics'), findsOneWidget);
       expect(find.text('Avg Yesterday'), findsOneWidget);
     });
 
@@ -248,8 +248,8 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      // THEN: I can see weekly stats
-      expect(find.text('This Week'), findsOneWidget);
+      // THEN: I can see weekly stats (widget shows "Hits This Week", "Avg/Day (7d)", etc.)
+      expect(find.text('Hits This Week'), findsOneWidget);
       expect(find.text('Avg/Day (7d)'), findsOneWidget);
     });
 
@@ -344,8 +344,8 @@ void main() {
         );
         await tester.pump(const Duration(milliseconds: 100));
 
-        // THEN: I see stats for 1 entry
-        expect(find.text('Today'), findsOneWidget);
+        // THEN: I see stats for 1 entry (widget shows "Total Today", "Hits Today", etc.)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
 
         // WHEN: I add another log entry (simulated)
         records = [
@@ -371,7 +371,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
 
         // THEN: The widget updates to show new stats
-        expect(find.text('Today'), findsOneWidget);
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
       },
     );
 
@@ -420,8 +420,8 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 100));
 
-      // THEN: I can see stats for today
-      expect(find.text('Today'), findsOneWidget);
+      // THEN: I can see stats for today (widget shows "Total Today", "Avg Today", etc.)
+      expect(find.text('Total Today'), findsAtLeastNWidgets(1));
       expect(find.text('Avg Today'), findsOneWidget);
       // Widget displays time tracking information
       expect(find.text('Time Since Last Hit'), findsOneWidget);

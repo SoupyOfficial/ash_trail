@@ -237,6 +237,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       tabletColumns: 4,
       desktopColumns: 4,
       spacing: Spacing.md.value,
+      // Use wider aspect ratio for compact cards (width:height)
+      mobileAspectRatio: 1.4,  // Shorter cards on mobile
+      tabletAspectRatio: 1.2,
+      desktopAspectRatio: 1.5,
       children: [
         _buildStatCard(
           context,
@@ -281,26 +285,26 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         borderRadius: BorderRadii.md,
       ),
       child: Padding(
-        padding: Paddings.md,
+        padding: Paddings.sm,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              size: IconSize.lg.value,
+              size: IconSize.md.value,
               color: iconColor ?? Theme.of(context).colorScheme.primary,
-            ),
-            SizedBox(height: Spacing.sm.value),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
             ),
             SizedBox(height: Spacing.xs.value),
             Text(
+              value,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
               textAlign: TextAlign.center,

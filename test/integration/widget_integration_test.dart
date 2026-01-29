@@ -135,8 +135,8 @@ void main() {
         // THEN: They see their recent activity
         expect(find.text('Time Since Last Hit'), findsOneWidget);
 
-        // AND: They can see stats for today
-        expect(find.text('Today'), findsOneWidget);
+        // AND: They can see stats for today (widget shows multiple "Total Today" in comparison rows)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
 
         // AND: They can log another session
@@ -204,14 +204,14 @@ void main() {
         // THEN: They see the time since last hit
         expect(find.text('Time Since Last Hit'), findsOneWidget);
 
-        // AND: They can see today's stats
-        expect(find.text('Today'), findsOneWidget);
+        // AND: They can see today's stats (widget shows multiple "Total Today" in comparison rows)
+        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
 
         // AND: They can see yesterday's stats for comparison
         expect(find.text('Avg Yesterday'), findsOneWidget);
 
-        // AND: They can see trend indicators
-        expect(find.text('Trend'), findsOneWidget);
+        // AND: They can see the statistics section header
+        expect(find.text('Statistics'), findsOneWidget);
       },
     );
   });

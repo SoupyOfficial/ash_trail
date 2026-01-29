@@ -6,6 +6,7 @@ import '../widgets/backdate_dialog.dart';
 import '../services/log_record_service.dart';
 import '../services/location_service.dart';
 import '../widgets/location_map_picker.dart';
+import '../widgets/reason_chips_grid.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import '../utils/design_constants.dart';
@@ -436,19 +437,11 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                           ),
                     ),
                     SizedBox(height: Spacing.md.value),
-                    Wrap(
+                    ReasonChipsGrid(
+                      selected: Set.from(draft.reasons ?? []),
+                      onToggle: draftNotifier.toggleReason,
+                      showIcons: true,
                       spacing: Spacing.sm.value,
-                      runSpacing: Spacing.sm.value,
-                      children: LogReason.values.map((reason) {
-                        final isSelected =
-                            draft.reasons?.contains(reason) ?? false;
-                        return FilterChip(
-                          avatar: Icon(reason.icon, size: IconSize.sm.value),
-                          label: Text(reason.displayName),
-                          selected: isSelected,
-                          onSelected: (_) => draftNotifier.toggleReason(reason),
-                        );
-                      }).toList(),
                     ),
                   ],
                 ),

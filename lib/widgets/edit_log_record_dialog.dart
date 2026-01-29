@@ -6,6 +6,7 @@ import '../models/log_record.dart';
 import '../providers/log_record_provider.dart';
 import '../services/validation_service.dart';
 import 'location_map_picker.dart';
+import 'reason_chips_grid.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Dialog for editing an existing log record
@@ -490,27 +491,17 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
               // Reasons
               Text('Reasons (optional)', style: theme.textTheme.titleMedium),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children:
-                    LogReason.values
-                        .map(
-                          (reason) => FilterChip(
-                            label: Text(reason.displayName),
-                            selected: _reasons.contains(reason),
-                            onSelected: (selected) {
-                              setState(() {
-                                if (selected) {
-                                  _reasons.add(reason);
-                                } else {
-                                  _reasons.remove(reason);
-                                }
-                              });
-                            },
-                          ),
-                        )
-                        .toList(),
+              ReasonChipsGrid(
+                selected: Set.from(_reasons),
+                onToggle: (reason) {
+                  setState(() {
+                    if (_reasons.contains(reason)) {
+                      _reasons.remove(reason);
+                    } else {
+                      _reasons.add(reason);
+                    }
+                  });
+                },
               ),
               const SizedBox(height: 24),
 

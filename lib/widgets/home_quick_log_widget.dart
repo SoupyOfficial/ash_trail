@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/enums.dart';
+import '../models/account.dart';
 import '../services/log_record_service.dart';
 import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
 import '../services/location_service.dart';
+import 'reason_chips_grid.dart';
 
 /// Minimal quick-log widget for home screen
 /// Features:
@@ -34,6 +36,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
   double? _moodRating;
   double? _physicalRating;
   final Set<LogReason> _selectedReasons = {};
+  
+  // Track current account ID to detect account switches
+  String? _currentAccountId;
   
   // Location service
   final LocationService _locationService = LocationService();
@@ -83,7 +88,21 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
   }
 
   Future<void> _createVapeLog(int durationMs) async {
-    final activeAccount = await ref.read(activeAccountProvider.future);
+    // Get the current active account - wait for it if loading
+    Account? activeAccount;
+    final activeAccountAsync = ref.read(activeAccountProvider);
+    
+    if (activeAccountAsync.isLoading) {
+      // Wait for account to load
+      try {
+        activeAccount = await ref.read(activeAccountProvider.future);
+      } catch (e) {
+        debugPrint('⚠️ Error loading active account: $e');
+      }
+    } else {
+      activeAccount = activeAccountAsync.asData?.value;
+    }
+    
     if (activeAccount == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -91,6 +110,15 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         );
       }
       return;
+    }
+    
+    // Double-check we're using the correct account (in case it changed during async operations)
+    final currentAccountAsync = ref.read(activeAccountProvider);
+    final currentAccount = currentAccountAsync.asData?.value;
+    if (currentAccount != null && currentAccount.userId != activeAccount.userId) {
+      // Account changed while we were processing - use the new account
+      activeAccount = currentAccount;
+      debugPrint('🔄 Account changed during log creation, using new account: ${activeAccount.userId}');
     }
 
     final service = LogRecordService();
@@ -194,8 +222,52 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     super.dispose();
   }
 
+  void _resetFormState() {
+    if (mounted) {
+      setState(() {
+        _moodRating = null;
+        _physicalRating = null;
+        _selectedReasons.clear();
+      });
+    }
+  }
+
+  void _cancelRecording() {
+    _recordingTimer?.cancel();
+    if (_isRecording && mounted) {
+      setState(() {
+        _isRecording = false;
+        _recordingStartTime = null;
+        _recordedDuration = Duration.zero;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Watch active account to detect account switches and reset form state
+    final activeAccountAsync = ref.watch(activeAccountProvider);
+    final activeAccount = activeAccountAsync.asData?.value;
+    
+    // Reset form state and cancel recording when account changes
+    if (activeAccount != null && activeAccount.userId != _currentAccountId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_currentAccountId != null) {
+          // Only reset if we had a previous account (not on first load)
+          _cancelRecording(); // Cancel any ongoing recording
+          _resetFormState(); // Reset form state
+        }
+        _currentAccountId = activeAccount.userId;
+      });
+    } else if (activeAccount == null && _currentAccountId != null) {
+      // Account was cleared
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _cancelRecording(); // Cancel any ongoing recording
+        _resetFormState(); // Reset form state
+        _currentAccountId = null;
+      });
+    }
+    
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 12),
       child: Padding(
@@ -262,19 +334,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
             // Reasons
             Text('Reasons', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children:
-                  LogReason.values
-                      .map(
-                        (reason) => FilterChip(
-                          selected: _selectedReasons.contains(reason),
-                          onSelected: (selected) => _toggleReason(reason),
-                          label: Text(reason.displayName),
-                        ),
-                      )
-                      .toList(),
+            ReasonChipsGrid(
+              selected: _selectedReasons,
+              onToggle: _toggleReason,
             ),
             const SizedBox(height: 16),
 

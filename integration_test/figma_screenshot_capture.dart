@@ -19,7 +19,7 @@ void main() {
       final outputDir = Directory('screenshots/flutter/$timestamp');
       await outputDir.create(recursive: true);
       
-      print('📸 Screenshot output directory: ${outputDir.path}');
+      debugPrint('📸 Screenshot output directory: ${outputDir.path}');
 
       // Start the app
       await tester.pumpWidget(
@@ -39,7 +39,7 @@ void main() {
       final hasNavBar = find.byType(NavigationBar).evaluate().isNotEmpty;
 
       if (hasWelcome) {
-        print('📱 App showing welcome screen - attempting to continue anonymously or sign in');
+        debugPrint('📱 App showing welcome screen - attempting to continue anonymously or sign in');
         
         // Try to find and tap "Continue anonymously" or similar
         final continueAnon = find.textContaining('Continue').evaluate().isNotEmpty ||
@@ -51,14 +51,14 @@ void main() {
             await tester.pumpAndSettle(const Duration(seconds: 3));
             await _captureAndSave(tester, outputDir, '01_home_after_auth');
           } catch (e) {
-            print('Could not tap continue anonymously: $e');
+            debugPrint('Could not tap continue anonymously: $e');
           }
         }
       }
 
       // If we have navigation bar, navigate through all main screens
       if (hasNavBar || find.byType(NavigationBar).evaluate().isNotEmpty) {
-        print('📱 Navigating through main screens...');
+        debugPrint('📱 Navigating through main screens...');
 
         // Screen 1: Home (already captured, but capture again to be sure)
         await _navigateToTab(tester, 0, 'Home');
@@ -93,7 +93,7 @@ void main() {
             await tester.pumpAndSettle();
           }
         } catch (e) {
-          print('Could not navigate to Accounts: $e');
+          debugPrint('Could not navigate to Accounts: $e');
         }
 
         // Try to find Export screen
@@ -112,7 +112,7 @@ void main() {
             }
           }
         } catch (e) {
-          print('Could not navigate to Export: $e');
+          debugPrint('Could not navigate to Export: $e');
         }
 
         // Try to find Profile screen
@@ -130,7 +130,7 @@ void main() {
             }
           }
         } catch (e) {
-          print('Could not navigate to Profile: $e');
+          debugPrint('Could not navigate to Profile: $e');
         }
       }
 
@@ -144,20 +144,20 @@ void main() {
         // No dialog
       }
 
-      print('');
-      print('✅ Screenshot capture complete!');
-      print('📁 Screenshots saved to: ${outputDir.path}');
-      print('');
-      print('Next steps:');
-      print('1. Review screenshots in: ${outputDir.path}');
-      print('2. Run: ./scripts/prepare_figma_import.sh');
-      print('3. Import to Figma using the generated guide');
+      debugPrint('');
+      debugPrint('✅ Screenshot capture complete!');
+      debugPrint('📁 Screenshots saved to: ${outputDir.path}');
+      debugPrint('');
+      debugPrint('Next steps:');
+      debugPrint('1. Review screenshots in: ${outputDir.path}');
+      debugPrint('2. Run: ./scripts/prepare_figma_import.sh');
+      debugPrint('3. Import to Figma using the generated guide');
     });
   });
 }
 
 Future<void> _navigateToTab(WidgetTester tester, int index, String screenName) async {
-  print('  → Navigating to $screenName...');
+  debugPrint('  → Navigating to $screenName...');
   
   try {
     // Find NavigationBar
@@ -185,7 +185,7 @@ Future<void> _navigateToTab(WidgetTester tester, int index, String screenName) a
       await Future.delayed(const Duration(milliseconds: 500));
     }
   } catch (e) {
-    print('    ⚠️  Could not navigate to $screenName: $e');
+    debugPrint('    ⚠️  Could not navigate to $screenName: $e');
   }
 }
 
@@ -198,7 +198,7 @@ Future<void> _captureAndSave(
   await tester.pumpAndSettle();
   await Future.delayed(const Duration(milliseconds: 500));
   
-  print('  📸 Capturing: $name');
+  debugPrint('  📸 Capturing: $name');
   
   // Integration test screenshots are saved automatically by the test driver
   // They go to integration_test/screenshots/ directory
@@ -207,17 +207,15 @@ Future<void> _captureAndSave(
     // The integration test driver will save screenshots automatically
     // when we call takeScreenshot on the binding
     final binding = IntegrationTestWidgetsFlutterBinding.instance;
-    if (binding is IntegrationTestWidgetsFlutterBinding) {
-      await binding.convertFlutterSurfaceToImage();
-      await tester.pumpAndSettle();
-      
-      // Screenshot will be saved by the test driver to integration_test/screenshots/
-      // with the name we provide
-      print('    ✅ Screenshot queued: $name');
-      print('    ℹ️  Will be saved to: integration_test/screenshots/$name.png');
-    }
+    await binding.convertFlutterSurfaceToImage();
+    await tester.pumpAndSettle();
+    
+    // Screenshot will be saved by the test driver to integration_test/screenshots/
+    // with the name we provide
+    debugPrint('    ✅ Screenshot queued: $name');
+    debugPrint('    ℹ️  Will be saved to: integration_test/screenshots/$name.png');
   } catch (e) {
-    print('    ⚠️  Screenshot capture note: $e');
-    print('    ℹ️  Screenshots will be saved by test driver');
+    debugPrint('    ⚠️  Screenshot capture note: $e');
+    debugPrint('    ℹ️  Screenshots will be saved by test driver');
   }
 }

@@ -1,18 +1,19 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/account.dart';
-import '../models/enums.dart';
+import '../models/home_widget_config.dart';
 import '../models/log_record.dart';
 import '../providers/account_provider.dart';
+import '../providers/home_widget_config_provider.dart';
 import '../providers/log_record_provider.dart'
     show activeAccountLogRecordsProvider, logRecordNotifierProvider;
 import '../providers/sync_provider.dart';
-import '../widgets/home_quick_log_widget.dart';
 import '../widgets/backdate_dialog.dart';
-import '../widgets/edit_log_record_dialog.dart';
-import '../widgets/time_since_last_hit_widget.dart';
+import '../widgets/home_widgets/home_widgets.dart';
 import '../utils/design_constants.dart';
 import 'accounts_screen.dart';
 
@@ -67,11 +68,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final activeAccountAsync = ref.watch(activeAccountProvider);
+    final isEditMode = ref.watch(homeEditModeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text(isEditMode ? 'Edit Home' : 'Home'),
         actions: [
+          // Edit mode toggle
+          if (activeAccountAsync.asData?.value != null)
+            IconButton(
+              icon: Icon(isEditMode ? Icons.done : Icons.edit),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                ref.read(homeEditModeProvider.notifier).state = !isEditMode;
+              },
+              tooltip: isEditMode ? 'Done' : 'Edit Layout',
+            ),
           IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
@@ -164,269 +176,270 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetRef ref,
   ) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
+    final widgetConfig = ref.watch(homeLayoutConfigProvider);
+    final isEditMode = ref.watch(homeEditModeProvider);
+    final visibleWidgets = widgetConfig.visibleWidgets;
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(
-        ResponsiveSize.responsive(
-          context: context,
-          mobile: Spacing.lg.value,
-          tablet: Spacing.xl.value,
-          desktop: Spacing.xl.value,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Time since last hit clock with integrated stats (Hero Section)
-          logRecordsAsync.when(
-            data: (records) => TimeSinceLastHitWidget(records: records),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          SizedBox(height: Spacing.xl.value),
+    return logRecordsAsync.when(
+      data: (records) {
+        // Group widgets into layout rows (compact widgets paired, others solo)
+        final layoutRows = _buildLayoutRows(visibleWidgets);
 
-          // Quick log widget
-          HomeQuickLogWidget(
-            onLogCreated: () {
-              ref.invalidate(activeAccountLogRecordsProvider);
-            },
-          ),
-          SizedBox(height: Spacing.xl.value),
-
-          // Recent entries
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recent Entries',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+        return Column(
+          children: [
+            // Main reorderable widget list
+            Expanded(
+              child: ReorderableListView.builder(
+                padding: EdgeInsets.all(
+                  ResponsiveSize.responsive(
+                    context: context,
+                    mobile: Spacing.lg.value,
+                    tablet: Spacing.xl.value,
+                    desktop: Spacing.xl.value,
+                  ),
+                ),
+                itemCount: layoutRows.length,
+                onReorder: (oldIndex, newIndex) {
+                  HapticFeedback.mediumImpact();
+                  // Convert row indices back to widget indices for reordering
+                  final oldWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, oldIndex);
+                  var newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex);
+                  
+                  // Adjust for the removal behavior
+                  if (newIndex > oldIndex) {
+                    newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex - 1) + 
+                                     layoutRows[newIndex - 1].length;
+                  }
+                  
+                  ref.read(homeLayoutConfigProvider.notifier).reorder(oldWidgetIndex, newWidgetIndex);
+                },
+                proxyDecorator: (child, index, animation) {
+                  return AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      final animValue = Curves.easeInOut.transform(animation.value);
+                      final elevation = lerpDouble(0, 8, animValue)!;
+                      final scale = lerpDouble(1, 1.02, animValue)!;
+                      return Transform.scale(
+                        scale: scale,
+                        child: Material(
+                          elevation: elevation,
+                          borderRadius: BorderRadius.circular(16),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: child,
+                  );
+                },
+                itemBuilder: (context, rowIndex) {
+                  final rowWidgets = layoutRows[rowIndex];
+                  final widgetIndex = _getFirstWidgetIndexForRow(layoutRows, rowIndex);
+                  
+                  // Single widget row (standard/large size)
+                  if (rowWidgets.length == 1) {
+                    final config = rowWidgets[0];
+                    return Padding(
+                      key: ValueKey('row_${config.id}'),
+                      padding: EdgeInsets.only(bottom: Spacing.md.value),
+                      child: HomeWidgetWrapper(
+                        widgetId: config.id,
+                        type: config.type,
+                        isEditMode: isEditMode,
+                        index: widgetIndex,
+                        onRemove: () => _confirmRemoveWidget(context, ref, config),
+                        child: HomeWidgetEditPadding(
+                          isEditMode: isEditMode,
+                          child: HomeWidgetBuilder(
+                            config: config,
+                            records: records,
+                            onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                            onRecordTap: () {},
+                            onRecordDelete: (record) => _deleteLogRecord(record),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  
+                  // Two compact widgets side-by-side
+                  return Padding(
+                    key: ValueKey('row_${rowWidgets[0].id}_${rowWidgets[1].id}'),
+                    padding: EdgeInsets.only(bottom: Spacing.md.value),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: HomeWidgetWrapper(
+                              widgetId: rowWidgets[0].id,
+                              type: rowWidgets[0].type,
+                              isEditMode: isEditMode,
+                              index: widgetIndex,
+                              onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[0]),
+                              child: HomeWidgetEditPadding(
+                                isEditMode: isEditMode,
+                                child: HomeWidgetBuilder(
+                                  config: rowWidgets[0],
+                                  records: records,
+                                  onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                                  onRecordTap: () {},
+                                  onRecordDelete: (record) => _deleteLogRecord(record),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: Spacing.sm.value),
+                          Expanded(
+                            child: HomeWidgetWrapper(
+                              widgetId: rowWidgets[1].id,
+                              type: rowWidgets[1].type,
+                              isEditMode: isEditMode,
+                              index: widgetIndex + 1,
+                              onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[1]),
+                              child: HomeWidgetEditPadding(
+                                isEditMode: isEditMode,
+                                child: HomeWidgetBuilder(
+                                  config: rowWidgets[1],
+                                  records: records,
+                                  onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                                  onRecordTap: () {},
+                                  onRecordDelete: (record) => _deleteLogRecord(record),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  );
+                },
               ),
-            ],
-          ),
-          SizedBox(height: Spacing.md.value),
-
-          logRecordsAsync.when(
-            data: (records) {
-              if (records.isEmpty) {
-                return Card(
-                  elevation: ElevationLevel.sm.value,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadii.md,
-                  ),
-                  child: Padding(
-                    padding: Paddings.xxl,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.inbox_outlined,
-                            size: IconSize.xxl.value,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.3),
-                          ),
-                          SizedBox(height: Spacing.lg.value),
-                          Text(
-                            'No entries yet',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                          SizedBox(height: Spacing.sm.value),
-                          Text(
-                            'Hold the duration button above to log your first session',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }
-
-              // Sort records in reverse chronological order (newest first)
-              final sortedRecords =
-                  records.toList()
-                    ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
-              final recentRecords = sortedRecords.take(5).toList();
-              return Column(
-                children: recentRecords
-                    .asMap()
-                    .entries
-                    .map(
-                      (entry) {
-                        final record = entry.value;
-                        final isLast = entry.key == recentRecords.length - 1;
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            bottom: isLast ? 0 : Spacing.sm.value,
-                          ),
-                          child: Dismissible(
-                            key: Key(record.logId),
-                            direction: DismissDirection.endToStart,
-                            confirmDismiss: (direction) async {
-                              return await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Delete Log Entry'),
-                                  content: Text(
-                                    'Are you sure you want to delete this ${record.eventType.name} entry?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    FilledButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      style: FilledButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                      ),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            onDismissed: (direction) async {
-                              await _deleteLogRecord(record);
-                            },
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: EdgeInsets.only(
-                                right: Spacing.lg.value,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadii.md,
-                              ),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                            child: Card(
-                              elevation: ElevationLevel.sm.value,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadii.md,
-                              ),
-                              child: ListTile(
-                                contentPadding: Paddings.md,
-                                leading: CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer,
-                                  child: Icon(
-                                    _getEventIcon(record.eventType),
-                                    size: IconSize.md.value,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
-                                  ),
-                                ),
-                                title: Text(
-                                  _formatDateTime(record.eventAt),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                                subtitle: record.note != null &&
-                                        record.note!.isNotEmpty
-                                    ? Padding(
-                                        padding: EdgeInsets.only(
-                                          top: Spacing.xs.value,
-                                        ),
-                                        child: Text(
-                                          record.note!,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
-                                        ),
-                                      )
-                                    : null,
-                                trailing: record.duration > 0
-                                    ? Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: Spacing.sm.value,
-                                          vertical: Spacing.xs.value,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer,
-                                          borderRadius: BorderRadii.sm,
-                                        ),
-                                        child: Text(
-                                          '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        ),
-                                      )
-                                    : null,
-                                onTap: () => _showEditDialog(context, record),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                    .toList(),
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Card(
-                  child: Padding(
-                    padding: Paddings.lg,
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: Theme.of(context).colorScheme.error,
-                            size: IconSize.xl.value,
-                          ),
-                          SizedBox(height: Spacing.md.value),
-                          Text(
-                            'Error loading entries',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          SizedBox(height: Spacing.xs.value),
-                          Text(
-                            error.toString(),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+            ),
+            // Add widget button in edit mode
+            if (isEditMode)
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: FilledButton.icon(
+                    onPressed: () => showWidgetPicker(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Widget'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
                     ),
                   ),
                 ),
+              ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(
+        child: Card(
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: Paddings.lg,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Theme.of(context).colorScheme.error,
+                  size: IconSize.xl.value,
+                ),
+                SizedBox(height: Spacing.md.value),
+                Text(
+                  'Error loading entries',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                SizedBox(height: Spacing.xs.value),
+                Text(
+                  error.toString(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build layout rows from widget list
+  /// Pairs consecutive compact widgets, others get their own row
+  List<List<HomeWidgetConfig>> _buildLayoutRows(List<HomeWidgetConfig> widgets) {
+    final rows = <List<HomeWidgetConfig>>[];
+    int i = 0;
+
+    while (i < widgets.length) {
+      final config = widgets[i];
+      final entry = WidgetCatalog.getEntry(config.type);
+
+      if (entry.size == WidgetSize.compact && i + 1 < widgets.length) {
+        // Check if next widget is also compact
+        final nextConfig = widgets[i + 1];
+        final nextEntry = WidgetCatalog.getEntry(nextConfig.type);
+
+        if (nextEntry.size == WidgetSize.compact) {
+          // Pair them together
+          rows.add([config, nextConfig]);
+          i += 2;
+          continue;
+        }
+      }
+
+      // Single widget row
+      rows.add([config]);
+      i++;
+    }
+
+    return rows;
+  }
+
+  /// Get the first widget index for a given row index
+  int _getFirstWidgetIndexForRow(List<List<HomeWidgetConfig>> rows, int rowIndex) {
+    int widgetIndex = 0;
+    for (int i = 0; i < rowIndex && i < rows.length; i++) {
+      widgetIndex += rows[i].length;
+    }
+    return widgetIndex;
+  }
+
+  void _confirmRemoveWidget(BuildContext context, WidgetRef ref, HomeWidgetConfig config) {
+    final entry = WidgetCatalog.getEntry(config.type);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Widget'),
+        content: Text('Remove "${entry.displayName}" from your home screen?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(homeLayoutConfigProvider.notifier).removeWidget(config.id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Removed ${entry.displayName}'),
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: () {
+                      ref.read(homeLayoutConfigProvider.notifier).addWidget(config.type);
+                    },
+                  ),
+                ),
+              );
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Remove'),
           ),
         ],
       ),
@@ -435,58 +448,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _showBackdateDialog(BuildContext context) {
     showDialog(context: context, builder: (context) => const BackdateDialog());
-  }
-
-  IconData _getEventIcon(EventType eventType) {
-    switch (eventType) {
-      case EventType.vape:
-        return Icons.cloud;
-      case EventType.inhale:
-        return Icons.air;
-      case EventType.sessionStart:
-        return Icons.play_arrow;
-      case EventType.sessionEnd:
-        return Icons.stop;
-      case EventType.note:
-        return Icons.note;
-      case EventType.purchase:
-        return Icons.shopping_cart;
-      case EventType.tolerance:
-        return Icons.trending_up;
-      case EventType.symptomRelief:
-        return Icons.healing;
-      case EventType.custom:
-        return Icons.circle;
-    }
-  }
-
-  String _formatDateTime(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-
-    if (diff.inMinutes < 1) {
-      return 'Just now';
-    } else if (diff.inHours < 1) {
-      return '${diff.inMinutes}m ago';
-    } else if (diff.inDays < 1) {
-      return '${diff.inHours}h ago';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays}d ago';
-    } else {
-      return '${dt.day}/${dt.month}/${dt.year}';
-    }
-  }
-
-  Future<void> _showEditDialog(BuildContext context, LogRecord record) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => EditLogRecordDialog(record: record),
-    );
-
-    if (result == true && mounted) {
-      // Record was updated, list will refresh automatically via stream
-      ref.invalidate(activeAccountLogRecordsProvider);
-    }
   }
 
   Future<void> _deleteLogRecord(LogRecord record) async {

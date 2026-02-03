@@ -89,6 +89,7 @@ app.*.map.json
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/build/
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
@@ -152,3 +153,4 @@ pubspec.lock
 # Screenshots for Figma workflow
 screenshots/
 !screenshots/.gitkeep
+

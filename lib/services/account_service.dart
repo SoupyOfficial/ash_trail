@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import '../models/account.dart';
 import '../repositories/account_repository.dart';
 import 'database_service.dart';
 import 'log_record_service.dart';
 
 class AccountService {
+  static final _log = AppLogger.logger('AccountService');
   final AccountRepository _repository;
   final LogRecordService _logRecordService;
 
@@ -17,32 +18,16 @@ class AccountService {
     LogRecordService? logRecordService,
   }) : _repository = repository ?? _createDefaultRepository(),
        _logRecordService = logRecordService ?? LogRecordService() {
-    debugPrint(
-      '\n🏗️ [AccountService] Initialized at ${DateTime.now()}',
-    );
+    _log.d('Initialized at ${DateTime.now()}');
   }
 
   /// Create the default repository using DatabaseService
   static AccountRepository _createDefaultRepository() {
-    debugPrint('   📦 Getting DatabaseService instance...');
     final dbService = DatabaseService.instance;
-    debugPrint('   ✅ Got DatabaseService instance: ${dbService.runtimeType}');
-
-    debugPrint('   📦 Getting database boxes...');
     final dbBoxes = dbService.boxes;
-    debugPrint('   📦 Got database boxes type: ${dbBoxes.runtimeType}');
-
-    if (dbBoxes is Map<String, dynamic>) {
-      debugPrint('   ✅ dbBoxes is a Map with keys: ${dbBoxes.keys.toList()}');
-    } else {
-      debugPrint('   ⚠️ dbBoxes is NOT a Map! Type: ${dbBoxes.runtimeType}');
-    }
-
-    debugPrint('   📞 Calling createAccountRepository...');
     final repo = createAccountRepository(
       dbBoxes is Map<String, dynamic> ? dbBoxes : null,
     );
-    debugPrint('   ✅ Created AccountRepository: ${repo.runtimeType}');
     return repo;
   }
 
@@ -86,19 +71,13 @@ class AccountService {
 
   /// Watch active account changes
   Stream<Account?> watchActiveAccount() {
-    debugPrint(
-      '🔴 [AccountService.watchActiveAccount] Called at ${DateTime.now()}',
-    );
-    debugPrint('   📞 Delegating to _repository.watchActive()');
+    _log.d('watchActiveAccount called');
     return _repository.watchActive();
   }
 
   /// Watch all accounts
   Stream<List<Account>> watchAllAccounts() {
-    debugPrint(
-      '🟢 [AccountService.watchAllAccounts] Called at ${DateTime.now()}',
-    );
-    debugPrint('   📞 Delegating to _repository.watchAll()');
+    _log.d('watchAllAccounts called');
     return _repository.watchAll();
   }
 

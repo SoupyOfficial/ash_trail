@@ -1,5 +1,5 @@
 import 'package:uuid/uuid.dart';
-import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
@@ -10,6 +10,7 @@ import 'account_service.dart';
 /// LogRecordService handles all CRUD operations for log records
 /// Implements offline-first with sync queue management
 class LogRecordService {
+  static final _log = AppLogger.logger('LogRecordService');
   late final LogRecordRepository _repository;
   final Uuid _uuid = const Uuid();
 
@@ -72,9 +73,7 @@ class LogRecordService {
     if (validateAccountId && _accountService != null) {
       final exists = await _accountService.accountExists(accountId);
       if (!exists) {
-        debugPrint(
-          '❌ [LogRecordService] Attempted to create log for non-existent account: $accountId',
-        );
+        _log.e('Attempted to create log for non-existent account: $accountId');
         throw ArgumentError(
           'Cannot create log record: Account "$accountId" does not exist. '
           'Please ensure the account is created before logging.',
@@ -723,7 +722,7 @@ class LogRecordService {
           importedCount++;
         }
       } catch (e) {
-        debugPrint('Error importing legacy record ${record.logId}: $e');
+        _log.e('Error importing legacy record ${record.logId}', error: e);
       }
     }
 

@@ -167,6 +167,72 @@ class HomeMetricsService {
     return getTotalDuration(_filterToday(records));
   }
 
+  /// Today's duration accumulated up to [asOf] (default: now).
+  /// Only includes records with eventAt <= asOf. Used for hour-block
+  /// trend and "Total up to X" labels that update with time.
+  ({
+    double duration,
+    String timeLabel,
+    double trendVsYesterday,
+    double? trendVsWeekAvg,
+    int count,
+  }) getTodayDurationUpTo(
+    List<LogRecord> records, {
+    DateTime? asOf,
+  }) {
+    final cutoff = asOf ?? DateTime.now();
+    final todayStart = DayBoundary.getTodayStart();
+
+    if (cutoff.isBefore(todayStart)) {
+      return (
+        duration: 0,
+        timeLabel: formatTimeLabel(cutoff),
+        trendVsYesterday: 0,
+        trendVsWeekAvg: null,
+        count: 0,
+      );
+    }
+
+    final todayRecords = _filterToday(records);
+    final upToRecords = todayRecords
+        .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
+        .toList();
+    final duration = getTotalDuration(upToRecords);
+    final count = upToRecords.length;
+
+    final yesterdayRecords = _filterYesterday(records);
+    final yesterdayDuration = getTotalDuration(yesterdayRecords);
+
+    const secondsPerDay = 24 * 60 * 60;
+    final elapsed =
+        cutoff.difference(todayStart).inSeconds.clamp(0, secondsPerDay);
+    final fraction = elapsed / secondsPerDay;
+    final expectedByNow = yesterdayDuration * fraction;
+
+    double trendVsYesterday = 0;
+    if (expectedByNow > 0) {
+      trendVsYesterday = ((duration - expectedByNow) / expectedByNow) * 100;
+    }
+
+    final weekRecords = _filterByDays(records, 7);
+    final weekTotal = getTotalDuration(weekRecords);
+    final weekAvgPerDay = weekTotal / 7;
+    final expectedByNowWeek = weekAvgPerDay * fraction;
+    double? trendVsWeekAvg;
+    if (expectedByNowWeek > 0) {
+      trendVsWeekAvg =
+          ((duration - expectedByNowWeek) / expectedByNowWeek) * 100;
+    }
+
+    return (
+      duration: duration,
+      timeLabel: formatTimeLabel(cutoff),
+      trendVsYesterday: trendVsYesterday,
+      trendVsWeekAvg: trendVsWeekAvg,
+      count: count,
+    );
+  }
+
   /// Get average duration per hit
   double? getAverageDuration(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;
@@ -509,6 +575,13 @@ class HomeMetricsService {
     final hour12 = hour % 12 == 0 ? 12 : hour % 12;
     final period = hour < 12 ? 'AM' : 'PM';
     return '$hour12 $period';
+  }
+
+  /// Format time for "Total up to X" label (e.g. "3pm", "10am")
+  static String formatTimeLabel(DateTime dt) {
+    final hour12 = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final period = dt.hour < 12 ? 'am' : 'pm';
+    return '$hour12$period';
   }
 
   /// Format time as relative ("2h ago", "Just now", etc.)

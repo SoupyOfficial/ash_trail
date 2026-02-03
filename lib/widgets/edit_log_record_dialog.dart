@@ -610,12 +610,14 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                   Row(
                     children: [
                       TextButton(
+                        key: const Key('edit_dialog_cancel'),
                         onPressed:
                             _isSubmitting ? null : () => Navigator.pop(context),
                         child: const Text('Cancel'),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
+                        key: const Key('edit_dialog_update'),
                         onPressed: _isSubmitting ? null : _updateLog,
                         child:
                             _isSubmitting

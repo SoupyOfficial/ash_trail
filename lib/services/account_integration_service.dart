@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import '../services/auth_service.dart';
 import '../services/account_service.dart';
 import '../services/account_session_manager.dart';
@@ -31,6 +31,7 @@ final accountIntegrationServiceProvider = Provider<AccountIntegrationService>((
 /// Supports multi-account: multiple users can be logged in simultaneously
 /// Automatically creates/updates local Account when user authenticates
 class AccountIntegrationService {
+  static final _log = AppLogger.logger('AccountIntegrationService');
   final AuthService authService;
   final AccountService accountService;
   final AccountSessionManager sessionManager;
@@ -51,9 +52,7 @@ class AccountIntegrationService {
     User firebaseUser, {
     bool makeActive = true,
   }) async {
-    debugPrint('\n🔄 [AccountIntegrationService] syncAccountFromFirebaseUser');
-    debugPrint('   User: ${firebaseUser.uid} (${firebaseUser.email})');
-    debugPrint('   Make active: $makeActive');
+    _log.d('syncAccountFromFirebaseUser: ${firebaseUser.uid} (${firebaseUser.email}), makeActive: $makeActive');
 
     // Check if account already exists
     Account? existingAccount = await accountService.getAccountByUserId(
@@ -92,7 +91,7 @@ class AccountIntegrationService {
         await sessionManager.setActiveAccount(firebaseUser.uid);
       }
 
-      debugPrint('   ✅ Updated existing account');
+      _log.i('Updated existing account');
       resultAccount = existingAccount;
     } else {
       // Create new account
@@ -114,7 +113,7 @@ class AccountIntegrationService {
         await sessionManager.setActiveAccount(firebaseUser.uid);
       }
 
-      debugPrint('   ✅ Created new account');
+      _log.i('Created new account');
       resultAccount = newAccount;
     }
 
@@ -132,16 +131,13 @@ class AccountIntegrationService {
   /// Custom tokens are valid for 48 hours.
   Future<void> _generateAndStoreCustomToken(String uid) async {
     try {
-      debugPrint('   🔑 Generating custom token for seamless switching...');
+      _log.d('Generating custom token for seamless switching');
       final tokenData = await tokenService.generateCustomToken(uid);
       final customToken = tokenData['customToken'] as String;
       await sessionManager.storeCustomToken(uid, customToken);
-      debugPrint('   ✅ Custom token generated and stored for $uid');
+      _log.i('Custom token generated and stored for $uid');
     } catch (e) {
-      // Non-fatal: User can still use the app, but may need to re-auth on switch
-      debugPrint('   ⚠️ Failed to generate custom token: $e');
-      debugPrint('   ⚠️ Account switching may require re-authentication');
-      // Don't rethrow - this is not critical to sign-in success
+      _log.w('Failed to generate custom token; account switching may require re-authentication', error: e);
     }
   }
 
@@ -175,7 +171,7 @@ class AccountIntegrationService {
     required String password,
     bool makeActive = true,
   }) async {
-    debugPrint('\n🔐 [AccountIntegrationService] signInWithEmail');
+    _log.d('signInWithEmail');
 
     final userCredential = await authService.signInWithEmail(
       email: email,
@@ -196,7 +192,7 @@ class AccountIntegrationService {
   /// In multi-account mode, adds this account to the logged-in list
   Future<Account> signInWithGoogle({bool makeActive = true}) async {
     try {
-      debugPrint('\n🔐 [AccountIntegrationService] signInWithGoogle');
+      _log.d('signInWithGoogle');
       CrashReportingService.logMessage('Starting Google sign-in');
 
       final userCredential = await authService.signInWithGoogle();
@@ -228,7 +224,7 @@ class AccountIntegrationService {
   /// Sign in with Apple and sync local account
   /// In multi-account mode, adds this account to the logged-in list
   Future<Account> signInWithApple({bool makeActive = true}) async {
-    debugPrint('\n🔐 [AccountIntegrationService] signInWithApple');
+    _log.d('signInWithApple');
 
     final userCredential = await authService.signInWithApple();
 
@@ -244,18 +240,18 @@ class AccountIntegrationService {
 
   /// Sign out all accounts (clears all sessions)
   Future<void> signOut() async {
-    debugPrint('\n🔐 [AccountIntegrationService] signOut (all accounts)');
+    _log.d('signOut (all accounts)');
 
     await authService.signOut();
     await sessionManager.clearAllSessions();
     await accountService.deactivateAllAccounts();
 
-    debugPrint('   ✅ All accounts signed out');
+    _log.i('All accounts signed out');
   }
 
   /// Sign out a single account while keeping others logged in
   Future<void> signOutAccount(String userId) async {
-    debugPrint('\n🔐 [AccountIntegrationService] signOutAccount($userId)');
+    _log.d('signOutAccount($userId)');
 
     // Check if this is the current Firebase auth user
     final currentUser = authService.currentUser;
@@ -284,7 +280,7 @@ class AccountIntegrationService {
       }
     }
 
-    debugPrint('   ✅ Account signed out: $userId');
+    _log.i('Account signed out: $userId');
   }
 
   /// Update user profile and sync with local account

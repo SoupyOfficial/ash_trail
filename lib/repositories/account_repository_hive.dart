@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import '../logging/app_logger.dart';
 import '../models/account.dart';
 import '../models/web_models.dart';
 import '../models/model_converters.dart';
@@ -8,19 +8,12 @@ import 'account_repository.dart';
 
 /// Web implementation of AccountRepository using Hive
 class AccountRepositoryHive implements AccountRepository {
-  // Singleton instance
+  static final _log = AppLogger.logger('AccountRepositoryHive');
   static AccountRepositoryHive? _instance;
 
   factory AccountRepositoryHive(Map<String, dynamic> boxes) {
-    debugPrint(
-      '🏭 [AccountRepositoryHive.factory] Creating/returning instance at ${DateTime.now()}',
-    );
-    if (_instance == null) {
-      debugPrint('   🆕 Instance is null, creating new instance...');
-      _instance = AccountRepositoryHive._internal(boxes);
-    } else {
-      debugPrint('   ♻️ Instance already exists, reusing...');
-    }
+    _log.t('Factory creating/returning instance');
+    _instance ??= AccountRepositoryHive._internal(boxes);
     return _instance!;
   }
 
@@ -29,131 +22,68 @@ class AccountRepositoryHive implements AccountRepository {
   bool _initialEmitted = false;
 
   AccountRepositoryHive._internal(Map<String, dynamic> boxes) {
-    debugPrint(
-      '\n🏗️ [AccountRepositoryHive._internal] Initializing at ${DateTime.now()}',
-    );
+    _log.d('Initializing with Hive box');
     _box = boxes['accounts'] as Box;
-    debugPrint('   ✅ Got Hive box: ${_box.name}');
-    debugPrint('   📊 Box has ${_box.length} items');
-    debugPrint('   🔑 Box keys: ${_box.keys.toList()}');
-
-    // Create broadcast stream controller with onListen callback to emit on first subscription
     _controller = StreamController<List<Account>>.broadcast(
       onListen: () {
-        debugPrint(
-          '   👂 [StreamController.onListen] LISTENER ATTACHED at ${DateTime.now()}',
-        );
-        // Emit initial data when first listener attaches
+        _log.t('StreamController listener attached');
         if (!_initialEmitted) {
-          debugPrint(
-            '   🔄 [onListen] First listener - triggering initial _emitChanges()',
-          );
           _initialEmitted = true;
           _emitChanges();
         }
       },
-      onCancel: () {
-        debugPrint(
-          '   👋 [StreamController] LISTENER CANCELLED at ${DateTime.now()}',
-        );
-      },
+      onCancel: () => _log.t('StreamController listener cancelled'),
     );
-    debugPrint(
-      '   ✅ Created broadcast StreamController with onListen callback',
-    );
-
-    // Listen to box changes and emit updates
     _box.watch().listen((_) {
-      debugPrint('   🔔 [Hive Box] Change detected at ${DateTime.now()}');
+      _log.t('Hive box change detected');
       _emitChanges();
     });
-    debugPrint('   ✅ Set up Hive box watch listener');
-
-    // Seed initial snapshot so StreamProvider leaves loading state
-    debugPrint('   🌱 Emitting initial snapshot...');
     _emitChanges();
-
-    // Also emit immediately on next microtask to ensure data is sent
     Future.microtask(() {
-      debugPrint('   ⏰ [microtask] Checking if data was emitted...');
       if (!_controller.isClosed && _controller.hasListener) {
-        debugPrint(
-          '   ⏰ [microtask] Controller has listeners, verifying emission...',
-        );
-        // Trigger another emission to ensure data gets through
         Future.delayed(const Duration(milliseconds: 100)).then((_) {
-          if (!_controller.isClosed) {
-            debugPrint('   ⏰ [delayed] Forcing re-emission after 100ms');
-            _emitChanges();
-          }
+          if (!_controller.isClosed) _emitChanges();
         });
       }
     });
-
-    debugPrint('   ✅ Initial snapshot emission queued\n');
   }
 
   void _emitChanges() {
-    debugPrint('\n🔄 [_emitChanges] START at ${DateTime.now()}');
-    debugPrint('   🔍 Controller closed? ${_controller.isClosed}');
-    debugPrint('   🔍 Controller hasListener? ${_controller.hasListener}');
-
     if (_controller.isClosed) {
-      debugPrint('   ⚠️ CRITICAL: Controller is CLOSED - cannot emit!');
+      _log.w('Controller is CLOSED - cannot emit');
       return;
     }
-
-    // Wrap getAll() with a timeout to catch hanging calls
-    Future<List<Account>> getAllWithTimeout() {
-      debugPrint('   ⏱️ Starting getAll() with 5 second timeout...');
-      return getAll().timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          debugPrint('   ⚠️ CRITICAL: getAll() timed out after 5 seconds!');
-          return <Account>[];
-        },
-      );
-    }
-
-    getAllWithTimeout()
+    getAll()
+        .timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            _log.w('getAll() timed out after 5 seconds');
+            return <Account>[];
+          },
+        )
         .then((accounts) {
-          debugPrint(
-            '   ✅ getAll() completed with ${accounts.length} accounts',
-          );
-          for (var i = 0; i < accounts.length; i++) {
-            debugPrint(
-              '      $i: ${accounts[i].userId} - ${accounts[i].email} (active: ${accounts[i].isActive})',
-            );
-          }
-
-          if (_controller.isClosed) {
-            debugPrint(
-              '   ⚠️ CRITICAL: Controller became CLOSED between getAll and add!',
-            );
-            return;
-          }
-
-          debugPrint('   📤 Adding ${accounts.length} accounts to stream');
+          if (_controller.isClosed) return;
           try {
             _controller.add(accounts);
-            debugPrint(
-              '   ✅ Successfully added to stream at ${DateTime.now()}',
-            );
           } catch (addError, addStackTrace) {
-            debugPrint('   ❌ ERROR adding to stream: $addError');
-            debugPrint('   StackTrace: $addStackTrace');
+            _log.e(
+              'Error adding to stream',
+              error: addError,
+              stackTrace: addStackTrace,
+            );
           }
         })
         .catchError((e, stackTrace) {
-          debugPrint('   ❌ Error in _emitChanges: $e');
-          debugPrint('   StackTrace: $stackTrace');
+          _log.e('Error in _emitChanges', error: e, stackTrace: stackTrace);
           if (!_controller.isClosed) {
             try {
               _controller.addError(e, stackTrace);
-              debugPrint('   ❌ Error added to stream');
             } catch (addError, addStackTrace) {
-              debugPrint('   ❌ ERROR adding error to stream: $addError');
-              debugPrint('   StackTrace: $addStackTrace');
+              _log.e(
+                'Error adding error to stream',
+                error: addError,
+                stackTrace: addStackTrace,
+              );
             }
           }
         });
@@ -161,29 +91,20 @@ class AccountRepositoryHive implements AccountRepository {
 
   @override
   Future<List<Account>> getAll() async {
-    debugPrint('\n📖 [getAll] START at ${DateTime.now()}');
-    debugPrint('   📦 Box length: ${_box.length}');
-    debugPrint('   🔑 Box keys: ${_box.keys.toList()}');
-
     final accounts = <Account>[];
     for (var key in _box.keys) {
       try {
         final json = Map<String, dynamic>.from(_box.get(key));
-        debugPrint('   🔍 Processing key "$key": ${json.keys.toList()}');
         final webAccount = WebAccount.fromJson(json);
         final account = AccountWebConversion.fromWebModel(
           webAccount,
           id: int.tryParse(webAccount.id) ?? 0,
         );
         accounts.add(account);
-        debugPrint('      ✅ Added: ${account.userId} - ${account.email}');
       } catch (e, stackTrace) {
-        debugPrint('   ❌ Error processing key "$key": $e');
-        debugPrint('   StackTrace: $stackTrace');
+        _log.e('Error processing key "$key"', error: e, stackTrace: stackTrace);
       }
     }
-
-    debugPrint('   ✅ getAll() returning ${accounts.length} accounts\n');
     return accounts;
   }
 
@@ -235,25 +156,15 @@ class AccountRepositoryHive implements AccountRepository {
 
   @override
   Future<void> setActive(String userId) async {
-    debugPrint(
-      '\n🎯🎯🎯 [HiveRepo.setActive] CALLED with userId: $userId 🎯🎯🎯',
-    );
-    debugPrint('   ⏰ Time: ${DateTime.now()}');
-
-    // Deactivate all accounts first, then activate the target one
+    _log.d('setActive($userId)');
     final keysToUpdate = <dynamic>[];
     for (var key in _box.keys) {
       keysToUpdate.add(key);
     }
-    debugPrint('   📊 Total accounts in box: ${keysToUpdate.length}');
-
     for (var key in keysToUpdate) {
       final json = Map<String, dynamic>.from(_box.get(key));
       final webAccount = WebAccount.fromJson(json);
       final isTargetAccount = webAccount.userId == userId;
-      debugPrint(
-        '   📝 Processing ${webAccount.userId}: isTarget=$isTargetAccount, wasActive=${webAccount.isActive}',
-      );
       final updated = WebAccount(
         id: webAccount.id,
         userId: webAccount.userId,
@@ -274,11 +185,7 @@ class AccountRepositoryHive implements AccountRepository {
       await _box.put(key, updated.toJson());
     }
 
-    debugPrint('   ✅ All accounts updated in Hive');
-    debugPrint('   📢 Calling _emitChanges()...');
-    // Explicitly emit changes after setActive
     _emitChanges();
-    debugPrint('🎯🎯🎯 [HiveRepo.setActive] COMPLETE 🎯🎯🎯\n');
   }
 
   @override
@@ -317,15 +224,10 @@ class AccountRepositoryHive implements AccountRepository {
 
   @override
   Stream<Account?> watchActive() {
-    debugPrint('🔴 [watchActive] Creating stream at ${DateTime.now()}');
     return _controller.stream.map((accounts) {
-      debugPrint('🔴 [watchActive.map] Processing ${accounts.length} accounts');
       try {
-        final active = accounts.firstWhere((a) => a.isActive);
-        debugPrint('   ✅ Found active account: ${active.userId}');
-        return active;
-      } catch (e) {
-        debugPrint('   ⚠️ No active account found');
+        return accounts.firstWhere((a) => a.isActive);
+      } catch (_) {
         return null;
       }
     });
@@ -333,22 +235,9 @@ class AccountRepositoryHive implements AccountRepository {
 
   @override
   Stream<List<Account>> watchAll() {
-    debugPrint('🟢 [watchAll] CREATING STREAM at ${DateTime.now()}');
-    debugPrint('   🔍 Controller closed? ${_controller.isClosed}');
-    debugPrint('   🔍 Controller hasListener? ${_controller.hasListener}');
-
-    // Return the raw controller stream wrapped with logging
-    // DO NOT use asBroadcastStream - the controller is already broadcast
-    return _controller.stream
-        .map((accounts) {
-          debugPrint(
-            '🟢 [watchAll.map] DATA RECEIVED: ${accounts.length} accounts at ${DateTime.now()}',
-          );
-          return accounts;
-        })
-        .handleError((error, stackTrace) {
-          debugPrint('🟢 [watchAll.map] ERROR RECEIVED: $error');
-          throw error;
-        });
+    return _controller.stream.handleError((error, stackTrace) {
+      _log.e('watchAll stream error', error: error, stackTrace: stackTrace);
+      throw error;
+    });
   }
 }

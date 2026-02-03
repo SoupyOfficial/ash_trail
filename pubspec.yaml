@@ -58,6 +58,7 @@ dependencies:
   http: ^1.2.2
   
   # Utilities
+  logger: ^2.6.2
   path_provider: ^2.1.5
   intl: ^0.20.1
   uuid: ^4.5.1
@@ -94,8 +95,19 @@ dev_dependencies:
   fake_cloud_firestore: ^3.1.0
   
   # Native E2E testing with iOS simulator support
-  patrol: ^3.13.0
+  # Pin patrol 3.15.2: 3.16+ has API change that patrol_cli 3.8 doesn't handle
+  patrol: 3.15.2
   patrol_finders: ^2.5.0
+
+# Patrol E2E configuration (CLI reads this; patrol.yaml used for scripts/docs)
+patrol:
+  app_name: AshTrail
+  test_directory: integration_test
+  android:
+    package_name: com.soup.smokeLog
+  ios:
+    bundle_id: com.soup.smokeLog
+    # Omit flavor: project has no Xcode flavors; Debug-Runner doesn't exist.
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

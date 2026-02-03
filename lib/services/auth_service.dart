@@ -5,12 +5,13 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import 'crash_reporting_service.dart';
 
 /// Service for handling authentication with Firebase Auth
 /// Supports email/password, Google Sign-In, and Apple Sign-In
 class AuthService {
+  static final _log = AppLogger.logger('AuthService');
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -92,19 +93,12 @@ class AuthService {
     try {
       CrashReportingService.logMessage('Starting Google sign-in');
 
-      // Ensure GoogleSignIn is properly initialized
-      if (kDebugMode) {
-        print('GoogleSignIn instance: $_googleSignIn');
-        print('GoogleSignIn scopes: ${_googleSignIn.scopes}');
-      }
+      _log.d('GoogleSignIn instance: $_googleSignIn');
 
-      // Sign out first to ensure clean state (prevents cached auth issues)
       try {
         await _googleSignIn.signOut();
       } catch (e) {
-        if (kDebugMode) {
-          print('Warning: Could not sign out before sign-in: $e');
-        }
+        _log.w('Could not sign out before sign-in', error: e);
       }
 
       CrashReportingService.logMessage('Calling GoogleSignIn.signIn()');
@@ -164,11 +158,7 @@ class AuthService {
         reason: 'Google sign-in failed',
       );
 
-      // Log the error for debugging
-      if (kDebugMode) {
-        print('Google sign-in error: $e');
-        print('Error type: ${e.runtimeType}');
-      }
+      _log.e('Google sign-in error', error: e);
       throw Exception('Failed to sign in with Google: $e');
     }
   }

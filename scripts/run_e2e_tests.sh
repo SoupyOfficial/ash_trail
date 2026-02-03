@@ -1,13 +1,26 @@
 #!/bin/bash
-# E2E Test Runner for iOS Simulator
-# Usage: ./scripts/run_e2e_tests.sh [test_file]
+# E2E Test Runner — default platform: iOS
+# Uses an iOS simulator by default. Use this script for consistent iOS E2E runs.
+#
+# Usage: ./scripts/run_e2e_tests.sh [options] [test_file]
+#
+# Options:
+#   --list-devices    List available iOS simulators
+#   --full-isolation  Uninstall app from simulator before run, then reinstall (clean state)
+#   --clean           Same as --full-isolation
 #
 # Examples:
-#   ./scripts/run_e2e_tests.sh                           # Run all E2E tests
+#   ./scripts/run_e2e_tests.sh                           # Run all E2E tests on iOS
 #   ./scripts/run_e2e_tests.sh app_e2e_test.dart         # Run specific test file
-#   ./scripts/run_e2e_tests.sh --list-devices            # List available simulators
+#   ./scripts/run_e2e_tests.sh --full-isolation          # Run with clean simulator state
+#   ./scripts/run_e2e_tests.sh --list-devices            # List available iOS simulators
 
 set -e
+
+# Ensure we run from project root (script is in scripts/)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 # Colors for output
 RED='\033[0;31m'
@@ -28,11 +41,22 @@ if [ "$1" == "--list-devices" ]; then
     exit 0
 fi
 
-# Check if Patrol CLI is installed
+# Parse optional --full-isolation / --clean
+FULL_ISOLATION=""
+while [ "$1" == "--full-isolation" ] || [ "$1" == "--clean" ]; do
+    FULL_ISOLATION="--full-isolation"
+    shift
+done
+
+# patrol 3.15.2 requires patrol_cli 3.5 or 3.6 (see compatibility table)
+export PATH="$HOME/.pub-cache/bin:/Volumes/Jacob-SSD/BuildCache/pub-cache/bin:$PATH"
 if ! command -v patrol &> /dev/null; then
-    echo -e "${YELLOW}Patrol CLI not found. Installing...${NC}"
-    dart pub global activate patrol_cli
-    export PATH="$PATH:$HOME/.pub-cache/bin"
+    echo -e "${YELLOW}Patrol CLI not found. Installing patrol_cli 3.6.0...${NC}"
+    dart pub global activate patrol_cli 3.6.0
+    echo -e "${YELLOW}If 'patrol' still not found, add the path shown above to your PATH.${NC}"
+else
+    echo -e "${BLUE}Ensuring patrol_cli 3.6.0 (required for patrol 3.15.2)...${NC}"
+    dart pub global activate patrol_cli 3.6.0
 fi
 
 # Ensure dependencies are up to date
@@ -63,15 +87,19 @@ if [ "$BOOTED" -eq 0 ]; then
     sleep 5
 fi
 
-# Determine test file
+# Determine test file (default: Patrol E2E as primary runner)
 if [ -n "$1" ]; then
     TEST_FILE="integration_test/$1"
     if [ ! -f "$TEST_FILE" ]; then
         TEST_FILE="$1"
     fi
 else
-    # Default to comprehensive test which uses standard flutter integration test
-    TEST_FILE="integration_test/comprehensive_e2e_test.dart"
+    # Default to Patrol E2E test (primary E2E runner for iOS simulator)
+    TEST_FILE="integration_test/app_e2e_test.dart"
+fi
+
+if [ -n "$FULL_ISOLATION" ]; then
+    echo -e "${BLUE}Using full isolation (clean simulator state)...${NC}"
 fi
 
 echo -e "${BLUE}🧪 Running E2E tests: $TEST_FILE${NC}"
@@ -82,9 +110,25 @@ if grep -q "patrol" "$TEST_FILE" 2>/dev/null; then
     # Use Patrol for patrol-based tests
     if command -v patrol &> /dev/null; then
         echo -e "${BLUE}Using Patrol test runner...${NC}"
+        
+        # Pre-build the Pods_Runner_RunnerUITests framework (workaround for implicit dependency not building)
+        echo -e "${BLUE}🔧 Pre-building Pods-Runner-RunnerUITests framework...${NC}"
+        cd ios && xcodebuild -project Pods/Pods.xcodeproj \
+            -target "Pods-Runner-RunnerUITests" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -quiet \
+            BUILD_DIR="../build/ios_integ/Build" \
+            CONFIGURATION_BUILD_DIR="../build/ios_integ/Build/Products/Debug-iphonesimulator" \
+            2>&1 | tail -5
+        cd ..
+        echo -e "${GREEN}✅ Pods-Runner-RunnerUITests framework built${NC}"
+        
         patrol test \
             --target "$TEST_FILE" \
             --device "$DEVICE_ID" \
+            --debug \
+            $FULL_ISOLATION \
             --verbose \
             && echo -e "${GREEN}✅ Patrol tests passed!${NC}" \
             || {

@@ -40,21 +40,25 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
         },
         destinations: const [
           NavigationDestination(
+            key: Key('nav_home'),
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Home',
           ),
           NavigationDestination(
+            key: Key('nav_analytics'),
             icon: Icon(Icons.analytics_outlined),
             selectedIcon: Icon(Icons.analytics),
             label: 'Analytics',
           ),
           NavigationDestination(
+            key: Key('nav_history'),
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
             label: 'History',
           ),
           NavigationDestination(
+            key: Key('nav_log'),
             icon: Icon(Icons.add_circle_outline),
             selectedIcon: Icon(Icons.add_circle),
             label: 'Log',

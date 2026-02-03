@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
+import 'logging/app_logger.dart';
 import 'services/hive_database_service.dart';
 import 'services/crash_reporting_service.dart';
 import 'services/location_service.dart';
@@ -11,6 +12,8 @@ import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
 import 'providers/home_widget_config_provider.dart';
 import 'navigation/main_navigation.dart';
+
+final _log = AppLogger.logger('main');
 
 /// App initialization state per design doc 6.1.1
 enum AppInitState { uninitialized, initializing, ready, failed }
@@ -23,70 +26,61 @@ final appInitStateProvider = StateProvider<AppInitState>((ref) {
 /// Main entry point for all platforms
 /// Uses Hive database for offline-first storage on web, iOS, Android, and desktop
 void main() async {
-  debugPrint('\n═══════════════════════════════════════════════════');
-  debugPrint('🚀 [main] APP START at ${DateTime.now()}');
-  debugPrint('═══════════════════════════════════════════════════\n');
+  _log.i('APP START at ${DateTime.now()}');
 
   WidgetsFlutterBinding.ensureInitialized();
-  debugPrint('✅ [main] WidgetsFlutterBinding initialized\n');
+  _log.i('WidgetsFlutterBinding initialized');
 
   try {
-    debugPrint('🔥 [main] Initializing Firebase...');
-    // Initialize Firebase
+    _log.i('Initializing Firebase...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    debugPrint('✅ [main] Firebase initialized\n');
+    _log.i('Firebase initialized');
   } catch (e) {
-    debugPrint('❌ [main] Firebase initialization error: $e\n');
+    _log.e('Firebase initialization error', error: e);
   }
 
   try {
-    debugPrint('📊 [main] Initializing CrashReportingService...');
-    // Initialize crash reporting
+    _log.i('Initializing CrashReportingService...');
     await CrashReportingService.initialize();
-    debugPrint('✅ [main] CrashReportingService initialized\n');
+    _log.i('CrashReportingService initialized');
   } catch (e) {
-    debugPrint('❌ [main] Crash reporting initialization error: $e\n');
+    _log.e('Crash reporting initialization error', error: e);
   }
 
   try {
-    debugPrint('📂 [main] Initializing Hive database...');
-    // Initialize Hive database
+    _log.i('Initializing Hive database...');
     final db = HiveDatabaseService();
     await db.initialize();
-    debugPrint('✅ [main] Hive database initialized\n');
+    _log.i('Hive database initialized');
   } catch (e) {
-    debugPrint('❌ [main] Hive database initialization error: $e\n');
+    _log.e('Hive database initialization error', error: e);
   }
 
   try {
-    debugPrint('📍 [main] Checking location permissions...');
-    // Check location permissions on startup (iOS-focused)
+    _log.i('Checking location permissions...');
     final locationService = LocationService();
     final hasPermission = await locationService.hasLocationPermission();
     if (hasPermission) {
-      debugPrint('✅ [main] Location permission already granted\n');
+      _log.i('Location permission already granted');
     } else {
-      debugPrint(
-        '⚠️  [main] Location permission not granted - will prompt user\n',
-      );
+      _log.w('Location permission not granted - will prompt user');
     }
   } catch (e) {
-    debugPrint('❌ [main] Location service initialization error: $e\n');
+    _log.e('Location service initialization error', error: e);
   }
 
-  // Initialize SharedPreferences for home widget config
   SharedPreferences? sharedPrefs;
   try {
-    debugPrint('⚙️  [main] Initializing SharedPreferences...');
+    _log.i('Initializing SharedPreferences...');
     sharedPrefs = await SharedPreferences.getInstance();
-    debugPrint('✅ [main] SharedPreferences initialized\n');
+    _log.i('SharedPreferences initialized');
   } catch (e) {
-    debugPrint('❌ [main] SharedPreferences initialization error: $e\n');
+    _log.e('SharedPreferences initialization error', error: e);
   }
 
-  debugPrint('🎬 [main] Starting ProviderScope and WidgetApp...\n');
+  _log.i('Starting ProviderScope and WidgetApp');
   runApp(
     ProviderScope(
       overrides: [
@@ -178,7 +172,7 @@ class AuthWrapper extends ConsumerWidget {
                   body: Center(child: CircularProgressIndicator()),
                 ),
             error: (error, stack) {
-              debugPrint('Active account provider error: $error\n$stack');
+              _log.e('Active account provider error', error: error, stackTrace: stack);
               return Scaffold(
                 body: Center(child: Text('Error: ${error.toString()}')),
               );
@@ -190,14 +184,14 @@ class AuthWrapper extends ConsumerWidget {
               body: Center(child: CircularProgressIndicator()),
             ),
         error: (error, stack) {
-          debugPrint('Auth state provider error: $error\n$stack');
+          _log.e('Auth state provider error', error: error, stackTrace: stack);
           return Scaffold(
             body: Center(child: Text('Error: ${error.toString()}')),
           );
         },
       );
     } catch (e, stack) {
-      debugPrint('AuthWrapper build error: $e\n$stack');
+      _log.e('AuthWrapper build error', error: e, stackTrace: stack);
       return const WelcomeScreen();
     }
   }
@@ -241,6 +235,7 @@ class WelcomeScreen extends ConsumerWidget {
               const Spacer(),
               // Sign in button
               FilledButton.icon(
+                key: const Key('sign_in_button'),
                 onPressed: () {
                   try {
                     Navigator.push(
@@ -250,7 +245,7 @@ class WelcomeScreen extends ConsumerWidget {
                       ),
                     );
                   } catch (e) {
-                    debugPrint('Navigation error: $e');
+                    _log.e('Navigation error', error: e);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Error navigating: $e')),
                     );
@@ -267,7 +262,7 @@ class WelcomeScreen extends ConsumerWidget {
                     final switcher = ref.read(accountSwitcherProvider.notifier);
                     await switcher.createAnonymousAccount();
                   } catch (e) {
-                    debugPrint('Anonymous account creation error: $e');
+                    _log.e('Anonymous account creation error', error: e);
                     if (context.mounted) {
                       ScaffoldMessenger.of(
                         context,

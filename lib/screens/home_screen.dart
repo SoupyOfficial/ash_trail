@@ -15,6 +15,7 @@ import '../providers/sync_provider.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/home_widgets/home_widgets.dart';
 import '../utils/design_constants.dart';
+import '../utils/a11y_utils.dart';
 import 'accounts_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -26,6 +27,9 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _lastAccountId;
+  /// Last successful records list; shown during refresh so we don't unmount
+  /// the widget tree (preserves quick-log recording state and form values).
+  List<LogRecord>? _lastRecords;
 
   @override
   void initState() {
@@ -48,12 +52,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (account == null) {
       syncService.stopAutoSync();
       _lastAccountId = null;
+      _lastRecords = null;
       return;
     }
 
     // Only start sync if account changed
     if (_lastAccountId != account.userId) {
       _lastAccountId = account.userId;
+      _lastRecords = null;
       syncService.startAccountSync(accountId: account.userId);
     }
   }
@@ -72,11 +78,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        key: const Key('app_bar_home'),
         title: Text(isEditMode ? 'Edit Home' : 'Home'),
         actions: [
           // Edit mode toggle
           if (activeAccountAsync.asData?.value != null)
             IconButton(
+              key: const Key('app_bar_edit_layout'),
               icon: Icon(isEditMode ? Icons.done : Icons.edit),
               onPressed: () {
                 HapticFeedback.selectionClick();
@@ -84,8 +92,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
               tooltip: isEditMode ? 'Done' : 'Edit Layout',
             ),
-          IconButton(
-            icon: const Icon(Icons.account_circle),
+          SemanticIconButton(
+            key: const Key('app_bar_account'),
+            icon: Icons.account_circle,
+            semanticLabel: 'Accounts',
             onPressed: () {
               Navigator.push(
                 context,
@@ -122,6 +132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         data: (account) {
           if (account == null) return null;
           return FloatingActionButton.small(
+            key: const Key('fab_backdate'),
             heroTag: 'backdate',
             onPressed: () => _showBackdateDialog(context),
             tooltip: 'Backdate Entry',
@@ -157,6 +168,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
+            key: const Key('add_account_button'),
             onPressed: () {
               Navigator.push(
                 context,
@@ -178,163 +190,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
     final widgetConfig = ref.watch(homeLayoutConfigProvider);
     final isEditMode = ref.watch(homeEditModeProvider);
-    final visibleWidgets = widgetConfig.visibleWidgets;
 
     return logRecordsAsync.when(
       data: (records) {
-        // Group widgets into layout rows (compact widgets paired, others solo)
-        final layoutRows = _buildLayoutRows(visibleWidgets);
-
-        return Column(
-          children: [
-            // Main reorderable widget list
-            Expanded(
-              child: ReorderableListView.builder(
-                padding: EdgeInsets.all(
-                  ResponsiveSize.responsive(
-                    context: context,
-                    mobile: Spacing.lg.value,
-                    tablet: Spacing.xl.value,
-                    desktop: Spacing.xl.value,
-                  ),
-                ),
-                itemCount: layoutRows.length,
-                onReorder: (oldIndex, newIndex) {
-                  HapticFeedback.mediumImpact();
-                  // Convert row indices back to widget indices for reordering
-                  final oldWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, oldIndex);
-                  var newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex);
-                  
-                  // Adjust for the removal behavior
-                  if (newIndex > oldIndex) {
-                    newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex - 1) + 
-                                     layoutRows[newIndex - 1].length;
-                  }
-                  
-                  ref.read(homeLayoutConfigProvider.notifier).reorder(oldWidgetIndex, newWidgetIndex);
-                },
-                proxyDecorator: (child, index, animation) {
-                  return AnimatedBuilder(
-                    animation: animation,
-                    builder: (context, child) {
-                      final animValue = Curves.easeInOut.transform(animation.value);
-                      final elevation = lerpDouble(0, 8, animValue)!;
-                      final scale = lerpDouble(1, 1.02, animValue)!;
-                      return Transform.scale(
-                        scale: scale,
-                        child: Material(
-                          elevation: elevation,
-                          borderRadius: BorderRadius.circular(16),
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: child,
-                  );
-                },
-                itemBuilder: (context, rowIndex) {
-                  final rowWidgets = layoutRows[rowIndex];
-                  final widgetIndex = _getFirstWidgetIndexForRow(layoutRows, rowIndex);
-                  
-                  // Single widget row (standard/large size)
-                  if (rowWidgets.length == 1) {
-                    final config = rowWidgets[0];
-                    return Padding(
-                      key: ValueKey('row_${config.id}'),
-                      padding: EdgeInsets.only(bottom: Spacing.md.value),
-                      child: HomeWidgetWrapper(
-                        widgetId: config.id,
-                        type: config.type,
-                        isEditMode: isEditMode,
-                        index: widgetIndex,
-                        onRemove: () => _confirmRemoveWidget(context, ref, config),
-                        child: HomeWidgetEditPadding(
-                          isEditMode: isEditMode,
-                          child: HomeWidgetBuilder(
-                            config: config,
-                            records: records,
-                            onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
-                            onRecordTap: () {},
-                            onRecordDelete: (record) => _deleteLogRecord(record),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  
-                  // Two compact widgets side-by-side
-                  return Padding(
-                    key: ValueKey('row_${rowWidgets[0].id}_${rowWidgets[1].id}'),
-                    padding: EdgeInsets.only(bottom: Spacing.md.value),
-                    child: IntrinsicHeight(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: HomeWidgetWrapper(
-                              widgetId: rowWidgets[0].id,
-                              type: rowWidgets[0].type,
-                              isEditMode: isEditMode,
-                              index: widgetIndex,
-                              onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[0]),
-                              child: HomeWidgetEditPadding(
-                                isEditMode: isEditMode,
-                                child: HomeWidgetBuilder(
-                                  config: rowWidgets[0],
-                                  records: records,
-                                  onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
-                                  onRecordTap: () {},
-                                  onRecordDelete: (record) => _deleteLogRecord(record),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: Spacing.sm.value),
-                          Expanded(
-                            child: HomeWidgetWrapper(
-                              widgetId: rowWidgets[1].id,
-                              type: rowWidgets[1].type,
-                              isEditMode: isEditMode,
-                              index: widgetIndex + 1,
-                              onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[1]),
-                              child: HomeWidgetEditPadding(
-                                isEditMode: isEditMode,
-                                child: HomeWidgetBuilder(
-                                  config: rowWidgets[1],
-                                  records: records,
-                                  onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
-                                  onRecordTap: () {},
-                                  onRecordDelete: (record) => _deleteLogRecord(record),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            // Add widget button in edit mode
-            if (isEditMode)
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: FilledButton.icon(
-                    onPressed: () => showWidgetPicker(context),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Widget'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        _lastRecords = records;
+        return _buildMainViewContent(
+          context,
+          ref,
+          records,
+          widgetConfig,
+          isEditMode,
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () {
+        // Keep showing last data during refresh so we don't unmount the list
+        // (preserves quick-log recording state and form values).
+        if (_lastRecords != null) {
+          return _buildMainViewContent(
+            context,
+            ref,
+            _lastRecords!,
+            widgetConfig,
+            isEditMode,
+          );
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
       error: (error, _) => Center(
         child: Card(
           margin: const EdgeInsets.all(16),
@@ -366,6 +247,159 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMainViewContent(
+    BuildContext context,
+    WidgetRef ref,
+    List<LogRecord> records,
+    HomeLayoutConfig layoutConfig,
+    bool isEditMode,
+  ) {
+    final visibleWidgets = layoutConfig.visibleWidgets;
+    final layoutRows = _buildLayoutRows(visibleWidgets);
+
+    return Column(
+      children: [
+        Expanded(
+          child: ReorderableListView.builder(
+            padding: EdgeInsets.all(
+              ResponsiveSize.responsive(
+                context: context,
+                mobile: Spacing.lg.value,
+                tablet: Spacing.xl.value,
+                desktop: Spacing.xl.value,
+              ),
+            ),
+            itemCount: layoutRows.length,
+            onReorder: (oldIndex, newIndex) {
+              HapticFeedback.mediumImpact();
+              final oldWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, oldIndex);
+              var newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex);
+              if (newIndex > oldIndex) {
+                newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex - 1) +
+                    layoutRows[newIndex - 1].length;
+              }
+              ref.read(homeLayoutConfigProvider.notifier).reorder(oldWidgetIndex, newWidgetIndex);
+            },
+            proxyDecorator: (child, index, animation) {
+              return AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  final animValue = Curves.easeInOut.transform(animation.value);
+                  final elevation = lerpDouble(0, 8, animValue)!;
+                  final scale = lerpDouble(1, 1.02, animValue)!;
+                  return Transform.scale(
+                    scale: scale,
+                    child: Material(
+                      elevation: elevation,
+                      borderRadius: BorderRadius.circular(16),
+                      child: child,
+                    ),
+                  );
+                },
+                child: child,
+              );
+            },
+            itemBuilder: (context, rowIndex) {
+              final rowWidgets = layoutRows[rowIndex];
+              final widgetIndex = _getFirstWidgetIndexForRow(layoutRows, rowIndex);
+
+              if (rowWidgets.length == 1) {
+                final config = rowWidgets[0];
+                return Padding(
+                  key: ValueKey('row_${config.id}'),
+                  padding: EdgeInsets.only(bottom: Spacing.md.value),
+                  child: HomeWidgetWrapper(
+                    widgetId: config.id,
+                    type: config.type,
+                    isEditMode: isEditMode,
+                    index: widgetIndex,
+                    onRemove: () => _confirmRemoveWidget(context, ref, config),
+                    child: HomeWidgetEditPadding(
+                      isEditMode: isEditMode,
+                      child: HomeWidgetBuilder(
+                        config: config,
+                        records: records,
+                        onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                        onRecordTap: () {},
+                        onRecordDelete: (record) => _deleteLogRecord(record),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return Padding(
+                key: ValueKey('row_${rowWidgets[0].id}_${rowWidgets[1].id}'),
+                padding: EdgeInsets.only(bottom: Spacing.md.value),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: HomeWidgetWrapper(
+                          widgetId: rowWidgets[0].id,
+                          type: rowWidgets[0].type,
+                          isEditMode: isEditMode,
+                          index: widgetIndex,
+                          onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[0]),
+                          child: HomeWidgetEditPadding(
+                            isEditMode: isEditMode,
+                            child: HomeWidgetBuilder(
+                              config: rowWidgets[0],
+                              records: records,
+                              onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                              onRecordTap: () {},
+                              onRecordDelete: (record) => _deleteLogRecord(record),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: Spacing.sm.value),
+                      Expanded(
+                        child: HomeWidgetWrapper(
+                          widgetId: rowWidgets[1].id,
+                          type: rowWidgets[1].type,
+                          isEditMode: isEditMode,
+                          index: widgetIndex + 1,
+                          onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[1]),
+                          child: HomeWidgetEditPadding(
+                            isEditMode: isEditMode,
+                            child: HomeWidgetBuilder(
+                              config: rowWidgets[1],
+                              records: records,
+                              onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                              onRecordTap: () {},
+                              onRecordDelete: (record) => _deleteLogRecord(record),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        if (isEditMode)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: FilledButton.icon(
+                key: const Key('add_widget_button'),
+                onPressed: () => showWidgetPicker(context),
+                icon: const Icon(Icons.add),
+                label: const Text('Add Widget'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 

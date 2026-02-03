@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../logging/app_logger.dart';
 import '../services/location_service.dart';
 
 /// A map-based location picker for iOS
@@ -21,6 +22,7 @@ class LocationMapPicker extends StatefulWidget {
 }
 
 class _LocationMapPickerState extends State<LocationMapPicker> {
+  static final _log = AppLogger.logger('LocationMapPicker');
   GoogleMapController? _mapController;
   LatLng? _selectedLocation;
   LatLng? _currentLocation;
@@ -69,7 +71,7 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
         );
       }
     } catch (e) {
-      debugPrint('Error getting current location: $e');
+      _log.e('Error getting current location', error: e);
       if (mounted) {
         ScaffoldMessenger.of(
           context,

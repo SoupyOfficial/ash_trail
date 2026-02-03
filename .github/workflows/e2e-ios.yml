@@ -67,8 +67,7 @@ jobs:
 
       # Run the Patrol-based E2E tests (requires Patrol CLI)
       - name: Install Patrol CLI
-        run: dart pub global activate patrol_cli
-        continue-on-error: true
+        run: dart pub global activate patrol_cli 3.6.0
 
       - name: Add Patrol to PATH
         run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
@@ -78,8 +77,9 @@ jobs:
           patrol test \
             --target integration_test/app_e2e_test.dart \
             --device "$SIMULATOR_DEVICE_ID" \
+            --debug \
+            --full-isolation \
             --verbose
-        continue-on-error: true
 
       # Run all integration tests as fallback
       - name: Run All Integration Tests (fallback)

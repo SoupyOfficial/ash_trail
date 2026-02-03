@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../logging/app_logger.dart';
 
 /// Service to interact with the custom token generation Cloud Function.
 ///
@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 /// Firebase custom tokens that can be used with signInWithCustomToken().
 /// Custom tokens are valid for 48 hours (Firebase limit).
 class TokenService {
+  static final _log = AppLogger.logger('TokenService');
   static const String _tokenEndpoint =
       'https://us-central1-smokelog-17303.cloudfunctions.net/generate_refresh_token';
 
@@ -28,7 +29,7 @@ class TokenService {
   /// Throws an exception if the Cloud Function call fails.
   Future<Map<String, dynamic>> generateCustomToken(String uid) async {
     try {
-      debugPrint('🔑 [TokenService] Requesting custom token for user: $uid');
+      _log.d('Requesting custom token for user: $uid');
 
       final response = await http.post(
         Uri.parse(_tokenEndpoint),
@@ -38,7 +39,7 @@ class TokenService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        debugPrint('🔑 [TokenService] Custom token received successfully');
+        _log.d('Custom token received successfully');
         return {
           'customToken': data['customToken'],
           'expiresIn': data['expiresIn'] ?? 172800, // Default 48 hours in seconds
@@ -46,11 +47,11 @@ class TokenService {
       } else {
         final errorMsg =
             'Failed to generate custom token: HTTP ${response.statusCode}, ${response.body}';
-        debugPrint('🔑 [TokenService] ❌ $errorMsg');
+        _log.e(errorMsg);
         throw Exception(errorMsg);
       }
     } catch (e) {
-      debugPrint('🔑 [TokenService] ❌ Error generating custom token: $e');
+      _log.e('Error generating custom token', error: e);
       rethrow;
     }
   }
@@ -73,7 +74,7 @@ class TokenService {
       // Even a 400 error means the endpoint is reachable
       return response.statusCode < 500;
     } catch (e) {
-      debugPrint('🔑 [TokenService] Endpoint not reachable: $e');
+      _log.w('Endpoint not reachable', error: e);
       return false;
     }
   }

@@ -1,9 +1,11 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 
 /// Service for reporting crashes and errors to Firebase Crashlytics
 /// Automatically integrates with TestFlight for crash monitoring
 class CrashReportingService {
+  static final _log = AppLogger.logger('CrashReportingService');
   static final CrashReportingService _instance =
       CrashReportingService._internal();
 
@@ -36,12 +38,10 @@ class CrashReportingService {
       }
 
       if (kDebugMode) {
-        print('Crash reporting initialized');
+        _log.i('Crash reporting initialized');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error initializing crash reporting: $e');
-      }
+      _log.e('Error initializing crash reporting', error: e);
     }
   }
 
@@ -62,12 +62,10 @@ class CrashReportingService {
       );
 
       if (kDebugMode) {
-        print('Error recorded: $error, Fatal: $fatal');
+        _log.d('Error recorded: $error, Fatal: $fatal');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to record error: $e');
-      }
+      _log.e('Failed to record error', error: e);
     }
   }
 
@@ -77,9 +75,7 @@ class CrashReportingService {
     try {
       await FirebaseCrashlytics.instance.setCustomKey(key, value);
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to set custom key: $e');
-      }
+      _log.e('Failed to set custom key', error: e);
     }
   }
 
@@ -89,9 +85,7 @@ class CrashReportingService {
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier(userId);
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to set user ID: $e');
-      }
+      _log.e('Failed to set user ID', error: e);
     }
   }
 
@@ -100,9 +94,7 @@ class CrashReportingService {
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier('');
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to clear user ID: $e');
-      }
+      _log.e('Failed to clear user ID', error: e);
     }
   }
 
@@ -112,9 +104,7 @@ class CrashReportingService {
     try {
       FirebaseCrashlytics.instance.log(message);
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to log message: $e');
-      }
+      _log.e('Failed to log message', error: e);
     }
   }
 
@@ -123,9 +113,7 @@ class CrashReportingService {
     try {
       return FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled;
     } catch (e) {
-      if (kDebugMode) {
-        print('Failed to check crashlytics status: $e');
-      }
+      _log.e('Failed to check crashlytics status', error: e);
       return false;
     }
   }

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
@@ -129,6 +129,7 @@ class AccountServiceValidator implements AccountIntegrityValidator {
 /// - Invalid ratings
 /// - Invalid location data
 class DataIntegrityService {
+  static final _log = AppLogger.logger('DataIntegrityService');
   final AccountIntegrityValidator _accountValidator;
   final LogRecordRepository _repository;
 
@@ -155,11 +156,9 @@ class DataIntegrityService {
   /// Returns [IntegrityCheckResult] with any issues found.
   /// This is a read-only operation and doesn't modify any data.
   Future<IntegrityCheckResult> runIntegrityCheck() async {
-    debugPrint('🔍 [DataIntegrityService] Starting integrity check...');
-
-    // Get all valid account IDs
+    _log.i('Starting integrity check');
     final validAccountIds = await _accountValidator.getAllAccountIds();
-    debugPrint('   📋 Found ${validAccountIds.length} valid accounts');
+    _log.d('Found ${validAccountIds.length} valid accounts');
 
     // Get ALL log records from the repository to check for orphans
     final allRecords = await _repository.getAll();
@@ -178,9 +177,7 @@ class DataIntegrityService {
       // Check for orphaned records
       if (!validAccountIds.contains(record.accountId)) {
         orphanedRecords.add(record);
-        debugPrint(
-          '   ⚠️ Orphaned record: ${record.logId} (accountId: ${record.accountId})',
-        );
+        _log.w('Orphaned record: ${record.logId} (accountId: ${record.accountId})');
       }
 
       // Check for duplicates
@@ -190,7 +187,7 @@ class DataIntegrityService {
           () => [seenLogIds[record.logId]!],
         );
         duplicateMap[record.logId]!.add(record);
-        debugPrint('   ⚠️ Duplicate logId: ${record.logId}');
+        _log.w('Duplicate logId: ${record.logId}');
       } else {
         seenLogIds[record.logId] = record;
       }
@@ -203,9 +200,7 @@ class DataIntegrityService {
       if (record.eventAt.isBefore(tenYearsAgo) ||
           record.eventAt.isAfter(oneDayFromNow)) {
         invalidTimestamps.add(record);
-        debugPrint(
-          '   ⚠️ Invalid timestamp: ${record.logId} (eventAt: ${record.eventAt})',
-        );
+        _log.w('Invalid timestamp: ${record.logId} (eventAt: ${record.eventAt})');
       }
 
       // Check for invalid ratings
@@ -214,20 +209,14 @@ class DataIntegrityService {
           (record.physicalRating != null &&
               (record.physicalRating! < 1 || record.physicalRating! > 10))) {
         invalidRatings.add(record);
-        debugPrint(
-          '   ⚠️ Invalid rating: ${record.logId} '
-          '(mood: ${record.moodRating}, physical: ${record.physicalRating})',
-        );
+        _log.w('Invalid rating: ${record.logId} (mood: ${record.moodRating}, physical: ${record.physicalRating})');
       }
 
       // Check for invalid location (one coordinate but not both)
       if ((record.latitude != null && record.longitude == null) ||
           (record.latitude == null && record.longitude != null)) {
         invalidLocations.add(record);
-        debugPrint(
-          '   ⚠️ Invalid location: ${record.logId} '
-          '(lat: ${record.latitude}, lon: ${record.longitude})',
-        );
+        _log.w('Invalid location: ${record.logId} (lat: ${record.latitude}, lon: ${record.longitude})');
       }
     }
 
@@ -239,15 +228,13 @@ class DataIntegrityService {
       invalidLocationRecords: invalidLocations,
     );
 
-    debugPrint('🔍 [DataIntegrityService] Check complete: $result');
+    _log.i('Check complete: $result');
     return result;
   }
 
   /// Check integrity for a specific account
   Future<IntegrityCheckResult> checkAccountIntegrity(String accountId) async {
-    debugPrint(
-      '🔍 [DataIntegrityService] Checking integrity for account: $accountId',
-    );
+    _log.d('Checking integrity for account: $accountId');
 
     final validAccountIds = await _accountValidator.getAllAccountIds();
     final records = await _repository.getByAccount(accountId);
@@ -323,7 +310,7 @@ class DataIntegrityService {
     bool fixRatings = true,
     bool clearInvalidLocations = true,
   }) async {
-    debugPrint('🔧 [DataIntegrityService] Starting repair...');
+    _log.i('Starting repair');
 
     final errors = <String>[];
     var orphansReassigned = 0;
@@ -368,7 +355,7 @@ class DataIntegrityService {
               );
               await _repository.update(fixedRecord);
               orphansReassigned++;
-              debugPrint('   ✅ Reassigned ${record.logId} to $targetAccountId');
+              _log.i('Reassigned ${record.logId} to $targetAccountId');
             } catch (e) {
               errors.add('Failed to reassign ${record.logId}: $e');
             }
@@ -389,7 +376,7 @@ class DataIntegrityService {
           try {
             await _repository.delete(duplicates[i].logId);
             duplicatesRemoved++;
-            debugPrint('   ✅ Removed duplicate ${duplicates[i].logId}');
+            _log.i('Removed duplicate ${duplicates[i].logId}');
           } catch (e) {
             errors.add('Failed to remove duplicate ${duplicates[i].logId}: $e');
           }
@@ -420,7 +407,7 @@ class DataIntegrityService {
             record.markDirty();
             await _repository.update(record);
             ratingsFixed++;
-            debugPrint('   ✅ Fixed ratings for ${record.logId}');
+            _log.i('Fixed ratings for ${record.logId}');
           }
         } catch (e) {
           errors.add('Failed to fix ratings for ${record.logId}: $e');
@@ -438,7 +425,7 @@ class DataIntegrityService {
           record.markDirty();
           await _repository.update(record);
           locationsCleared++;
-          debugPrint('   ✅ Cleared invalid location for ${record.logId}');
+          _log.i('Cleared invalid location for ${record.logId}');
         } catch (e) {
           errors.add('Failed to clear location for ${record.logId}: $e');
         }
@@ -453,7 +440,7 @@ class DataIntegrityService {
       errors: errors,
     );
 
-    debugPrint('🔧 [DataIntegrityService] Repair complete: $result');
+    _log.i('Repair complete: $result');
     return result;
   }
 

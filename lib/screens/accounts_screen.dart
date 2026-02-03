@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../logging/app_logger.dart';
 import '../providers/account_provider.dart';
 import '../models/account.dart';
 import '../services/account_integration_service.dart';
@@ -15,26 +16,21 @@ const kTestAccountName = 'Test User';
 
 class AccountsScreen extends ConsumerWidget {
   const AccountsScreen({super.key});
+  static final _log = AppLogger.logger('AccountsScreen');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    debugPrint('\n═══════════════════════════════════════════════════');
-    debugPrint('🔵 [AccountsScreen] BUILD START at ${DateTime.now()}');
-    debugPrint('═══════════════════════════════════════════════════\n');
-
     final accountsAsync = ref.watch(allAccountsProvider);
     final activeAccountAsync = ref.watch(activeAccountProvider);
     final loggedInAccountsAsync = ref.watch(loggedInAccountsProvider);
 
-    debugPrint(
-      '🔍 [AccountsScreen] accountsAsync state: ${accountsAsync.runtimeType}',
-    );
-
     return Scaffold(
       appBar: AppBar(
+        key: const Key('app_bar_accounts'),
         title: const Text('Accounts'),
         actions: [
           IconButton(
+            key: const Key('accounts_export_button'),
             icon: const Icon(Icons.import_export),
             tooltip: 'Import / Export',
             onPressed: () {
@@ -112,8 +108,6 @@ class AccountsScreen extends ConsumerWidget {
       ),
       body: accountsAsync.when(
         data: (List<Account> accounts) {
-          debugPrint('\n📋 [AccountsScreen.body] Rendering DATA state');
-          debugPrint('   📊 Total accounts: ${accounts.length}');
 
           final activeAccount = activeAccountAsync.maybeWhen(
             data: (account) => account,
@@ -140,7 +134,9 @@ class AccountsScreen extends ConsumerWidget {
                         ),
                   ),
                 ),
-                ...loggedInAccounts.map((account) {
+                ...loggedInAccounts.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final account = entry.value;
                   final isActive = account.userId == activeAccount?.userId;
                   return _buildAccountCard(
                     context,
@@ -148,6 +144,7 @@ class AccountsScreen extends ConsumerWidget {
                     account,
                     isActive,
                     true,
+                    cardIndex: index,
                   );
                 }),
                 const SizedBox(height: 16),
@@ -172,13 +169,14 @@ class AccountsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  ...otherAccounts.map((account) {
+                  ...otherAccounts.asMap().entries.map((entry) {
                     return _buildAccountCard(
                       context,
                       ref,
-                      account,
+                      entry.value,
                       false,
                       false,
+                      cardIndex: null,
                     );
                   }),
                   const SizedBox(height: 16),
@@ -187,7 +185,9 @@ class AccountsScreen extends ConsumerWidget {
 
               // Add account button
               Card(
+                key: const Key('accounts_add_account_card'),
                 child: ListTile(
+                  key: const Key('accounts_add_account'),
                   leading: CircleAvatar(
                     backgroundColor:
                         Theme.of(context).colorScheme.primaryContainer,
@@ -212,12 +212,10 @@ class AccountsScreen extends ConsumerWidget {
           );
         },
         loading: () {
-          debugPrint('\n⏳ [AccountsScreen.body] Rendering LOADING state');
           return const Center(child: CircularProgressIndicator());
         },
         error: (error, stackTrace) {
-          debugPrint('\n❌ [AccountsScreen.body] Rendering ERROR state');
-          debugPrint('   Error: $error');
+          _log.e('AccountsScreen error', error: error, stackTrace: stackTrace);
           return Center(child: Text('Error: $error'));
         },
       ),
@@ -229,11 +227,13 @@ class AccountsScreen extends ConsumerWidget {
     WidgetRef ref,
     Account account,
     bool isActive,
-    bool isLoggedIn,
-  ) {
+    bool isLoggedIn, {
+    int? cardIndex,
+  }) {
     final theme = Theme.of(context);
 
     return Card(
+      key: cardIndex != null ? Key('account_card_$cardIndex') : null,
       elevation: isActive
           ? ElevationLevel.lg.value
           : ElevationLevel.sm.value,

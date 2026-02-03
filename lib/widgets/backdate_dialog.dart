@@ -515,11 +515,13 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
+                    key: const Key('backdate_dialog_cancel'),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('CANCEL'),
                   ),
                   const SizedBox(width: 8),
                   FilledButton.icon(
+                    key: const Key('backdate_dialog_create'),
                     onPressed: _createBackdatedLog,
                     icon: const Icon(Icons.check),
                     label: const Text('CREATE LOG'),

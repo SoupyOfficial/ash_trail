@@ -32,6 +32,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        key: const Key('app_bar_analytics'),
         title: const Text('Analytics'),
       ),
       body: RefreshIndicator(

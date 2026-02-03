@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../logging/app_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/enums.dart';
@@ -26,6 +27,7 @@ class HomeQuickLogWidget extends ConsumerStatefulWidget {
 }
 
 class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
+  static final _log = AppLogger.logger('HomeQuickLogWidget');
   // Duration recording state
   bool _isRecording = false;
   DateTime? _recordingStartTime;
@@ -97,7 +99,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
       try {
         activeAccount = await ref.read(activeAccountProvider.future);
       } catch (e) {
-        debugPrint('⚠️ Error loading active account: $e');
+        _log.w('Error loading active account', error: e);
       }
     } else {
       activeAccount = activeAccountAsync.asData?.value;
@@ -118,7 +120,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     if (currentAccount != null && currentAccount.userId != activeAccount.userId) {
       // Account changed while we were processing - use the new account
       activeAccount = currentAccount;
-      debugPrint('🔄 Account changed during log creation, using new account: ${activeAccount.userId}');
+      _log.d('Account changed during log creation, using new account: ${activeAccount.userId}');
     }
 
     final service = LogRecordService();
@@ -149,7 +151,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
           longitude = position.longitude;
         }
       } catch (e) {
-        debugPrint('⚠️ Failed to capture location for quick log: $e');
+        _log.w('Failed to capture location for quick log', error: e);
       }
 
       final record = await service.createLogRecord(
@@ -248,26 +250,28 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     // Watch active account to detect account switches and reset form state
     final activeAccountAsync = ref.watch(activeAccountProvider);
     final activeAccount = activeAccountAsync.asData?.value;
-    
-    // Reset form state and cancel recording when account changes
-    if (activeAccount != null && activeAccount.userId != _currentAccountId) {
+
+    // Only cancel recording on account change (so we don't log to wrong account).
+    // Do not reset form values; the form only resets when the user taps "Clear
+    // form" or after successfully finishing a log.
+    if (activeAccountAsync.isLoading) {
+      // Loading: do nothing; keep current state
+    } else if (activeAccount != null && activeAccount.userId != _currentAccountId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_currentAccountId != null) {
-          // Only reset if we had a previous account (not on first load)
-          _cancelRecording(); // Cancel any ongoing recording
-          _resetFormState(); // Reset form state
-        }
+        if (_currentAccountId != null) _cancelRecording();
         _currentAccountId = activeAccount.userId;
       });
     } else if (activeAccount == null && _currentAccountId != null) {
-      // Account was cleared
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _cancelRecording(); // Cancel any ongoing recording
-        _resetFormState(); // Reset form state
+        _cancelRecording();
         _currentAccountId = null;
       });
     }
     
+    final hasFormValues = _moodRating != null ||
+        _physicalRating != null ||
+        _selectedReasons.isNotEmpty;
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 12),
       child: Padding(
@@ -275,56 +279,107 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Mood Rating
+            if (hasFormValues)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      key: const Key('quick_log_clear_form'),
+                      onPressed: _resetFormState,
+                      icon: const Icon(Icons.clear_all, size: 18),
+                      label: const Text('Clear form'),
+                    ),
+                  ],
+                ),
+              ),
+            // Mood — muted until user slides (then uses theme primary)
             Row(
               children: [
                 Expanded(
                   child: Text(
                     'Mood',
-                    style: Theme.of(context).textTheme.labelMedium,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: _moodRating == null
+                          ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
+                          : null,
+                    ),
                   ),
                 ),
                 Expanded(
                   flex: 3,
-                  child: Slider(
-                    value: _moodRating ?? 5.5,
-                    min: 1,
-                    max: 10,
-                    divisions: 9,
-                    label: (_moodRating ?? 5.5).toStringAsFixed(0),
-                    onChanged: (value) {
-                      setState(() {
-                        _moodRating = value;
-                      });
-                    },
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: _moodRating == null
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
+                          : null,
+                      inactiveTrackColor: _moodRating == null
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)
+                          : null,
+                      thumbColor: _moodRating == null
+                          ? Theme.of(context).colorScheme.outline
+                          : null,
+                    ),
+                    child: Slider(
+                      key: const Key('quick_log_mood_slider'),
+                      value: _moodRating ?? 5.5,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      label: (_moodRating ?? 5.5).toStringAsFixed(0),
+                      onChanged: (value) {
+                        setState(() {
+                          _moodRating = value;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
 
-            // Physical Rating
+            // Physical — muted until user slides (then uses theme primary)
             Row(
               children: [
                 Expanded(
                   child: Text(
                     'Physical',
-                    style: Theme.of(context).textTheme.labelMedium,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: _physicalRating == null
+                          ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
+                          : null,
+                    ),
                   ),
                 ),
                 Expanded(
                   flex: 3,
-                  child: Slider(
-                    value: _physicalRating ?? 5.5,
-                    min: 1,
-                    max: 10,
-                    divisions: 9,
-                    label: (_physicalRating ?? 5.5).toStringAsFixed(0),
-                    onChanged: (value) {
-                      setState(() {
-                        _physicalRating = value;
-                      });
-                    },
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: _physicalRating == null
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
+                          : null,
+                      inactiveTrackColor: _physicalRating == null
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)
+                          : null,
+                      thumbColor: _physicalRating == null
+                          ? Theme.of(context).colorScheme.outline
+                          : null,
+                    ),
+                    child: Slider(
+                      key: const Key('quick_log_physical_slider'),
+                      value: _physicalRating ?? 5.5,
+                      min: 1,
+                      max: 10,
+                      divisions: 9,
+                      label: (_physicalRating ?? 5.5).toStringAsFixed(0),
+                      onChanged: (value) {
+                        setState(() {
+                          _physicalRating = value;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -335,6 +390,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
             Text('Reasons', style: Theme.of(context).textTheme.labelMedium),
             const SizedBox(height: 8),
             ReasonChipsGrid(
+              key: const Key('quick_log_reasons'),
               selected: _selectedReasons,
               onToggle: _toggleReason,
               showIcons: true,
@@ -342,12 +398,16 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
             const SizedBox(height: 16),
 
             // Press-and-hold duration button
-            Center(
-              child: GestureDetector(
-                onLongPressStart: _handleLongPressStart,
-                onLongPressEnd: _handleLongPressEnd,
-                onLongPressCancel: _handleTapCancel,
-                child: Container(
+            Semantics(
+              label: 'Hold to record duration',
+              button: true,
+              child: Center(
+                child: GestureDetector(
+                  key: const Key('hold_to_record_button'),
+                  onLongPressStart: _handleLongPressStart,
+                  onLongPressEnd: _handleLongPressEnd,
+                  onLongPressCancel: _handleTapCancel,
+                  child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color:
@@ -402,6 +462,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                 ),
               ),
             ),
+          ),
           ],
         ),
       ),

@@ -57,7 +57,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
       // ===== DURATION-BASED =====
       case HomeWidgetType.totalDurationToday:
-        return _buildTotalDurationToday(context, metrics);
+        return _TotalDurationTodayCard(records: records);
 
       case HomeWidgetType.avgDurationPerHit:
         return _buildAvgDurationPerHit(context, metrics);
@@ -127,31 +127,38 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   // ===== TIME-BASED BUILDERS =====
 
-  Widget _buildAvgTimeBetween(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildAvgTimeBetween(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     // Calculate average gap from first hit of the day
     final todayGap = metrics.getAverageGapToday(records);
     final weekGap = metrics.getAverageGap(records, days: 7);
 
     return StatCardWidget(
       title: 'Avg Gap (Today)',
-      value: todayGap != null
-          ? HomeMetricsService.formatDurationObject(todayGap)
-          : '--',
-      subtitle: weekGap != null
-          ? '7d avg: ${HomeMetricsService.formatDurationObject(weekGap)}'
-          : null,
+      value:
+          todayGap != null
+              ? HomeMetricsService.formatDurationObject(todayGap)
+              : '--',
+      subtitle:
+          weekGap != null
+              ? '7d avg: ${HomeMetricsService.formatDurationObject(weekGap)}'
+              : null,
       icon: Icons.hourglass_empty,
     );
   }
 
-  Widget _buildLongestGapToday(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildLongestGapToday(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final gap = metrics.getLongestGap(records, days: 1);
 
     return StatCardWidget(
       title: 'Longest Gap',
-      value: gap != null
-          ? HomeMetricsService.formatDurationObject(gap.gap)
-          : '--',
+      value:
+          gap != null ? HomeMetricsService.formatDurationObject(gap.gap) : '--',
       subtitle: 'today',
       icon: Icons.hourglass_full,
     );
@@ -205,12 +212,18 @@ class HomeWidgetBuilder extends ConsumerWidget {
     return StatCardWidget(
       title: 'Peak Hour',
       value: peak != null ? HomeMetricsService.formatHour(peak.hour) : '--',
-      subtitle: peak != null ? '${peak.percentage.toStringAsFixed(0)}% of hits' : null,
+      subtitle:
+          peak != null
+              ? '${peak.percentage.toStringAsFixed(0)}% of hits'
+              : null,
       icon: Icons.schedule,
     );
   }
 
-  Widget _buildActiveHoursToday(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildActiveHoursToday(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final activeHours = metrics.getActiveHoursToday(records);
 
     return StatCardWidget(
@@ -223,29 +236,18 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   // ===== DURATION-BASED BUILDERS =====
 
-  Widget _buildTotalDurationToday(BuildContext context, HomeMetricsService metrics) {
-    final total = metrics.getTotalDurationToday(records);
-    final comparison = metrics.getTodayVsYesterday(records);
-
-    return StatCardWidget(
-      title: 'Total Today',
-      value: HomeMetricsService.formatDuration(total),
-      subtitle: 'duration',
-      icon: Icons.today,
-      trendWidget: comparison.yesterdayDuration > 0
-          ? TrendIndicator(percentChange: comparison.durationChange)
-          : null,
-    );
-  }
-
-  Widget _buildAvgDurationPerHit(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildAvgDurationPerHit(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final todayAvg = metrics.getAverageDurationToday(records);
     final yesterdayAvg = metrics.getAverageDuration(
       records.where((r) {
         // Use 6am day boundary for more natural grouping
         final todayStart = DayBoundary.getTodayStart();
         final yesterdayStart = DayBoundary.getYesterdayStart();
-        return r.eventAt.isAfter(yesterdayStart) && r.eventAt.isBefore(todayStart);
+        return r.eventAt.isAfter(yesterdayStart) &&
+            r.eventAt.isBefore(todayStart);
       }).toList(),
     );
 
@@ -259,39 +261,51 @@ class HomeWidgetBuilder extends ConsumerWidget {
       value: todayAvg != null ? '${todayAvg.toStringAsFixed(1)}s' : '--',
       subtitle: 'today',
       icon: Icons.av_timer,
-      trendWidget: percentChange != null
-          ? TrendIndicator(percentChange: percentChange)
-          : null,
+      trendWidget:
+          percentChange != null
+              ? TrendIndicator(percentChange: percentChange)
+              : null,
     );
   }
 
-  Widget _buildLongestHitToday(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildLongestHitToday(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final longest = metrics.getLongestHit(records, days: 1);
 
     return StatCardWidget(
       title: 'Longest Hit',
-      value: longest != null
-          ? HomeMetricsService.formatDuration(longest.duration)
-          : '--',
+      value:
+          longest != null
+              ? HomeMetricsService.formatDuration(longest.duration)
+              : '--',
       subtitle: 'today',
       icon: Icons.arrow_upward,
     );
   }
 
-  Widget _buildShortestHitToday(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildShortestHitToday(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final shortest = metrics.getShortestHit(records, days: 1);
 
     return StatCardWidget(
       title: 'Shortest Hit',
-      value: shortest != null
-          ? HomeMetricsService.formatDuration(shortest.duration)
-          : '--',
+      value:
+          shortest != null
+              ? HomeMetricsService.formatDuration(shortest.duration)
+              : '--',
       subtitle: 'today',
       icon: Icons.arrow_downward,
     );
   }
 
-  Widget _buildTotalDurationWeek(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildTotalDurationWeek(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final total = metrics.getTotalDuration(records, days: 7);
     final dailyAvg = total / 7;
 
@@ -319,7 +333,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.trending_up, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.trending_up,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Duration Trend',
@@ -340,9 +358,8 @@ class HomeWidgetBuilder extends ConsumerWidget {
                     ),
                     Text(
                       '${comparison.current.toStringAsFixed(1)}s',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -366,9 +383,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
       value: '$count',
       subtitle: 'count',
       icon: Icons.touch_app,
-      trendWidget: comparison.yesterdayCount > 0
-          ? TrendIndicator(percentChange: comparison.countChange)
-          : null,
+      trendWidget:
+          comparison.yesterdayCount > 0
+              ? TrendIndicator(percentChange: comparison.countChange)
+              : null,
     );
   }
 
@@ -395,7 +413,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildHitsPerActiveHour(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildHitsPerActiveHour(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final ratio = metrics.getHitsPerActiveHour(records, days: 1);
 
     return StatCardWidget(
@@ -408,7 +429,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   // ===== COMPARISON BUILDERS =====
 
-  Widget _buildTodayVsYesterday(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildTodayVsYesterday(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final comparison = metrics.getTodayVsYesterday(records);
 
     return Card(
@@ -419,7 +443,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.compare_arrows, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.compare_arrows,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Today vs Yesterday',
@@ -453,18 +481,23 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildTodayVsWeekAvg(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildTodayVsWeekAvg(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final todayCount = metrics.getHitCountToday(records);
     final todayDuration = metrics.getTotalDurationToday(records);
     final weekAvgCount = metrics.getDailyAverageHits(records, days: 7);
     final weekAvgDuration = metrics.getTotalDuration(records, days: 7) / 7;
 
-    final countDiff = weekAvgCount > 0
-        ? ((todayCount - weekAvgCount) / weekAvgCount) * 100
-        : 0.0;
-    final durationDiff = weekAvgDuration > 0
-        ? ((todayDuration - weekAvgDuration) / weekAvgDuration) * 100
-        : 0.0;
+    final countDiff =
+        weekAvgCount > 0
+            ? ((todayCount - weekAvgCount) / weekAvgCount) * 100
+            : 0.0;
+    final durationDiff =
+        weekAvgDuration > 0
+            ? ((todayDuration - weekAvgDuration) / weekAvgDuration) * 100
+            : 0.0;
 
     return Card(
       child: Padding(
@@ -474,7 +507,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.analytics, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.analytics,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Today vs Week Avg',
@@ -495,7 +532,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 ),
                 Column(
                   children: [
-                    Text('Duration', style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      'Duration',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                     const SizedBox(height: 4),
                     TrendIndicator(percentChange: durationDiff),
                   ],
@@ -508,7 +548,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildWeekdayVsWeekend(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildWeekdayVsWeekend(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final comparison = metrics.getWeekdayVsWeekend(records, days: 7);
 
     return Card(
@@ -519,7 +562,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.calendar_today,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Weekday vs Weekend',
@@ -533,12 +580,14 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Weekday', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'Weekday',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                       Text(
                         '${comparison.weekdayAvgCount.toStringAsFixed(1)}/day',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -546,12 +595,14 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Weekend', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'Weekend',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                       Text(
                         '${comparison.weekendAvgCount.toStringAsFixed(1)}/day',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -589,7 +640,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.bar_chart, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.bar_chart,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Weekly Pattern',
@@ -604,7 +659,8 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(7, (index) {
-                  final height = maxCount > 0 ? (dayCounts[index] / maxCount) * 40 : 0.0;
+                  final height =
+                      maxCount > 0 ? (dayCounts[index] / maxCount) * 40 : 0.0;
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -612,7 +668,9 @@ class HomeWidgetBuilder extends ConsumerWidget {
                         width: 24,
                         height: height + 4,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -649,7 +707,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.grid_on, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.grid_on,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Hourly Heatmap',
@@ -673,12 +735,17 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 final intensity = maxCount > 0 ? count / maxCount : 0.0;
 
                 return Tooltip(
-                  message: '${HomeMetricsService.formatHour(index)}: $count hits',
+                  message:
+                      '${HomeMetricsService.formatHour(index)}: $count hits',
                   child: Container(
                     decoration: BoxDecoration(
-                      color: count > 0
-                          ? Theme.of(context).colorScheme.primary.withOpacity(0.2 + intensity * 0.7)
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          count > 0
+                              ? Theme.of(context).colorScheme.primary
+                                  .withOpacity(0.2 + intensity * 0.7)
+                              : Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Center(
@@ -686,7 +753,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
                         index.toString(),
                         style: TextStyle(
                           fontSize: 9,
-                          color: intensity > 0.5 ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                          color:
+                              intensity > 0.5
+                                  ? Colors.white
+                                  : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -702,7 +772,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   // ===== SECONDARY BUILDERS =====
 
-  Widget _buildMoodPhysicalAvg(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildMoodPhysicalAvg(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
     final todayMood = metrics.getAverageMood(records, days: 1);
     final todayPhysical = metrics.getAveragePhysical(records, days: 1);
     final weekMood = metrics.getAverageMood(records, days: 7);
@@ -716,7 +789,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.mood, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.mood,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Mood & Physical',
@@ -763,7 +840,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.label_outline, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.label_outline,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Top Reasons',
@@ -776,24 +857,26 @@ class HomeWidgetBuilder extends ConsumerWidget {
               Text(
                 'No reasons logged',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               )
             else
-              ...topReasons.map((r) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Icon(r.reason.icon, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(r.reason.displayName)),
-                        Text(
-                          '${r.count}',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  )),
+              ...topReasons.map(
+                (r) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(r.reason.icon, size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(r.reason.displayName)),
+                      Text(
+                        '${r.count}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -823,9 +906,9 @@ class _ComparisonColumn extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           '$count hits',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           HomeMetricsService.formatDuration(duration),
@@ -864,15 +947,15 @@ class _RatingColumn extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           todayValue != null ? todayValue!.toStringAsFixed(1) : '--',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           '7d: ${weekValue != null ? weekValue!.toStringAsFixed(1) : '--'}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
@@ -884,13 +967,11 @@ class _TimeSinceLastHitWidget extends StatefulWidget {
   final List<LogRecord> records;
   final HomeMetricsService metrics;
 
-  const _TimeSinceLastHitWidget({
-    required this.records,
-    required this.metrics,
-  });
+  const _TimeSinceLastHitWidget({required this.records, required this.metrics});
 
   @override
-  State<_TimeSinceLastHitWidget> createState() => _TimeSinceLastHitWidgetState();
+  State<_TimeSinceLastHitWidget> createState() =>
+      _TimeSinceLastHitWidgetState();
 }
 
 class _TimeSinceLastHitWidgetState extends State<_TimeSinceLastHitWidget> {
@@ -977,17 +1058,17 @@ class _TimeSinceLastHitWidgetState extends State<_TimeSinceLastHitWidget> {
                 Text(
                   'Time Since Last Hit',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Text(
               _formatRelativeDuration(_timeSinceLastHit!),
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -1024,10 +1105,9 @@ class _RecentEntriesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = records
-        .where((r) => !r.isDeleted)
-        .toList()
-      ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
+    final sorted =
+        records.where((r) => !r.isDeleted).toList()
+          ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
     final recent = sorted.take(count).toList();
 
     if (recent.isEmpty) {
@@ -1041,7 +1121,9 @@ class _RecentEntriesWidget extends StatelessWidget {
                 Icon(
                   Icons.inbox_outlined,
                   size: 48,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.3),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -1052,8 +1134,8 @@ class _RecentEntriesWidget extends StatelessWidget {
                 Text(
                   'Hold the duration button to log',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -1070,7 +1152,11 @@ class _RecentEntriesWidget extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
-                Icon(Icons.history, size: 20, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                  Icons.history,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Recent Entries',
@@ -1079,11 +1165,13 @@ class _RecentEntriesWidget extends StatelessWidget {
               ],
             ),
           ),
-          ...recent.map((record) => _RecentEntryTile(
-                record: record,
-                onTap: onRecordTap,
-                onDelete: onRecordDelete,
-              )),
+          ...recent.map(
+            (record) => _RecentEntryTile(
+              record: record,
+              onTap: onRecordTap,
+              onDelete: onRecordDelete,
+            ),
+          ),
         ],
       ),
     );
@@ -1095,11 +1183,7 @@ class _RecentEntryTile extends StatelessWidget {
   final VoidCallback? onTap;
   final Future<void> Function(LogRecord)? onDelete;
 
-  const _RecentEntryTile({
-    required this.record,
-    this.onTap,
-    this.onDelete,
-  });
+  const _RecentEntryTile({required this.record, this.onTap, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -1109,21 +1193,24 @@ class _RecentEntryTile extends StatelessWidget {
       confirmDismiss: (direction) async {
         return await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Delete Entry'),
-            content: const Text('Are you sure you want to delete this entry?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Delete Entry'),
+                content: const Text(
+                  'Are you sure you want to delete this entry?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('Delete'),
+                  ),
+                ],
               ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
         );
       },
       onDismissed: (_) => onDelete?.call(record),
@@ -1144,33 +1231,38 @@ class _RecentEntryTile extends StatelessWidget {
         ),
         title: Text(
           HomeMetricsService.formatRelativeTime(record.eventAt),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
-        subtitle: record.note?.isNotEmpty == true
-            ? Text(
-                record.note!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              )
-            : null,
-        trailing: record.duration > 0
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  HomeMetricsService.formatDuration(record.duration),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              )
-            : null,
+        subtitle:
+            record.note?.isNotEmpty == true
+                ? Text(
+                  record.note!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                )
+                : null,
+        trailing:
+            record.duration > 0
+                ? Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    HomeMetricsService.formatDuration(record.duration),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+                : null,
         onTap: onTap,
       ),
     );
@@ -1197,5 +1289,56 @@ class _RecentEntryTile extends StatelessWidget {
       case EventType.custom:
         return Icons.circle;
     }
+  }
+}
+
+/// Card showing today's total duration up to current (or selected) time,
+/// with hour-block trend. Rebuilds every minute to update the time label.
+/// Updates every minute to show current time.
+class _TotalDurationTodayCard extends StatefulWidget {
+  final List<LogRecord> records;
+
+  const _TotalDurationTodayCard({required this.records});
+
+  @override
+  State<_TotalDurationTodayCard> createState() =>
+      _TotalDurationTodayCardState();
+}
+
+class _TotalDurationTodayCardState extends State<_TotalDurationTodayCard> {
+  late DateTime _asOf;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _asOf = DateTime.now();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() => _asOf = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asOf = _asOf;
+    final metrics = HomeMetricsService();
+    final data = metrics.getTodayDurationUpTo(widget.records, asOf: asOf);
+
+    return StatCardWidget(
+      title: 'Total up to ${data.timeLabel}',
+      value: HomeMetricsService.formatDuration(data.duration),
+      subtitle: 'duration',
+      icon: Icons.today,
+      trendWidget:
+          data.trendVsYesterday != 0
+              ? TrendIndicator(percentChange: data.trendVsYesterday)
+              : null,
+    );
   }
 }

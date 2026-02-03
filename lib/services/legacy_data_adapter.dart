@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart' as enums;
 
@@ -8,6 +9,7 @@ import '../models/enums.dart' as enums;
 /// - AshleyLogs (legacy personal logs)
 /// - Any other legacy log tables that need to be migrated to current schema
 class LegacyDataAdapter {
+  static final _log = AppLogger.logger('LegacyDataAdapter');
   final FirebaseFirestore _firestore;
 
   LegacyDataAdapter({FirebaseFirestore? firestore})
@@ -46,16 +48,16 @@ class LegacyDataAdapter {
           );
           records.add(record);
         } catch (e) {
-          // Log conversion error but continue processing other records
-          // TODO: Implement proper logging instead of print
-          // print('Error converting legacy record from $collectionName/${doc.id}: $e');
+          _log.e(
+            'Error converting legacy record from $collectionName/${doc.id}',
+            error: e,
+          );
         }
       }
 
       return records;
     } catch (e) {
-      // TODO: Implement proper logging instead of print
-      // print('Error querying legacy collection $collectionName: $e');
+      _log.e('Error querying legacy collection $collectionName', error: e);
       return [];
     }
   }
@@ -169,8 +171,7 @@ class LegacyDataAdapter {
       try {
         return DateTime.parse(value);
       } catch (e) {
-        // TODO: Implement proper logging instead of print
-        // print('Could not parse datetime string: $value');
+        _log.w('Could not parse datetime string: $value');
         return null;
       }
     }
@@ -319,8 +320,7 @@ class LegacyDataAdapter {
                   );
                   yield record;
                 } catch (e) {
-                  // TODO: Implement proper logging instead of print
-                  // print('Error processing legacy record: $e');
+                  _log.e('Error processing legacy record', error: e);
                 }
               }
             }

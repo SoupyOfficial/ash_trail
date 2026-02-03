@@ -136,8 +136,8 @@ void main() {
         // THEN: They see their recent activity
         expect(find.text('Time Since Last Hit'), findsOneWidget);
 
-        // AND: They can see stats for today (widget shows multiple "Total Today" in comparison rows)
-        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
+        // AND: They can see stats for today (widget shows multiple "Total up to X" in comparison rows)
+        expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
 
         // AND: They can log another session
@@ -205,8 +205,8 @@ void main() {
         // THEN: They see the time since last hit
         expect(find.text('Time Since Last Hit'), findsOneWidget);
 
-        // AND: They can see today's stats (widget shows multiple "Total Today" in comparison rows)
-        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
+        // AND: They can see today's stats (widget shows multiple "Total up to X" in comparison rows)
+        expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
 
         // AND: They can see yesterday's stats for comparison
         expect(find.text('Avg Yesterday'), findsOneWidget);

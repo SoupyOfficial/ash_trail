@@ -211,6 +211,11 @@ Quick logging templates for common actions:
 - Same API surface via repository pattern
 - Automatic platform detection at build time
 
+## Testing
+
+- **Unit/widget tests:** `flutter test` (no device).
+- **E2E tests default to iOS.** Run `./scripts/run_e2e_tests.sh` to use an iOS simulator automatically; use `./scripts/run_e2e_tests.sh --list-devices` to list simulators. See [E2E Testing Guide](docs/testing/E2E_TESTING_GUIDE.md) and [Testing Documentation](docs/testing/) for details.
+
 ## Documentation
 
 Comprehensive documentation is organized in the [`docs/`](docs/) directory:

@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 
 /// Notification service per design doc 22. Notifications & Reminders
 /// Provides local notification scheduling for reminders
 /// Account-aware reminders per design doc 22.5.1
 class NotificationService {
+  static final _log = AppLogger.logger('NotificationService');
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
@@ -21,7 +22,7 @@ class NotificationService {
     // Request permissions for iOS
 
     _isInitialized = true;
-    debugPrint('NotificationService initialized');
+    _log.i('NotificationService initialized');
   }
 
   /// Schedule a reminder notification per design doc 22.4
@@ -46,9 +47,7 @@ class NotificationService {
     // Per design doc 22.4: Schedule reminders locally
     // Store accountId in notification payload for account-aware handling
 
-    debugPrint(
-      'Scheduled reminder: $title at $scheduledTime for account $accountId',
-    );
+    _log.i('Scheduled reminder: $title at $scheduledTime for account $accountId');
   }
 
   /// Schedule a daily reminder at a specific time
@@ -68,9 +67,7 @@ class NotificationService {
     // TODO: Implement daily reminder scheduling
     // Per design doc 22.4: Recurring reminders
 
-    debugPrint(
-      'Scheduled daily reminder: $title at $hour:$minute for account $accountId',
-    );
+    _log.i('Scheduled daily reminder: $title at $hour:$minute for account $accountId');
   }
 
   /// Cancel a specific reminder
@@ -79,7 +76,7 @@ class NotificationService {
 
     // TODO: Implement notification cancellation
 
-    debugPrint('Cancelled reminder: $id');
+    _log.d('Cancelled reminder: $id');
   }
 
   /// Cancel all reminders for a specific account
@@ -89,7 +86,7 @@ class NotificationService {
 
     // TODO: Cancel all notifications with matching accountId in payload
 
-    debugPrint('Cancelled all reminders for account: $accountId');
+    _log.d('Cancelled all reminders for account: $accountId');
   }
 
   /// Cancel all reminders
@@ -98,7 +95,7 @@ class NotificationService {
 
     // TODO: Cancel all scheduled notifications
 
-    debugPrint('Cancelled all reminders');
+    _log.d('Cancelled all reminders');
   }
 
   /// Get all pending reminders
@@ -130,7 +127,7 @@ class NotificationService {
     // TODO: Navigate to appropriate screen based on payload
     // Parse accountId from payload and switch to that account if needed
 
-    debugPrint('Notification tapped with payload: $payload');
+    _log.d('Notification tapped with payload: $payload');
   }
 }
 

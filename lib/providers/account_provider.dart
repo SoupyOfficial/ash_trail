@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../logging/app_logger.dart';
 import 'package:uuid/uuid.dart';
 import '../models/account.dart';
 import '../models/enums.dart' as enums;
@@ -10,61 +10,36 @@ import '../services/log_record_service.dart';
 import '../services/token_service.dart';
 import 'log_record_provider.dart';
 
+final _accountLog = AppLogger.logger('AccountProvider');
+
 // Token service provider - creates a new instance (stateless service)
 final tokenServiceProvider = Provider<TokenService>((ref) {
-  debugPrint('🔧 [tokenServiceProvider] Creating TokenService instance');
+  _accountLog.d('Creating TokenService instance');
   return TokenService();
 });
 
 // Service provider - creates AccountService with dependencies
 final accountServiceProvider = Provider<AccountService>((ref) {
-  debugPrint('🔧 [accountServiceProvider] Creating AccountService instance');
-  // LogRecordService is created internally by AccountService if not provided
+  _accountLog.d('Creating AccountService instance');
   return AccountService();
 });
 
 // Session manager provider - creates AccountSessionManager with dependencies
 final accountSessionManagerProvider = Provider<AccountSessionManager>((ref) {
-  debugPrint('🔧 [accountSessionManagerProvider] Creating AccountSessionManager instance');
+  _accountLog.d('Creating AccountSessionManager instance');
   final accountService = ref.watch(accountServiceProvider);
   return AccountSessionManager(accountService: accountService);
 });
 
 // Active account provider - cache the stream to avoid multiple subscriptions
 final activeAccountProvider = StreamProvider<Account?>((ref) {
-  debugPrint('\n🔴 [activeAccountProvider] INITIALIZING at ${DateTime.now()}');
+  _accountLog.d('activeAccountProvider initializing');
   final service = ref.watch(accountServiceProvider);
-  debugPrint('   📞 Calling service.watchActiveAccount()');
   final stream = service.watchActiveAccount();
-  debugPrint('   ✅ Stream obtained at ${DateTime.now()}');
-
-  // Create a logging wrapper stream that logs events without consuming them
-  final loggingStream = stream
-      .asBroadcastStream(
-        onListen: (subscription) {
-          debugPrint(
-            '   👂 [activeAccountProvider] Listener attached at ${DateTime.now()}',
-          );
-        },
-        onCancel: (subscription) {
-          debugPrint(
-            '   👋 [activeAccountProvider] Listener cancelled at ${DateTime.now()}',
-          );
-        },
-      )
-      .map((account) {
-        debugPrint(
-          '🔴 [activeAccountProvider] Stream EVENT: ${account?.userId ?? "null"} at ${DateTime.now()}',
-        );
-        return account;
-      })
-      .handleError((error, stackTrace) {
-        debugPrint('🔴 [activeAccountProvider] Stream ERROR: $error');
-        debugPrint('   StackTrace: $stackTrace');
-        throw error;
-      });
-
-  return loggingStream;
+  return stream.handleError((error, stackTrace) {
+    _accountLog.e('activeAccountProvider stream error', error: error, stackTrace: stackTrace);
+    throw error;
+  });
 });
 
 // All accounts provider - uses FutureProvider for simpler state management
@@ -76,23 +51,14 @@ final allAccountsProvider = FutureProvider<List<Account>>((ref) async {
           .watch(activeAccountProvider)
           .maybeWhen(data: (acc) => acc?.userId, orElse: () => null) ??
       'none';
-  debugPrint('\n🟢 [allAccountsProvider] INITIALIZING at ${DateTime.now()}');
-  debugPrint('   👤 Active dependency: $active');
+  _accountLog.d('allAccountsProvider initializing (active: $active)');
   final service = ref.watch(accountServiceProvider);
-  debugPrint('   📞 Calling service.getAllAccounts()');
-
   try {
     final accounts = await service.getAllAccounts();
-    debugPrint(
-      '🟢 [allAccountsProvider] SUCCESS: Loaded ${accounts.length} accounts at ${DateTime.now()}',
-    );
-    for (var i = 0; i < accounts.length; i++) {
-      debugPrint('      $i: ${accounts[i].userId} - ${accounts[i].email}');
-    }
+    _accountLog.d('allAccountsProvider loaded ${accounts.length} accounts');
     return accounts;
   } catch (error, stackTrace) {
-    debugPrint('🟢 [allAccountsProvider] ERROR: $error');
-    debugPrint('   StackTrace: $stackTrace');
+    _accountLog.e('allAccountsProvider error', error: error, stackTrace: stackTrace);
     rethrow;
   }
 });
@@ -102,21 +68,14 @@ final allAccountsProvider = FutureProvider<List<Account>>((ref) async {
 final loggedInAccountsProvider = FutureProvider<List<Account>>((ref) async {
   // Watch active account to refresh when it changes
   ref.watch(activeAccountProvider);
-
-  debugPrint(
-    '\n🔵 [loggedInAccountsProvider] INITIALIZING at ${DateTime.now()}',
-  );
+  _accountLog.d('loggedInAccountsProvider initializing');
   final sessionManager = ref.watch(accountSessionManagerProvider);
-
   try {
     final accounts = await sessionManager.getLoggedInAccounts();
-    debugPrint(
-      '🔵 [loggedInAccountsProvider] SUCCESS: ${accounts.length} logged-in accounts',
-    );
+    _accountLog.d('loggedInAccountsProvider loaded ${accounts.length} accounts');
     return accounts;
   } catch (error, stackTrace) {
-    debugPrint('🔵 [loggedInAccountsProvider] ERROR: $error');
-    debugPrint('   StackTrace: $stackTrace');
+    _accountLog.e('loggedInAccountsProvider error', error: error, stackTrace: stackTrace);
     rethrow;
   }
 });
@@ -159,10 +118,7 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
   ///
   /// The account must be logged in (have a valid session).
   Future<void> switchAccount(String userId) async {
-    debugPrint('\n🔀🔀🔀 [AccountSwitcher.switchAccount] CALLED 🔀🔀🔀');
-    debugPrint('   🎯 Target userId: $userId');
-    debugPrint('   ⏰ Time: ${DateTime.now()}');
-
+    _accountLog.d('switchAccount($userId)');
     state = const AsyncValue.loading();
     try {
       final sessionManager = _ref.read(accountSessionManagerProvider);
@@ -171,94 +127,52 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
 
       // Check if already authenticated as this user
       final currentAuthUid = auth.currentUser?.uid;
-      debugPrint('   🔐 Current Firebase Auth UID: $currentAuthUid');
-
       if (currentAuthUid != userId) {
-        debugPrint('   🔄 Need to switch Firebase Auth user...');
-
-        // Try to get a valid custom token from storage
         String? customToken = await sessionManager.getValidCustomToken(userId);
 
         if (customToken == null) {
-          // No valid token - generate a new one via Cloud Function
-          debugPrint('   🔑 No valid custom token found, generating new one...');
           try {
             final tokenData = await tokenService.generateCustomToken(userId);
             customToken = tokenData['customToken'] as String;
             await sessionManager.storeCustomToken(userId, customToken);
-            debugPrint('   ✅ New custom token generated and stored');
           } catch (e) {
-            debugPrint('   ⚠️ Failed to generate custom token: $e');
-            // Continue anyway - the account switch will still work locally
-            // but sync may fail until we can get a valid token
+            _accountLog.w('Failed to generate custom token', error: e);
           }
-        } else {
-          debugPrint('   ✅ Valid custom token found in storage');
         }
 
-        // Sign in with custom token if we have one
         if (customToken != null) {
-          debugPrint('   🔐 Signing in with custom token...');
           try {
             await auth.signInWithCustomToken(customToken);
-            debugPrint(
-              '   ✅ Firebase Auth switched to user: ${auth.currentUser?.uid}',
-            );
           } catch (e) {
-            debugPrint('   ⚠️ Failed to sign in with custom token: $e');
-            // Token might be invalid - remove it and continue
+            _accountLog.w('Failed to sign in with custom token', error: e);
             await sessionManager.removeCustomToken(userId);
-            // Try to regenerate token
             try {
-              debugPrint('   🔄 Retrying with fresh token...');
               final tokenData = await tokenService.generateCustomToken(userId);
               customToken = tokenData['customToken'] as String;
               await sessionManager.storeCustomToken(userId, customToken);
               await auth.signInWithCustomToken(customToken);
-              debugPrint(
-                '   ✅ Firebase Auth switched to user: ${auth.currentUser?.uid}',
-              );
             } catch (retryError) {
-              debugPrint('   ❌ Retry failed: $retryError');
-              // Continue anyway - local switch will work but sync won't
+              _accountLog.e('Retry sign-in failed', error: retryError);
             }
           }
         }
-      } else {
-        debugPrint('   ✅ Already authenticated as target user');
       }
 
-      // Update active account in local storage
-      debugPrint('   📞 Calling sessionManager.setActiveAccount($userId)...');
       await sessionManager.setActiveAccount(userId);
-      debugPrint('   ✅ sessionManager.setActiveAccount completed');
-
-      // Per design doc 8.4.1: Reset session state on account switch
-      // Clear draft state when account changes
-      debugPrint('   🔄 Resetting logDraftProvider...');
       _ref.read(logDraftProvider.notifier).reset();
-
-      // Invalidate providers to refresh with new account's data
       _invalidateProviders();
-
-      debugPrint(
-        '🔀🔀🔀 [AccountSwitcher.switchAccount] COMPLETE for $userId 🔀🔀🔀\n',
-      );
 
       state = const AsyncValue.data(null);
     } catch (e, st) {
-      debugPrint('   ❌ ERROR in switchAccount: $e');
+      _accountLog.e('switchAccount error', error: e, stackTrace: st);
       state = AsyncValue.error(e, st);
     }
   }
 
   /// Helper to invalidate all account-related providers
   void _invalidateProviders() {
-    debugPrint('   ♻️ Invalidating activeAccountProvider...');
     _ref.invalidate(activeAccountProvider);
-    debugPrint('   ♻️ Invalidating allAccountsProvider...');
     _ref.invalidate(allAccountsProvider);
-    debugPrint('   ♻️ Invalidating loggedInAccountsProvider...');
     _ref.invalidate(loggedInAccountsProvider);
   }
 
@@ -304,20 +218,13 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      debugPrint(
-        '\n🔄 [AccountSwitcher] Migrating anonymous data to authenticated account',
-      );
-      debugPrint('   From: $anonymousUserId');
-      debugPrint('   To: $authenticatedUserId');
+      _accountLog.i('Migrating anonymous data: $anonymousUserId -> $authenticatedUserId');
 
       final logRecordService = LogRecordService();
-
-      // 1. Get all log records for anonymous account
       final anonymousRecords = await logRecordService.getLogRecords(
         accountId: anonymousUserId,
         includeDeleted: true,
       );
-      debugPrint('   📊 Found ${anonymousRecords.length} records to migrate');
 
       // 2. Update each record's accountId to authenticated account
       for (final record in anonymousRecords) {
@@ -348,10 +255,10 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(allAccountsProvider);
       _ref.invalidate(loggedInAccountsProvider);
 
-      debugPrint('   ✅ Migration complete');
+      _accountLog.i('Migration complete');
       state = const AsyncValue.data(null);
     } catch (e, st) {
-      debugPrint('   ❌ Migration failed: $e');
+      _accountLog.e('Migration failed', error: e, stackTrace: st);
       state = AsyncValue.error(e, st);
     }
   }

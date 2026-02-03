@@ -344,8 +344,8 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Verify today stats are shown (widget shows "Total Today", "Hits Today", etc.)
-        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
+        // Verify today stats are shown (widget shows "Total up to X", "Hits Today", etc.)
+        expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
         // Should show average duration
         expect(find.text('Avg Today'), findsOneWidget);
         // Should show hits count
@@ -390,8 +390,8 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Both sections should exist (widget shows "Total Today", "Avg Today", "Avg Yesterday" etc.)
-        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
+        // Both sections should exist (widget shows "Total up to X", "Avg Today", "Avg Yesterday" etc.)
+        expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
         expect(find.text('Avg Yesterday'), findsOneWidget);
         // Widget renders whatever sections it can based on actual data
@@ -480,8 +480,8 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 100));
 
-        // Widget should display something for today (widget shows "Total Today", "Avg Today", etc.)
-        expect(find.text('Total Today'), findsAtLeastNWidgets(1));
+        // Widget should display something for today (widget shows "Total up to X", "Avg Today", etc.)
+        expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
         expect(find.text('Avg Today'), findsOneWidget);
         // Widget should be functional
         expect(find.byType(TimeSinceLastHitWidget), findsOneWidget);

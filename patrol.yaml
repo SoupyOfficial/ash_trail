@@ -3,14 +3,19 @@ package_name: com.soup.smokeLog
 bundle_id: com.soup.smokeLog
 
 # Patrol configuration for E2E testing
+# Default platform: iOS. Use ./scripts/run_e2e_tests.sh for automatic iOS simulator selection.
 patrol:
   # Test directory containing Patrol tests
   test_dir: integration_test
-  
+
+  # Default platform for test runs (iOS). Scripts and CI use iOS simulator.
+  default_platform: ios
+
   # iOS configuration
+  # Omit flavor: the project has no flavors; using Debug/Release/Profile only.
+  # flavor: Runner would request Debug-Runner config which doesn't exist, causing
+  # xcodebuild to fall back to Release and fail on simulator (aot_assembly_release).
   ios:
-    # iOS simulator for testing
-    flavor: Runner
     bundle_id: com.soup.smokeLog
     
   # Android configuration (for future use)

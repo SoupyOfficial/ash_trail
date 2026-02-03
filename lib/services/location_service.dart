@@ -1,12 +1,12 @@
-// TODO: Re-enable when geolocator 12.0.0 API is fully integrated
-// import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import '../logging/app_logger.dart';
 
 /// Service for handling location permissions and access
 /// Follows design doc 22.3: Handle permission requests gracefully
 /// TODO: Re-enable location features when geolocator 12.0.0 API is properly integrated
 class LocationService {
+  static final _log = AppLogger.logger('LocationService');
   static final LocationService _instance = LocationService._internal();
 
   factory LocationService() {
@@ -45,7 +45,7 @@ class LocationService {
       return permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
     } catch (e) {
-      debugPrint('Error requesting location permission: $e');
+      _log.e('Error requesting location permission', error: e);
       return false;
     }
   }
@@ -57,14 +57,14 @@ class LocationService {
       // Check permission first
       final hasPermission = await requestLocationPermission();
       if (!hasPermission) {
-        debugPrint('Location permission not granted');
+        _log.w('Location permission not granted');
         return null;
       }
 
       // Check if location service is enabled
       final isEnabled = await isLocationServiceEnabled();
       if (!isEnabled) {
-        debugPrint('Location service is not enabled');
+        _log.w('Location service is not enabled');
         return null;
       }
 
@@ -75,7 +75,7 @@ class LocationService {
 
       return position;
     } catch (e) {
-      debugPrint('Error getting location: $e');
+      _log.e('Error getting location', error: e);
       return null;
     }
   }

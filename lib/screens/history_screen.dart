@@ -31,14 +31,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        key: const Key('app_bar_history'),
         title: const Text('History'),
         actions: [
           IconButton(
+            key: const Key('history_filter_button'),
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilterDialog,
             tooltip: 'Filter',
           ),
           PopupMenuButton<HistoryGrouping>(
+            key: const Key('history_group_button'),
             icon: const Icon(Icons.view_agenda),
             tooltip: 'Group by',
             onSelected: (grouping) {
@@ -83,6 +86,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
             ),
             child: TextField(
+              key: const Key('history_search'),
               decoration: InputDecoration(
                 hintText: 'Search entries...',
                 prefixIcon: const Icon(Icons.search),

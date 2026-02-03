@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/log_record.dart';
+import '../services/home_metrics_service.dart';
 import '../utils/pattern_analysis.dart'
     show PatternAnalysis, PeakHourData, DayPatternData;
 import '../utils/design_constants.dart';
@@ -277,6 +278,25 @@ class _TimeSinceLastHitWidgetState
   double _calculateTrend(double currentAvg, double comparisonAvg) {
     if (comparisonAvg == 0) return 0;
     return ((currentAvg - comparisonAvg) / comparisonAvg) * 100;
+  }
+
+  /// Calculate trend for today's total duration based on hour-block pace.
+  /// Compares today's accumulated duration to the expected amount by this hour
+  /// (fullDayReference × elapsed fraction of day). Behind pace → negative,
+  /// ahead of pace → positive. Avoids "always down until end of day" when
+  /// comparing raw today total to yesterday's full-day total.
+  /// Returns: positive = ahead of pace, negative = behind pace, 0 = no change / no reference
+  double _calculateTrendHourBlock(double actualSoFar, double fullDayReference) {
+    if (fullDayReference <= 0) return 0;
+    final now = DateTime.now();
+    final todayStart = DayBoundary.getTodayStart();
+    final elapsed = now.difference(todayStart);
+    const secondsPerDay = 24 * 60 * 60;
+    final elapsedSeconds = elapsed.inSeconds.clamp(0, secondsPerDay);
+    final fraction = elapsedSeconds / secondsPerDay;
+    final expectedByNow = fullDayReference * fraction;
+    if (expectedByNow <= 0) return 0;
+    return ((actualSoFar - expectedByNow) / expectedByNow) * 100;
   }
 
   Widget _buildTrendIndicator(double trendPercent, BuildContext context) {
@@ -749,6 +769,7 @@ class _TimeSinceLastHitWidgetState
     if (_timeSinceLastHit == null) {
       final colorScheme = Theme.of(context).colorScheme;
       return Card(
+        key: const Key('time_since_last_hit'),
         elevation: ElevationLevel.md.value,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadii.md,
@@ -785,23 +806,26 @@ class _TimeSinceLastHitWidgetState
     }
 
     // Calculate trends
-    // Average duration per hit trends
+    // Average duration per hit trends (raw comparison)
     final todayVsYesterdayTrend = _calculateTrend(
       _todayStats.avgDuration,
       _yesterdayStats.avgDuration,
     );
-    
-    // Total duration trends
-    final todayTotalVsYesterdayTotalTrend = _calculateTrend(
+
+    // Total duration trends: hour-block pace (expected-by-now vs actual so far)
+    final todayTotalVsYesterdayTotalTrend = _calculateTrendHourBlock(
       _todayStats.totalDuration,
       _yesterdayStats.totalDuration,
     );
-    final todayTotalVsWeekAvgTrend = _calculateTrend(
+    final todayTotalVsWeekAvgTrend = _calculateTrendHourBlock(
       _todayStats.totalDuration,
       _weekStats.avgDuration,
     );
 
+    final timeLabel = HomeMetricsService.formatTimeLabel(DateTime.now());
+
     return Card(
+      key: const Key('time_since_last_hit'),
       elevation: ElevationLevel.md.value,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadii.md,
@@ -897,26 +921,26 @@ class _TimeSinceLastHitWidgetState
                       children: [
                         _buildStatCard(
                           context,
-                          title: 'Total Today',
+                          title: 'Total up to $timeLabel',
                           value: _formatSeconds(_todayStats.totalDuration),
                           subtitle: 'duration',
                           icon: Icons.today,
                           trendWidget: _buildTrendIndicator(todayTotalVsYesterdayTotalTrend, context),
                           tooltipDescription:
-                              'Total duration of all hits today. Shows percentage difference compared to yesterday.',
+                              'Total duration today up to $timeLabel. Trend vs yesterday\'s pace (expected-by-this-hour); ahead or behind.',
                           onTap: () => _showDetailView(
                             context,
-                            'Total Today',
+                            'Total up to $timeLabel',
                             _formatSeconds(_todayStats.totalDuration),
                             'total duration',
                             {
                               'Total Hits': _todayStats.count,
                               'Average per Hit': '${_todayStats.avgDuration.toStringAsFixed(1)} sec',
                               'Comparison': todayTotalVsYesterdayTotalTrend == 0
-                                  ? 'No change from yesterday'
+                                  ? 'On yesterday\'s pace'
                                   : todayTotalVsYesterdayTotalTrend > 0
-                                      ? '${todayTotalVsYesterdayTotalTrend.toStringAsFixed(0)}% higher than yesterday'
-                                      : '${todayTotalVsYesterdayTotalTrend.abs().toStringAsFixed(0)}% lower than yesterday',
+                                      ? '${todayTotalVsYesterdayTotalTrend.toStringAsFixed(0)}% ahead of yesterday\'s pace'
+                                      : '${todayTotalVsYesterdayTotalTrend.abs().toStringAsFixed(0)}% behind yesterday\'s pace',
                               'Yesterday Total': _formatSeconds(_yesterdayStats.totalDuration),
                             },
                           ),
@@ -950,26 +974,26 @@ class _TimeSinceLastHitWidgetState
                       children: [
                         _buildStatCard(
                           context,
-                          title: 'Total Today',
+                          title: 'Total up to $timeLabel',
                           value: _formatSeconds(_todayStats.totalDuration),
                           subtitle: 'duration',
                           icon: Icons.today,
                           trendWidget: _buildTrendIndicator(todayTotalVsWeekAvgTrend, context),
                           tooltipDescription:
-                              'Total duration of all hits today. Shows percentage difference compared to 7-day daily average.',
+                              'Total duration today up to $timeLabel. Trend vs 7-day avg pace (expected-by-this-hour); ahead or behind.',
                           onTap: () => _showDetailView(
                             context,
-                            'Total Today',
+                            'Total up to $timeLabel',
                             _formatSeconds(_todayStats.totalDuration),
                             'total duration',
                             {
                               'Total Hits': _todayStats.count,
                               'Average per Hit': '${_todayStats.avgDuration.toStringAsFixed(1)} sec',
                               'Comparison': todayTotalVsWeekAvgTrend == 0
-                                  ? 'No change from 7-day avg'
+                                  ? 'On 7-day avg pace'
                                   : todayTotalVsWeekAvgTrend > 0
-                                      ? '${todayTotalVsWeekAvgTrend.toStringAsFixed(0)}% higher than 7-day avg'
-                                      : '${todayTotalVsWeekAvgTrend.abs().toStringAsFixed(0)}% lower than 7-day avg',
+                                      ? '${todayTotalVsWeekAvgTrend.toStringAsFixed(0)}% ahead of 7-day avg pace'
+                                      : '${todayTotalVsWeekAvgTrend.abs().toStringAsFixed(0)}% behind 7-day avg pace',
                               '7-Day Avg/Day': _formatSeconds(_weekStats.avgDuration),
                             },
                           ),

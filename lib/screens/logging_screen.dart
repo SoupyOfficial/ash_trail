@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../logging/app_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
@@ -50,12 +51,13 @@ class _LoggingScreenState extends ConsumerState<LoggingScreen>
 
     return Scaffold(
       appBar: AppBar(
+        key: const Key('app_bar_logging'),
         title: const Text('Log Event'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.edit_note), text: 'Detailed'),
-            Tab(icon: Icon(Icons.history), text: 'Backdate'),
+            Tab(key: Key('tab_detailed'), icon: Icon(Icons.edit_note), text: 'Detailed'),
+            Tab(key: Key('tab_backdate'), icon: Icon(Icons.history), text: 'Backdate'),
           ],
         ),
       ),
@@ -82,6 +84,7 @@ class _DetailedLogTab extends ConsumerStatefulWidget {
 }
 
 class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
+  static final _log = AppLogger.logger('LoggingScreen');
   final _formKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
 
@@ -131,9 +134,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
       final position = await _locationService.getCurrentLocation();
       if (position != null && mounted) {
         draftNotifier.setLocation(position.latitude, position.longitude);
-        debugPrint(
-          '✅ Location auto-captured: ${position.latitude}, ${position.longitude}',
-        );
+        _log.d('Location auto-captured: ${position.latitude}, ${position.longitude}');
         // Show notification that location was captured
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -145,7 +146,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
         }
       }
     } catch (e) {
-      debugPrint('⚠️ Failed to auto-capture location: $e');
+      _log.w('Failed to auto-capture location', error: e);
     }
   }
 
@@ -844,6 +845,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
               children: [
                 Expanded(
                   child: OutlinedButton(
+                    key: const Key('logging_clear_button'),
                     onPressed: _isSubmitting
                         ? null
                         : () {
@@ -861,6 +863,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 Expanded(
                   flex: 2,
                   child: FilledButton(
+                    key: const Key('logging_log_event_button'),
                     onPressed: _isSubmitting ? null : () => _submitLog(draft),
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(

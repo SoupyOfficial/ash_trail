@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../models/log_record.dart';
 import '../models/web_models.dart';
@@ -193,44 +192,16 @@ class LogRecordRepositoryHive implements LogRecordRepository {
 
   @override
   Stream<List<LogRecord>> watchByAccount(String accountId) {
-    debugPrint(
-      '\n🗄️ [HiveRepo.watchByAccount] CALLED for accountId: $accountId',
-    );
-    debugPrint('   📊 Total records in box: ${_box.length}');
     final allRecords = _getAllRecords();
     final matchingRecords =
         allRecords
             .where((r) => r.accountId == accountId && !r.isDeleted)
             .toList();
-    debugPrint(
-      '   🔍 Records matching accountId $accountId: ${matchingRecords.length}',
-    );
-    for (final r in allRecords.take(5)) {
-      debugPrint(
-        '      Sample record: logId=${r.logId.substring(0, 8)}... accountId=${r.accountId} isDeleted=${r.isDeleted}',
-      );
-    }
-
-    // Create a stream that emits the INITIAL DATA first, then listens for changes
-    final mappedStream = _controller.stream.map((records) {
-      final filtered =
-          records
-              .where((r) => r.accountId == accountId && !r.isDeleted)
-              .toList();
-      debugPrint(
-        '🗄️ [HiveRepo.watchByAccount] STREAM EMIT for $accountId: ${filtered.length} records (from ${records.length} total)',
-      );
-      return filtered;
-    });
-
-    // Start with current data, then continue with updates
-    debugPrint(
-      '   📤 Emitting initial ${matchingRecords.length} records for $accountId',
-    );
+    final mappedStream = _controller.stream.map((records) =>
+        records
+            .where((r) => r.accountId == accountId && !r.isDeleted)
+            .toList());
     return Stream.value(matchingRecords).asyncExpand((initial) async* {
-      debugPrint(
-        '🗄️ [HiveRepo.watchByAccount] INITIAL EMIT for $accountId: ${initial.length} records',
-      );
       yield initial;
       yield* mappedStream;
     });

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../logging/app_logger.dart';
 import 'dart:convert';
 import '../models/account.dart';
 import '../models/enums.dart';
@@ -21,6 +21,7 @@ import 'account_service.dart';
 /// - Each account's data syncs independently to Firestore
 /// - Switching accounts changes both the displayed data AND the Firebase Auth user
 class AccountSessionManager {
+  static final _log = AppLogger.logger('AccountSessionManager');
   final FlutterSecureStorage _secureStorage;
   final AccountService _accountService;
 
@@ -42,12 +43,10 @@ class AccountSessionManager {
 
   /// Get list of all accounts that have active sessions (logged in)
   Future<List<Account>> getLoggedInAccounts() async {
-    debugPrint('\n🔐 [AccountSessionManager] getLoggedInAccounts()');
-
+    _log.d('getLoggedInAccounts()');
     final allAccounts = await _accountService.getAllAccounts();
     final loggedInAccounts = allAccounts.where((a) => a.isLoggedIn).toList();
-
-    debugPrint('   📊 Found ${loggedInAccounts.length} logged-in accounts');
+    _log.d('Found ${loggedInAccounts.length} logged-in accounts');
     return loggedInAccounts;
   }
 
@@ -58,7 +57,7 @@ class AccountSessionManager {
     required String? accessToken,
     DateTime? tokenExpiresAt,
   }) async {
-    debugPrint('\n🔐 [AccountSessionManager] storeSession($userId)');
+    _log.d('storeSession($userId)');
 
     final sessionData = {
       'userId': userId,
@@ -87,7 +86,7 @@ class AccountSessionManager {
     // Track this account in logged-in list
     await _addToLoggedInList(userId);
 
-    debugPrint('   ✅ Session stored for $userId');
+    _log.i('Session stored for $userId');
   }
 
   /// Retrieve stored session for an account
@@ -100,7 +99,7 @@ class AccountSessionManager {
     try {
       return jsonDecode(sessionJson) as Map<String, dynamic>;
     } catch (e) {
-      debugPrint('   ❌ Failed to decode session: $e');
+      _log.e('Failed to decode session', error: e);
       return null;
     }
   }
@@ -115,7 +114,7 @@ class AccountSessionManager {
   /// They are valid for 48 hours from the time they were generated.
   Future<void> storeCustomToken(String uid, String customToken) async {
     try {
-      debugPrint('🔑 [AccountSessionManager] Storing custom token for $uid');
+      _log.d('Storing custom token for $uid');
 
       // Store the custom token
       await _secureStorage.write(
@@ -130,9 +129,9 @@ class AccountSessionManager {
         value: timestamp,
       );
 
-      debugPrint('🔑 [AccountSessionManager] ✅ Custom token stored for $uid');
+      _log.i('Custom token stored for $uid');
     } catch (e) {
-      debugPrint('🔑 [AccountSessionManager] ❌ Error storing custom token: $e');
+      _log.e('Error storing custom token', error: e);
       rethrow;
     }
   }
@@ -151,7 +150,7 @@ class AccountSessionManager {
         key: '$_customTokenPrefix$uid',
       );
       if (customToken == null) {
-        debugPrint('🔑 [AccountSessionManager] No custom token found for $uid');
+        _log.d('No custom token found for $uid');
         return null;
       }
 
@@ -160,9 +159,7 @@ class AccountSessionManager {
         key: '$_customTokenTimestampPrefix$uid',
       );
       if (timestampStr == null) {
-        debugPrint(
-          '🔑 [AccountSessionManager] No timestamp found for custom token $uid',
-        );
+        _log.d('No timestamp found for custom token $uid');
         return null;
       }
 
@@ -173,23 +170,17 @@ class AccountSessionManager {
 
       if (tokenAge > maxAge) {
         final ageHours = tokenAge / 3600000;
-        debugPrint(
-          '🔑 [AccountSessionManager] Custom token for $uid has expired (age: ${ageHours.toStringAsFixed(1)} hours)',
-        );
+        _log.w('Custom token for $uid has expired (age: ${ageHours.toStringAsFixed(1)} hours)');
         // Remove expired token
         await removeCustomToken(uid);
         return null;
       }
 
       final ageHours = tokenAge / 3600000;
-      debugPrint(
-        '🔑 [AccountSessionManager] Retrieved valid custom token for $uid (age: ${ageHours.toStringAsFixed(1)} hours)',
-      );
+      _log.d('Retrieved valid custom token for $uid (age: ${ageHours.toStringAsFixed(1)} hours)');
       return customToken;
     } catch (e) {
-      debugPrint(
-        '🔑 [AccountSessionManager] ❌ Error retrieving custom token: $e',
-      );
+      _log.e('Error retrieving custom token', error: e);
       return null;
     }
   }
@@ -204,11 +195,9 @@ class AccountSessionManager {
     try {
       await _secureStorage.delete(key: '$_customTokenPrefix$uid');
       await _secureStorage.delete(key: '$_customTokenTimestampPrefix$uid');
-      debugPrint('🔑 [AccountSessionManager] Removed custom token for $uid');
+      _log.i('Removed custom token for $uid');
     } catch (e) {
-      debugPrint(
-        '🔑 [AccountSessionManager] ❌ Error removing custom token: $e',
-      );
+      _log.e('Error removing custom token', error: e);
     }
   }
 
@@ -220,7 +209,7 @@ class AccountSessionManager {
 
   /// Clear session for a specific account (sign out single account)
   Future<void> clearSession(String userId) async {
-    debugPrint('\n🔐 [AccountSessionManager] clearSession($userId)');
+    _log.d('clearSession($userId)');
 
     await _secureStorage.delete(key: '$_sessionPrefix$userId');
     
@@ -240,12 +229,12 @@ class AccountSessionManager {
     // Remove from logged-in list
     await _removeFromLoggedInList(userId);
 
-    debugPrint('   ✅ Session cleared for $userId');
+    _log.i('Session cleared for $userId');
   }
 
   /// Clear all sessions (sign out all accounts)
   Future<void> clearAllSessions() async {
-    debugPrint('\n🔐 [AccountSessionManager] clearAllSessions()');
+    _log.d('clearAllSessions()');
 
     final loggedInUserIds = await _getLoggedInList();
     for (final userId in loggedInUserIds) {
@@ -267,13 +256,13 @@ class AccountSessionManager {
     await _secureStorage.delete(key: _loggedInAccountsKey);
     await _secureStorage.delete(key: _activeSessionKey);
 
-    debugPrint('   ✅ All sessions cleared');
+    _log.i('All sessions cleared');
   }
 
   /// Set the active account for data viewing
   /// This doesn't change Firebase auth state, just which account's data we show
   Future<void> setActiveAccount(String userId) async {
-    debugPrint('\n🔐 [AccountSessionManager] setActiveAccount($userId)');
+    _log.d('setActiveAccount($userId)');
 
     await _secureStorage.write(key: _activeSessionKey, value: userId);
     await _accountService.setActiveAccount(userId);
@@ -285,7 +274,7 @@ class AccountSessionManager {
       await _accountService.saveAccount(account);
     }
 
-    debugPrint('   ✅ Active account set to $userId');
+    _log.i('Active account set to $userId');
   }
 
   /// Get currently active account's userId
@@ -305,7 +294,7 @@ class AccountSessionManager {
     String? accessToken,
     DateTime? tokenExpiresAt,
   }) async {
-    debugPrint('\n🔐 [AccountSessionManager] addAccountSession($userId)');
+    _log.d('addAccountSession($userId)');
 
     // Check if account already exists
     Account? account = await _accountService.getAccountByUserId(userId);
@@ -348,7 +337,7 @@ class AccountSessionManager {
       tokenExpiresAt: tokenExpiresAt,
     );
 
-    debugPrint('   ✅ Account session added for $userId');
+    _log.i('Account session added for $userId');
     return account;
   }
 
@@ -358,15 +347,13 @@ class AccountSessionManager {
     String userId, {
     bool deleteData = false,
   }) async {
-    debugPrint(
-      '\n🔐 [AccountSessionManager] removeAccountSession($userId, deleteData: $deleteData)',
-    );
+    _log.d('removeAccountSession($userId, deleteData: $deleteData)');
 
     await clearSession(userId);
 
     if (deleteData) {
       await _accountService.deleteAccount(userId);
-      debugPrint('   🗑️ Account data deleted');
+      _log.i('Account data deleted');
     }
 
     // If this was the active account, switch to another logged-in account
@@ -380,7 +367,7 @@ class AccountSessionManager {
       }
     }
 
-    debugPrint('   ✅ Account session removed');
+    _log.i('Account session removed');
   }
 
   /// Check if there are any logged-in accounts

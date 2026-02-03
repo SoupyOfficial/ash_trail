@@ -1,10 +1,11 @@
 import 'database_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../logging/app_logger.dart';
 
 /// Hive implementation for all platforms (web, iOS, Android, desktop)
 /// Uses IndexedDB on web, native storage on mobile/desktop
 class HiveDatabaseService implements DatabaseService {
+  static final _log = AppLogger.logger('HiveDatabaseService');
   // Singleton instance
   static final HiveDatabaseService _instance = HiveDatabaseService._internal();
   static HiveDatabaseService get instance => _instance;
@@ -28,51 +29,21 @@ class HiveDatabaseService implements DatabaseService {
   @override
   Future<void> initialize() async {
     if (_initialized) {
-      debugPrint(
-        '🏗️ [HiveDatabaseService.initialize] Already initialized, skipping',
-      );
+      _log.d('Already initialized, skipping');
       return;
     }
-
-    debugPrint(
-      '\n🏗️ [HiveDatabaseService.initialize] START at ${DateTime.now()}',
-    );
-
-    // Initialize Hive for Flutter (works on all platforms)
-    debugPrint('   📦 Calling Hive.initFlutter()...');
+    _log.i('Initializing Hive database');
     await Hive.initFlutter();
-    debugPrint('   ✅ Hive.initFlutter() completed');
-
-    // Open boxes for different data types
-    debugPrint('   📂 Opening Hive boxes...');
     _accountsBox = await Hive.openBox('accounts');
-    debugPrint(
-      '      ✅ Opened accounts box with ${_accountsBox!.length} items',
-    );
-
     _logEntriesBox = await Hive.openBox('log_entries');
-    debugPrint('      ✅ Opened log_entries box');
-
     _logRecordsBox = await Hive.openBox('log_records');
-    debugPrint('      ✅ Opened log_records box');
-
     _profilesBox = await Hive.openBox('profiles');
-    debugPrint('      ✅ Opened profiles box');
-
     _userAccountsBox = await Hive.openBox('user_accounts');
-    debugPrint('      ✅ Opened user_accounts box');
-
     _dailyRollupsBox = await Hive.openBox('daily_rollups');
-    debugPrint('      ✅ Opened daily_rollups box');
-
     _sessionsBox = await Hive.openBox('sessions');
-    debugPrint('      ✅ Opened sessions box');
-
     _templatesBox = await Hive.openBox('templates');
-    debugPrint('      ✅ Opened templates box');
-
     _initialized = true;
-    debugPrint('   ✅ All boxes opened successfully\n');
+    _log.i('All Hive boxes opened successfully');
   }
 
   @override
@@ -80,17 +51,10 @@ class HiveDatabaseService implements DatabaseService {
 
   @override
   dynamic get boxes {
-    debugPrint(
-      '🏗️ [HiveDatabaseService.boxes] Accessing boxes at ${DateTime.now()}',
-    );
     if (!_initialized) {
-      debugPrint('   ❌ CRITICAL: Database not initialized!');
+      _log.e('Database not initialized - call initialize() first');
       throw Exception('Database not initialized. Call initialize() first.');
     }
-    // Return a map of boxes
-    debugPrint(
-      '   ✅ Returning boxes map with ${_accountsBox!.length} accounts',
-    );
     return {
       'accounts': _accountsBox,
       'logEntries': _logEntriesBox,

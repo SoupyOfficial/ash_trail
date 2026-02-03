@@ -25,7 +25,10 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Import / Export')),
+      appBar: AppBar(
+        key: const Key('app_bar_export'),
+        title: const Text('Import / Export'),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

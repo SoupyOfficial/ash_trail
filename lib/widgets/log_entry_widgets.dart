@@ -2,10 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../logging/app_logger.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../services/location_service.dart';
 import 'reason_chips_grid.dart';
+
+final _logEntryLog = AppLogger.logger('LogEntryWidgets');
 
 /// Dialog for creating a new log entry
 class CreateLogEntryDialog extends ConsumerStatefulWidget {
@@ -437,7 +440,7 @@ class QuickLogButton extends ConsumerWidget {
               longitude = position.longitude;
             }
           } catch (e) {
-            debugPrint('⚠️ Failed to capture location for quick log: $e');
+            _logEntryLog.w('Failed to capture location for quick log', error: e);
           }
 
           await service.createLogRecord(

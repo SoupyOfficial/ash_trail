@@ -21,11 +21,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
       - name: Analyze
         run: flutter analyze
 
-      - name: Test
-        run: flutter test
+      - name: Test with coverage gate
+        run: bash scripts/coverage/check_coverage.sh
 
       - name: Build web (release)
         run: flutter build web --release

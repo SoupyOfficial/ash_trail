@@ -17,6 +17,17 @@ flutter test --coverage
 - Runs all tests in `test/`.
 - Writes **LCOV** to `coverage/lcov.info`.
 
+### Coverage gate (85% line coverage)
+
+Use the repo’s coverage gate script locally or in CI:
+
+```bash
+MIN_COVERAGE=85 bash scripts/coverage/check_coverage.sh
+```
+
+- Filters generated files (e.g., `*.g.dart`, `*.freezed.dart`, `firebase_options.dart`).
+- Fails the run if line coverage is below the threshold.
+
 ### View coverage locally
 
 **Option A – HTML report (recommended)**

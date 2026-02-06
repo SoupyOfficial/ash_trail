@@ -1,0 +1,2 @@
+Error: xcodebuild exited with code -9
+See the logs above to learn what happened. Also consider running with --verbose. If the logs still aren't useful, then it's a bug - please report it.

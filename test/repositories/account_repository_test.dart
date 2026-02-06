@@ -286,17 +286,6 @@ void main() {
       final retrieved = await repository.getByUserId('email-user');
       expect(retrieved?.authProvider, equals(AuthProvider.email));
     });
-
-    test('saves and retrieves accounts with anonymous provider', () async {
-      final account = _createTestAccount(
-        userId: 'anon-user',
-        authProvider: AuthProvider.anonymous,
-      );
-      await repository.save(account);
-
-      final retrieved = await repository.getByUserId('anon-user');
-      expect(retrieved?.authProvider, equals(AuthProvider.anonymous));
-    });
   });
 
   group('AccountRepository - Login State', () {

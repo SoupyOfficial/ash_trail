@@ -48,7 +48,6 @@ enum AuthProvider {
   apple, // Apple Sign-In
   email, // Email/password
   devStatic, // Development static account
-  anonymous, // Anonymous account
 }
 
 /// Time confidence levels for clock skew handling

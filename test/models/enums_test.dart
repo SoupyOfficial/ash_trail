@@ -158,17 +158,16 @@ void main() {
       expect(AuthProvider.values.contains(AuthProvider.apple), isTrue);
       expect(AuthProvider.values.contains(AuthProvider.email), isTrue);
       expect(AuthProvider.values.contains(AuthProvider.devStatic), isTrue);
-      expect(AuthProvider.values.contains(AuthProvider.anonymous), isTrue);
     });
 
-    test('has expected count of 5 providers', () {
-      expect(AuthProvider.values.length, equals(5));
+    test('has expected count of 4 providers', () {
+      expect(AuthProvider.values.length, equals(4));
     });
 
     test('can be serialized to string name', () {
       expect(AuthProvider.gmail.name, equals('gmail'));
       expect(AuthProvider.apple.name, equals('apple'));
-      expect(AuthProvider.anonymous.name, equals('anonymous'));
+      expect(AuthProvider.email.name, equals('email'));
     });
   });
 

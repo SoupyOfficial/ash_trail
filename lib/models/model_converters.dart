@@ -35,7 +35,7 @@ extension AccountWebConversion on Account {
       isLoggedIn: web.isLoggedIn,
       authProvider: AuthProvider.values.firstWhere(
         (p) => p.name == web.authProvider,
-        orElse: () => AuthProvider.anonymous,
+        orElse: () => AuthProvider.email,
       ),
       createdAt: web.createdAt,
       lastSyncedAt: web.updatedAt,

@@ -357,6 +357,35 @@ void main() {
       expect(mockStorage.storage['custom_token_user-1'], isNull);
     });
 
+    test('getValidCustomToken returns token at 46 hours (within valid window)', () async {
+      // Store token with timestamp just under 47 hours (within valid window)
+      mockStorage.storage['custom_token_user-1'] = 'still-valid-token';
+      final validTimestamp = DateTime.now()
+          .subtract(const Duration(hours: 46))
+          .millisecondsSinceEpoch;
+      mockStorage.storage['custom_token_timestamp_user-1'] = validTimestamp.toString();
+
+      final token = await sessionManager.getValidCustomToken('user-1');
+
+      expect(token, equals('still-valid-token'));
+      // Token should NOT be removed
+      expect(mockStorage.storage['custom_token_user-1'], isNotNull);
+    });
+
+    test('getValidCustomToken returns null at exactly 47 hours (boundary)', () async {
+      // Store token with timestamp at exactly 47 hours (edge of valid window)
+      mockStorage.storage['custom_token_user-1'] = 'boundary-token';
+      final boundaryTimestamp = DateTime.now()
+          .subtract(const Duration(hours: 47, minutes: 1))
+          .millisecondsSinceEpoch;
+      mockStorage.storage['custom_token_timestamp_user-1'] = boundaryTimestamp.toString();
+
+      final token = await sessionManager.getValidCustomToken('user-1');
+
+      // Should be null as it's past the 47-hour buffer
+      expect(token, isNull);
+    });
+
     test('getValidCustomToken returns null when no token exists', () async {
       final token = await sessionManager.getValidCustomToken('non-existent');
       expect(token, isNull);

@@ -22,7 +22,7 @@ void main() {
         expect(account.email, 'test@example.com');
         expect(account.isActive, true);
         expect(account.isLoggedIn, false);
-        expect(account.authProvider, 'anonymous');
+        expect(account.authProvider, 'email');
       });
 
       test('creates with all optional fields', () {
@@ -66,7 +66,7 @@ void main() {
         expect(account.isLoggedIn, false);
       });
 
-      test('defaults authProvider to anonymous', () {
+      test('defaults authProvider to email', () {
         final account = WebAccount(
           id: 'acc-1',
           userId: 'user-1',
@@ -76,7 +76,7 @@ void main() {
           updatedAt: now,
         );
 
-        expect(account.authProvider, 'anonymous');
+        expect(account.authProvider, 'email');
       });
     });
 
@@ -182,7 +182,7 @@ void main() {
 
         expect(account.isActive, true);
         expect(account.isLoggedIn, false);
-        expect(account.authProvider, 'anonymous');
+        expect(account.authProvider, 'email');
         expect(account.displayName, isNull);
         expect(account.photoUrl, isNull);
       });

@@ -153,9 +153,7 @@ class AccountsScreen extends ConsumerWidget {
               // Other accounts section (logged out but data preserved)
               ...() {
                 final otherAccounts =
-                    accounts
-                        .where((a) => !a.isLoggedIn && !a.isAnonymous)
-                        .toList();
+                    accounts.where((a) => !a.isLoggedIn).toList();
                 if (otherAccounts.isEmpty) return <Widget>[];
                 return [
                   Padding(
@@ -459,8 +457,8 @@ class AccountsScreen extends ConsumerWidget {
         return 'Apple';
       case 'AuthProvider.email':
         return 'Email';
-      case 'AuthProvider.anonymous':
-        return 'Anonymous';
+      case 'AuthProvider.devStatic':
+        return 'Dev';
       default:
         return 'Unknown';
     }

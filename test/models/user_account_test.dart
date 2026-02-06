@@ -61,7 +61,7 @@ void main() {
         final account = UserAccount.create(
           accountId: 'acc-123',
           displayName: 'Test User',
-          authProvider: AuthProvider.anonymous,
+          authProvider: AuthProvider.email,
         );
 
         expect(account.isActive, false);
@@ -252,15 +252,6 @@ void main() {
         expect(account.authProvider, AuthProvider.apple);
       });
 
-      test('works with anonymous provider', () {
-        final account = UserAccount.create(
-          accountId: 'acc-3',
-          displayName: 'Anonymous User',
-          authProvider: AuthProvider.anonymous,
-        );
-        expect(account.authProvider, AuthProvider.anonymous);
-      });
-
       test('works with email provider', () {
         final account = UserAccount.create(
           accountId: 'acc-4',
@@ -344,38 +335,6 @@ void main() {
         expect(account.email, 'john.doe@gmail.com');
         expect(account.authProvider, AuthProvider.gmail);
         expect(account.isActive, true);
-      });
-
-      test('creating an anonymous user', () {
-        final account = UserAccount.create(
-          accountId: 'anon-device-id',
-          displayName: 'Anonymous',
-          authProvider: AuthProvider.anonymous,
-        );
-
-        expect(account.authProvider, AuthProvider.anonymous);
-        expect(account.email, isNull);
-        expect(account.photoUrl, isNull);
-      });
-
-      test('upgrading anonymous to Gmail account', () {
-        var account = UserAccount.create(
-          accountId: 'anon-id',
-          displayName: 'Anonymous',
-          authProvider: AuthProvider.anonymous,
-        );
-
-        // Simulate upgrade
-        account = account.copyWith(
-          accountId: 'google-uid-456',
-          displayName: 'Jane Smith',
-          authProvider: AuthProvider.gmail,
-          email: 'jane@gmail.com',
-        );
-
-        expect(account.authProvider, AuthProvider.gmail);
-        expect(account.email, 'jane@gmail.com');
-        expect(account.displayName, 'Jane Smith');
       });
 
       test('updating tokens after refresh', () {

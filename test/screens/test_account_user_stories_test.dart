@@ -95,15 +95,13 @@ void main() {
       expect(testAccount.isActive, isTrue);
     });
 
-    /// **Purpose:** Confirm test accounts use devStatic (not anonymous) auth.
+    /// **Purpose:** Confirm test accounts use devStatic auth provider.
     ///
     /// **What it does:** Verifies that test accounts created with
-    /// AuthProvider.devStatic are NOT marked as anonymous accounts.
+    /// AuthProvider.devStatic have the correct auth provider set.
     ///
     /// **How it works:** Creates an account with devStatic auth provider,
-    /// then checks that isAnonymous returns false and authProvider
-    /// is correctly set. This is important because anonymous accounts
-    /// may be treated differently (e.g., auto-deleted, limited features).
+    /// then checks that authProvider is correctly set.
     test('Test account uses devStatic auth provider', () {
       // GIVEN: A test account
       final testAccount = Account.create(
@@ -113,8 +111,7 @@ void main() {
         authProvider: AuthProvider.devStatic,
       );
 
-      // THEN: It should NOT be anonymous
-      expect(testAccount.isAnonymous, isFalse);
+      // THEN: It should have devStatic auth provider
       expect(testAccount.authProvider, AuthProvider.devStatic);
     });
 

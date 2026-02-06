@@ -144,8 +144,8 @@ class AshTrailApp extends ConsumerWidget {
   }
 }
 
-/// Wrapper widget that supports anonymous mode (per design doc 8.5)
-/// Shows home screen for both authenticated and anonymous users
+/// Wrapper widget that handles authentication state
+/// Shows home screen for authenticated users, welcome screen otherwise
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
 
@@ -157,11 +157,11 @@ class AuthWrapper extends ConsumerWidget {
 
       return authState.when(
         data: (user) {
-          // Check if we have an active account (authenticated or anonymous)
+          // Check if we have an active authenticated account
           return activeAccount.when(
             data: (account) {
               if (account != null) {
-                // Have an active account (authenticated or anonymous), show main navigation
+                // Have an active account, show main navigation
                 return const MainNavigation();
               }
               // No active account - show welcome screen with options
@@ -197,8 +197,7 @@ class AuthWrapper extends ConsumerWidget {
   }
 }
 
-/// Welcome screen for new users - offers sign in or anonymous mode
-/// Per design doc 8.5: Anonymous usage is a first-class mode
+/// Welcome screen for new users - offers sign in options
 class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
 
@@ -253,33 +252,6 @@ class WelcomeScreen extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.login),
                 label: const Text('Sign In'),
-              ),
-              const SizedBox(height: 12),
-              // Continue anonymously button (per design doc 8.5)
-              OutlinedButton.icon(
-                onPressed: () async {
-                  try {
-                    final switcher = ref.read(accountSwitcherProvider.notifier);
-                    await switcher.createAnonymousAccount();
-                  } catch (e) {
-                    _log.e('Anonymous account creation error', error: e);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                    }
-                  }
-                },
-                icon: const Icon(Icons.person_outline),
-                label: const Text('Continue Without Account'),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your data stays on this device until you sign in',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
             ],

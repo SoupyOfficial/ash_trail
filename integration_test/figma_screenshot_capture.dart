@@ -39,19 +39,18 @@ void main() {
       final hasNavBar = find.byType(NavigationBar).evaluate().isNotEmpty;
 
       if (hasWelcome) {
-        debugPrint('📱 App showing welcome screen - attempting to continue anonymously or sign in');
+        debugPrint('📱 App showing welcome screen - user must sign in to access the app');
         
-        // Try to find and tap "Continue anonymously" or similar
-        final continueAnon = find.textContaining('Continue').evaluate().isNotEmpty ||
-                            find.textContaining('anonymous').evaluate().isNotEmpty;
+        // Try to find and tap Sign In button
+        final hasSignIn = find.textContaining('Sign In').evaluate().isNotEmpty;
         
-        if (continueAnon) {
+        if (hasSignIn) {
           try {
-            await tester.tap(find.textContaining('Continue').first);
+            await tester.tap(find.textContaining('Sign In').first);
             await tester.pumpAndSettle(const Duration(seconds: 3));
-            await _captureAndSave(tester, outputDir, '01_home_after_auth');
+            await _captureAndSave(tester, outputDir, '01_login_screen');
           } catch (e) {
-            debugPrint('Could not tap continue anonymously: $e');
+            debugPrint('Could not tap sign in: $e');
           }
         }
       }

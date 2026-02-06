@@ -414,16 +414,6 @@ void main() {
       final account = await accountService.getAccountByUserId('apple-user');
       expect(account!.authProvider, equals(AuthProvider.apple));
     });
-
-    test('handles anonymous accounts', () async {
-      await accountService.saveAccount(_createAccount(
-        userId: 'anon-user',
-        authProvider: AuthProvider.anonymous,
-      ));
-
-      final account = await accountService.getAccountByUserId('anon-user');
-      expect(account!.authProvider, equals(AuthProvider.anonymous));
-    });
   });
 
   group('AccountService - Edge Cases', () {

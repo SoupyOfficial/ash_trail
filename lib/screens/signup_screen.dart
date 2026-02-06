@@ -46,7 +46,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         password: _passwordController.text,
         displayName: _usernameController.text.trim(),
       );
-      // Navigation handled by auth state change in main.dart
+      // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -64,7 +67,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithGoogle();
-      // Navigation handled by auth state change in main.dart
+      // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -82,7 +88,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithApple();
-      // Navigation handled by auth state change in main.dart
+      // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

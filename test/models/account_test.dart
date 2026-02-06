@@ -102,13 +102,13 @@ void main() {
       expect(account.tokenExpiresAt, tokenExpiresAt);
     });
 
-    test('Account.create() defaults authProvider to anonymous', () {
+    test('Account.create() defaults authProvider to email', () {
       final account = Account.create(
         userId: 'test_user_123',
         email: 'test@example.com',
       );
 
-      expect(account.authProvider, AuthProvider.anonymous);
+      expect(account.authProvider, AuthProvider.email);
     });
 
     test('Account.create() defaults createdAt to current time', () {
@@ -127,38 +127,6 @@ void main() {
         account.createdAt.isBefore(after.add(const Duration(seconds: 1))),
         true,
       );
-    });
-
-    group('isAnonymous', () {
-      test('returns true for anonymous auth provider', () {
-        final account = Account.create(
-          userId: 'test_user_123',
-          email: 'test@example.com',
-          authProvider: AuthProvider.anonymous,
-        );
-
-        expect(account.isAnonymous, true);
-      });
-
-      test('returns false for google auth provider', () {
-        final account = Account.create(
-          userId: 'test_user_123',
-          email: 'test@example.com',
-          authProvider: AuthProvider.gmail,
-        );
-
-        expect(account.isAnonymous, false);
-      });
-
-      test('returns false for email auth provider', () {
-        final account = Account.create(
-          userId: 'test_user_123',
-          email: 'test@example.com',
-          authProvider: AuthProvider.email,
-        );
-
-        expect(account.isAnonymous, false);
-      });
     });
 
     group('fullName', () {
@@ -223,7 +191,7 @@ void main() {
           displayName: 'Original Name',
           firstName: 'John',
           lastName: 'Doe',
-          authProvider: AuthProvider.anonymous,
+          authProvider: AuthProvider.email,
           isActive: false,
           accessToken: 'old-access',
           refreshToken: 'old-refresh',

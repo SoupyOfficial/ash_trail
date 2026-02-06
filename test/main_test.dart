@@ -167,11 +167,6 @@ void main() {
       expect(find.text('Welcome to Ash Trail'), findsOneWidget);
       expect(find.text('Track your sessions with ease'), findsOneWidget);
       expect(find.text('Sign In'), findsOneWidget);
-      expect(find.text('Continue Without Account'), findsOneWidget);
-      expect(
-        find.text('Your data stays on this device until you sign in'),
-        findsOneWidget,
-      );
       expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
     });
 
@@ -194,28 +189,6 @@ void main() {
 
       // Check that we navigated away from welcome screen
       expect(find.text('Welcome to Ash Trail'), findsNothing);
-    });
-
-    testWidgets('Continue Without Account button is visible', (tester) async {
-      tester.view.physicalSize = const Size(1400, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: WelcomeScreen())),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Button exists and is visible
-      expect(find.text('Continue Without Account'), findsOneWidget);
-      expect(
-        find.text('Your data stays on this device until you sign in'),
-        findsOneWidget,
-      );
     });
   });
 }

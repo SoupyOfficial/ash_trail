@@ -41,13 +41,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-      // On success, close the login screen so AuthWrapper can show Home
+      // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
       if (mounted) {
-        Navigator.of(context).pop();
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       setState(() {
@@ -66,13 +62,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithGoogle();
-      // On success, close the login screen so AuthWrapper can show Home
+      // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
       if (mounted) {
-        Navigator.of(context).pop();
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       setState(() {
@@ -91,13 +83,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
       await integrationService.signInWithApple();
-      // On success, close the login screen so AuthWrapper can show Home
+      // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
       if (mounted) {
-        Navigator.of(context).pop();
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       setState(() {

@@ -60,7 +60,7 @@ class Account {
   Account() {
     userId = '';
     email = '';
-    authProvider = AuthProvider.anonymous;
+    authProvider = AuthProvider.email;
     isActive = false;
     isLoggedIn = false;
     createdAt = DateTime.now();
@@ -74,7 +74,7 @@ class Account {
     this.firstName,
     this.lastName,
     this.photoUrl,
-    this.authProvider = AuthProvider.anonymous,
+    this.authProvider = AuthProvider.email,
     this.isActive = false,
     this.isLoggedIn = false,
     DateTime? createdAt,
@@ -134,12 +134,8 @@ class Account {
     return account;
   }
 
-  /// Check if this is an anonymous account
-  bool get isAnonymous => authProvider == AuthProvider.anonymous;
-
   /// Check if session is valid (has refresh token that hasn't expired)
   bool get hasValidSession {
-    if (isAnonymous) return isLoggedIn;
     if (refreshToken == null) return false;
     // If no expiry set, assume valid
     if (tokenExpiresAt == null) return true;

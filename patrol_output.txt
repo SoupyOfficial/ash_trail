@@ -1,0 +1,11 @@
+
+Update available! 3.6.0 → 3.5.0. (Newest patrol_cli 4.0.2 is not compatible with project patrol version.)
+
+To update to the latest compatible version, run:
+dart pub global activate patrol_cli 3.5.0
+
+⚠️  Before updating, please ensure your patrol package version is compatible with patrol_cli 4.0.2
+Check the compatibility table at: https://patrol.leancode.co/documentation/compatibility-table
+
+
+• Building app with entrypoint test_bundle.dart for iOS simulator (debug)...

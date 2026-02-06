@@ -1,12 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../logging/app_logger.dart';
-import 'package:uuid/uuid.dart';
 import '../models/account.dart';
-import '../models/enums.dart' as enums;
 import '../services/account_service.dart';
 import '../services/account_session_manager.dart';
-import '../services/log_record_service.dart';
 import '../services/token_service.dart';
 import 'log_record_provider.dart';
 
@@ -78,15 +75,6 @@ final loggedInAccountsProvider = FutureProvider<List<Account>>((ref) async {
     _accountLog.e('loggedInAccountsProvider error', error: error, stackTrace: stackTrace);
     rethrow;
   }
-});
-
-/// Provider to check if current mode is anonymous (per design doc 8.5)
-final isAnonymousModeProvider = Provider<bool>((ref) {
-  final activeAccount = ref.watch(activeAccountProvider);
-  return activeAccount.maybeWhen(
-    data: (account) => account?.isAnonymous ?? true,
-    orElse: () => true,
-  );
 });
 
 /// Provider to check if any accounts are logged in
@@ -174,93 +162,6 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
     _ref.invalidate(activeAccountProvider);
     _ref.invalidate(allAccountsProvider);
     _ref.invalidate(loggedInAccountsProvider);
-  }
-
-  /// Create and activate an anonymous account (per design doc 8.5)
-  Future<Account> createAnonymousAccount() async {
-    state = const AsyncValue.loading();
-    try {
-      final service = _ref.read(accountServiceProvider);
-      final sessionManager = _ref.read(accountSessionManagerProvider);
-      const uuid = Uuid();
-      final userId = 'anon_${uuid.v4()}';
-
-      final anonymousAccount = Account.create(
-        userId: userId,
-        email: 'anonymous@local',
-        displayName: 'Anonymous User',
-        authProvider: enums.AuthProvider.anonymous,
-        isActive: true,
-        isLoggedIn: true,
-        lastAccessedAt: DateTime.now(),
-      );
-
-      final saved = await service.saveAccount(anonymousAccount);
-      await sessionManager.setActiveAccount(saved.userId);
-
-      // Invalidate providers to refresh
-      _ref.invalidate(activeAccountProvider);
-      _ref.invalidate(allAccountsProvider);
-      _ref.invalidate(loggedInAccountsProvider);
-
-      state = const AsyncValue.data(null);
-      return saved;
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
-    }
-  }
-
-  /// Migrate anonymous data to authenticated account (per design doc 8.5.1)
-  Future<void> migrateAnonymousToAuthenticated({
-    required String anonymousUserId,
-    required String authenticatedUserId,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      _accountLog.i('Migrating anonymous data: $anonymousUserId -> $authenticatedUserId');
-
-      final logRecordService = LogRecordService();
-      final anonymousRecords = await logRecordService.getLogRecords(
-        accountId: anonymousUserId,
-        includeDeleted: true,
-      );
-
-      // 2. Update each record's accountId to authenticated account
-      for (final record in anonymousRecords) {
-        record.accountId = authenticatedUserId;
-        record.syncState = enums.SyncState.pending; // Mark for sync
-        record.updatedAt = DateTime.now();
-        await logRecordService.updateLogRecord(record);
-      }
-
-      // 3. Delete anonymous account (but data is now under authenticated account)
-      final service = _ref.read(accountServiceProvider);
-      final anonAccount = await service.getAccountByUserId(anonymousUserId);
-      if (anonAccount != null) {
-        anonAccount.isLoggedIn = false;
-        anonAccount.isActive = false;
-        await service.saveAccount(anonAccount);
-        // Don't delete the account record, just deactivate it
-        // In case user wants to see it existed
-      }
-
-      // 4. Set authenticated account as active
-      await _ref
-          .read(accountSessionManagerProvider)
-          .setActiveAccount(authenticatedUserId);
-
-      // Invalidate providers
-      _ref.invalidate(activeAccountProvider);
-      _ref.invalidate(allAccountsProvider);
-      _ref.invalidate(loggedInAccountsProvider);
-
-      _accountLog.i('Migration complete');
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      _accountLog.e('Migration failed', error: e, stackTrace: st);
-      state = AsyncValue.error(e, st);
-    }
   }
 
   /// Add a new account (for multi-account support)

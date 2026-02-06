@@ -25,7 +25,7 @@ class WebAccount {
     this.photoUrl,
     required this.isActive,
     this.isLoggedIn = false,
-    this.authProvider = 'anonymous',
+    this.authProvider = 'email',
     required this.createdAt,
     required this.updatedAt,
     this.lastAccessedAt,
@@ -59,7 +59,7 @@ class WebAccount {
     photoUrl: json['photoUrl'],
     isActive: json['isActive'] ?? true,
     isLoggedIn: json['isLoggedIn'] ?? false,
-    authProvider: json['authProvider'] ?? 'anonymous',
+    authProvider: json['authProvider'] ?? 'email',
     createdAt: DateTime.parse(json['createdAt']),
     updatedAt: DateTime.parse(json['updatedAt']),
     lastAccessedAt:

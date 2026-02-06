@@ -461,88 +461,6 @@ void main() {
       });
     });
 
-    group('isAnonymousModeProvider', () {
-      test('returns true when no active account', () async {
-        final container = createContainer();
-        addTearDown(container.dispose);
-
-        container.listen(activeAccountProvider, (_, __) {});
-        await Future.delayed(Duration.zero);
-
-        mockAccountService.emitActiveAccount(null);
-        await Future.delayed(Duration.zero);
-
-        final isAnonymous = container.read(isAnonymousModeProvider);
-        expect(isAnonymous, isTrue);
-      });
-
-      test('returns true for anonymous account', () async {
-        final container = createContainer();
-        addTearDown(container.dispose);
-        final anonymousAccount = createTestAccount(
-          userId: 'anon_123',
-          email: 'anonymous@local',
-          authProvider: AuthProvider.anonymous,
-        );
-
-        container.listen(activeAccountProvider, (_, __) {});
-        await Future.delayed(Duration.zero);
-
-        mockAccountService.emitActiveAccount(anonymousAccount);
-        await Future.delayed(Duration.zero);
-
-        final isAnonymous = container.read(isAnonymousModeProvider);
-        expect(isAnonymous, isTrue);
-      });
-
-      test('returns false for authenticated account', () async {
-        final container = createContainer();
-        addTearDown(container.dispose);
-        final authenticatedAccount = createTestAccount(
-          userId: 'user-123',
-          email: 'user@example.com',
-          authProvider: AuthProvider.email,
-        );
-
-        container.listen(activeAccountProvider, (_, __) {});
-        await Future.delayed(Duration.zero);
-
-        mockAccountService.emitActiveAccount(authenticatedAccount);
-        await Future.delayed(Duration.zero);
-
-        final isAnonymous = container.read(isAnonymousModeProvider);
-        expect(isAnonymous, isFalse);
-      });
-
-      test('returns false for Google-authenticated account', () async {
-        final container = createContainer();
-        addTearDown(container.dispose);
-        final googleAccount = createTestAccount(
-          userId: 'google-user',
-          email: 'user@gmail.com',
-          authProvider: AuthProvider.gmail,
-        );
-
-        container.listen(activeAccountProvider, (_, __) {});
-        await Future.delayed(Duration.zero);
-
-        mockAccountService.emitActiveAccount(googleAccount);
-        await Future.delayed(Duration.zero);
-
-        final isAnonymous = container.read(isAnonymousModeProvider);
-        expect(isAnonymous, isFalse);
-      });
-
-      test('returns true during loading state', () async {
-        final container = createContainer();
-        addTearDown(container.dispose);
-
-        // Don't emit anything - still loading
-        final isAnonymous = container.read(isAnonymousModeProvider);
-        expect(isAnonymous, isTrue);
-      });
-    });
-
     group('AccountSwitcher', () {
       // Note: switchAccount tests removed - they require FirebaseAuth which cannot
       // be initialized in unit tests. Account switching is tested in integration tests.
@@ -609,39 +527,6 @@ void main() {
         final switcher = container.read(accountSwitcherProvider.notifier);
         await switcher.deleteAccount('user-1');
         await Future.delayed(Duration.zero);
-
-        final state = container.read(accountSwitcherProvider);
-        expect(state.hasError, isTrue);
-      });
-
-      test(
-        'createAnonymousAccount creates and activates anonymous account',
-        () async {
-          final container = createContainer();
-          addTearDown(container.dispose);
-
-          final switcher = container.read(accountSwitcherProvider.notifier);
-          final account = await switcher.createAnonymousAccount();
-          await Future.delayed(Duration.zero);
-
-          expect(account.userId, startsWith('anon_'));
-          expect(account.email, equals('anonymous@local'));
-          expect(account.authProvider, equals(AuthProvider.anonymous));
-          expect(account.isActive, isTrue);
-        },
-      );
-
-      test('createAnonymousAccount handles errors', () async {
-        final container = createContainer();
-        addTearDown(container.dispose);
-        mockAccountService.throwOnSave = true;
-
-        final switcher = container.read(accountSwitcherProvider.notifier);
-
-        await expectLater(
-          () => switcher.createAnonymousAccount(),
-          throwsException,
-        );
 
         final state = container.read(accountSwitcherProvider);
         expect(state.hasError, isTrue);
@@ -725,8 +610,8 @@ void main() {
             authProvider: AuthProvider.gmail,
           ),
           createTestAccount(
-            userId: 'anon-user',
-            authProvider: AuthProvider.anonymous,
+            userId: 'apple-user',
+            authProvider: AuthProvider.apple,
           ),
         ]);
 
@@ -743,7 +628,7 @@ void main() {
           containsAll([
             AuthProvider.email,
             AuthProvider.gmail,
-            AuthProvider.anonymous,
+            AuthProvider.apple,
           ]),
         );
       });

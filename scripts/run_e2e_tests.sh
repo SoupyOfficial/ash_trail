@@ -105,6 +105,9 @@ fi
 echo -e "${BLUE}🧪 Running E2E tests: $TEST_FILE${NC}"
 echo ""
 
+# Log timestamp before iOS build
+echo -e "${BLUE}⏱️  Build started at: $(date '+%Y-%m-%d %H:%M:%S')${NC}"
+
 # Check if test file uses Patrol
 if grep -q "patrol" "$TEST_FILE" 2>/dev/null; then
     # Use Patrol for patrol-based tests
@@ -113,6 +116,7 @@ if grep -q "patrol" "$TEST_FILE" 2>/dev/null; then
         
         # Pre-build the Pods_Runner_RunnerUITests framework (workaround for implicit dependency not building)
         echo -e "${BLUE}🔧 Pre-building Pods-Runner-RunnerUITests framework...${NC}"
+        echo -e "${BLUE}⏱️  iOS framework build started at: $(date '+%Y-%m-%d %H:%M:%S')${NC}"
         cd ios && xcodebuild -project Pods/Pods.xcodeproj \
             -target "Pods-Runner-RunnerUITests" \
             -configuration Debug \

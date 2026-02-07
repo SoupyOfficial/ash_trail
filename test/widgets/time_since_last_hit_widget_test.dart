@@ -41,7 +41,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
       expect(find.byIcon(Icons.timer), findsOneWidget);
@@ -70,7 +70,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
       // Widget uses relative format for main display: "2h ago"
@@ -96,7 +96,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
       // Widget uses relative format for main display: "1d ago" (< 7 days)
@@ -140,7 +140,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
       // Should be showing around 30 minutes (not 2 or 5 hours)
@@ -223,7 +223,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // Check for stat labels (widget shows "Hits Today" and "Hits This Week")
       expect(find.text('Hits Today'), findsOneWidget);
@@ -256,12 +256,15 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // Check for avg duration labels (widget shows these in statistics section)
       expect(find.text('Avg Today'), findsOneWidget);
       expect(find.text('Avg Yesterday'), findsOneWidget);
-      expect(find.text('sec/hit'), findsAtLeastNWidgets(1)); // Duration subtitles
+      expect(
+        find.text('sec/hit'),
+        findsAtLeastNWidgets(1),
+      ); // Duration subtitles
     });
 
     testWidgets('shows trend indicator', (tester) async {
@@ -289,7 +292,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // Check for statistics section (which contains trend indicators)
       expect(find.text('Statistics'), findsOneWidget);
@@ -342,7 +345,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Verify today stats are shown (widget shows "Total up to X", "Hits Today", etc.)
         expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
@@ -388,7 +391,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Both sections should exist (widget shows "Total up to X", "Avg Today", "Avg Yesterday" etc.)
         expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
@@ -444,7 +447,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Widget shows "Hits This Week" and "Avg/Day (7d)" labels
         expect(find.text('Hits This Week'), findsOneWidget);
@@ -478,7 +481,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Widget should display something for today (widget shows "Total up to X", "Avg Today", etc.)
         expect(find.textContaining('Total up to'), findsAtLeastNWidgets(1));
@@ -641,7 +644,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Check for statistics section (contains trend indicators)
         expect(find.text('Statistics'), findsOneWidget);
@@ -705,7 +708,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Check for statistics section (contains trend indicators)
         expect(find.text('Statistics'), findsOneWidget);
@@ -777,7 +780,7 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // Patterns section is collapsed and may be off-screen; scroll into view then expand
         await tester.ensureVisible(find.text('Patterns'));
@@ -840,7 +843,7 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(patternsFinder, warnIfMissed: false);
           await tester.pumpAndSettle();
-          
+
           // Check for weekly pattern display - it may not always show depending on data
           final weeklyPatternFinder = find.text('Weekly Pattern');
           if (weeklyPatternFinder.evaluate().isNotEmpty) {
@@ -854,7 +857,9 @@ void main() {
           }
         } else {
           // Pattern section should exist with this much data
-          fail('Patterns section should be visible with 12 records across 6 days');
+          fail(
+            'Patterns section should be visible with 12 records across 6 days',
+          );
         }
       });
 
@@ -868,7 +873,8 @@ void main() {
         // Add records for Monday, Tuesday, Wednesday (weekdays 1-3)
         for (int dayOffset = 0; dayOffset < 3; dayOffset++) {
           final recordDate = todayStart.subtract(Duration(days: dayOffset));
-          if (recordDate.weekday <= 5) { // Only weekdays
+          if (recordDate.weekday <= 5) {
+            // Only weekdays
             // Add 3 records per weekday
             for (int j = 0; j < 3; j++) {
               records.add(
@@ -889,7 +895,8 @@ void main() {
         // Find the most recent Saturday or Sunday
         for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
           final recordDate = todayStart.subtract(Duration(days: dayOffset));
-          if (recordDate.weekday > 5) { // Weekend
+          if (recordDate.weekday > 5) {
+            // Weekend
             // Add 1 record per weekend day
             records.add(
               LogRecord.create(
@@ -928,7 +935,7 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(patternsFinder, warnIfMissed: false);
           await tester.pumpAndSettle();
-          
+
           // Check if Weekly Pattern section exists
           final weeklyPatternFinder = find.text('Weekly Pattern');
           if (weeklyPatternFinder.evaluate().isNotEmpty) {
@@ -943,7 +950,9 @@ void main() {
           }
         } else {
           // Pattern section should exist with this much data
-          fail('Patterns section should be visible with weekday and weekend records');
+          fail(
+            'Patterns section should be visible with weekday and weekend records',
+          );
         }
       });
     });

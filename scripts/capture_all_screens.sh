@@ -6,6 +6,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
 DEVICE_ID="${1:-}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCREENSHOT_DIR="screenshots/flutter/$TIMESTAMP"
@@ -74,7 +78,7 @@ if [[ "$run_test" == "y" ]]; then
         --driver=test_driver/integration_test.dart \
         --target=integration_test/figma_screenshot_capture.dart \
         -d "$DEVICE_ID" \
-        2>&1 | tee /tmp/flutter_screenshot.log
+        2>&1 | tee "$PROJECT_ROOT/build/logs/flutter_screenshot.log"
     
     # Check for screenshots in integration_test/screenshots/
     if [ -d "integration_test/screenshots" ]; then

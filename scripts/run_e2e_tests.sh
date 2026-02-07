@@ -49,7 +49,7 @@ while [ "$1" == "--full-isolation" ] || [ "$1" == "--clean" ]; do
 done
 
 # patrol 3.15.2 requires patrol_cli 3.5 or 3.6 (see compatibility table)
-export PATH="$HOME/.pub-cache/bin:/Volumes/Jacob-SSD/BuildCache/pub-cache/bin:$PATH"
+export PATH="$HOME/.pub-cache/bin${PUB_CACHE:+:$PUB_CACHE/bin}:$PATH"
 if ! command -v patrol &> /dev/null; then
     echo -e "${YELLOW}Patrol CLI not found. Installing patrol_cli 3.6.0...${NC}"
     dart pub global activate patrol_cli 3.6.0

@@ -5,6 +5,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
 DEVICE_ID="${1:-}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCREENSHOT_DIR="screenshots/flutter/$TIMESTAMP"
@@ -52,7 +56,8 @@ if ! pgrep -f "flutter run.*$DEVICE_ID" > /dev/null; then
     echo ""
     
     # Start app in background
-    flutter run -d "$DEVICE_ID" > /tmp/flutter_app.log 2>&1 &
+    mkdir -p "$PROJECT_ROOT/build/logs"
+    flutter run -d "$DEVICE_ID" > "$PROJECT_ROOT/build/logs/flutter_app.log" 2>&1 &
     APP_PID=$!
     
     # Wait for app to start
@@ -61,7 +66,7 @@ if ! pgrep -f "flutter run.*$DEVICE_ID" > /dev/null; then
     
     # Check if app started
     if ! kill -0 $APP_PID 2>/dev/null; then
-        echo -e "${RED}❌ App failed to start. Check /tmp/flutter_app.log${NC}"
+        echo -e "${RED}❌ App failed to start. Check build/logs/flutter_app.log${NC}"
         exit 1
     fi
     

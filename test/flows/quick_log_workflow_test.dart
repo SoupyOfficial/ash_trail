@@ -81,7 +81,7 @@ void main() {
 
         // Rebuild with the new log
         await tester.pumpWidget(createHomeScreen([firstLog]));
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // THEN: The time since widget shows the entry
         expect(find.text('Time Since Last Hit'), findsOneWidget);
@@ -131,7 +131,7 @@ void main() {
 
         // WHEN: They view the home screen
         await tester.pumpWidget(createHomeScreen(logs));
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // THEN: They see their recent activity
         expect(find.text('Time Since Last Hit'), findsOneWidget);
@@ -200,7 +200,7 @@ void main() {
 
         // WHEN: They view the home screen
         await tester.pumpWidget(createHomeScreen(logs));
-        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 150));
 
         // THEN: They see the time since last hit
         expect(find.text('Time Since Last Hit'), findsOneWidget);
@@ -332,7 +332,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // WHEN: A new log is added
       logs = [
@@ -356,7 +356,7 @@ void main() {
         ),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       expect(find.text('Time Since Last Hit'), findsOneWidget);
     });
@@ -456,7 +456,7 @@ void main() {
 
       // WHEN: They view the app
       await tester.pumpWidget(createScreen(logs));
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // THEN: App remains responsive
       expect(find.text('Time Since Last Hit'), findsOneWidget);

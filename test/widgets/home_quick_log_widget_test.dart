@@ -129,7 +129,7 @@ void main() {
         tester.getCenter(durationButton.first),
       );
 
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // Release the gesture
       await gesture.up();

@@ -5,7 +5,11 @@
 
 set -e
 
-DEVICE_ID="${1:-0A875592-129B-40B6-A072-A0C0CA94AED3}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+DEVICE_ID="${1:-}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCREENSHOT_DIR="screenshots/flutter/$TIMESTAMP"
 
@@ -42,7 +46,8 @@ xcrun simctl launch "$DEVICE_ID" "$BUNDLE_ID" 2>&1 || {
     echo -e "${YELLOW}Could not launch via simctl, will use flutter run instead${NC}"
     echo -e "${BLUE}Starting app with flutter run...${NC}"
     echo -e "${YELLOW}This will open the app. Please wait for it to fully load...${NC}"
-    flutter run -d "$DEVICE_ID" > /tmp/flutter_app.log 2>&1 &
+    mkdir -p "$PROJECT_ROOT/build/logs"
+    flutter run -d "$DEVICE_ID" > "$PROJECT_ROOT/build/logs/flutter_app.log" 2>&1 &
     APP_PID=$!
     echo -e "${YELLOW}Waiting 45 seconds for app to fully load and render...${NC}"
     sleep 45

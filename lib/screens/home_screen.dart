@@ -27,6 +27,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _lastAccountId;
+
   /// Last successful records list; shown during refresh so we don't unmount
   /// the widget tree (preserves quick-log recording state and form values).
   List<LogRecord>? _lastRecords;
@@ -183,10 +184,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildMainView(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  Widget _buildMainView(BuildContext context, WidgetRef ref) {
     final logRecordsAsync = ref.watch(activeAccountLogRecordsProvider);
     final widgetConfig = ref.watch(homeLayoutConfigProvider);
     final isEditMode = ref.watch(homeEditModeProvider);
@@ -216,37 +214,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
         return const Center(child: CircularProgressIndicator());
       },
-      error: (error, _) => Center(
-        child: Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: Paddings.lg,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).colorScheme.error,
-                  size: IconSize.xl.value,
-                ),
-                SizedBox(height: Spacing.md.value),
-                Text(
-                  'Error loading entries',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                SizedBox(height: Spacing.xs.value),
-                Text(
-                  error.toString(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+      error:
+          (error, _) => Center(
+            child: Card(
+              margin: const EdgeInsets.all(16),
+              child: Padding(
+                padding: Paddings.lg,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Theme.of(context).colorScheme.error,
+                      size: IconSize.xl.value,
+                    ),
+                    SizedBox(height: Spacing.md.value),
+                    Text(
+                      'Error loading entries',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    SizedBox(height: Spacing.xs.value),
+                    Text(
+                      error.toString(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.error,
                       ),
-                  textAlign: TextAlign.center,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -275,13 +274,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             itemCount: layoutRows.length,
             onReorder: (oldIndex, newIndex) {
               HapticFeedback.mediumImpact();
-              final oldWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, oldIndex);
-              var newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex);
+              final oldWidgetIndex = _getFirstWidgetIndexForRow(
+                layoutRows,
+                oldIndex,
+              );
+              var newWidgetIndex = _getFirstWidgetIndexForRow(
+                layoutRows,
+                newIndex,
+              );
               if (newIndex > oldIndex) {
-                newWidgetIndex = _getFirstWidgetIndexForRow(layoutRows, newIndex - 1) +
+                newWidgetIndex =
+                    _getFirstWidgetIndexForRow(layoutRows, newIndex - 1) +
                     layoutRows[newIndex - 1].length;
               }
-              ref.read(homeLayoutConfigProvider.notifier).reorder(oldWidgetIndex, newWidgetIndex);
+              ref
+                  .read(homeLayoutConfigProvider.notifier)
+                  .reorder(oldWidgetIndex, newWidgetIndex);
             },
             proxyDecorator: (child, index, animation) {
               return AnimatedBuilder(
@@ -304,7 +312,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
             itemBuilder: (context, rowIndex) {
               final rowWidgets = layoutRows[rowIndex];
-              final widgetIndex = _getFirstWidgetIndexForRow(layoutRows, rowIndex);
+              final widgetIndex = _getFirstWidgetIndexForRow(
+                layoutRows,
+                rowIndex,
+              );
 
               if (rowWidgets.length == 1) {
                 final config = rowWidgets[0];
@@ -322,7 +333,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: HomeWidgetBuilder(
                         config: config,
                         records: records,
-                        onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                        onLogCreated:
+                            () =>
+                                ref.invalidate(activeAccountLogRecordsProvider),
                         onRecordTap: () {},
                         onRecordDelete: (record) => _deleteLogRecord(record),
                       ),
@@ -344,15 +357,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           type: rowWidgets[0].type,
                           isEditMode: isEditMode,
                           index: widgetIndex,
-                          onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[0]),
+                          onRemove:
+                              () => _confirmRemoveWidget(
+                                context,
+                                ref,
+                                rowWidgets[0],
+                              ),
                           child: HomeWidgetEditPadding(
                             isEditMode: isEditMode,
                             child: HomeWidgetBuilder(
                               config: rowWidgets[0],
                               records: records,
-                              onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                              onLogCreated:
+                                  () => ref.invalidate(
+                                    activeAccountLogRecordsProvider,
+                                  ),
                               onRecordTap: () {},
-                              onRecordDelete: (record) => _deleteLogRecord(record),
+                              onRecordDelete:
+                                  (record) => _deleteLogRecord(record),
                             ),
                           ),
                         ),
@@ -364,15 +386,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           type: rowWidgets[1].type,
                           isEditMode: isEditMode,
                           index: widgetIndex + 1,
-                          onRemove: () => _confirmRemoveWidget(context, ref, rowWidgets[1]),
+                          onRemove:
+                              () => _confirmRemoveWidget(
+                                context,
+                                ref,
+                                rowWidgets[1],
+                              ),
                           child: HomeWidgetEditPadding(
                             isEditMode: isEditMode,
                             child: HomeWidgetBuilder(
                               config: rowWidgets[1],
                               records: records,
-                              onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+                              onLogCreated:
+                                  () => ref.invalidate(
+                                    activeAccountLogRecordsProvider,
+                                  ),
                               onRecordTap: () {},
-                              onRecordDelete: (record) => _deleteLogRecord(record),
+                              onRecordDelete:
+                                  (record) => _deleteLogRecord(record),
                             ),
                           ),
                         ),
@@ -405,7 +436,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// Build layout rows from widget list
   /// Pairs consecutive compact widgets, others get their own row
-  List<List<HomeWidgetConfig>> _buildLayoutRows(List<HomeWidgetConfig> widgets) {
+  List<List<HomeWidgetConfig>> _buildLayoutRows(
+    List<HomeWidgetConfig> widgets,
+  ) {
     final rows = <List<HomeWidgetConfig>>[];
     int i = 0;
 
@@ -435,7 +468,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   /// Get the first widget index for a given row index
-  int _getFirstWidgetIndexForRow(List<List<HomeWidgetConfig>> rows, int rowIndex) {
+  int _getFirstWidgetIndexForRow(
+    List<List<HomeWidgetConfig>> rows,
+    int rowIndex,
+  ) {
     int widgetIndex = 0;
     for (int i = 0; i < rowIndex && i < rows.length; i++) {
       widgetIndex += rows[i].length;
@@ -443,40 +479,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return widgetIndex;
   }
 
-  void _confirmRemoveWidget(BuildContext context, WidgetRef ref, HomeWidgetConfig config) {
+  void _confirmRemoveWidget(
+    BuildContext context,
+    WidgetRef ref,
+    HomeWidgetConfig config,
+  ) {
     final entry = WidgetCatalog.getEntry(config.type);
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Widget'),
-        content: Text('Remove "${entry.displayName}" from your home screen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Remove Widget'),
+            content: Text(
+              'Remove "${entry.displayName}" from your home screen?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref
+                      .read(homeLayoutConfigProvider.notifier)
+                      .removeWidget(config.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Removed ${entry.displayName}'),
+                      duration: const Duration(seconds: 3),
+                      action: SnackBarAction(
+                        label: 'UNDO',
+                        onPressed: () {
+                          ref
+                              .read(homeLayoutConfigProvider.notifier)
+                              .addWidget(config.type);
+                        },
+                      ),
+                    ),
+                  );
+                },
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Remove'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(homeLayoutConfigProvider.notifier).removeWidget(config.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Removed ${entry.displayName}'),
-                  action: SnackBarAction(
-                    label: 'UNDO',
-                    onPressed: () {
-                      ref.read(homeLayoutConfigProvider.notifier).addWidget(config.type);
-                    },
-                  ),
-                ),
-              );
-            },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Remove'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -518,6 +566,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         SnackBar(
           content: Text('Error deleting entry: $e'),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
     }

@@ -90,7 +90,10 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
     if (activeAccount == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No active account selected')),
+          const SnackBar(
+            content: Text('No active account selected'),
+            duration: Duration(seconds: 3),
+          ),
         );
       }
       return;
@@ -116,9 +119,10 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
 
       if (mounted) {
         Navigator.pop(context, record);
-        final locationMessage = _latitude != null && _longitude != null
-            ? 'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}. Location captured.'
-            : 'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}';
+        final locationMessage =
+            _latitude != null && _longitude != null
+                ? 'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}. Location captured.'
+                : 'Logged ${_eventType.name} at ${DateFormat.yMd().add_jm().format(_selectedDateTime)}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(locationMessage),
@@ -138,6 +142,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
           SnackBar(
             content: Text('Error creating log: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -570,7 +575,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Location captured successfully'),
-              duration: Duration(seconds: 2),
+              duration: Duration(seconds: 3),
             ),
           );
         }

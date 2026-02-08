@@ -211,6 +211,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
           SnackBar(
             content: Text('Exported ${records.length} records to clipboard'),
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
             action: SnackBarAction(label: 'OK', onPressed: () {}),
           ),
         );
@@ -222,6 +223,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             content: Text('Export failed: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -251,6 +253,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               'Exported ${records.length} records - copied to clipboard',
             ),
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -261,6 +264,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             content: Text('Export failed: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
           ),
         );
       }

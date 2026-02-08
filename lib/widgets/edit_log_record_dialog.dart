@@ -156,6 +156,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
         SnackBar(
           content: Text('Error deleting entry: $e'),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
     } finally {
@@ -176,6 +177,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
             'Location must have both latitude and longitude, or neither',
           ),
           backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -187,6 +189,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
         const SnackBar(
           content: Text('Mood rating must be between 1 and 10'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -198,6 +201,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
         const SnackBar(
           content: Text('Physical rating must be between 1 and 10'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -233,7 +237,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Log updated successfully'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -243,6 +247,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
           SnackBar(
             content: Text('Error updating log: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -665,7 +670,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Location updated'),
-          duration: Duration(seconds: 2),
+          duration: Duration(seconds: 3),
         ),
       );
     } else if (result == null && mounted) {
@@ -679,7 +684,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Location cleared'),
-          duration: Duration(seconds: 2),
+          duration: Duration(seconds: 3),
         ),
       );
     }

@@ -328,6 +328,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Photo upload coming soon!'),
+                                    duration: Duration(seconds: 3),
                                   ),
                                 );
                               },

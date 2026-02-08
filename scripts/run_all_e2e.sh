@@ -34,6 +34,7 @@ TESTS=(
   home_screen_test.dart
   logging_test.dart
   login_flow_test.dart
+  multi_account_test.dart
   navigation_test.dart
 )
 
@@ -75,11 +76,15 @@ echo -e "${BLUE}📦 flutter pub get${NC}"
 flutter pub get --suppress-analytics
 
 # Clear previous diagnostics log & screenshots
-rm -f /tmp/ash_trail_test_diagnostics.log
+rm -f "$PROJECT_ROOT/logs/ash_trail_test_diagnostics.log"
 rm -rf /tmp/ash_trail_screenshots
 mkdir -p /tmp/ash_trail_screenshots
+mkdir -p "$PROJECT_ROOT/logs"
 
-# Find iOS simulator
+# ── Find & boot iOS simulator (prevent patrol from cloning) ───────────────────
+# Patrol / xcodebuild will clone a new simulator if the target device isn't
+# already booted AND visible in Simulator.app. We guarantee both here so the
+# test run reuses the existing sim.
 DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 Pro Max" | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' || true)
 if [ -z "$DEVICE_ID" ]; then
   DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' || true)
@@ -97,8 +102,18 @@ BOOTED=$(xcrun simctl list devices | grep "$DEVICE_ID" | grep -c "Booted" || tru
 if [ "$BOOTED" -eq 0 ]; then
   echo -e "${BLUE}🚀 Booting simulator...${NC}"
   xcrun simctl boot "$DEVICE_ID" || true
-  sleep 5
 fi
+
+# Open Simulator.app so the device is visible — this is the key step that
+# prevents xcodebuild from creating a cloned simulator for UI testing.
+echo -e "${BLUE}📲 Opening Simulator.app...${NC}"
+open -a Simulator
+
+# Wait until the simulator is fully booted and responsive
+echo -e "${BLUE}⏳ Waiting for simulator to finish booting...${NC}"
+xcrun simctl bootstatus "$DEVICE_ID" -b 2>/dev/null || true
+sleep 2
+echo -e "${GREEN}✅ Simulator is ready${NC}"
 
 # Pre-build Pods framework once (shared across all tests)
 echo -e "${BLUE}🔧 Pre-building Pods-Runner-RunnerUITests framework...${NC}"
@@ -208,7 +223,12 @@ else
 fi
 
 # ── Diagnostics log ──────────────────────────────────────────────────────────
-DIAG_LOG="/tmp/ash_trail_test_diagnostics.log"
+# The test helper writes to <project_root>/logs/ (or /tmp/ as fallback).
+DIAG_LOG="$PROJECT_ROOT/logs/ash_trail_test_diagnostics.log"
+DIAG_LOG_TMP="/tmp/ash_trail_test_diagnostics.log"
+if [ ! -f "$DIAG_LOG" ] && [ -f "$DIAG_LOG_TMP" ]; then
+  DIAG_LOG="$DIAG_LOG_TMP"
+fi
 if [ -f "$DIAG_LOG" ]; then
   echo ""
   echo -e "${CYAN}──────────────────────────────────────────────────${NC}"

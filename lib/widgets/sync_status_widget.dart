@@ -98,15 +98,21 @@ class SyncStatusWidget extends ConsumerWidget {
       final result = await syncService.forceSyncNow();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(result.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Sync failed: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     }
   }
@@ -225,7 +231,10 @@ class SyncStatusIndicator extends ConsumerWidget {
                                 final result = await syncService.forceSyncNow();
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(result.message)),
+                                    SnackBar(
+                                      content: Text(result.message),
+                                      duration: const Duration(seconds: 3),
+                                    ),
                                   );
                                 }
                               },

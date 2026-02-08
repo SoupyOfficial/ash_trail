@@ -73,9 +73,12 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
     } catch (e) {
       _log.e('Error getting current location', error: e);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error getting location: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -114,7 +117,10 @@ class _LocationMapPickerState extends State<LocationMapPicker> {
       Navigator.of(context).pop(_selectedLocation);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a location on the map')),
+        const SnackBar(
+          content: Text('Please select a location on the map'),
+          duration: Duration(seconds: 3),
+        ),
       );
     }
   }

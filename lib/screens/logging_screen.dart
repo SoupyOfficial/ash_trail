@@ -157,7 +157,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Location captured'),
-              duration: Duration(seconds: 2),
+              duration: Duration(seconds: 3),
             ),
           );
         }

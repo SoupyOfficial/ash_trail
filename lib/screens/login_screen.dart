@@ -313,6 +313,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     content: Text(
                                       'Password reset coming soon!',
                                     ),
+                                    duration: Duration(seconds: 3),
                                   ),
                                 );
                               },

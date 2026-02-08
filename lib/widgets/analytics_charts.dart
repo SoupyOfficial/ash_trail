@@ -298,7 +298,7 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('End date must be on or after the start date'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 3),
           ),
         );
         return;
@@ -309,7 +309,7 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Start date cannot be in the future'),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 3),
           ),
         );
         return;

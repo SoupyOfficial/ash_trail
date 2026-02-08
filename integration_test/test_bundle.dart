@@ -9,7 +9,15 @@ import 'package:patrol/src/native/contracts/contracts.dart';
 import 'package:test_api/src/backend/invoker.dart';
 
 // START: GENERATED TEST IMPORTS
+import 'accounts_test.dart' as accounts_test;
+import 'analytics_test.dart' as analytics_test;
+import 'auth_test.dart' as auth_test;
+import 'history_test.dart' as history_test;
+import 'home_screen_test.dart' as home_screen_test;
+import 'logging_test.dart' as logging_test;
+import 'login_flow_test.dart' as login_flow_test;
 import 'multi_account_test.dart' as multi_account_test;
+import 'navigation_test.dart' as navigation_test;
 // END: GENERATED TEST IMPORTS
 
 Future<void> main() async {
@@ -69,7 +77,15 @@ Future<void> main() async {
   });
 
   // START: GENERATED TEST GROUPS
+  group('accounts_test', accounts_test.main);
+  group('analytics_test', analytics_test.main);
+  group('auth_test', auth_test.main);
+  group('history_test', history_test.main);
+  group('home_screen_test', home_screen_test.main);
+  group('logging_test', logging_test.main);
+  group('login_flow_test', login_flow_test.main);
   group('multi_account_test', multi_account_test.main);
+  group('navigation_test', navigation_test.main);
   // END: GENERATED TEST GROUPS
 
   final dartTestGroup = await testExplorationCompleter.future;

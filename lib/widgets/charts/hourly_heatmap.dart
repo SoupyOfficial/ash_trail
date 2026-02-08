@@ -174,7 +174,7 @@ class _HeatmapCell extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('$hourLabel: $count entries'),
-              duration: const Duration(seconds: 1),
+              duration: const Duration(seconds: 3),
               behavior: SnackBarBehavior.floating,
             ),
           );

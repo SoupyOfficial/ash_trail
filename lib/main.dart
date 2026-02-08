@@ -172,7 +172,11 @@ class AuthWrapper extends ConsumerWidget {
                   body: Center(child: CircularProgressIndicator()),
                 ),
             error: (error, stack) {
-              _log.e('Active account provider error', error: error, stackTrace: stack);
+              _log.e(
+                'Active account provider error',
+                error: error,
+                stackTrace: stack,
+              );
               return Scaffold(
                 body: Center(child: Text('Error: ${error.toString()}')),
               );
@@ -246,7 +250,10 @@ class WelcomeScreen extends ConsumerWidget {
                   } catch (e) {
                     _log.e('Navigation error', error: e);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error navigating: $e')),
+                      SnackBar(
+                        content: Text('Error navigating: $e'),
+                        duration: const Duration(seconds: 3),
+                      ),
                     );
                   }
                 },

@@ -206,9 +206,8 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
                       setState(() {
                         final currentReasons = _reasons ?? [];
                         if (currentReasons.contains(reason)) {
-                          _reasons = currentReasons
-                              .where((r) => r != reason)
-                              .toList();
+                          _reasons =
+                              currentReasons.where((r) => r != reason).toList();
                           if (_reasons!.isEmpty) _reasons = null;
                         } else {
                           _reasons = [...currentReasons, reason];
@@ -380,14 +379,20 @@ class _CreateLogEntryDialogState extends ConsumerState<CreateLogEntryDialog> {
       if (mounted) {
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Event logged successfully')),
+          const SnackBar(
+            content: Text('Event logged successfully'),
+            duration: Duration(seconds: 3),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error logging event: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error logging event: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -422,9 +427,12 @@ class QuickLogButton extends ConsumerWidget {
         final accountId = ref.read(activeAccountIdProvider);
 
         if (accountId == null) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('No active account')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No active account'),
+              duration: Duration(seconds: 3),
+            ),
+          );
           return;
         }
 
@@ -440,7 +448,10 @@ class QuickLogButton extends ConsumerWidget {
               longitude = position.longitude;
             }
           } catch (e) {
-            _logEntryLog.w('Failed to capture location for quick log', error: e);
+            _logEntryLog.w(
+              'Failed to capture location for quick log',
+              error: e,
+            );
           }
 
           await service.createLogRecord(
@@ -453,18 +464,25 @@ class QuickLogButton extends ConsumerWidget {
           );
 
           if (context.mounted) {
-            final locationMessage = latitude != null && longitude != null
-                ? '$label logged. Location captured.'
-                : '$label logged';
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(locationMessage)));
+            final locationMessage =
+                latitude != null && longitude != null
+                    ? '$label logged. Location captured.'
+                    : '$label logged';
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(locationMessage),
+                duration: const Duration(seconds: 3),
+              ),
+            );
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Error: $e')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error: $e'),
+                duration: const Duration(seconds: 3),
+              ),
+            );
           }
         }
       },

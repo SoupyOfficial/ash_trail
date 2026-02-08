@@ -17,17 +17,44 @@ import 'package:ash_trail/providers/log_record_provider.dart';
 late final File _logFile;
 bool _logFileInitialized = false;
 
+/// Resolve the project-root `logs/` directory.
+///
+/// 1. Try `Platform.script` (works when running from the host CLI).
+/// 2. Parse `StackTrace.current` — the Dart VM in debug mode retains the real
+///    source paths even inside the iOS simulator, so we can extract the project
+///    root from there.
+/// 3. Fall back to `/tmp/ash_trail_logs` as a last resort.
+Directory _resolveLogsDir() {
+  // 1. Platform.script
+  try {
+    final scriptPath = Platform.script.toFilePath();
+    if (scriptPath.contains('integration_test')) {
+      return Directory('${scriptPath.split('integration_test').first}logs');
+    }
+  } catch (_) {}
+
+  // 2. StackTrace (reliable in debug-mode simulator builds)
+  try {
+    final trace = StackTrace.current.toString();
+    final match = RegExp(r'file://(/.+?/)integration_test/').firstMatch(trace);
+    if (match != null) {
+      return Directory('${match.group(1)}logs');
+    }
+  } catch (_) {}
+
+  // 3. Fallback
+  return Directory('/tmp/ash_trail_logs');
+}
+
 void _initLogFile() {
   if (_logFileInitialized) return;
   _logFileInitialized = true;
-  // Save to the logs/ folder at the root of the repo.
-  final repoRoot = Platform.script.toFilePath().split('integration_test').first;
-  final logsDir = Directory('${repoRoot}logs');
+
+  final logsDir = _resolveLogsDir();
   if (!logsDir.existsSync()) {
     logsDir.createSync(recursive: true);
   }
-  final path = '${logsDir.path}/ash_trail_test_diagnostics.log';
-  _logFile = File(path);
+  _logFile = File('${logsDir.path}/ash_trail_test_diagnostics.log');
   // Truncate on first init
   _logFile.writeAsStringSync(
     '=== AshTrail Test Diagnostics ===\n'

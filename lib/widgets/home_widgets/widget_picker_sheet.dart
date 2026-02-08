@@ -32,13 +32,18 @@ class WidgetPickerSheet extends ConsumerWidget {
                 height: 4,
                 margin: const EdgeInsets.only(top: 12, bottom: 8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withOpacity(0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Icon(
@@ -50,8 +55,8 @@ class WidgetPickerSheet extends ConsumerWidget {
                       child: Text(
                         'Add Widget',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -90,10 +95,12 @@ class WidgetPickerSheet extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Text(
                                 category.displayName,
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ),
                             ],
                           ),
@@ -107,22 +114,29 @@ class WidgetPickerSheet extends ConsumerWidget {
                             entry: entry,
                             isAdded: isAdded,
                             canAdd: canAdd,
-                            onTap: canAdd
-                                ? () {
-                                    HapticFeedback.mediumImpact();
-                                    ref
-                                        .read(homeLayoutConfigProvider.notifier)
-                                        .addWidget(entry.type);
-                                    Navigator.pop(context);
+                            onTap:
+                                canAdd
+                                    ? () {
+                                      HapticFeedback.mediumImpact();
+                                      ref
+                                          .read(
+                                            homeLayoutConfigProvider.notifier,
+                                          )
+                                          .addWidget(entry.type);
+                                      Navigator.pop(context);
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Added ${entry.displayName}'),
-                                        duration: const Duration(seconds: 2),
-                                      ),
-                                    );
-                                  }
-                                : null,
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Added ${entry.displayName}',
+                                          ),
+                                          duration: const Duration(seconds: 3),
+                                        ),
+                                      );
+                                    }
+                                    : null,
                           );
                         }),
                       ],
@@ -157,59 +171,63 @@ class _WidgetPickerTile extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: isAdded
-          ? colorScheme.surfaceContainerHighest.withOpacity(0.5)
-          : null,
+      color:
+          isAdded ? colorScheme.surfaceContainerHighest.withOpacity(0.5) : null,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: canAdd
-              ? colorScheme.primaryContainer
-              : colorScheme.surfaceContainerHighest,
+          backgroundColor:
+              canAdd
+                  ? colorScheme.primaryContainer
+                  : colorScheme.surfaceContainerHighest,
           child: Icon(
             entry.icon,
             size: 20,
-            color: canAdd
-                ? colorScheme.onPrimaryContainer
-                : colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color:
+                canAdd
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurfaceVariant.withOpacity(0.5),
           ),
         ),
         title: Text(
           entry.displayName,
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            color: canAdd
-                ? colorScheme.onSurface
-                : colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color:
+                canAdd
+                    ? colorScheme.onSurface
+                    : colorScheme.onSurfaceVariant.withOpacity(0.5),
           ),
         ),
         subtitle: Text(
           entry.description,
           style: TextStyle(
-            color: canAdd
-                ? colorScheme.onSurfaceVariant
-                : colorScheme.onSurfaceVariant.withOpacity(0.4),
+            color:
+                canAdd
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.onSurfaceVariant.withOpacity(0.4),
           ),
         ),
-        trailing: isAdded
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: colorScheme.tertiaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Added',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: colorScheme.onTertiaryContainer,
-                    fontWeight: FontWeight.w500,
+        trailing:
+            isAdded
+                ? Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                ),
-              )
-            : Icon(
-                Icons.add_circle_outline,
-                color: colorScheme.primary,
-              ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Added',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onTertiaryContainer,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+                : Icon(Icons.add_circle_outline, color: colorScheme.primary),
         onTap: onTap,
       ),
     );

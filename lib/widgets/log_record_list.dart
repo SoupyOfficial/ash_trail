@@ -281,7 +281,10 @@ class LogRecordTile extends ConsumerWidget {
                                 'https://www.google.com/maps/search/?api=1&query=${record.latitude},${record.longitude}';
                             // For now just show a snackbar - you'd need url_launcher for actual opening
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Map URL: $url')),
+                              SnackBar(
+                                content: Text('Map URL: $url'),
+                                duration: const Duration(seconds: 3),
+                              ),
                             );
                           },
                           icon: const Icon(Icons.map, size: 16),
@@ -318,7 +321,10 @@ class LogRecordTile extends ConsumerWidget {
                     await service.deleteLogRecord(record);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Entry deleted')),
+                        const SnackBar(
+                          content: Text('Entry deleted'),
+                          duration: Duration(seconds: 3),
+                        ),
                       );
                     }
                   },
@@ -345,12 +351,7 @@ class LogRecordTile extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              softWrap: true,
-            ),
-          ),
+          Expanded(child: Text(value, softWrap: true)),
         ],
       ),
     );

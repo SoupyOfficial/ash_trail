@@ -49,7 +49,9 @@ void main() {
       final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
       final records = [
         createLogRecord(eventAt: oneHourAgo),
-        createLogRecord(eventAt: DateTime.now().subtract(const Duration(hours: 2))),
+        createLogRecord(
+          eventAt: DateTime.now().subtract(const Duration(hours: 2)),
+        ),
       ];
 
       final duration = service.getTimeSinceLastHit(records);
@@ -85,9 +87,7 @@ void main() {
 
   group('HomeMetricsService - Average Gap', () {
     test('returns null with less than 2 records', () {
-      final records = [
-        createLogRecord(eventAt: DateTime.now()),
-      ];
+      final records = [createLogRecord(eventAt: DateTime.now())];
       expect(service.getAverageGap(records), isNull);
     });
 
@@ -125,9 +125,7 @@ void main() {
 
   group('HomeMetricsService - Average Gap Today', () {
     test('returns null with less than 2 records today', () {
-      final records = [
-        createLogRecord(eventAt: DateTime.now()),
-      ];
+      final records = [createLogRecord(eventAt: DateTime.now())];
       expect(service.getAverageGapToday(records), isNull);
     });
 
@@ -137,7 +135,9 @@ void main() {
         createLogRecord(eventAt: now),
         createLogRecord(eventAt: now.subtract(const Duration(hours: 1))),
         createLogRecord(eventAt: now.subtract(const Duration(hours: 2))),
-        createLogRecord(eventAt: now.subtract(const Duration(days: 1))), // Yesterday
+        createLogRecord(
+          eventAt: now.subtract(const Duration(days: 1)),
+        ), // Yesterday
       ];
 
       final avg = service.getAverageGapToday(records);
@@ -150,15 +150,22 @@ void main() {
   group('HomeMetricsService - Longest Gap', () {
     test('returns null with less than 2 records', () {
       expect(service.getLongestGap([]), isNull);
-      expect(service.getLongestGap([createLogRecord(eventAt: DateTime.now())]), isNull);
+      expect(
+        service.getLongestGap([createLogRecord(eventAt: DateTime.now())]),
+        isNull,
+      );
     });
 
     test('finds the longest gap', () {
       final now = DateTime.now();
       final records = [
         createLogRecord(eventAt: now),
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 3))), // 3h gap
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 4))), // 1h gap
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 3)),
+        ), // 3h gap
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 4)),
+        ), // 1h gap
       ];
 
       final result = service.getLongestGap(records);
@@ -170,7 +177,7 @@ void main() {
       final now = DateTime.now();
       final gapEnd = now.subtract(const Duration(hours: 1));
       final gapStart = now.subtract(const Duration(hours: 5));
-      
+
       final records = [
         createLogRecord(eventAt: now),
         createLogRecord(eventAt: gapEnd),
@@ -194,12 +201,17 @@ void main() {
 
     test('getFirstHitToday returns earliest hit today', () {
       final now = DateTime.now();
-      final earliest = now.subtract(const Duration(hours: 5));
+      // Use DayBoundary-aware "earliest" so it's always within the logical day
+      // (which starts at 6am). Pick a time 1 hour after today's day-start.
+      final todayStart = DateTime(now.year, now.month, now.day, 6);
+      final earliest = todayStart.add(const Duration(hours: 1)); // 7am today
       final records = [
         createLogRecord(eventAt: now),
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 2))),
+        createLogRecord(eventAt: now.subtract(const Duration(hours: 1))),
         createLogRecord(eventAt: earliest),
-        createLogRecord(eventAt: now.subtract(const Duration(days: 1))), // Yesterday
+        createLogRecord(
+          eventAt: now.subtract(const Duration(days: 1)),
+        ), // Yesterday
       ];
 
       final first = service.getFirstHitToday(records);
@@ -230,7 +242,9 @@ void main() {
       final records = [
         createLogRecord(eventAt: baseTime),
         createLogRecord(eventAt: baseTime.add(const Duration(minutes: 30))),
-        createLogRecord(eventAt: baseTime.add(const Duration(hours: 1))), // 3 PM
+        createLogRecord(
+          eventAt: baseTime.add(const Duration(hours: 1)),
+        ), // 3 PM
         createLogRecord(eventAt: DateTime(2024, 1, 15, 10, 0)), // 10 AM
       ];
 
@@ -357,7 +371,10 @@ void main() {
       final now = DateTime.now();
       final records = [
         createLogRecord(eventAt: now),
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 1)), isDeleted: true),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 1)),
+          isDeleted: true,
+        ),
       ];
 
       expect(service.getHitCountToday(records), 1);
@@ -421,14 +438,15 @@ void main() {
       final comparison = service.getTodayVsYesterday(records);
       expect(comparison.todayCount, 2);
       expect(comparison.yesterdayCount, 1);
-      expect(comparison.countChange, greaterThan(0)); // Today more than yesterday
+      expect(
+        comparison.countChange,
+        greaterThan(0),
+      ); // Today more than yesterday
     });
 
     test('getTodayVsYesterday handles empty yesterday', () {
       final now = DateTime.now();
-      final records = [
-        createLogRecord(eventAt: now),
-      ];
+      final records = [createLogRecord(eventAt: now)];
 
       final comparison = service.getTodayVsYesterday(records);
       expect(comparison.todayCount, 1);
@@ -503,16 +521,12 @@ void main() {
     });
 
     test('getAverageMood returns null for no mood data', () {
-      final records = [
-        createLogRecord(eventAt: DateTime.now()),
-      ];
+      final records = [createLogRecord(eventAt: DateTime.now())];
       expect(service.getAverageMood(records), isNull);
     });
 
     test('getAveragePhysical returns null for no physical data', () {
-      final records = [
-        createLogRecord(eventAt: DateTime.now()),
-      ];
+      final records = [createLogRecord(eventAt: DateTime.now())];
       expect(service.getAveragePhysical(records), isNull);
     });
 
@@ -540,9 +554,7 @@ void main() {
 
   group('HomeMetricsService - Top Reasons', () {
     test('getTopReasons returns empty list for no reasons', () {
-      final records = [
-        createLogRecord(eventAt: DateTime.now()),
-      ];
+      final records = [createLogRecord(eventAt: DateTime.now())];
       expect(service.getTopReasons(records), isEmpty);
     });
 
@@ -553,7 +565,12 @@ void main() {
         accountId: 'test-account',
         eventType: EventType.vape,
         eventAt: now,
-        reasons: [LogReason.medical, LogReason.social, LogReason.stress, LogReason.habit],
+        reasons: [
+          LogReason.medical,
+          LogReason.social,
+          LogReason.stress,
+          LogReason.habit,
+        ],
       );
 
       final results = service.getTopReasons([record], limit: 2);
@@ -589,7 +606,10 @@ void main() {
       final now = DateTime.now();
       final records = [
         createLogRecord(eventAt: now, duration: 30),
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 1)), duration: 20),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 20,
+        ),
       ];
 
       final result = service.getTodayDurationUpTo(records);
@@ -603,7 +623,10 @@ void main() {
       final cutoff = now.subtract(const Duration(hours: 2));
       final records = [
         createLogRecord(eventAt: now, duration: 100), // After cutoff
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 3)), duration: 30), // Before cutoff
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 3)),
+          duration: 30,
+        ), // Before cutoff
       ];
 
       final result = service.getTodayDurationUpTo(records, asOf: cutoff);
@@ -621,7 +644,10 @@ void main() {
       final now = DateTime.now();
       final records = [
         createLogRecord(eventAt: now, duration: 30),
-        createLogRecord(eventAt: now.subtract(const Duration(hours: 1)), duration: 60),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 60,
+        ),
       ];
 
       final avg = service.getAverageDuration(records);
@@ -632,7 +658,10 @@ void main() {
       final now = DateTime.now();
       final records = [
         createLogRecord(eventAt: now, duration: 30),
-        createLogRecord(eventAt: now.subtract(const Duration(days: 1)), duration: 100),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(days: 1)),
+          duration: 100,
+        ),
       ];
 
       final avg = service.getAverageDurationToday(records);
@@ -645,8 +674,16 @@ void main() {
       final now = DateTime.now();
       final records = [
         createLogRecord(logId: 'short', eventAt: now, duration: 10),
-        createLogRecord(logId: 'long', eventAt: now.subtract(const Duration(hours: 1)), duration: 60),
-        createLogRecord(logId: 'medium', eventAt: now.subtract(const Duration(hours: 2)), duration: 30),
+        createLogRecord(
+          logId: 'long',
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 60,
+        ),
+        createLogRecord(
+          logId: 'medium',
+          eventAt: now.subtract(const Duration(hours: 2)),
+          duration: 30,
+        ),
       ];
 
       final longest = service.getLongestHit(records);
@@ -657,7 +694,11 @@ void main() {
       final now = DateTime.now();
       final records = [
         createLogRecord(logId: 'short', eventAt: now, duration: 10),
-        createLogRecord(logId: 'long', eventAt: now.subtract(const Duration(hours: 1)), duration: 60),
+        createLogRecord(
+          logId: 'long',
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 60,
+        ),
       ];
 
       final shortest = service.getShortestHit(records);

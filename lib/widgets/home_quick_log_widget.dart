@@ -137,7 +137,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
       // Check minimum threshold
       if (durationMs < 1000) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          final messenger = ScaffoldMessenger.of(context);
+          messenger.clearSnackBars();
+          messenger.showSnackBar(
             const SnackBar(
               content: Text('Duration too short (minimum 1 second)'),
               duration: Duration(seconds: 3),
@@ -181,7 +183,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                 ? 'Logged vape (${durationStr}s). Location captured.'
                 : 'Logged vape (${durationStr}s)';
 
-        ScaffoldMessenger.of(context).showSnackBar(
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.clearSnackBars();
+        messenger.showSnackBar(
           SnackBar(
             content: Text(locationMessage),
             duration: const Duration(seconds: 3),
@@ -207,7 +211,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.clearSnackBars();
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Error logging: $e'),
             backgroundColor: Colors.red,

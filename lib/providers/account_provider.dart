@@ -34,7 +34,11 @@ final activeAccountProvider = StreamProvider<Account?>((ref) {
   final service = ref.watch(accountServiceProvider);
   final stream = service.watchActiveAccount();
   return stream.handleError((error, stackTrace) {
-    _accountLog.e('activeAccountProvider stream error', error: error, stackTrace: stackTrace);
+    _accountLog.e(
+      'activeAccountProvider stream error',
+      error: error,
+      stackTrace: stackTrace,
+    );
     throw error;
   });
 });
@@ -55,7 +59,11 @@ final allAccountsProvider = FutureProvider<List<Account>>((ref) async {
     _accountLog.d('allAccountsProvider loaded ${accounts.length} accounts');
     return accounts;
   } catch (error, stackTrace) {
-    _accountLog.e('allAccountsProvider error', error: error, stackTrace: stackTrace);
+    _accountLog.e(
+      'allAccountsProvider error',
+      error: error,
+      stackTrace: stackTrace,
+    );
     rethrow;
   }
 });
@@ -69,10 +77,16 @@ final loggedInAccountsProvider = FutureProvider<List<Account>>((ref) async {
   final sessionManager = ref.watch(accountSessionManagerProvider);
   try {
     final accounts = await sessionManager.getLoggedInAccounts();
-    _accountLog.d('loggedInAccountsProvider loaded ${accounts.length} accounts');
+    _accountLog.d(
+      'loggedInAccountsProvider loaded ${accounts.length} accounts',
+    );
     return accounts;
   } catch (error, stackTrace) {
-    _accountLog.e('loggedInAccountsProvider error', error: error, stackTrace: stackTrace);
+    _accountLog.e(
+      'loggedInAccountsProvider error',
+      error: error,
+      stackTrace: stackTrace,
+    );
     rethrow;
   }
 });
@@ -162,6 +176,7 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
     _ref.invalidate(activeAccountProvider);
     _ref.invalidate(allAccountsProvider);
     _ref.invalidate(loggedInAccountsProvider);
+    _ref.invalidate(activeAccountLogRecordsProvider);
   }
 
   /// Add a new account (for multi-account support)

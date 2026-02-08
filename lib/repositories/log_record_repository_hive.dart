@@ -196,11 +196,16 @@ class LogRecordRepositoryHive implements LogRecordRepository {
     final matchingRecords =
         allRecords
             .where((r) => r.accountId == accountId && !r.isDeleted)
-            .toList();
-    final mappedStream = _controller.stream.map((records) =>
-        records
-            .where((r) => r.accountId == accountId && !r.isDeleted)
-            .toList());
+            .toList()
+          ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
+    final mappedStream = _controller.stream.map((records) {
+      final filtered =
+          records
+              .where((r) => r.accountId == accountId && !r.isDeleted)
+              .toList()
+            ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
+      return filtered;
+    });
     return Stream.value(matchingRecords).asyncExpand((initial) async* {
       yield initial;
       yield* mappedStream;

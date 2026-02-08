@@ -39,14 +39,34 @@ class HomeComponent {
   }
 
   /// Long-press the hold-to-record button for [duration].
+  ///
+  /// Pumps frames in small increments during the hold so the
+  /// [LongPressGestureRecognizer] reliably detects the press on
+  /// slower simulators and when the button is inside a scrollable.
   Future<void> holdToRecord({
     Duration duration = const Duration(seconds: 3),
   }) async {
+    // Ensure the button is scrolled into view and the widget tree is stable.
+    await $.tester.ensureVisible(holdToRecordButton);
+    await settle($);
+
     final center = $.tester.getCenter(holdToRecordButton);
     final gesture = await $.tester.startGesture(center);
-    await $.pump(duration);
+
+    // Pump in 100 ms increments so the gesture arena processes
+    // intermediate frames and fires the long-press callback.
+    const increment = Duration(milliseconds: 100);
+    var remaining = duration;
+    while (remaining > Duration.zero) {
+      final step = remaining > increment ? increment : remaining;
+      await $.pump(step);
+      remaining -= step;
+    }
+
     await gesture.up();
-    await $.pump(const Duration(milliseconds: 500));
+    // Allow the recording callback / snackbar to start appearing.
+    await $.pump(const Duration(seconds: 1));
+    await settle($, frames: 5);
   }
 
   // ── Assertions ──

@@ -38,10 +38,10 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
   double? _moodRating;
   double? _physicalRating;
   final Set<LogReason> _selectedReasons = {};
-  
+
   // Track current account ID to detect account switches
   String? _currentAccountId;
-  
+
   // Location service
   final LocationService _locationService = LocationService();
 
@@ -93,7 +93,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     // Get the current active account - wait for it if loading
     Account? activeAccount;
     final activeAccountAsync = ref.read(activeAccountProvider);
-    
+
     if (activeAccountAsync.isLoading) {
       // Wait for account to load
       try {
@@ -104,7 +104,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     } else {
       activeAccount = activeAccountAsync.asData?.value;
     }
-    
+
     if (activeAccount == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,17 +113,22 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
       }
       return;
     }
-    
+
     // Double-check we're using the correct account (in case it changed during async operations)
     final currentAccountAsync = ref.read(activeAccountProvider);
     final currentAccount = currentAccountAsync.asData?.value;
-    if (currentAccount != null && currentAccount.userId != activeAccount.userId) {
+    if (currentAccount != null &&
+        currentAccount.userId != activeAccount.userId) {
       // Account changed while we were processing - use the new account
       activeAccount = currentAccount;
-      _log.d('Account changed during log creation, using new account: ${activeAccount.userId}');
+      _log.d(
+        'Account changed during log creation, using new account: ${activeAccount.userId}',
+      );
     }
 
-    final service = LogRecordService();
+    final service = LogRecordService(
+      accountService: ref.read(accountServiceProvider),
+    );
 
     try {
       // Check minimum threshold
@@ -168,10 +173,11 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
 
       if (mounted) {
         final durationStr = durationSeconds.toStringAsFixed(1);
-        final locationMessage = latitude != null && longitude != null
-            ? 'Logged vape (${durationStr}s). Location captured.'
-            : 'Logged vape (${durationStr}s)';
-        
+        final locationMessage =
+            latitude != null && longitude != null
+                ? 'Logged vape (${durationStr}s). Location captured.'
+                : 'Logged vape (${durationStr}s)';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(locationMessage),
@@ -256,7 +262,8 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     // form" or after successfully finishing a log.
     if (activeAccountAsync.isLoading) {
       // Loading: do nothing; keep current state
-    } else if (activeAccount != null && activeAccount.userId != _currentAccountId) {
+    } else if (activeAccount != null &&
+        activeAccount.userId != _currentAccountId) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_currentAccountId != null) _cancelRecording();
         _currentAccountId = activeAccount.userId;
@@ -267,8 +274,9 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         _currentAccountId = null;
       });
     }
-    
-    final hasFormValues = _moodRating != null ||
+
+    final hasFormValues =
+        _moodRating != null ||
         _physicalRating != null ||
         _selectedReasons.isNotEmpty;
 
@@ -301,9 +309,12 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                   child: Text(
                     'Mood',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: _moodRating == null
-                          ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
-                          : null,
+                      color:
+                          _moodRating == null
+                              ? Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6)
+                              : null,
                     ),
                   ),
                 ),
@@ -311,15 +322,23 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                   flex: 3,
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: _moodRating == null
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest
-                          : null,
-                      inactiveTrackColor: _moodRating == null
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)
-                          : null,
-                      thumbColor: _moodRating == null
-                          ? Theme.of(context).colorScheme.outline
-                          : null,
+                      activeTrackColor:
+                          _moodRating == null
+                              ? Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest
+                              : null,
+                      inactiveTrackColor:
+                          _moodRating == null
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.6)
+                              : null,
+                      thumbColor:
+                          _moodRating == null
+                              ? Theme.of(context).colorScheme.outline
+                              : null,
                     ),
                     child: Slider(
                       key: const Key('quick_log_mood_slider'),
@@ -347,9 +366,12 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                   child: Text(
                     'Physical',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: _physicalRating == null
-                          ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)
-                          : null,
+                      color:
+                          _physicalRating == null
+                              ? Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6)
+                              : null,
                     ),
                   ),
                 ),
@@ -357,15 +379,23 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                   flex: 3,
                   child: SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: _physicalRating == null
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest
-                          : null,
-                      inactiveTrackColor: _physicalRating == null
-                          ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.6)
-                          : null,
-                      thumbColor: _physicalRating == null
-                          ? Theme.of(context).colorScheme.outline
-                          : null,
+                      activeTrackColor:
+                          _physicalRating == null
+                              ? Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest
+                              : null,
+                      inactiveTrackColor:
+                          _physicalRating == null
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.6)
+                              : null,
+                      thumbColor:
+                          _physicalRating == null
+                              ? Theme.of(context).colorScheme.outline
+                              : null,
                     ),
                     child: Slider(
                       key: const Key('quick_log_physical_slider'),
@@ -408,61 +438,61 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
                   onLongPressEnd: _handleLongPressEnd,
                   onLongPressCancel: _handleTapCancel,
                   child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color:
-                        _isRecording
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 20,
-                    horizontal: 16,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _isRecording ? Icons.pause : Icons.touch_app,
-                        size: 28,
-                        color:
-                            _isRecording
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.primary,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color:
+                          _isRecording
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
                       ),
-                      const SizedBox(width: 12),
-                      if (_isRecording)
-                        Text(
-                          '${(_recordedDuration.inMilliseconds / 1000).toStringAsFixed(2)}s',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        )
-                      else
-                        Text(
-                          'Hold to record duration',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isRecording ? Icons.pause : Icons.touch_app,
+                          size: 28,
+                          color:
+                              _isRecording
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.primary,
                         ),
-                    ],
+                        const SizedBox(width: 12),
+                        if (_isRecording)
+                          Text(
+                            '${(_recordedDuration.inMilliseconds / 1000).toStringAsFixed(2)}s',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          )
+                        else
+                          Text(
+                            'Hold to record duration',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           ],
         ),
       ),

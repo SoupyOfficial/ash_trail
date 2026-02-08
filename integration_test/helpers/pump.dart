@@ -20,9 +20,13 @@ bool _logFileInitialized = false;
 void _initLogFile() {
   if (_logFileInitialized) return;
   _logFileInitialized = true;
-  // Write to the app's documents directory (accessible on simulator filesystem)
-  // Use a path that's easy to find from the host machine.
-  final path = '/tmp/ash_trail_test_diagnostics.log';
+  // Save to the logs/ folder at the root of the repo.
+  final repoRoot = Platform.script.toFilePath().split('integration_test').first;
+  final logsDir = Directory('${repoRoot}logs');
+  if (!logsDir.existsSync()) {
+    logsDir.createSync(recursive: true);
+  }
+  final path = '${logsDir.path}/ash_trail_test_diagnostics.log';
   _logFile = File(path);
   // Truncate on first init
   _logFile.writeAsStringSync(
@@ -601,4 +605,163 @@ Future<void> debugLogActiveUser(String step) async {
     '  ⚡ [$step] Firebase=${fbUser?.email ?? 'null'} '
     'Hive=$hiveActive',
   );
+}
+
+/// Wait until the Riverpod [activeAccountProvider] reflects [expectedEmail].
+///
+/// After switching accounts, Firebase Auth + Hive + the Riverpod stream
+/// all need time to propagate the new active user. This helper polls until
+/// the provider emits the expected email, or times out.
+///
+/// Returns `true` if the provider converged, `false` on timeout.
+Future<bool> waitForProviderPropagation(
+  PatrolIntegrationTester $,
+  String expectedEmail, {
+  Duration timeout = const Duration(seconds: 15),
+}) async {
+  testLog('  ⏳ Waiting for activeAccountProvider → $expectedEmail ...');
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    await $.pump(const Duration(milliseconds: 200));
+    final container = _findProviderContainer($);
+    if (container != null) {
+      try {
+        final asyncVal = container.read(activeAccountProvider);
+        final email = asyncVal.asData?.value?.email;
+        if (email == expectedEmail) {
+          testLog('  ✓ Provider propagated to $expectedEmail');
+          return true;
+        }
+        // Also check Hive to see if it's ahead of the provider
+        final hiveAcct = await AccountService().getActiveAccount();
+        testLog(
+          '  ⏳ Provider=${email ?? 'null/loading'} '
+          'Hive=${hiveAcct?.email ?? 'null'} '
+          '(waiting for $expectedEmail)',
+        );
+      } catch (e) {
+        testLog('  ⏳ Provider read error: $e');
+      }
+    }
+    await settle($, frames: 5);
+  }
+  testLog(
+    '  ⚠ TIMEOUT: Provider did not propagate within ${timeout.inSeconds}s',
+  );
+  await debugDumpAccountState($, 'Provider propagation TIMEOUT');
+  return false;
+}
+
+/// Dump all visible snackbar-related widgets on screen for debugging.
+///
+/// Useful for understanding why a snackbar might be stuck or why a new
+/// snackbar isn't appearing (e.g. if a stale one is blocking).
+Future<void> debugDumpSnackbarState(
+  PatrolIntegrationTester $,
+  String label,
+) async {
+  testLog('');
+  testLog('┌── SNACKBAR STATE: $label ──');
+
+  // Look for SnackBar widgets
+  final snackbarFinder = find.byType(SnackBar);
+  final snackbarCount = snackbarFinder.evaluate().length;
+  testLog('  SnackBar widgets on screen: $snackbarCount');
+
+  if (snackbarCount > 0) {
+    for (final element in snackbarFinder.evaluate()) {
+      final sb = element.widget as SnackBar;
+      // Try to get the content text
+      if (sb.content is Text) {
+        testLog('    Content: "${(sb.content as Text).data}"');
+      } else {
+        testLog('    Content type: ${sb.content.runtimeType}');
+      }
+      testLog('    Duration: ${sb.duration}');
+      testLog('    Action: ${sb.action?.label ?? 'none'}');
+    }
+  }
+
+  // Also check for any Text containing common snackbar messages
+  final loggedVape = find.textContaining('Logged vape');
+  final errorText = find.textContaining('Error');
+  final noActive = find.textContaining('No active account');
+  final tooShort = find.textContaining('too short');
+
+  testLog('  "Logged vape" visible: ${$.tester.any(loggedVape)}');
+  testLog('  "Error" visible: ${$.tester.any(errorText)}');
+  testLog('  "No active account" visible: ${$.tester.any(noActive)}');
+  testLog('  "too short" visible: ${$.tester.any(tooShort)}');
+
+  // Look for ScaffoldMessenger state
+  try {
+    final scaffoldFinder = find.byType(Scaffold);
+    testLog('  Scaffold widgets: ${scaffoldFinder.evaluate().length}');
+  } catch (e) {
+    testLog('  Scaffold check error: $e');
+  }
+
+  testLog('└── END SNACKBAR STATE ──');
+  testLog('');
+}
+
+/// Clear any leftover snackbars by finding the ScaffoldMessenger and
+/// calling clearSnackBars(). This is important before attempting a new
+/// quick log, because a stale snackbar can interfere with detection.
+Future<void> clearSnackbars(PatrolIntegrationTester $) async {
+  try {
+    final scaffoldFinder = find.byType(Scaffold);
+    if (scaffoldFinder.evaluate().isNotEmpty) {
+      final scaffoldElement = scaffoldFinder.evaluate().first;
+      final scaffoldContext = scaffoldElement;
+      ScaffoldMessenger.of(scaffoldContext).clearSnackBars();
+      testLog('  🧹 Cleared snackbars via ScaffoldMessenger');
+      await $.pump(const Duration(milliseconds: 300));
+    }
+  } catch (e) {
+    testLog('  🧹 clearSnackbars error: $e');
+  }
+}
+
+/// Dump the state of the HomeQuickLogWidget — checks if the recording
+/// button is present and captures any visible state indicators.
+Future<void> debugDumpQuickLogWidgetState(
+  PatrolIntegrationTester $,
+  String label,
+) async {
+  testLog('');
+  testLog('┌── QUICK LOG WIDGET STATE: $label ──');
+
+  final holdButton = find.byKey(const Key('hold_to_record_button'));
+  testLog(
+    '  hold_to_record_button: ${$.tester.any(holdButton) ? 'VISIBLE' : 'NOT FOUND'}',
+  );
+
+  // Check for any duration text (timer display while recording)
+  final durationText = find.textContaining('s');
+  int durationCount = 0;
+  for (final element in durationText.evaluate()) {
+    final widget = element.widget;
+    if (widget is Text) {
+      final text = widget.data ?? '';
+      // Look for patterns like "2.5s" or "0:03"
+      if (RegExp(r'^\d+\.?\d*s?$').hasMatch(text.trim()) ||
+          RegExp(r'^\d+:\d{2}$').hasMatch(text.trim())) {
+        testLog('  Timer text: "$text"');
+        durationCount++;
+      }
+    }
+  }
+  if (durationCount == 0) {
+    testLog('  No timer/duration text visible (widget idle)');
+  }
+
+  // Check for the recording overlay/animation
+  final circularProgress = find.byType(CircularProgressIndicator);
+  testLog(
+    '  CircularProgressIndicator: ${$.tester.any(circularProgress) ? 'VISIBLE (recording?)' : 'not visible'}',
+  );
+
+  testLog('└── END QUICK LOG WIDGET STATE ──');
+  testLog('');
 }

@@ -101,7 +101,7 @@ class InMemoryAccountRepository implements AccountRepository {
 void main() {
   late InMemoryAccountRepository repository;
 
-  Account _createTestAccount({
+  Account createTestAccount({
     required String userId,
     String email = 'test@example.com',
     String? displayName,
@@ -129,7 +129,7 @@ void main() {
 
   group('AccountRepository - CRUD Operations', () {
     test('save() creates new account', () async {
-      final account = _createTestAccount(userId: 'user-1');
+      final account = createTestAccount(userId: 'user-1');
 
       final saved = await repository.save(account);
 
@@ -138,7 +138,7 @@ void main() {
     });
 
     test('save() updates existing account', () async {
-      final account = _createTestAccount(userId: 'user-1', displayName: 'Original');
+      final account = createTestAccount(userId: 'user-1', displayName: 'Original');
       await repository.save(account);
 
       account.displayName = 'Updated';
@@ -156,9 +156,9 @@ void main() {
     });
 
     test('getAll() returns all saved accounts', () async {
-      await repository.save(_createTestAccount(userId: 'user-1', email: 'one@test.com'));
-      await repository.save(_createTestAccount(userId: 'user-2', email: 'two@test.com'));
-      await repository.save(_createTestAccount(userId: 'user-3', email: 'three@test.com'));
+      await repository.save(createTestAccount(userId: 'user-1', email: 'one@test.com'));
+      await repository.save(createTestAccount(userId: 'user-2', email: 'two@test.com'));
+      await repository.save(createTestAccount(userId: 'user-3', email: 'three@test.com'));
 
       final accounts = await repository.getAll();
 
@@ -172,8 +172,8 @@ void main() {
     });
 
     test('getByUserId() returns correct account', () async {
-      await repository.save(_createTestAccount(userId: 'user-1', email: 'one@test.com'));
-      await repository.save(_createTestAccount(userId: 'user-2', email: 'two@test.com'));
+      await repository.save(createTestAccount(userId: 'user-1', email: 'one@test.com'));
+      await repository.save(createTestAccount(userId: 'user-2', email: 'two@test.com'));
 
       final result = await repository.getByUserId('user-2');
 
@@ -182,8 +182,8 @@ void main() {
     });
 
     test('delete() removes account', () async {
-      await repository.save(_createTestAccount(userId: 'user-1'));
-      await repository.save(_createTestAccount(userId: 'user-2'));
+      await repository.save(createTestAccount(userId: 'user-1'));
+      await repository.save(createTestAccount(userId: 'user-2'));
 
       await repository.delete('user-1');
 
@@ -193,7 +193,7 @@ void main() {
     });
 
     test('delete() clears active status when deleting active account', () async {
-      final account = _createTestAccount(userId: 'user-1', isActive: true);
+      final account = createTestAccount(userId: 'user-1', isActive: true);
       await repository.save(account);
       await repository.setActive('user-1');
 
@@ -206,7 +206,7 @@ void main() {
 
   group('AccountRepository - Active Account Operations', () {
     test('setActive() sets account as active', () async {
-      await repository.save(_createTestAccount(userId: 'user-1'));
+      await repository.save(createTestAccount(userId: 'user-1'));
 
       await repository.setActive('user-1');
 
@@ -217,8 +217,8 @@ void main() {
     });
 
     test('setActive() deactivates previous active account', () async {
-      final user1 = _createTestAccount(userId: 'user-1', isActive: true);
-      final user2 = _createTestAccount(userId: 'user-2');
+      final user1 = createTestAccount(userId: 'user-1', isActive: true);
+      final user2 = createTestAccount(userId: 'user-2');
       await repository.save(user1);
       await repository.setActive('user-1');
       await repository.save(user2);
@@ -232,7 +232,7 @@ void main() {
     });
 
     test('getActive() returns null when no active account', () async {
-      await repository.save(_createTestAccount(userId: 'user-1', isActive: false));
+      await repository.save(createTestAccount(userId: 'user-1', isActive: false));
 
       final active = await repository.getActive();
 
@@ -240,8 +240,8 @@ void main() {
     });
 
     test('clearActive() deactivates all accounts', () async {
-      final user1 = _createTestAccount(userId: 'user-1', isActive: true);
-      final user2 = _createTestAccount(userId: 'user-2', isActive: true);
+      final user1 = createTestAccount(userId: 'user-1', isActive: true);
+      final user2 = createTestAccount(userId: 'user-2', isActive: true);
       await repository.save(user1);
       await repository.save(user2);
       await repository.setActive('user-1');
@@ -255,7 +255,7 @@ void main() {
 
   group('AccountRepository - Auth Provider Filtering', () {
     test('saves and retrieves accounts with gmail provider', () async {
-      final account = _createTestAccount(
+      final account = createTestAccount(
         userId: 'google-user',
         authProvider: AuthProvider.gmail,
       );
@@ -266,7 +266,7 @@ void main() {
     });
 
     test('saves and retrieves accounts with apple provider', () async {
-      final account = _createTestAccount(
+      final account = createTestAccount(
         userId: 'apple-user',
         authProvider: AuthProvider.apple,
       );
@@ -277,7 +277,7 @@ void main() {
     });
 
     test('saves and retrieves accounts with email provider', () async {
-      final account = _createTestAccount(
+      final account = createTestAccount(
         userId: 'email-user',
         authProvider: AuthProvider.email,
       );
@@ -290,7 +290,7 @@ void main() {
 
   group('AccountRepository - Login State', () {
     test('tracks logged in status', () async {
-      final account = _createTestAccount(userId: 'user-1', isLoggedIn: true);
+      final account = createTestAccount(userId: 'user-1', isLoggedIn: true);
       await repository.save(account);
 
       final retrieved = await repository.getByUserId('user-1');
@@ -298,7 +298,7 @@ void main() {
     });
 
     test('updates login status', () async {
-      final account = _createTestAccount(userId: 'user-1', isLoggedIn: false);
+      final account = createTestAccount(userId: 'user-1', isLoggedIn: false);
       await repository.save(account);
 
       account.isLoggedIn = true;
@@ -318,7 +318,7 @@ void main() {
       });
 
       await Future.delayed(const Duration(milliseconds: 10));
-      await repository.save(_createTestAccount(userId: 'user-1'));
+      await repository.save(createTestAccount(userId: 'user-1'));
       await Future.delayed(const Duration(milliseconds: 10));
 
       await subscription.cancel();
@@ -335,7 +335,7 @@ void main() {
       });
 
       await Future.delayed(const Duration(milliseconds: 10));
-      await repository.save(_createTestAccount(userId: 'user-1'));
+      await repository.save(createTestAccount(userId: 'user-1'));
       await repository.setActive('user-1');
       await Future.delayed(const Duration(milliseconds: 10));
 
@@ -366,7 +366,7 @@ void main() {
     });
 
     test('handles special characters in email', () async {
-      final account = _createTestAccount(
+      final account = createTestAccount(
         userId: 'special-user',
         email: 'test+tag@sub.example.com',
       );
@@ -377,7 +377,7 @@ void main() {
     });
 
     test('handles unicode in display name', () async {
-      final account = _createTestAccount(
+      final account = createTestAccount(
         userId: 'unicode-user',
         displayName: '日本語ユーザー 🎉',
       );
@@ -388,7 +388,7 @@ void main() {
     });
 
     test('handles empty display name', () async {
-      final account = _createTestAccount(
+      final account = createTestAccount(
         userId: 'empty-name',
         displayName: '',
       );
@@ -399,7 +399,7 @@ void main() {
     });
 
     test('setActive with non-existent userId does not throw', () async {
-      await repository.save(_createTestAccount(userId: 'existing', isActive: false));
+      await repository.save(createTestAccount(userId: 'existing', isActive: false));
 
       // Should not throw
       await repository.setActive('non-existent');
@@ -417,10 +417,10 @@ void main() {
 
   group('AccountRepository - Multi-Account Scenarios', () {
     test('supports multiple logged-in accounts', () async {
-      await repository.save(_createTestAccount(userId: 'account-1', isLoggedIn: true));
+      await repository.save(createTestAccount(userId: 'account-1', isLoggedIn: true));
       await repository.setActive('account-1');
-      await repository.save(_createTestAccount(userId: 'account-2', isLoggedIn: true));
-      await repository.save(_createTestAccount(userId: 'account-3', isLoggedIn: true));
+      await repository.save(createTestAccount(userId: 'account-2', isLoggedIn: true));
+      await repository.save(createTestAccount(userId: 'account-3', isLoggedIn: true));
 
       final accounts = await repository.getAll();
       final loggedIn = accounts.where((a) => a.isLoggedIn).length;
@@ -429,9 +429,9 @@ void main() {
     });
 
     test('only one account can be active at a time', () async {
-      await repository.save(_createTestAccount(userId: 'a1'));
-      await repository.save(_createTestAccount(userId: 'a2'));
-      await repository.save(_createTestAccount(userId: 'a3'));
+      await repository.save(createTestAccount(userId: 'a1'));
+      await repository.save(createTestAccount(userId: 'a2'));
+      await repository.save(createTestAccount(userId: 'a3'));
 
       await repository.setActive('a2');
 
@@ -442,8 +442,8 @@ void main() {
     });
 
     test('switching accounts preserves login state', () async {
-      final logged1 = _createTestAccount(userId: 'logged-1', isLoggedIn: true);
-      final logged2 = _createTestAccount(userId: 'logged-2', isLoggedIn: true);
+      final logged1 = createTestAccount(userId: 'logged-1', isLoggedIn: true);
+      final logged2 = createTestAccount(userId: 'logged-2', isLoggedIn: true);
       await repository.save(logged1);
       await repository.setActive('logged-1');
       await repository.save(logged2);

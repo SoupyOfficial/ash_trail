@@ -147,7 +147,7 @@ void main() {
   late InMemoryLogRecordRepository repository;
   const uuid = Uuid();
 
-  LogRecord _createTestRecord({
+  LogRecord createTestRecord({
     String? logId,
     String accountId = 'account-1',
     EventType eventType = EventType.vape,
@@ -177,7 +177,7 @@ void main() {
 
   group('LogRecordRepository - CRUD Operations', () {
     test('create() stores new log record', () async {
-      final record = _createTestRecord(logId: 'log-1');
+      final record = createTestRecord(logId: 'log-1');
 
       final created = await repository.create(record);
 
@@ -186,14 +186,14 @@ void main() {
     });
 
     test('create() with generated logId works', () async {
-      final record = _createTestRecord();
+      final record = createTestRecord();
       await repository.create(record);
 
       expect(record.logId, isNotEmpty);
     });
 
     test('update() modifies existing record', () async {
-      final record = _createTestRecord(logId: 'log-1', note: 'Original');
+      final record = createTestRecord(logId: 'log-1', note: 'Original');
       await repository.create(record);
 
       final updated = record.copyWith(note: 'Updated');
@@ -204,7 +204,7 @@ void main() {
     });
 
     test('delete() removes record', () async {
-      final record = _createTestRecord(logId: 'log-1');
+      final record = createTestRecord(logId: 'log-1');
       await repository.create(record);
 
       await repository.delete('log-1');
@@ -220,8 +220,8 @@ void main() {
     });
 
     test('getByLogId() returns correct record', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', note: 'First'));
-      await repository.create(_createTestRecord(logId: 'log-2', note: 'Second'));
+      await repository.create(createTestRecord(logId: 'log-1', note: 'First'));
+      await repository.create(createTestRecord(logId: 'log-2', note: 'Second'));
 
       final result = await repository.getByLogId('log-2');
 
@@ -229,9 +229,9 @@ void main() {
     });
 
     test('getAll() returns all records', () async {
-      await repository.create(_createTestRecord(logId: 'log-1'));
-      await repository.create(_createTestRecord(logId: 'log-2'));
-      await repository.create(_createTestRecord(logId: 'log-3'));
+      await repository.create(createTestRecord(logId: 'log-1'));
+      await repository.create(createTestRecord(logId: 'log-2'));
+      await repository.create(createTestRecord(logId: 'log-3'));
 
       final all = await repository.getAll();
 
@@ -241,9 +241,9 @@ void main() {
 
   group('LogRecordRepository - Account Filtering', () {
     test('getByAccount() returns only records for specified account', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-2', accountId: 'account-2'));
-      await repository.create(_createTestRecord(logId: 'log-3', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-1', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-2', accountId: 'account-2'));
+      await repository.create(createTestRecord(logId: 'log-3', accountId: 'account-1'));
 
       final account1Records = await repository.getByAccount('account-1');
 
@@ -252,8 +252,8 @@ void main() {
     });
 
     test('getByAccount() excludes deleted records', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-2', accountId: 'account-1', isDeleted: true));
+      await repository.create(createTestRecord(logId: 'log-1', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-2', accountId: 'account-1', isDeleted: true));
 
       final records = await repository.getByAccount('account-1');
 
@@ -261,9 +261,9 @@ void main() {
     });
 
     test('countByAccount() returns correct count', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-2', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-3', accountId: 'account-2'));
+      await repository.create(createTestRecord(logId: 'log-1', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-2', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-3', accountId: 'account-2'));
 
       final count = await repository.countByAccount('account-1');
 
@@ -271,9 +271,9 @@ void main() {
     });
 
     test('deleteByAccount() removes all records for account', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-2', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-3', accountId: 'account-2'));
+      await repository.create(createTestRecord(logId: 'log-1', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-2', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-3', accountId: 'account-2'));
 
       await repository.deleteByAccount('account-1');
 
@@ -287,15 +287,15 @@ void main() {
 
   group('LogRecordRepository - Date Range Filtering', () {
     test('getByDateRange() returns records within range', () async {
-      await repository.create(_createTestRecord(
+      await repository.create(createTestRecord(
         logId: 'log-1',
         eventAt: DateTime(2024, 1, 10),
       ));
-      await repository.create(_createTestRecord(
+      await repository.create(createTestRecord(
         logId: 'log-2',
         eventAt: DateTime(2024, 1, 15),
       ));
-      await repository.create(_createTestRecord(
+      await repository.create(createTestRecord(
         logId: 'log-3',
         eventAt: DateTime(2024, 1, 20),
       ));
@@ -311,7 +311,7 @@ void main() {
     });
 
     test('getByDateRange() includes boundary dates', () async {
-      await repository.create(_createTestRecord(
+      await repository.create(createTestRecord(
         logId: 'log-1',
         eventAt: DateTime(2024, 1, 15),
       ));
@@ -326,7 +326,7 @@ void main() {
     });
 
     test('getByDateRange() returns empty for out-of-range', () async {
-      await repository.create(_createTestRecord(
+      await repository.create(createTestRecord(
         logId: 'log-1',
         eventAt: DateTime(2024, 1, 15),
       ));
@@ -343,9 +343,9 @@ void main() {
 
   group('LogRecordRepository - Event Type Filtering', () {
     test('getByEventType() filters by event type', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', eventType: EventType.vape));
-      await repository.create(_createTestRecord(logId: 'log-2', eventType: EventType.inhale));
-      await repository.create(_createTestRecord(logId: 'log-3', eventType: EventType.vape));
+      await repository.create(createTestRecord(logId: 'log-1', eventType: EventType.vape));
+      await repository.create(createTestRecord(logId: 'log-2', eventType: EventType.inhale));
+      await repository.create(createTestRecord(logId: 'log-3', eventType: EventType.vape));
 
       final vapeRecords = await repository.getByEventType('account-1', EventType.vape);
 
@@ -354,7 +354,7 @@ void main() {
     });
 
     test('getByEventType() returns empty when no matches', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', eventType: EventType.vape));
+      await repository.create(createTestRecord(logId: 'log-1', eventType: EventType.vape));
 
       final records = await repository.getByEventType('account-1', EventType.note);
 
@@ -364,9 +364,9 @@ void main() {
 
   group('LogRecordRepository - Sync Status', () {
     test('getPendingSync() returns only pending records', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', syncState: SyncState.pending));
-      await repository.create(_createTestRecord(logId: 'log-2', syncState: SyncState.synced));
-      await repository.create(_createTestRecord(logId: 'log-3', syncState: SyncState.pending));
+      await repository.create(createTestRecord(logId: 'log-1', syncState: SyncState.pending));
+      await repository.create(createTestRecord(logId: 'log-2', syncState: SyncState.synced));
+      await repository.create(createTestRecord(logId: 'log-3', syncState: SyncState.pending));
 
       final pending = await repository.getPendingSync();
 
@@ -377,9 +377,9 @@ void main() {
 
   group('LogRecordRepository - Deleted Records', () {
     test('getDeleted() returns only deleted records for account', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', isDeleted: false));
-      await repository.create(_createTestRecord(logId: 'log-2', isDeleted: true));
-      await repository.create(_createTestRecord(logId: 'log-3', isDeleted: true));
+      await repository.create(createTestRecord(logId: 'log-1', isDeleted: false));
+      await repository.create(createTestRecord(logId: 'log-2', isDeleted: true));
+      await repository.create(createTestRecord(logId: 'log-3', isDeleted: true));
 
       final deleted = await repository.getDeleted('account-1');
 
@@ -395,7 +395,7 @@ void main() {
       final subscription = stream.listen(emitted.add);
 
       await Future.delayed(const Duration(milliseconds: 10));
-      await repository.create(_createTestRecord(logId: 'log-1'));
+      await repository.create(createTestRecord(logId: 'log-1'));
       await Future.delayed(const Duration(milliseconds: 10));
 
       await subscription.cancel();
@@ -404,7 +404,7 @@ void main() {
     });
 
     test('watchByAccount() emits updates on delete', () async {
-      await repository.create(_createTestRecord(logId: 'log-1'));
+      await repository.create(createTestRecord(logId: 'log-1'));
 
       final stream = repository.watchByAccount('account-1');
       final emitted = <List<LogRecord>>[];
@@ -422,7 +422,7 @@ void main() {
 
   group('LogRecordRepository - Edge Cases', () {
     test('handles records with empty note', () async {
-      final record = _createTestRecord(logId: 'log-1', note: '');
+      final record = createTestRecord(logId: 'log-1', note: '');
       await repository.create(record);
 
       final retrieved = await repository.getByLogId('log-1');
@@ -431,7 +431,7 @@ void main() {
 
     test('handles records with very long note', () async {
       final longNote = 'A' * 10000;
-      final record = _createTestRecord(logId: 'log-1', note: longNote);
+      final record = createTestRecord(logId: 'log-1', note: longNote);
       await repository.create(record);
 
       final retrieved = await repository.getByLogId('log-1');
@@ -439,7 +439,7 @@ void main() {
     });
 
     test('handles unicode in note', () async {
-      final record = _createTestRecord(logId: 'log-1', note: '日本語のメモ 🎉 émoji');
+      final record = createTestRecord(logId: 'log-1', note: '日本語のメモ 🎉 émoji');
       await repository.create(record);
 
       final retrieved = await repository.getByLogId('log-1');
@@ -459,8 +459,8 @@ void main() {
 
   group('LogRecordRepository - Multiple Accounts', () {
     test('keeps records separate between accounts', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-2', accountId: 'account-2'));
+      await repository.create(createTestRecord(logId: 'log-1', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-2', accountId: 'account-2'));
 
       final account1 = await repository.getByAccount('account-1');
       final account2 = await repository.getByAccount('account-2');
@@ -472,9 +472,9 @@ void main() {
     });
 
     test('countByAccount is account-specific', () async {
-      await repository.create(_createTestRecord(logId: 'log-1', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-2', accountId: 'account-1'));
-      await repository.create(_createTestRecord(logId: 'log-3', accountId: 'account-2'));
+      await repository.create(createTestRecord(logId: 'log-1', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-2', accountId: 'account-1'));
+      await repository.create(createTestRecord(logId: 'log-3', accountId: 'account-2'));
 
       expect(await repository.countByAccount('account-1'), equals(2));
       expect(await repository.countByAccount('account-2'), equals(1));

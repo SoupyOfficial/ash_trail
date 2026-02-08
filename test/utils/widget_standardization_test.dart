@@ -5,14 +5,13 @@ import 'package:ash_trail/utils/design_constants.dart';
 
 void main() {
   group('AlignmentHelper', () {
-    testWidgets('centerHorizontal centers widget without width',
-        (tester) async {
+    testWidgets('centerHorizontal centers widget without width', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AlignmentHelper.centerHorizontal(
-              child: const Text('Test'),
-            ),
+            body: AlignmentHelper.centerHorizontal(child: const Text('Test')),
           ),
         ),
       );
@@ -21,8 +20,9 @@ void main() {
       expect(find.text('Test'), findsOneWidget);
     });
 
-    testWidgets('centerHorizontal applies max width constraint',
-        (tester) async {
+    testWidgets('centerHorizontal applies max width constraint', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -41,8 +41,9 @@ void main() {
         matching: find.byType(ConstrainedBox),
       );
       expect(constrainedBoxFinder, findsOneWidget);
-      final constrainedBox =
-          tester.widget<ConstrainedBox>(constrainedBoxFinder);
+      final constrainedBox = tester.widget<ConstrainedBox>(
+        constrainedBoxFinder,
+      );
       expect(constrainedBox.constraints.maxWidth, 200);
     });
 
@@ -80,8 +81,9 @@ void main() {
       expect(find.text('Test'), findsOneWidget);
     });
 
-    testWidgets('alignWithPadding applies alignment and padding',
-        (tester) async {
+    testWidgets('alignWithPadding applies alignment and padding', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -109,11 +111,7 @@ void main() {
           home: Scaffold(
             body: SpacedColumn(
               spacing: 20,
-              children: [
-                Text('First'),
-                Text('Second'),
-                Text('Third'),
-              ],
+              children: [Text('First'), Text('Second'), Text('Third')],
             ),
           ),
         ),
@@ -178,10 +176,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: SpacedColumn(
-              spacing: 20,
-              children: [Text('Only')],
-            ),
+            body: SpacedColumn(spacing: 20, children: [Text('Only')]),
           ),
         ),
       );
@@ -192,13 +187,7 @@ void main() {
 
     testWidgets('handles empty children list', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SpacedColumn(
-              children: [],
-            ),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: SpacedColumn(children: []))),
       );
 
       expect(find.byType(Column), findsOneWidget);
@@ -212,11 +201,7 @@ void main() {
           home: Scaffold(
             body: SpacedRow(
               spacing: 16,
-              children: [
-                Text('A'),
-                Text('B'),
-                Text('C'),
-              ],
+              children: [Text('A'), Text('B'), Text('C')],
             ),
           ),
         ),
@@ -268,10 +253,7 @@ void main() {
           home: Scaffold(
             body: CenteredSpacedColumn(
               spacing: 12,
-              children: [
-                Text('One'),
-                Text('Two'),
-              ],
+              children: [Text('One'), Text('Two')],
             ),
           ),
         ),
@@ -286,10 +268,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: CenteredSpacedColumn(
-              maxWidth: 300,
-              children: [Text('Test')],
-            ),
+            body: CenteredSpacedColumn(maxWidth: 300, children: [Text('Test')]),
           ),
         ),
       );
@@ -299,8 +278,9 @@ void main() {
         matching: find.byType(ConstrainedBox),
       );
       expect(constrainedBoxFinder, findsOneWidget);
-      final constrainedBox =
-          tester.widget<ConstrainedBox>(constrainedBoxFinder);
+      final constrainedBox = tester.widget<ConstrainedBox>(
+        constrainedBoxFinder,
+      );
       expect(constrainedBox.constraints.maxWidth, 300);
     });
   });
@@ -312,10 +292,7 @@ void main() {
           home: Scaffold(
             body: CenteredSpacedRow(
               spacing: 8,
-              children: [
-                Text('Left'),
-                Text('Right'),
-              ],
+              children: [Text('Left'), Text('Right')],
             ),
           ),
         ),
@@ -330,10 +307,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: CenteredSpacedRow(
-              maxWidth: 400,
-              children: [Text('Test')],
-            ),
+            body: CenteredSpacedRow(maxWidth: 400, children: [Text('Test')]),
           ),
         ),
       );
@@ -343,8 +317,9 @@ void main() {
         matching: find.byType(ConstrainedBox),
       );
       expect(constrainedBoxFinder, findsOneWidget);
-      final constrainedBox =
-          tester.widget<ConstrainedBox>(constrainedBoxFinder);
+      final constrainedBox = tester.widget<ConstrainedBox>(
+        constrainedBoxFinder,
+      );
       expect(constrainedBox.constraints.maxWidth, 400);
     });
   });
@@ -354,10 +329,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: PaddedContainer(
-              padding: Spacing.xl,
-              child: Text('Content'),
-            ),
+            body: PaddedContainer(padding: Spacing.xl, child: Text('Content')),
           ),
         ),
       );
@@ -370,10 +342,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: PaddedContainer(
-              fillWidth: true,
-              child: Text('Content'),
-            ),
+            body: PaddedContainer(fillWidth: true, child: Text('Content')),
           ),
         ),
       );
@@ -386,10 +355,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: PaddedContainer(
-              minHeight: 100,
-              child: Text('Content'),
-            ),
+            body: PaddedContainer(minHeight: 100, child: Text('Content')),
           ),
         ),
       );
@@ -403,11 +369,7 @@ void main() {
     testWidgets('renders with default styling', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: StandardCard(
-              child: Text('Card Content'),
-            ),
-          ),
+          home: Scaffold(body: StandardCard(child: Text('Card Content'))),
         ),
       );
 
@@ -438,12 +400,7 @@ void main() {
     testWidgets('applies custom elevation', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: StandardCard(
-              elevation: 8,
-              child: Text('Card'),
-            ),
-          ),
+          home: Scaffold(body: StandardCard(elevation: 8, child: Text('Card'))),
         ),
       );
 
@@ -472,10 +429,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: StandardCard(
-              borderRadius: radius,
-              child: Text('Card'),
-            ),
+            body: StandardCard(borderRadius: radius, child: Text('Card')),
           ),
         ),
       );
@@ -491,10 +445,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: CenteredCard(
-              maxWidth: 500,
-              child: Text('Centered'),
-            ),
+            body: CenteredCard(maxWidth: 500, child: Text('Centered')),
           ),
         ),
       );
@@ -516,7 +467,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: CenteredCard(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(32),
               child: Text('Padded'),
             ),
           ),
@@ -531,11 +482,7 @@ void main() {
     testWidgets('expands to fill available space', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: FillContainer(
-              child: Text('Filled'),
-            ),
-          ),
+          home: Scaffold(body: FillContainer(child: Text('Filled'))),
         ),
       );
 
@@ -548,11 +495,7 @@ void main() {
     testWidgets('wraps child with minimum size constraint', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: MinimumTouchTarget(
-              child: Icon(Icons.add),
-            ),
-          ),
+          home: Scaffold(body: MinimumTouchTarget(child: Icon(Icons.add))),
         ),
       );
 
@@ -605,10 +548,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: MinimumTouchTarget(
-              minSize: 64,
-              child: Icon(Icons.add),
-            ),
+            body: MinimumTouchTarget(minSize: 64, child: Icon(Icons.add)),
           ),
         ),
       );
@@ -623,13 +563,7 @@ void main() {
     testWidgets('renders with default values', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: [
-                ResponsiveDivider(),
-              ],
-            ),
-          ),
+          home: Scaffold(body: Column(children: [ResponsiveDivider()])),
         ),
       );
 
@@ -669,11 +603,7 @@ void main() {
   group('SpacingDivider', () {
     testWidgets('renders as SizedBox with height', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SpacingDivider(height: 24),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: SpacingDivider(height: 24))),
       );
 
       final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox));
@@ -682,11 +612,7 @@ void main() {
 
     testWidgets('uses default height of 16', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SpacingDivider(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: SpacingDivider())),
       );
 
       final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox));
@@ -716,10 +642,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: SingleChildScrollView(
-              child: StyledSection(
-                title: 'Title',
-                content: Text('Content'),
-              ),
+              child: StyledSection(title: 'Title', content: Text('Content')),
             ),
           ),
         ),
@@ -753,10 +676,7 @@ void main() {
             body: StyledSection(
               title: 'Styled',
               content: Text('Content'),
-              titleStyle: TextStyle(
-                fontSize: 24,
-                color: Colors.blue,
-              ),
+              titleStyle: TextStyle(fontSize: 24, color: Colors.blue),
             ),
           ),
         ),
@@ -771,11 +691,7 @@ void main() {
   group('SafePadding', () {
     testWidgets('wraps child in SafeArea', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: SafePadding(
-            child: Text('Safe'),
-          ),
-        ),
+        const MaterialApp(home: SafePadding(child: Text('Safe'))),
       );
 
       expect(find.byType(SafeArea), findsOneWidget);
@@ -785,10 +701,7 @@ void main() {
     testWidgets('applies additional padding', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: SafePadding(
-            additionalPadding: 16,
-            child: Text('Padded'),
-          ),
+          home: SafePadding(additionalPadding: 16, child: Text('Padded')),
         ),
       );
 

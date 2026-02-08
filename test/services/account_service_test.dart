@@ -141,7 +141,7 @@ void main() {
     mockLogRecordService.reset();
   });
 
-  Account _createAccount({
+  Account createAccount({
     required String userId,
     String email = 'test@example.com',
     String? displayName,
@@ -166,9 +166,9 @@ void main() {
     });
 
     test('getAllAccounts returns all accounts', () async {
-      await mockRepository.save(_createAccount(userId: 'user-1'));
-      await mockRepository.save(_createAccount(userId: 'user-2'));
-      await mockRepository.save(_createAccount(userId: 'user-3'));
+      await mockRepository.save(createAccount(userId: 'user-1'));
+      await mockRepository.save(createAccount(userId: 'user-2'));
+      await mockRepository.save(createAccount(userId: 'user-3'));
 
       final accounts = await accountService.getAllAccounts();
 
@@ -176,7 +176,7 @@ void main() {
     });
 
     test('getActiveAccount returns null when no active account', () async {
-      await mockRepository.save(_createAccount(userId: 'inactive', isActive: false));
+      await mockRepository.save(createAccount(userId: 'inactive', isActive: false));
 
       final active = await accountService.getActiveAccount();
 
@@ -184,8 +184,8 @@ void main() {
     });
 
     test('getActiveAccount returns active account', () async {
-      await mockRepository.save(_createAccount(userId: 'inactive', isActive: false));
-      await mockRepository.save(_createAccount(userId: 'active', isActive: true));
+      await mockRepository.save(createAccount(userId: 'inactive', isActive: false));
+      await mockRepository.save(createAccount(userId: 'active', isActive: true));
 
       final active = await accountService.getActiveAccount();
 
@@ -199,7 +199,7 @@ void main() {
     });
 
     test('getAccountByUserId returns account when exists', () async {
-      await mockRepository.save(_createAccount(userId: 'target', email: 'target@test.com'));
+      await mockRepository.save(createAccount(userId: 'target', email: 'target@test.com'));
 
       final account = await accountService.getAccountByUserId('target');
 
@@ -210,7 +210,7 @@ void main() {
 
   group('AccountService - Save Operations', () {
     test('saveAccount creates new account', () async {
-      final account = _createAccount(userId: 'new-user');
+      final account = createAccount(userId: 'new-user');
 
       final saved = await accountService.saveAccount(account);
 
@@ -220,7 +220,7 @@ void main() {
     });
 
     test('saveAccount updates existing account', () async {
-      final account = _createAccount(userId: 'existing', displayName: 'Original');
+      final account = createAccount(userId: 'existing', displayName: 'Original');
       await accountService.saveAccount(account);
 
       account.displayName = 'Updated';
@@ -233,7 +233,7 @@ void main() {
 
   group('AccountService - Active Account Management', () {
     test('setActiveAccount activates specified account', () async {
-      await mockRepository.save(_createAccount(userId: 'user-1', isActive: false));
+      await mockRepository.save(createAccount(userId: 'user-1', isActive: false));
 
       await accountService.setActiveAccount('user-1');
 
@@ -242,8 +242,8 @@ void main() {
     });
 
     test('setActiveAccount deactivates other accounts', () async {
-      await mockRepository.save(_createAccount(userId: 'was-active', isActive: true));
-      await mockRepository.save(_createAccount(userId: 'new-active', isActive: false));
+      await mockRepository.save(createAccount(userId: 'was-active', isActive: true));
+      await mockRepository.save(createAccount(userId: 'new-active', isActive: false));
 
       await accountService.setActiveAccount('new-active');
 
@@ -252,8 +252,8 @@ void main() {
     });
 
     test('deactivateAllAccounts clears all active flags', () async {
-      await mockRepository.save(_createAccount(userId: 'a1', isActive: true));
-      await mockRepository.save(_createAccount(userId: 'a2', isActive: true));
+      await mockRepository.save(createAccount(userId: 'a1', isActive: true));
+      await mockRepository.save(createAccount(userId: 'a2', isActive: true));
 
       await accountService.deactivateAllAccounts();
 
@@ -264,7 +264,7 @@ void main() {
 
   group('AccountService - Delete Operations', () {
     test('deleteAccount removes account', () async {
-      await mockRepository.save(_createAccount(userId: 'to-delete'));
+      await mockRepository.save(createAccount(userId: 'to-delete'));
 
       await accountService.deleteAccount('to-delete');
 
@@ -273,7 +273,7 @@ void main() {
     });
 
     test('deleteAccount deletes associated log records first', () async {
-      await mockRepository.save(_createAccount(userId: 'user-with-logs'));
+      await mockRepository.save(createAccount(userId: 'user-with-logs'));
 
       await accountService.deleteAccount('user-with-logs');
 
@@ -281,8 +281,8 @@ void main() {
     });
 
     test('deleteAccount preserves other accounts', () async {
-      await mockRepository.save(_createAccount(userId: 'keep'));
-      await mockRepository.save(_createAccount(userId: 'remove'));
+      await mockRepository.save(createAccount(userId: 'keep'));
+      await mockRepository.save(createAccount(userId: 'remove'));
 
       await accountService.deleteAccount('remove');
 
@@ -292,7 +292,7 @@ void main() {
 
   group('AccountService - Watch Operations', () {
     test('watchActiveAccount emits stream', () async {
-      await mockRepository.save(_createAccount(userId: 'active', isActive: true));
+      await mockRepository.save(createAccount(userId: 'active', isActive: true));
 
       final stream = accountService.watchActiveAccount();
 
@@ -300,7 +300,7 @@ void main() {
     });
 
     test('watchAllAccounts emits stream', () async {
-      await mockRepository.save(_createAccount(userId: 'user-1'));
+      await mockRepository.save(createAccount(userId: 'user-1'));
 
       final stream = accountService.watchAllAccounts();
 
@@ -310,7 +310,7 @@ void main() {
 
   group('AccountService - Utility Methods', () {
     test('accountExists returns true for existing account', () async {
-      await mockRepository.save(_createAccount(userId: 'existing'));
+      await mockRepository.save(createAccount(userId: 'existing'));
 
       final exists = await accountService.accountExists('existing');
 
@@ -324,9 +324,9 @@ void main() {
     });
 
     test('getAllAccountIds returns all user IDs', () async {
-      await mockRepository.save(_createAccount(userId: 'id-1'));
-      await mockRepository.save(_createAccount(userId: 'id-2'));
-      await mockRepository.save(_createAccount(userId: 'id-3'));
+      await mockRepository.save(createAccount(userId: 'id-1'));
+      await mockRepository.save(createAccount(userId: 'id-2'));
+      await mockRepository.save(createAccount(userId: 'id-3'));
 
       final ids = await accountService.getAllAccountIds();
 
@@ -343,12 +343,12 @@ void main() {
 
   group('AccountService - Multi-Account Scenarios', () {
     test('supports multiple logged-in accounts', () async {
-      await accountService.saveAccount(_createAccount(
+      await accountService.saveAccount(createAccount(
         userId: 'a1',
         isLoggedIn: true,
         isActive: true,
       ));
-      await accountService.saveAccount(_createAccount(
+      await accountService.saveAccount(createAccount(
         userId: 'a2',
         isLoggedIn: true,
         isActive: false,
@@ -361,12 +361,12 @@ void main() {
     });
 
     test('switching active account preserves login state', () async {
-      await mockRepository.save(_createAccount(
+      await mockRepository.save(createAccount(
         userId: 'first',
         isActive: true,
         isLoggedIn: true,
       ));
-      await mockRepository.save(_createAccount(
+      await mockRepository.save(createAccount(
         userId: 'second',
         isActive: false,
         isLoggedIn: true,
@@ -386,7 +386,7 @@ void main() {
 
   group('AccountService - Auth Provider Handling', () {
     test('handles email provider accounts', () async {
-      await accountService.saveAccount(_createAccount(
+      await accountService.saveAccount(createAccount(
         userId: 'email-user',
         authProvider: AuthProvider.email,
       ));
@@ -396,7 +396,7 @@ void main() {
     });
 
     test('handles Google provider accounts', () async {
-      await accountService.saveAccount(_createAccount(
+      await accountService.saveAccount(createAccount(
         userId: 'google-user',
         authProvider: AuthProvider.gmail,
       ));
@@ -406,7 +406,7 @@ void main() {
     });
 
     test('handles Apple provider accounts', () async {
-      await accountService.saveAccount(_createAccount(
+      await accountService.saveAccount(createAccount(
         userId: 'apple-user',
         authProvider: AuthProvider.apple,
       ));

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
@@ -10,28 +9,33 @@ import 'package:ash_trail/services/legacy_data_adapter.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/account.dart';
 import 'package:ash_trail/models/enums.dart';
-import 'package:ash_trail/repositories/log_record_repository.dart';
 
 /// Mock LogRecordService for testing
 class MockLogRecordService implements LogRecordService {
   final List<LogRecord> _records = [];
   final Map<String, List<String>> _syncErrors = {};
-  
+
   void addRecord(LogRecord record) => _records.add(record);
   void clearRecords() => _records.clear();
   List<LogRecord> get records => List.unmodifiable(_records);
-  Map<String, String> get lastErrors => Map.unmodifiable(
-    _syncErrors.map((k, v) => MapEntry(k, v.last)),
-  );
-  
+  Map<String, String> get lastErrors =>
+      Map.unmodifiable(_syncErrors.map((k, v) => MapEntry(k, v.last)));
+
   @override
-  Future<List<LogRecord>> getPendingSync({String? accountId, int limit = 50}) async {
-    return _records.where((r) {
-      if (accountId != null && r.accountId != accountId) return false;
-      return r.syncState == SyncState.pending || r.syncState == SyncState.error;
-    }).take(limit).toList();
+  Future<List<LogRecord>> getPendingSync({
+    String? accountId,
+    int limit = 50,
+  }) async {
+    return _records
+        .where((r) {
+          if (accountId != null && r.accountId != accountId) return false;
+          return r.syncState == SyncState.pending ||
+              r.syncState == SyncState.error;
+        })
+        .take(limit)
+        .toList();
   }
-  
+
   @override
   Future<LogRecord?> getLogRecordByLogId(String logId) async {
     try {
@@ -40,7 +44,7 @@ class MockLogRecordService implements LogRecordService {
       return null;
     }
   }
-  
+
   @override
   Future<void> markSynced(LogRecord record, DateTime remoteUpdatedAt) async {
     final index = _records.indexWhere((r) => r.logId == record.logId);
@@ -51,7 +55,7 @@ class MockLogRecordService implements LogRecordService {
       );
     }
   }
-  
+
   @override
   Future<void> markSyncError(LogRecord record, String error) async {
     final index = _records.indexWhere((r) => r.logId == record.logId);
@@ -60,7 +64,7 @@ class MockLogRecordService implements LogRecordService {
       _syncErrors[record.logId] = [...(_syncErrors[record.logId] ?? []), error];
     }
   }
-  
+
   @override
   Future<int> countLogRecords({
     required String accountId,
@@ -76,7 +80,7 @@ class MockLogRecordService implements LogRecordService {
       return true;
     }).length;
   }
-  
+
   @override
   Future<LogRecord> importLogRecord({
     required String logId,
@@ -120,7 +124,7 @@ class MockLogRecordService implements LogRecordService {
     _records.add(record);
     return record;
   }
-  
+
   @override
   Future<LogRecord> updateLogRecord(
     LogRecord record, {
@@ -153,7 +157,7 @@ class MockLogRecordService implements LogRecordService {
     }
     return _records[index];
   }
-  
+
   @override
   Future<void> applyRemoteDeletion(
     LogRecord record, {
@@ -170,7 +174,7 @@ class MockLogRecordService implements LogRecordService {
       );
     }
   }
-  
+
   // Stubs for other methods
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
@@ -180,31 +184,31 @@ class MockLogRecordService implements LogRecordService {
 class MockAccountSessionManager implements AccountSessionManager {
   final List<Account> _loggedInAccounts = [];
   final Map<String, String> _customTokens = {};
-  
+
   void setLoggedInAccounts(List<Account> accounts) {
     _loggedInAccounts.clear();
     _loggedInAccounts.addAll(accounts);
   }
-  
+
   void setCustomToken(String userId, String token) {
     _customTokens[userId] = token;
   }
-  
+
   @override
   Future<List<Account>> getLoggedInAccounts() async {
     return List.unmodifiable(_loggedInAccounts);
   }
-  
+
   @override
   Future<String?> getValidCustomToken(String userId) async {
     return _customTokens[userId];
   }
-  
+
   @override
   Future<void> storeCustomToken(String userId, String token) async {
     _customTokens[userId] = token;
   }
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
@@ -213,19 +217,16 @@ class MockAccountSessionManager implements AccountSessionManager {
 class MockTokenService implements TokenService {
   bool shouldFail = false;
   int generateCallCount = 0;
-  
+
   @override
   Future<Map<String, dynamic>> generateCustomToken(String uid) async {
     generateCallCount++;
     if (shouldFail) {
       throw Exception('Token generation failed');
     }
-    return {
-      'customToken': 'mock_token_for_$uid',
-      'expiresIn': 172800,
-    };
+    return {'customToken': 'mock_token_for_$uid', 'expiresIn': 172800};
   }
-  
+
   @override
   Future<bool> isEndpointReachable() async => !shouldFail;
 }
@@ -276,9 +277,9 @@ Account createTestAccount({
 /// Mock LegacyDataAdapter for testing
 class MockLegacyDataAdapter implements LegacyDataAdapter {
   final List<LogRecord> _legacyRecords = [];
-  
+
   void addLegacyRecord(LogRecord record) => _legacyRecords.add(record);
-  
+
   @override
   Future<List<LogRecord>> queryAllLegacyCollections({
     DateTime? since,
@@ -286,17 +287,17 @@ class MockLegacyDataAdapter implements LegacyDataAdapter {
   }) async {
     return _legacyRecords.take(limit).toList();
   }
-  
+
   @override
   Future<bool> hasLegacyData(String accountId) async {
     return _legacyRecords.isNotEmpty;
   }
-  
+
   @override
   Future<int> getLegacyRecordCount(String accountId) async {
     return _legacyRecords.length;
   }
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
@@ -317,7 +318,8 @@ SyncService createTestSyncService({
     sessionManager: sessionManager,
     tokenService: tokenService,
     legacyAdapter: legacyAdapter ?? MockLegacyDataAdapter(),
-    connectivityCheck: connectivityCheck ?? () async => [ConnectivityResult.wifi],
+    connectivityCheck:
+        connectivityCheck ?? () async => [ConnectivityResult.wifi],
   );
 }
 
@@ -393,10 +395,8 @@ void main() {
         logRecordService: mockLogRecordService,
         sessionManager: mockSessionManager,
         tokenService: mockTokenService,
-        connectivityCheck: () async => [
-          ConnectivityResult.wifi,
-          ConnectivityResult.mobile,
-        ],
+        connectivityCheck:
+            () async => [ConnectivityResult.wifi, ConnectivityResult.mobile],
       );
 
       expect(await syncService.isOnline(), true);
@@ -491,18 +491,15 @@ void main() {
 
     test('getSyncStatus counts pending records', () async {
       // Add some records
-      mockLogRecordService.addRecord(createTestLogRecord(
-        logId: 'log-1',
-        syncState: SyncState.pending,
-      ));
-      mockLogRecordService.addRecord(createTestLogRecord(
-        logId: 'log-2',
-        syncState: SyncState.synced,
-      ));
-      mockLogRecordService.addRecord(createTestLogRecord(
-        logId: 'log-3',
-        syncState: SyncState.pending,
-      ));
+      mockLogRecordService.addRecord(
+        createTestLogRecord(logId: 'log-1', syncState: SyncState.pending),
+      );
+      mockLogRecordService.addRecord(
+        createTestLogRecord(logId: 'log-2', syncState: SyncState.synced),
+      );
+      mockLogRecordService.addRecord(
+        createTestLogRecord(logId: 'log-3', syncState: SyncState.pending),
+      );
 
       final syncService = createTestSyncService(
         logRecordService: mockLogRecordService,
@@ -613,67 +610,79 @@ void main() {
       mockTokenService = MockTokenService();
     });
 
-    test('pullRecordsForAccount returns offline message when offline', () async {
-      final syncService = createTestSyncService(
-        logRecordService: mockLogRecordService,
-        sessionManager: mockSessionManager,
-        tokenService: mockTokenService,
-        connectivityCheck: () async => [ConnectivityResult.none],
-      );
+    test(
+      'pullRecordsForAccount returns offline message when offline',
+      () async {
+        final syncService = createTestSyncService(
+          logRecordService: mockLogRecordService,
+          sessionManager: mockSessionManager,
+          tokenService: mockTokenService,
+          connectivityCheck: () async => [ConnectivityResult.none],
+        );
 
-      final result = await syncService.pullRecordsForAccount(
-        accountId: 'test-account',
-      );
+        final result = await syncService.pullRecordsForAccount(
+          accountId: 'test-account',
+        );
 
-      expect(result.success, 0);
-      expect(result.message, 'Device is offline');
-    });
+        expect(result.success, 0);
+        expect(result.message, 'Device is offline');
+      },
+    );
 
-    test('pullRecordsForAccountIncludingLegacy returns offline message when offline', () async {
-      final syncService = createTestSyncService(
-        logRecordService: mockLogRecordService,
-        sessionManager: mockSessionManager,
-        tokenService: mockTokenService,
-        connectivityCheck: () async => [ConnectivityResult.none],
-      );
+    test(
+      'pullRecordsForAccountIncludingLegacy returns offline message when offline',
+      () async {
+        final syncService = createTestSyncService(
+          logRecordService: mockLogRecordService,
+          sessionManager: mockSessionManager,
+          tokenService: mockTokenService,
+          connectivityCheck: () async => [ConnectivityResult.none],
+        );
 
-      final result = await syncService.pullRecordsForAccountIncludingLegacy(
-        accountId: 'test-account',
-      );
+        final result = await syncService.pullRecordsForAccountIncludingLegacy(
+          accountId: 'test-account',
+        );
 
-      expect(result.success, 0);
-      expect(result.message, 'Device is offline');
-    });
+        expect(result.success, 0);
+        expect(result.message, 'Device is offline');
+      },
+    );
 
-    test('pullAllLoggedInAccounts returns offline message when offline', () async {
-      final syncService = createTestSyncService(
-        logRecordService: mockLogRecordService,
-        sessionManager: mockSessionManager,
-        tokenService: mockTokenService,
-        connectivityCheck: () async => [ConnectivityResult.none],
-      );
+    test(
+      'pullAllLoggedInAccounts returns offline message when offline',
+      () async {
+        final syncService = createTestSyncService(
+          logRecordService: mockLogRecordService,
+          sessionManager: mockSessionManager,
+          tokenService: mockTokenService,
+          connectivityCheck: () async => [ConnectivityResult.none],
+        );
 
-      final result = await syncService.pullAllLoggedInAccounts();
+        final result = await syncService.pullAllLoggedInAccounts();
 
-      expect(result.success, 0);
-      expect(result.message, 'Device is offline');
-    });
+        expect(result.success, 0);
+        expect(result.message, 'Device is offline');
+      },
+    );
 
-    test('pullAllLoggedInAccounts returns no accounts message when empty', () async {
-      mockSessionManager.setLoggedInAccounts([]);
-      
-      final syncService = createTestSyncService(
-        logRecordService: mockLogRecordService,
-        sessionManager: mockSessionManager,
-        tokenService: mockTokenService,
-        connectivityCheck: () async => [ConnectivityResult.wifi],
-      );
+    test(
+      'pullAllLoggedInAccounts returns no accounts message when empty',
+      () async {
+        mockSessionManager.setLoggedInAccounts([]);
 
-      final result = await syncService.pullAllLoggedInAccounts();
+        final syncService = createTestSyncService(
+          logRecordService: mockLogRecordService,
+          sessionManager: mockSessionManager,
+          tokenService: mockTokenService,
+          connectivityCheck: () async => [ConnectivityResult.wifi],
+        );
 
-      expect(result.success, 0);
-      expect(result.message, 'No logged-in accounts');
-    });
+        final result = await syncService.pullAllLoggedInAccounts();
+
+        expect(result.success, 0);
+        expect(result.message, 'No logged-in accounts');
+      },
+    );
   });
 
   group('SyncService - Sync All Accounts', () {
@@ -687,35 +696,41 @@ void main() {
       mockTokenService = MockTokenService();
     });
 
-    test('syncAllLoggedInAccounts returns offline message when offline', () async {
-      final syncService = createTestSyncService(
-        logRecordService: mockLogRecordService,
-        sessionManager: mockSessionManager,
-        tokenService: mockTokenService,
-        connectivityCheck: () async => [ConnectivityResult.none],
-      );
+    test(
+      'syncAllLoggedInAccounts returns offline message when offline',
+      () async {
+        final syncService = createTestSyncService(
+          logRecordService: mockLogRecordService,
+          sessionManager: mockSessionManager,
+          tokenService: mockTokenService,
+          connectivityCheck: () async => [ConnectivityResult.none],
+        );
 
-      final result = await syncService.syncAllLoggedInAccounts();
+        final result = await syncService.syncAllLoggedInAccounts();
 
-      expect(result.success, 0);
-      expect(result.message, 'Device is offline');
-    });
+        expect(result.success, 0);
+        expect(result.message, 'Device is offline');
+      },
+    );
 
-    test('syncAllLoggedInAccounts returns no accounts message when empty', () async {
-      mockSessionManager.setLoggedInAccounts([]);
-      
-      final syncService = createTestSyncService(
-        logRecordService: mockLogRecordService,
-        sessionManager: mockSessionManager,
-        tokenService: mockTokenService,
-        connectivityCheck: () async => [ConnectivityResult.wifi],
-      );
+    test(
+      'syncAllLoggedInAccounts returns no accounts message when empty',
+      () async {
+        mockSessionManager.setLoggedInAccounts([]);
 
-      final result = await syncService.syncAllLoggedInAccounts();
+        final syncService = createTestSyncService(
+          logRecordService: mockLogRecordService,
+          sessionManager: mockSessionManager,
+          tokenService: mockTokenService,
+          connectivityCheck: () async => [ConnectivityResult.wifi],
+        );
 
-      expect(result.success, 0);
-      expect(result.message, 'No logged-in accounts');
-    });
+        final result = await syncService.syncAllLoggedInAccounts();
+
+        expect(result.success, 0);
+        expect(result.message, 'No logged-in accounts');
+      },
+    );
   });
 
   group('SyncService - Force Sync', () {
@@ -731,7 +746,7 @@ void main() {
 
     test('forceSyncNow calls syncAllLoggedInAccounts', () async {
       mockSessionManager.setLoggedInAccounts([]);
-      
+
       final syncService = createTestSyncService(
         logRecordService: mockLogRecordService,
         sessionManager: mockSessionManager,
@@ -746,16 +761,6 @@ void main() {
   });
 
   group('SyncService - Account Sync', () {
-    late MockLogRecordService mockLogRecordService;
-    late MockAccountSessionManager mockSessionManager;
-    late MockTokenService mockTokenService;
-
-    setUp(() {
-      mockLogRecordService = MockLogRecordService();
-      mockSessionManager = MockAccountSessionManager();
-      mockTokenService = MockTokenService();
-    });
-
     // Note: startAccountSync requires FirebaseAuth.instance which can't be mocked in unit tests
     // This functionality is tested in integration tests instead
   });
@@ -782,9 +787,9 @@ void main() {
 
     test('isEndpointReachable returns correct value', () async {
       final tokenService = MockTokenService();
-      
+
       expect(await tokenService.isEndpointReachable(), true);
-      
+
       tokenService.shouldFail = true;
       expect(await tokenService.isEndpointReachable(), false);
     });
@@ -798,26 +803,34 @@ void main() {
     });
 
     test('getPendingSync filters by account and sync state', () async {
-      service.addRecord(createTestLogRecord(
-        logId: 'log-1',
-        accountId: 'account-1',
-        syncState: SyncState.pending,
-      ));
-      service.addRecord(createTestLogRecord(
-        logId: 'log-2',
-        accountId: 'account-1',
-        syncState: SyncState.synced,
-      ));
-      service.addRecord(createTestLogRecord(
-        logId: 'log-3',
-        accountId: 'account-2',
-        syncState: SyncState.pending,
-      ));
-      service.addRecord(createTestLogRecord(
-        logId: 'log-4',
-        accountId: 'account-1',
-        syncState: SyncState.error,
-      ));
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-1',
+          accountId: 'account-1',
+          syncState: SyncState.pending,
+        ),
+      );
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-2',
+          accountId: 'account-1',
+          syncState: SyncState.synced,
+        ),
+      );
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-3',
+          accountId: 'account-2',
+          syncState: SyncState.pending,
+        ),
+      );
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-4',
+          accountId: 'account-1',
+          syncState: SyncState.error,
+        ),
+      );
 
       final pending = await service.getPendingSync(accountId: 'account-1');
 
@@ -827,10 +840,9 @@ void main() {
 
     test('getPendingSync respects limit', () async {
       for (var i = 0; i < 10; i++) {
-        service.addRecord(createTestLogRecord(
-          logId: 'log-$i',
-          syncState: SyncState.pending,
-        ));
+        service.addRecord(
+          createTestLogRecord(logId: 'log-$i', syncState: SyncState.pending),
+        );
       }
 
       final pending = await service.getPendingSync(limit: 5);
@@ -846,7 +858,10 @@ void main() {
     });
 
     test('markSynced updates sync state', () async {
-      final record = createTestLogRecord(logId: 'log-1', syncState: SyncState.pending);
+      final record = createTestLogRecord(
+        logId: 'log-1',
+        syncState: SyncState.pending,
+      );
       service.addRecord(record);
 
       await service.markSynced(record, DateTime.now());
@@ -856,7 +871,10 @@ void main() {
     });
 
     test('markSyncError updates sync state and stores error', () async {
-      final record = createTestLogRecord(logId: 'log-1', syncState: SyncState.pending);
+      final record = createTestLogRecord(
+        logId: 'log-1',
+        syncState: SyncState.pending,
+      );
       service.addRecord(record);
 
       await service.markSyncError(record, 'Test error');
@@ -884,10 +902,7 @@ void main() {
     });
 
     test('updateLogRecord modifies existing record', () async {
-      final record = createTestLogRecord(
-        logId: 'log-1',
-        note: 'Original note',
-      );
+      final record = createTestLogRecord(logId: 'log-1', note: 'Original note');
       service.addRecord(record);
 
       await service.updateLogRecord(
@@ -917,21 +932,27 @@ void main() {
     });
 
     test('countLogRecords filters correctly', () async {
-      service.addRecord(createTestLogRecord(
-        logId: 'log-1',
-        accountId: 'account-1',
-        eventType: EventType.vape,
-      ));
-      service.addRecord(createTestLogRecord(
-        logId: 'log-2',
-        accountId: 'account-1',
-        eventType: EventType.note,
-      ));
-      service.addRecord(createTestLogRecord(
-        logId: 'log-3',
-        accountId: 'account-2',
-        eventType: EventType.vape,
-      ));
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-1',
+          accountId: 'account-1',
+          eventType: EventType.vape,
+        ),
+      );
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-2',
+          accountId: 'account-1',
+          eventType: EventType.note,
+        ),
+      );
+      service.addRecord(
+        createTestLogRecord(
+          logId: 'log-3',
+          accountId: 'account-2',
+          eventType: EventType.vape,
+        ),
+      );
 
       expect(await service.countLogRecords(accountId: 'account-1'), 2);
       expect(await service.countLogRecords(accountId: 'account-2'), 1);

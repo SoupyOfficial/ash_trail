@@ -248,7 +248,7 @@ void main() {
     mockLogRecordService.reset();
   });
 
-  Account _createAccount({
+  Account createAccount({
     required String userId,
     String email = 'test@example.com',
     bool isActive = false,
@@ -266,7 +266,7 @@ void main() {
 
   group('AccountSessionManager - Session Storage', () {
     test('storeSession stores session data in secure storage', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1'));
+      mockRepository.addAccount(createAccount(userId: 'user-1'));
 
       await sessionManager.storeSession(
         userId: 'user-1',
@@ -284,7 +284,7 @@ void main() {
     });
 
     test('storeSession updates account isLoggedIn state', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: false));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: false));
 
       await sessionManager.storeSession(
         userId: 'user-1',
@@ -428,7 +428,7 @@ void main() {
 
   group('AccountSessionManager - Session Clearing', () {
     test('clearSession removes session data', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: true));
       mockStorage.storage['session_user-1'] = jsonEncode({'userId': 'user-1'});
       mockStorage.storage['custom_token_user-1'] = 'token';
       mockStorage.storage['logged_in_accounts'] = jsonEncode(['user-1']);
@@ -440,7 +440,7 @@ void main() {
     });
 
     test('clearSession updates account state', () async {
-      final account = _createAccount(userId: 'user-1', isLoggedIn: true);
+      final account = createAccount(userId: 'user-1', isLoggedIn: true);
       account.refreshToken = 'token';
       account.accessToken = 'access';
       mockRepository.addAccount(account);
@@ -454,8 +454,8 @@ void main() {
     });
 
     test('clearAllSessions clears all logged-in accounts', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: true));
-      mockRepository.addAccount(_createAccount(userId: 'user-2', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'user-2', isLoggedIn: true));
       mockStorage.storage['logged_in_accounts'] = jsonEncode(['user-1', 'user-2']);
       mockStorage.storage['session_user-1'] = jsonEncode({'userId': 'user-1'});
       mockStorage.storage['session_user-2'] = jsonEncode({'userId': 'user-2'});
@@ -471,7 +471,7 @@ void main() {
 
   group('AccountSessionManager - Active Account Management', () {
     test('setActiveAccount stores active user ID', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1'));
+      mockRepository.addAccount(createAccount(userId: 'user-1'));
 
       await sessionManager.setActiveAccount('user-1');
 
@@ -479,7 +479,7 @@ void main() {
     });
 
     test('setActiveAccount updates lastAccessedAt', () async {
-      final account = _createAccount(userId: 'user-1');
+      final account = createAccount(userId: 'user-1');
       mockRepository.addAccount(account);
       final beforeSet = DateTime.now();
 
@@ -507,15 +507,15 @@ void main() {
 
   group('AccountSessionManager - Logged-in Accounts', () {
     test('getLoggedInAccounts returns accounts with isLoggedIn true', () async {
-      mockRepository.addAccount(_createAccount(
+      mockRepository.addAccount(createAccount(
         userId: 'logged-in-1',
         isLoggedIn: true,
       ));
-      mockRepository.addAccount(_createAccount(
+      mockRepository.addAccount(createAccount(
         userId: 'logged-in-2',
         isLoggedIn: true,
       ));
-      mockRepository.addAccount(_createAccount(
+      mockRepository.addAccount(createAccount(
         userId: 'logged-out',
         isLoggedIn: false,
       ));
@@ -527,7 +527,7 @@ void main() {
     });
 
     test('getLoggedInAccounts returns empty when none logged in', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: false));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: false));
 
       final loggedIn = await sessionManager.getLoggedInAccounts();
 
@@ -535,7 +535,7 @@ void main() {
     });
 
     test('hasLoggedInAccounts returns true when accounts logged in', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: true));
 
       final hasAccounts = await sessionManager.hasLoggedInAccounts();
 
@@ -548,9 +548,9 @@ void main() {
     });
 
     test('getLoggedInCount returns correct count', () async {
-      mockRepository.addAccount(_createAccount(userId: 'u1', isLoggedIn: true));
-      mockRepository.addAccount(_createAccount(userId: 'u2', isLoggedIn: true));
-      mockRepository.addAccount(_createAccount(userId: 'u3', isLoggedIn: false));
+      mockRepository.addAccount(createAccount(userId: 'u1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'u2', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'u3', isLoggedIn: false));
 
       final count = await sessionManager.getLoggedInCount();
 
@@ -578,7 +578,7 @@ void main() {
     });
 
     test('addAccountSession updates existing account', () async {
-      mockRepository.addAccount(_createAccount(
+      mockRepository.addAccount(createAccount(
         userId: 'existing',
         email: 'old@test.com',
         isLoggedIn: false,
@@ -615,7 +615,7 @@ void main() {
 
   group('AccountSessionManager - Remove Account Session', () {
     test('removeAccountSession clears session without deleting data', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: true));
       mockStorage.storage['session_user-1'] = jsonEncode({'userId': 'user-1'});
       mockStorage.storage['logged_in_accounts'] = jsonEncode(['user-1']);
 
@@ -629,7 +629,7 @@ void main() {
     });
 
     test('removeAccountSession with deleteData removes account', () async {
-      mockRepository.addAccount(_createAccount(userId: 'user-1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'user-1', isLoggedIn: true));
       mockStorage.storage['active_session_user_id'] = 'user-1';
 
       await sessionManager.removeAccountSession('user-1', deleteData: true);
@@ -639,8 +639,8 @@ void main() {
     });
 
     test('removeAccountSession switches active account when removing active', () async {
-      mockRepository.addAccount(_createAccount(userId: 'active', isLoggedIn: true, isActive: true));
-      mockRepository.addAccount(_createAccount(userId: 'other', isLoggedIn: true, isActive: false));
+      mockRepository.addAccount(createAccount(userId: 'active', isLoggedIn: true, isActive: true));
+      mockRepository.addAccount(createAccount(userId: 'other', isLoggedIn: true, isActive: false));
       mockStorage.storage['active_session_user_id'] = 'active';
       mockStorage.storage['logged_in_accounts'] = jsonEncode(['active', 'other']);
 
@@ -710,8 +710,8 @@ void main() {
     });
 
     test('switching accounts preserves other sessions', () async {
-      mockRepository.addAccount(_createAccount(userId: 'a1', isLoggedIn: true));
-      mockRepository.addAccount(_createAccount(userId: 'a2', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'a1', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'a2', isLoggedIn: true));
       mockStorage.storage['session_a1'] = jsonEncode({'userId': 'a1'});
       mockStorage.storage['session_a2'] = jsonEncode({'userId': 'a2'});
 
@@ -724,8 +724,8 @@ void main() {
     });
 
     test('clearing one session does not affect others', () async {
-      mockRepository.addAccount(_createAccount(userId: 'keep', isLoggedIn: true));
-      mockRepository.addAccount(_createAccount(userId: 'clear', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'keep', isLoggedIn: true));
+      mockRepository.addAccount(createAccount(userId: 'clear', isLoggedIn: true));
       mockStorage.storage['session_keep'] = jsonEncode({'userId': 'keep'});
       mockStorage.storage['session_clear'] = jsonEncode({'userId': 'clear'});
       mockStorage.storage['logged_in_accounts'] = jsonEncode(['keep', 'clear']);

@@ -67,7 +67,7 @@ class AccountsComponent {
     }
   }
 
-  /// Verify the text "Active • <email>" is visible on screen for [email].
+  /// Verify the text "Active • \<email>" is visible on screen for [email].
   void verifyActiveAccount(String email) {
     expect(
       find.textContaining('Active • $email'),
@@ -76,7 +76,7 @@ class AccountsComponent {
     );
   }
 
-  /// Verify the text "Tap to switch • <email>" is visible for [email].
+  /// Verify the text "Tap to switch • \<email>" is visible for [email].
   void verifySwitchableAccount(String email) {
     expect(
       find.textContaining('Tap to switch • $email'),

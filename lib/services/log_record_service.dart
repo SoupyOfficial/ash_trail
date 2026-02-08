@@ -69,6 +69,10 @@ class LogRecordService {
     double? latitude,
     double? longitude,
   }) async {
+    _log.w(
+      '[CREATE_LOG_START] accountId=$accountId, eventType=${eventType.name}, '
+      'duration=$duration, source=${source.name}',
+    );
     // Validate accountId exists (if validation enabled and service available)
     if (validateAccountId && _accountService != null) {
       final exists = await _accountService.accountExists(accountId);
@@ -126,7 +130,16 @@ class LogRecordService {
       longitude: longitude,
     );
 
-    return await _repository.create(record);
+    _log.w(
+      '[CREATE_LOG] Persisting to repository: logId=$logId, '
+      'accountId=$accountId, eventAt=${record.eventAt}',
+    );
+    final created = await _repository.create(record);
+    _log.w(
+      '[CREATE_LOG_END] Record persisted: logId=${created.logId}, '
+      'accountId=${created.accountId}',
+    );
+    return created;
   }
 
   /// Import a log record from remote source (e.g., Firestore)

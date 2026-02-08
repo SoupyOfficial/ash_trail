@@ -26,7 +26,20 @@ final appInitStateProvider = StateProvider<AppInitState>((ref) {
 /// Main entry point for all platforms
 /// Uses Hive database for offline-first storage on web, iOS, Android, and desktop
 void main() async {
+  // Enable verbose logging for TestFlight/QA builds.
+  // This ensures all debug/info logs from HomeQuickLogWidget, AccountSwitcher,
+  // LogRecordService, etc. are visible even in release mode.
+  // Set to false before production release to reduce log noise.
+  const enableVerbose = bool.fromEnvironment(
+    'VERBOSE_LOGGING',
+    defaultValue: true,
+  );
+  AppLogger.setVerboseLogging(enableVerbose);
+
   _log.i('APP START at ${DateTime.now()}');
+  _log.w(
+    'Verbose logging: $enableVerbose (diagnostics: ${AppLogger.diagnostics})',
+  );
 
   WidgetsFlutterBinding.ensureInitialized();
   _log.i('WidgetsFlutterBinding initialized');

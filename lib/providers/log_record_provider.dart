@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../services/log_record_service.dart';
 import 'account_provider.dart';
+
+final _providerLog = AppLogger.logger('LogRecordProvider');
 
 // ===== DRAFT STATE MANAGEMENT =====
 
@@ -277,23 +280,55 @@ final logRecordServiceProvider = Provider<LogRecordService>((ref) {
 /// Provider for active account ID (derived from activeAccountProvider)
 final activeAccountIdProvider = Provider<String?>((ref) {
   final activeAccount = ref.watch(activeAccountProvider);
-  return activeAccount.when(
+  final result = activeAccount.when(
     data: (account) => account?.userId,
     loading: () => null,
     error: (e, __) => null,
   );
+  _providerLog.w(
+    '[PROVIDER] activeAccountIdProvider → ${result ?? 'null'} '
+    '(state: ${activeAccount.isLoading
+        ? 'loading'
+        : activeAccount.hasError
+        ? 'error'
+        : 'data'})',
+  );
+  return result;
 });
 
 /// Provider for watching log records for active account (convenience wrapper)
 final activeAccountLogRecordsProvider = StreamProvider<List<LogRecord>>((ref) {
   final accountId = ref.watch(activeAccountIdProvider);
-  if (accountId == null) return Stream.value([]);
+  if (accountId == null) {
+    _providerLog.w(
+      '[PROVIDER] activeAccountLogRecordsProvider → accountId is null, returning empty',
+    );
+    return Stream.value([]);
+  }
+  _providerLog.w(
+    '[PROVIDER] activeAccountLogRecordsProvider → watching records for $accountId',
+  );
   final params = LogRecordsParams(accountId: accountId);
   final innerProvider = ref.watch(logRecordsProvider(params));
   return innerProvider.when(
-    data: (records) => Stream.value(records),
-    loading: () => Stream.value([]),
-    error: (e, __) => Stream.value([]),
+    data: (records) {
+      _providerLog.w(
+        '[PROVIDER] activeAccountLogRecordsProvider → ${records.length} records for $accountId',
+      );
+      return Stream.value(records);
+    },
+    loading: () {
+      _providerLog.w(
+        '[PROVIDER] activeAccountLogRecordsProvider → loading for $accountId',
+      );
+      return Stream.value([]);
+    },
+    error: (e, __) {
+      _providerLog.w(
+        '[PROVIDER] activeAccountLogRecordsProvider → ERROR for $accountId: $e',
+      );
+      return Stream.value([]);
+    },
   );
 });
 
@@ -327,20 +362,18 @@ final createLogRecordProvider =
     });
 
 /// Provider for watching log records
-final logRecordsProvider = StreamProvider.family<
-  List<LogRecord>,
-  LogRecordsParams
->((ref, params) {
-  final service = ref.read(logRecordServiceProvider);
-  final accountId = params.accountId ?? ref.read(activeAccountIdProvider);
-  if (accountId == null) return Stream.value([]);
-  return service.watchLogRecords(
-    accountId: accountId,
-    startDate: params.startDate,
-    endDate: params.endDate,
-    includeDeleted: params.includeDeleted,
-  );
-});
+final logRecordsProvider =
+    StreamProvider.family<List<LogRecord>, LogRecordsParams>((ref, params) {
+      final service = ref.read(logRecordServiceProvider);
+      final accountId = params.accountId ?? ref.read(activeAccountIdProvider);
+      if (accountId == null) return Stream.value([]);
+      return service.watchLogRecords(
+        accountId: accountId,
+        startDate: params.startDate,
+        endDate: params.endDate,
+        includeDeleted: params.includeDeleted,
+      );
+    });
 
 /// Provider for getting log records (one-time fetch)
 final getLogRecordsProvider =

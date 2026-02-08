@@ -90,22 +90,49 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
   }
 
   Future<void> _createVapeLog(int durationMs) async {
+    // ── DIAGNOSTIC: Log the full pipeline for multi-account debugging ──
+    // Uses .w() (warning level) so these are visible in release/TestFlight.
+    _log.w(
+      '[QUICK_LOG_START] durationMs=$durationMs, '
+      'widgetAccountId=$_currentAccountId, mounted=$mounted',
+    );
+
     // Get the current active account - wait for it if loading
     Account? activeAccount;
     final activeAccountAsync = ref.read(activeAccountProvider);
 
+    _log.w(
+      '[QUICK_LOG] activeAccountProvider state: '
+      'isLoading=${activeAccountAsync.isLoading}, '
+      'hasValue=${activeAccountAsync.hasValue}, '
+      'hasError=${activeAccountAsync.hasError}',
+    );
+
     if (activeAccountAsync.isLoading) {
       // Wait for account to load
+      _log.w('[QUICK_LOG] Provider is loading — awaiting future...');
       try {
         activeAccount = await ref.read(activeAccountProvider.future);
+        _log.w(
+          '[QUICK_LOG] Provider resolved: '
+          'userId=${activeAccount?.userId}, email=${activeAccount?.email}',
+        );
       } catch (e) {
-        _log.w('Error loading active account', error: e);
+        _log.e('[QUICK_LOG] Error loading active account', error: e);
       }
     } else {
       activeAccount = activeAccountAsync.asData?.value;
+      _log.w(
+        '[QUICK_LOG] Provider already loaded: '
+        'userId=${activeAccount?.userId}, email=${activeAccount?.email}',
+      );
     }
 
     if (activeAccount == null) {
+      _log.e(
+        '[QUICK_LOG] ABORT — No active account! '
+        'Provider state: ${activeAccountAsync}',
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -123,9 +150,21 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     if (currentAccount != null &&
         currentAccount.userId != activeAccount.userId) {
       // Account changed while we were processing - use the new account
+      _log.w(
+        '[QUICK_LOG] ACCOUNT CHANGED during log creation! '
+        'Original: ${activeAccount.userId}/${activeAccount.email} → '
+        'New: ${currentAccount.userId}/${currentAccount.email}',
+      );
       activeAccount = currentAccount;
-      _log.d(
-        'Account changed during log creation, using new account: ${activeAccount.userId}',
+    }
+
+    // Cross-check with widget-level tracked account ID
+    if (_currentAccountId != null &&
+        _currentAccountId != activeAccount.userId) {
+      _log.w(
+        '[QUICK_LOG] MISMATCH: widget._currentAccountId=$_currentAccountId '
+        'but provider says ${activeAccount.userId}. '
+        'Possible race between account switch and gesture.',
       );
     }
 
@@ -136,6 +175,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     try {
       // Check minimum threshold
       if (durationMs < 1000) {
+        _log.w('[QUICK_LOG] ABORT — Duration too short: ${durationMs}ms');
         if (mounted) {
           final messenger = ScaffoldMessenger.of(context);
           messenger.clearSnackBars();
@@ -159,10 +199,22 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         if (position != null) {
           latitude = position.latitude;
           longitude = position.longitude;
+          _log.d('[QUICK_LOG] Location captured: $latitude, $longitude');
+        } else {
+          _log.d('[QUICK_LOG] No location available');
         }
       } catch (e) {
-        _log.w('Failed to capture location for quick log', error: e);
+        _log.w('[QUICK_LOG] Failed to capture location', error: e);
       }
+
+      _log.w(
+        '[QUICK_LOG] Creating record: '
+        'accountId=${activeAccount.userId}, '
+        'email=${activeAccount.email}, '
+        'duration=${durationSeconds.toStringAsFixed(1)}s, '
+        'mood=$_moodRating, physical=$_physicalRating, '
+        'reasons=${_selectedReasons.length}',
+      );
 
       final record = await service.createLogRecord(
         accountId: activeAccount.userId,
@@ -174,6 +226,14 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         reasons: _selectedReasons.isNotEmpty ? _selectedReasons.toList() : null,
         latitude: latitude,
         longitude: longitude,
+      );
+
+      _log.w(
+        '[QUICK_LOG] Record CREATED: '
+        'logId=${record.logId}, '
+        'accountId=${record.accountId}, '
+        'eventAt=${record.eventAt}, '
+        'syncState=${record.syncState.name}',
       );
 
       if (mounted) {
@@ -192,6 +252,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
             action: SnackBarAction(
               label: 'UNDO',
               onPressed: () async {
+                _log.w('[QUICK_LOG] UNDO tapped for logId=${record.logId}');
                 await service.deleteLogRecord(record);
               },
             ),
@@ -206,10 +267,19 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         });
 
         widget.onLogCreated?.call();
+        _log.w('[QUICK_LOG] Invalidating providers...');
         ref.invalidate(activeAccountLogRecordsProvider);
         ref.invalidate(logRecordStatsProvider);
+        _log.w('[QUICK_LOG_END] Success — snackbar displayed');
+      } else {
+        _log.w('[QUICK_LOG_END] Record saved but widget no longer mounted');
       }
-    } catch (e) {
+    } catch (e, st) {
+      _log.e(
+        '[QUICK_LOG] EXCEPTION during log creation',
+        error: e,
+        stackTrace: st,
+      );
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
         messenger.clearSnackBars();

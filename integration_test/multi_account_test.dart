@@ -644,6 +644,9 @@ void main() {
             'records to the correct account and appears in History.',
       );
 
+      // ── DIAGNOSTIC: Log AppLogger config to detect release-mode filtering ──
+      debugDumpLoggerConfig('Test 3 start');
+
       // ── ARRANGE: Login + ensure account 2 ──
       _log.stepStart('3.1', 'Ensure both accounts present');
       _log.arrange('Authenticating and verifying two accounts');
@@ -781,6 +784,12 @@ void main() {
       await settle($, frames: 20);
       await $.pump(const Duration(seconds: 1));
 
+      // ── DIAGNOSTIC: Full pipeline trace BEFORE the critical log ──
+      await debugDumpLogCreationPipeline(
+        $,
+        'BEFORE critical quick log (acct2)',
+      );
+
       final acct2Duration = _randomHoldDuration();
       _log.action('Holding to record for ${acct2Duration.inMilliseconds}ms');
       await debugLogActiveUser('immediately before holdToRecord');
@@ -791,6 +800,12 @@ void main() {
       await settle($, frames: 10);
 
       await debugDumpSnackbarState($, 'Immediately after hold-to-record');
+
+      // ── DIAGNOSTIC: Full pipeline trace AFTER the gesture ──
+      await debugDumpLogCreationPipeline(
+        $,
+        'AFTER holdToRecord gesture (acct2)',
+      );
 
       // Poll for result with detailed diagnostics
       bool gotResult = false;
@@ -839,6 +854,17 @@ void main() {
         await debugDumpQuickLogWidgetState($, 'TIMEOUT — widget state');
         await debugDumpAccountState($, 'TIMEOUT — account state');
         await debugDumpLogState($, 'TIMEOUT — log state');
+        await debugDumpLogCreationPipeline($, 'TIMEOUT — full pipeline');
+      }
+
+      // ── DIAGNOSTIC: Verify record actually persisted to Hive ──
+      final acct2Persisted = await debugVerifyLogPersisted(
+        $,
+        'Account 2 post-switch quick log',
+        acct2LoggedAt,
+      );
+      if (!acct2Persisted) {
+        _log.fail('Record NOT found in Hive despite snackbar!');
       }
 
       await debugDumpAccountState($, 'After quick log for account 2');
@@ -1302,6 +1328,9 @@ void main() {
             'log → verify → data isolation → cleanup',
       );
 
+      // ── DIAGNOSTIC: Logger config at test start ──
+      debugDumpLoggerConfig('Test 6 start');
+
       // ── Phase 1: Start clean → Login account 1 ──
       _log.stepStart('6.1', 'Clean start — login account 1');
       _log.arrange('Logging out all accounts, then signing in with account 1');
@@ -1454,6 +1483,12 @@ void main() {
       await settle($, frames: 20);
       await $.pump(const Duration(seconds: 1));
 
+      // ── DIAGNOSTIC: Full pipeline trace BEFORE the critical log ──
+      await debugDumpLogCreationPipeline(
+        $,
+        'BEFORE Phase 5 critical quick log',
+      );
+
       final p5Duration = _randomHoldDuration();
       _log.action('Holding to record for ${p5Duration.inMilliseconds}ms');
       await debugLogActiveUser('immediately before holdToRecord');
@@ -1509,6 +1544,17 @@ void main() {
         await debugDumpQuickLogWidgetState($, 'FAILED — widget state');
         await debugDumpAccountState($, 'FAILED — account state');
         await debugDumpLogState($, 'FAILED — log state');
+        await debugDumpLogCreationPipeline($, 'FAILED — full pipeline');
+      }
+
+      // ── DIAGNOSTIC: Verify record actually persisted ──
+      final p5Persisted = await debugVerifyLogPersisted(
+        $,
+        'Phase 5 critical quick log',
+        p5LoggedAt,
+      );
+      if (!p5Persisted) {
+        _log.fail('Phase 5: Record NOT found in Hive!');
       }
 
       await debugDumpAccountState($, 'After quick log');
@@ -1614,6 +1660,9 @@ void main() {
             '3 times to verify consistency across switches.',
       );
 
+      // ── DIAGNOSTIC: Logger config ──
+      debugDumpLoggerConfig('Test 7 start');
+
       // ── Setup ──
       _log.stepStart('7.0', 'Setup — ensure both accounts present');
       _log.arrange('Logging in and verifying account 2 exists');
@@ -1689,6 +1738,11 @@ void main() {
         // Extra settle so the widget tree is stable before the gesture.
         await settle($, frames: 20);
         await $.pump(const Duration(seconds: 1));
+
+        // Pipeline dump on first iteration for diagnostic baseline
+        if (i == 1) {
+          await debugDumpLogCreationPipeline($, 'Iter 1: BEFORE quick log');
+        }
 
         final loopDur = _randomHoldDuration();
         _log.action('Holding to record for ${loopDur.inMilliseconds}ms');
@@ -1806,6 +1860,9 @@ void main() {
             '6 times to stress-test consistency.',
       );
 
+      // ── DIAGNOSTIC: Logger config ──
+      debugDumpLoggerConfig('Test 8 start');
+
       // ── Setup ──
       _log.stepStart('8.0', 'Setup — ensure both accounts present');
       _log.arrange('Logging in and verifying account 2 exists');
@@ -1885,6 +1942,11 @@ void main() {
         await settle($, frames: 20);
         await $.pump(const Duration(seconds: 1));
 
+        // Pipeline dump on first iteration for diagnostic baseline
+        if (i == 1) {
+          await debugDumpLogCreationPipeline($, 'Iter 1: BEFORE quick log');
+        }
+
         final loopDur = _randomHoldDuration();
         _log.action('Holding to record for ${loopDur.inMilliseconds}ms');
         await debugDumpLogState($, 'Iter $i: Before quick log');
@@ -1949,6 +2011,20 @@ void main() {
           await debugDumpQuickLogWidgetState($, 'Iter $i: TIMEOUT');
           await debugDumpAccountState($, 'Iter $i: TIMEOUT');
           await debugDumpLogState($, 'Iter $i: TIMEOUT');
+          await debugDumpLogCreationPipeline(
+            $,
+            'Iter $i: TIMEOUT — full pipeline',
+          );
+        }
+
+        // Verify persistence after each iteration
+        final iterPersisted = await debugVerifyLogPersisted(
+          $,
+          'Iter $i persistence check',
+          loopLoggedAt,
+        );
+        if (!iterPersisted) {
+          _log.fail('Iter $i: Record NOT found in Hive!');
         }
 
         await debugDumpLogState($, 'Iter $i: After quick log');

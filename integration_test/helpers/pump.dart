@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
+import 'package:ash_trail/logging/app_logger.dart';
 import 'package:ash_trail/services/account_service.dart';
+import 'package:ash_trail/services/log_record_service.dart';
 import 'package:ash_trail/providers/account_provider.dart';
 import 'package:ash_trail/providers/log_record_provider.dart';
 
@@ -791,4 +793,263 @@ Future<void> debugDumpQuickLogWidgetState(
 
   testLog('└── END QUICK LOG WIDGET STATE ──');
   testLog('');
+}
+
+// ── Enhanced Multi-Account Debugging Helpers ─────────────────────────────────
+
+/// Dump the AppLogger configuration to verify that logging is active
+/// in this build mode. Critical for diagnosing why logs may be missing
+/// in TestFlight but present in debug builds.
+void debugDumpLoggerConfig(String label) {
+  testLog('');
+  testLog('┌── LOGGER CONFIG: $label ──');
+  try {
+    final diag = AppLogger.diagnostics;
+    testLog('  verboseLogging: ${diag['verboseLogging']}');
+    testLog('  kDebugMode: ${diag['kDebugMode']}');
+    testLog('  loggerLevel: ${diag['loggerLevel']}');
+    testLog('  activeLoggers: ${(diag['activeLoggers'] as List).join(', ')}');
+  } catch (e) {
+    testLog('  ERROR reading logger diagnostics: $e');
+  }
+  testLog('└── END LOGGER CONFIG ──');
+  testLog('');
+}
+
+/// Comprehensive pipeline trace: captures the full state chain from
+/// Firebase Auth → Hive Accounts → Riverpod Provider → LogRecordService
+/// before and after a log creation attempt.
+///
+/// Call this BEFORE and AFTER `holdToRecord()` to create a complete
+/// diagnostic breadcrumb trail for debugging log recording failures
+/// in TestFlight.
+Future<void> debugDumpLogCreationPipeline(
+  PatrolIntegrationTester $,
+  String label,
+) async {
+  testLog('');
+  testLog('╔══════════════════════════════════════════════════════╗');
+  testLog('║  LOG CREATION PIPELINE: $label');
+  testLog('╚══════════════════════════════════════════════════════╝');
+
+  final stopwatch = Stopwatch()..start();
+
+  // 1. Firebase Auth — who does Firebase think we are?
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      testLog('  [1] Firebase Auth: uid=${user.uid}, email=${user.email}');
+      // Check token freshness
+      try {
+        final idToken = await user.getIdTokenResult();
+        final expirationTime = idToken.expirationTime;
+        final isExpired =
+            expirationTime != null && expirationTime.isBefore(DateTime.now());
+        testLog(
+          '  [1] Token: expires=$expirationTime, '
+          'isExpired=$isExpired, '
+          'signInProvider=${idToken.signInProvider}',
+        );
+      } catch (e) {
+        testLog('  [1] Token check error: $e');
+      }
+    } else {
+      testLog('  [1] Firebase Auth: NOT SIGNED IN');
+    }
+  } catch (e) {
+    testLog('  [1] Firebase Auth ERROR: $e');
+  }
+
+  // 2. Hive — what does the local DB say?
+  try {
+    final accountService = AccountService();
+    final activeAccount = await accountService.getActiveAccount();
+    final allAccounts = await accountService.getAllAccounts();
+    testLog(
+      '  [2] Hive Active: ${activeAccount?.email ?? 'NONE'} '
+      '(userId=${activeAccount?.userId ?? 'null'})',
+    );
+    testLog('  [2] Hive Total: ${allAccounts.length} accounts');
+    for (final a in allAccounts) {
+      final marker = a.userId == activeAccount?.userId ? ' ← ACTIVE' : '';
+      testLog('      ${a.email} isLoggedIn=${a.isLoggedIn}$marker');
+    }
+  } catch (e) {
+    testLog('  [2] Hive ERROR: $e');
+  }
+
+  // 3. Riverpod — what do the providers say?
+  try {
+    final container = _findProviderContainer($);
+    if (container != null) {
+      // activeAccountProvider
+      try {
+        final activeAsync = container.read(activeAccountProvider);
+        testLog(
+          '  [3] activeAccountProvider: '
+          'isLoading=${activeAsync.isLoading}, '
+          'hasValue=${activeAsync.hasValue}, '
+          'hasError=${activeAsync.hasError}',
+        );
+        activeAsync.whenData((account) {
+          testLog('      → email=${account?.email}, userId=${account?.userId}');
+        });
+      } catch (e) {
+        testLog('  [3] activeAccountProvider: read error: $e');
+      }
+
+      // activeAccountIdProvider
+      try {
+        final accountId = container.read(activeAccountIdProvider);
+        testLog('  [3] activeAccountIdProvider: ${accountId ?? 'null'}');
+      } catch (e) {
+        testLog('  [3] activeAccountIdProvider: read error: $e');
+      }
+
+      // activeAccountLogRecordsProvider
+      try {
+        final logsAsync = container.read(activeAccountLogRecordsProvider);
+        logsAsync.when(
+          data: (records) {
+            testLog('  [3] activeAccountLogRecords: ${records.length} records');
+            if (records.isNotEmpty) {
+              final latest = records.first;
+              testLog(
+                '      Latest: logId=${latest.logId}, '
+                'accountId=${latest.accountId}, '
+                'eventAt=${latest.eventAt}',
+              );
+            }
+          },
+          loading: () => testLog('  [3] activeAccountLogRecords: LOADING'),
+          error: (e, _) => testLog('  [3] activeAccountLogRecords: ERROR: $e'),
+        );
+      } catch (e) {
+        testLog('  [3] activeAccountLogRecords: read error: $e');
+      }
+    } else {
+      testLog('  [3] Riverpod: ProviderContainer NOT FOUND');
+    }
+  } catch (e) {
+    testLog('  [3] Riverpod ERROR: $e');
+  }
+
+  // 4. Cross-checks — Firebase uid vs Hive active vs Provider
+  try {
+    final fbUid = FirebaseAuth.instance.currentUser?.uid;
+    final hiveAcct = await AccountService().getActiveAccount();
+    final container = _findProviderContainer($);
+    String? providerUid;
+    if (container != null) {
+      try {
+        providerUid = container.read(activeAccountIdProvider);
+      } catch (_) {}
+    }
+
+    final allMatch =
+        fbUid != null && fbUid == hiveAcct?.userId && fbUid == providerUid;
+    testLog('  [4] CROSS-CHECK:');
+    testLog('      Firebase uid:  ${fbUid ?? 'null'}');
+    testLog('      Hive userId:   ${hiveAcct?.userId ?? 'null'}');
+    testLog('      Provider uid:  ${providerUid ?? 'null'}');
+    testLog('      ALL MATCH: $allMatch');
+    if (!allMatch) {
+      testLog(
+        '      ⚠ MISMATCH DETECTED — this can cause log recording issues!',
+      );
+    }
+  } catch (e) {
+    testLog('  [4] Cross-check error: $e');
+  }
+
+  // 5. Direct repository query — how many records does each account have?
+  try {
+    final accountService = AccountService();
+    final allAccounts = await accountService.getAllAccounts();
+    testLog('  [5] RECORD COUNTS BY ACCOUNT:');
+    final logService = LogRecordService();
+    for (final acct in allAccounts) {
+      try {
+        final records = await logService.getLogRecords(accountId: acct.userId);
+        testLog('      ${acct.email}: ${records.length} records');
+      } catch (e) {
+        testLog('      ${acct.email}: ERROR: $e');
+      }
+    }
+  } catch (e) {
+    testLog('  [5] Record count error: $e');
+  }
+
+  stopwatch.stop();
+  testLog('  ⏱ Pipeline dump took ${stopwatch.elapsedMilliseconds}ms');
+  testLog('════════════════════════════════════════════════════════');
+  testLog('');
+}
+
+/// Verify that a log record was actually persisted to Hive after creation.
+///
+/// Call this AFTER the snackbar confirms "Logged vape" to double-check
+/// that the record made it to the repository (catches silent write failures).
+Future<bool> debugVerifyLogPersisted(
+  PatrolIntegrationTester $,
+  String label,
+  DateTime approximateLogTime,
+) async {
+  testLog('');
+  testLog('┌── VERIFY LOG PERSISTED: $label ──');
+
+  try {
+    final accountService = AccountService();
+    final activeAccount = await accountService.getActiveAccount();
+    if (activeAccount == null) {
+      testLog('  ERROR: No active account — cannot verify');
+      testLog('└── END VERIFY ──');
+      return false;
+    }
+
+    final logService = LogRecordService();
+    final records = await logService.getLogRecords(
+      accountId: activeAccount.userId,
+    );
+
+    testLog('  Active account: ${activeAccount.email}');
+    testLog('  Total records for account: ${records.length}');
+    testLog('  Expected log time: ~$approximateLogTime');
+
+    // Find records within ±2 minutes of the expected time
+    final window = const Duration(minutes: 2);
+    final nearbyRecords =
+        records.where((r) {
+          final diff = r.eventAt.difference(approximateLogTime).abs();
+          return diff < window;
+        }).toList();
+
+    testLog('  Records within ±2min window: ${nearbyRecords.length}');
+    for (final r in nearbyRecords) {
+      testLog(
+        '    logId=${r.logId}, eventAt=${r.eventAt}, '
+        'type=${r.eventType.name}, duration=${r.duration}',
+      );
+    }
+
+    if (nearbyRecords.isEmpty) {
+      testLog('  ⚠ NO RECORDS FOUND in time window!');
+      testLog('  Last 3 records:');
+      for (final r in records.take(3)) {
+        testLog(
+          '    logId=${r.logId}, eventAt=${r.eventAt}, '
+          'accountId=${r.accountId}',
+        );
+      }
+    }
+
+    final found = nearbyRecords.isNotEmpty;
+    testLog('  PERSISTED: $found');
+    testLog('└── END VERIFY ──');
+    return found;
+  } catch (e) {
+    testLog('  ERROR: $e');
+    testLog('└── END VERIFY ──');
+    return false;
+  }
 }

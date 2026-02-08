@@ -291,21 +291,6 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (hasFormValues)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton.icon(
-                      key: const Key('quick_log_clear_form'),
-                      onPressed: _resetFormState,
-                      icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear form'),
-                    ),
-                  ],
-                ),
-              ),
             // Mood — muted until user slides (then uses theme primary)
             Row(
               children: [
@@ -430,6 +415,23 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
               showIcons: true,
             ),
             const SizedBox(height: 16),
+
+            // Clear form button
+            if (hasFormValues)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      key: const Key('quick_log_clear_form'),
+                      onPressed: _resetFormState,
+                      icon: const Icon(Icons.clear_all, size: 18),
+                      label: const Text('Clear form'),
+                    ),
+                  ],
+                ),
+              ),
 
             // Press-and-hold duration button
             Semantics(

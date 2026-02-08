@@ -2,19 +2,29 @@ name: Deploy to TestFlight
 
 on:
   push:
-    branches: [main, ui-enhancements]
+    branches: [main]
   workflow_dispatch:
     inputs:
       build_number:
-        description: 'Build number (optional - auto-increments if not provided)'
+        description: 'Build number (optional — auto-increments from pubspec if not provided)'
         required: false
         type: string
+      skip_tests:
+        description: 'Skip tests before building'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   deploy:
     runs-on: macos-latest
-    timeout-minutes: 60
-    
+    timeout-minutes: 45
+
+    env:
+      APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,213 +35,53 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run tests
-        continue-on-error: true
-        run: flutter test || echo "⚠️ Tests failed, continuing with deployment..."
-
-      # Setup Ruby for Fastlane
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-          working-directory: ios
-      
-      # Install Fastlane
-      - name: Install Fastlane
-        run: |
-          cd ios
-          bundle install
-
-      # Install CocoaPods dependencies
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install --repo-update
-
-      # Install Apple certificate and provisioning profile
+      # Install Apple certificate and provisioning profile for code signing
       - name: Install Apple Certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # Create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
-          # Import certificate from secrets
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
 
-          # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          # Import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          
-          # Set the keychain as default and search list
           security default-keychain -s $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH $(security list-keychain -d user | sed s/\"//g)
 
-          # Verify certificate was imported
-          security find-identity -v -p codesigning $KEYCHAIN_PATH
-          
-          # Export keychain path for later use
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
 
       - name: Install Provisioning Profile
-        id: install-profile
         env:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
         run: |
-          # Import provisioning profile from secrets
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > $PP_PATH
 
-          # Verify file was created
-          ls -la $PP_PATH
-          
-          # Extract UUID from provisioning profile
           PP_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< "$(/usr/bin/security cms -D -i $PP_PATH)")
-          
-          # Export UUID for use in other steps
-          echo "uuid=$PP_UUID" >> $GITHUB_OUTPUT
-          
-          # Install provisioning profile with UUID filename
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PP_UUID.mobileprovision
-          
-          echo "Installed provisioning profile with UUID: $PP_UUID"
 
-      # Create ExportOptions.plist for code signing
-      - name: Create ExportOptions.plist
-        env:
-          PROVISIONING_PROFILE_UUID: ${{ steps.install-profile.outputs.uuid }}
-        run: |
-          cat > ios/ExportOptions.plist << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>app-store</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>signingCertificate</key>
-            <string>Apple Distribution</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.soup.smokeLog</key>
-              <string>$PROVISIONING_PROFILE_UUID</string>
-            </dict>
-            <key>teamID</key>
-            <string>DGQ5P34GS9</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>thinning</key>
-            <string>&lt;none&gt;</string>
-          </dict>
-          </plist>
-          EOF
-          
-          echo "ExportOptions.plist created with provisioning profile UUID: $PROVISIONING_PROFILE_UUID"
-          cat ios/ExportOptions.plist
+          echo "Installed provisioning profile: $PP_UUID"
 
-      # Build Flutter iOS app with code signing
-      - name: Build iOS App
+      # Run the same deploy script used locally
+      - name: Build & Upload to TestFlight
         env:
           BUILD_NUMBER: ${{ github.event.inputs.build_number || github.run_number }}
-          PROVISIONING_PROFILE_UUID: ${{ steps.install-profile.outputs.uuid }}
-          KEYCHAIN_PATH: ${{ env.KEYCHAIN_PATH }}
-        run: |
-          # Verify certificate and provisioning profile are available
-          echo "Verifying signing setup..."
-          echo "Keychain: $KEYCHAIN_PATH"
-          echo "Provisioning Profile UUID: $PROVISIONING_PROFILE_UUID"
-          security find-identity -v -p codesigning "$KEYCHAIN_PATH" || echo "Warning: Could not verify certificate"
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ | grep "$PROVISIONING_PROFILE_UUID" || echo "Warning: Could not verify provisioning profile"
-          
-          # Build the Flutter iOS app WITHOUT code signing (we'll sign manually)
-          flutter build ios \
-            --release \
-            --build-number=$BUILD_NUMBER \
-            --obfuscate \
-            --split-debug-info=build/app/infos \
-            --no-codesign
-          
-          # Archive with manual signing using xcodebuild
-          # Use the UUID from the installed provisioning profile
-          cd ios
-          xcodebuild -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath ../build/ios/archive/Runner.xcarchive \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_UUID" \
-            PROVISIONING_PROFILE="$PROVISIONING_PROFILE_UUID" \
-            DEVELOPMENT_TEAM=DGQ5P34GS9 \
-            CODE_SIGN_KEYCHAIN="$KEYCHAIN_PATH" \
-            archive \
-            2>&1 | tee ../build.log
-          
-          # Export the archive to IPA
-          xcodebuild -exportArchive \
-            -archivePath ../build/ios/archive/Runner.xcarchive \
-            -exportPath ../build/ios/ipa \
-            -exportOptionsPlist ExportOptions.plist \
-            -allowProvisioningUpdates \
-            2>&1 | tee -a ../build.log
-          
-          cd ..
-          
-          # Find and verify IPA was created
-          IPA_FILE=$(find build/ios/ipa -name "*.ipa" -type f | head -n 1)
-          if [ -n "$IPA_FILE" ]; then
-            echo "✅ IPA file created successfully: $IPA_FILE"
-            ls -lh "$IPA_FILE"
-            # Rename to expected name if different
-            if [ "$IPA_FILE" != "build/ios/ipa/ash_trail.ipa" ]; then
-              mv "$IPA_FILE" build/ios/ipa/ash_trail.ipa
-              echo "Renamed IPA to ash_trail.ipa"
-            fi
-          else
-            echo "❌ IPA file was not created"
-            echo "Checking what files were created:"
-            ls -R build/ios/ipa/ || echo "ipa directory not found"
-            exit 1
-          fi
-
-      # Upload to TestFlight
-      - name: Upload to TestFlight
-        env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
-          IPA_PATH: build/ios/ipa/ash_trail.ipa
-          APP_STORE_CONNECT_API_KEY_FILE: ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
-        run: |
-          # Decode API key
-          mkdir -p ~/private_keys
-          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > "$APP_STORE_CONNECT_API_KEY_FILE"
-          chmod 600 "$APP_STORE_CONNECT_API_KEY_FILE"
-
-          # Upload using Fastlane (environment variables are automatically available)
-          cd ios
-          bundle exec fastlane upload_ipa ipa_path:"../$IPA_PATH"
+          SKIP_TESTS: ${{ github.event.inputs.skip_tests == 'true' && '1' || '' }}
+          SKIP_CLEAN: '1'  # checkout is already clean
+        run: ./scripts/deploy_testflight.sh "$BUILD_NUMBER"
 
       # Cleanup
-      - name: Clean up keychain and provisioning profile
-        if: ${{ always() }}
+      - name: Clean up signing artifacts
+        if: always()
         run: |
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
-          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision || true
-          rm -rf ~/private_keys || true
+          rm -f ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision || true
+          rm -rf ~/.private_keys || true

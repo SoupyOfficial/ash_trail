@@ -131,7 +131,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     if (activeAccount == null) {
       _log.e(
         '[QUICK_LOG] ABORT — No active account! '
-        'Provider state: ${activeAccountAsync}',
+        'Provider state: $activeAccountAsync',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

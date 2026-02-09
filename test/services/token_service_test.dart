@@ -126,24 +126,19 @@ void main() {
       );
     });
 
-    test(
-      'generates different tokens on subsequent calls for same UID',
-      () async {
-        final result1 = await tokenService.generateCustomToken(
-          'test-uid-repeat',
-        );
-        final result2 = await tokenService.generateCustomToken(
-          'test-uid-repeat',
-        );
+    test('generates different tokens on subsequent calls for same UID', () async {
+      final result1 = await tokenService.generateCustomToken('test-uid-repeat');
+      // Wait for the server-side iat timestamp to advance (1-second granularity)
+      await Future<void>.delayed(const Duration(seconds: 1));
+      final result2 = await tokenService.generateCustomToken('test-uid-repeat');
 
-        // Firebase custom tokens include timestamps, so they should differ
-        expect(
-          result1['customToken'],
-          isNot(equals(result2['customToken'])),
-          reason: 'Subsequent calls should generate fresh tokens',
-        );
-      },
-    );
+      // Firebase custom tokens include timestamps, so they should differ
+      expect(
+        result1['customToken'],
+        isNot(equals(result2['customToken'])),
+        reason: 'Subsequent calls should generate fresh tokens',
+      );
+    });
   });
 
   group('TokenService - Contract Tests (mocked HTTP)', () {

@@ -263,6 +263,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Expanded(
           child: ReorderableListView.builder(
+            buildDefaultDragHandles: false,
             padding: EdgeInsets.all(
               ResponsiveSize.responsive(
                 context: context,

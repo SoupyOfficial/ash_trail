@@ -124,7 +124,7 @@ void main() {
       expect(find.text('5'), findsOneWidget);
       expect(find.text('Daily Avg'), findsOneWidget);
       expect(find.byType(ActivityBarChart), findsOneWidget);
-      expect(find.byType(HourlyHeatmap), findsOneWidget);
+      expect(find.byType(WeekdayHourlyHeatmap), findsOneWidget);
     });
 
     testWidgets('switches chart type and reloads for new time range', (
@@ -244,7 +244,7 @@ void main() {
       await pumpAnalyticsWidget(tester);
       await tester.pumpAndSettle();
 
-      expect(find.byType(HourlyHeatmap), findsOneWidget);
+      expect(find.byType(WeekdayHourlyHeatmap), findsOneWidget);
     });
   });
 
@@ -357,7 +357,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // THEN: I see activity patterns displayed
-        expect(find.byType(HourlyHeatmap), findsOneWidget);
+        expect(find.byType(WeekdayHourlyHeatmap), findsOneWidget);
       },
     );
 
@@ -761,8 +761,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // THEN: Heatmaps should be present and use the same filtered data
-        expect(find.byType(HourlyHeatmap), findsOneWidget);
-        expect(find.text('Activity by Hour'), findsOneWidget);
+        expect(find.byType(WeekdayHourlyHeatmap), findsOneWidget);
+        expect(find.text('Weekday Activity by Hour'), findsOneWidget);
       },
     );
   });

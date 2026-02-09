@@ -21,16 +21,12 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
     const HomeScreen(),
     const AnalyticsScreen(),
     const HistoryScreen(),
-    const LoggingScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -56,12 +52,6 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
             label: 'History',
-          ),
-          NavigationDestination(
-            key: Key('nav_log'),
-            icon: Icon(Icons.add_circle_outline),
-            selectedIcon: Icon(Icons.add_circle),
-            label: 'Log',
           ),
         ],
       ),

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../screens/home_screen.dart';
 import '../screens/analytics_screen.dart';
 import '../screens/history_screen.dart';
-import '../screens/logging_screen.dart';
+// import '../screens/logging_screen.dart';
 
 /// Main navigation wrapper with bottom navigation bar
 /// Provides persistent navigation state across screens

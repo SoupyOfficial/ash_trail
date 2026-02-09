@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/services/home_metrics_service.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 
 /// Test helper to create a LogRecord with specific properties
 LogRecord createLogRecord({
@@ -203,8 +204,8 @@ void main() {
       final now = DateTime.now();
       // Use DayBoundary-aware "earliest" so it's always within the logical day
       // (which starts at 6am). Pick a time 1 hour after today's day-start.
-      final todayStart = DateTime(now.year, now.month, now.day, 6);
-      final earliest = todayStart.add(const Duration(hours: 1)); // 7am today
+      final todayStart = DayBoundary.getTodayStart();
+      final earliest = todayStart.add(const Duration(hours: 1));
       final records = [
         createLogRecord(eventAt: now),
         createLogRecord(eventAt: now.subtract(const Duration(hours: 1))),

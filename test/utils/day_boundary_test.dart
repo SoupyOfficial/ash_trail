@@ -88,7 +88,7 @@ void main() {
       test('returns day end just before next day start', () {
         final tuesday7am = DateTime(2024, 1, 16, 7, 0);
         final dayEnd = DayBoundary.getDayEnd(tuesday7am);
-        
+
         // Should be just before Wednesday 6am
         expect(dayEnd.day, 17);
         expect(dayEnd.hour, 5);
@@ -100,8 +100,10 @@ void main() {
         final tuesday7am = DateTime(2024, 1, 16, 7, 0);
         final dayStart = DayBoundary.getDayStart(tuesday7am);
         final dayEnd = DayBoundary.getDayEnd(tuesday7am);
-        
-        final expectedEnd = dayStart.add(const Duration(days: 1)).subtract(const Duration(microseconds: 1));
+
+        final expectedEnd = dayStart
+            .add(const Duration(days: 1))
+            .subtract(const Duration(microseconds: 1));
         expect(dayEnd, expectedEnd);
       });
     });
@@ -110,7 +112,7 @@ void main() {
       test('returns a DateTime one day after today start', () {
         final todayStart = DayBoundary.getTodayStart();
         final todayEnd = DayBoundary.getTodayEnd();
-        
+
         // todayEnd should be just before tomorrow's start
         final tomorrowStart = todayStart.add(const Duration(days: 1));
         expect(todayEnd.isBefore(tomorrowStart), isTrue);
@@ -166,10 +168,16 @@ void main() {
 
     group('isYesterday', () {
       test('returns true for yesterday afternoon', () {
-        final now = DateTime.now();
-        final yesterday = now.subtract(const Duration(days: 1));
+        // Use DayBoundary-aware yesterday to avoid failure when running before 6am
+        final logicalYesterday = DayBoundary.getYesterdayStart();
         // Adjust to afternoon time to ensure it's clearly yesterday
-        final yesterdayAfternoon = DateTime(yesterday.year, yesterday.month, yesterday.day, 14, 0);
+        final yesterdayAfternoon = DateTime(
+          logicalYesterday.year,
+          logicalYesterday.month,
+          logicalYesterday.day,
+          14,
+          0,
+        );
         expect(DayBoundary.isYesterday(yesterdayAfternoon), isTrue);
       });
 

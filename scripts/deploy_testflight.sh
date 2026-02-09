@@ -5,10 +5,17 @@
 # Works both locally and in CI (GitHub Actions)
 #
 # Usage:
-#   ./scripts/deploy_testflight.sh              # auto build number from pubspec
-#   ./scripts/deploy_testflight.sh 42            # explicit build number
-#   SKIP_TESTS=1 ./scripts/deploy_testflight.sh  # skip tests
-#   SKIP_CLEAN=1 ./scripts/deploy_testflight.sh  # skip flutter clean
+#   ./scripts/deploy_testflight.sh                  # bump patch (default)
+#   ./scripts/deploy_testflight.sh --patch           # bump patch: 1.0.1 → 1.0.2
+#   ./scripts/deploy_testflight.sh --minor           # bump minor: 1.0.1 → 1.1.0
+#   ./scripts/deploy_testflight.sh --major           # bump major: 1.0.1 → 2.0.0
+#   ./scripts/deploy_testflight.sh --no-bump         # keep current version
+#   ./scripts/deploy_testflight.sh --build 42        # explicit build number
+#   SKIP_TESTS=1 ./scripts/deploy_testflight.sh      # skip tests
+#   SKIP_CLEAN=1 ./scripts/deploy_testflight.sh      # skip flutter clean
+#
+# Flags can be combined:
+#   ./scripts/deploy_testflight.sh --minor --build 50
 # =============================================================================
 
 set -euo pipefail
@@ -34,24 +41,82 @@ BUNDLE_ID="com.soup.smokeLog"
 TEAM_ID="DGQ5P34GS9"
 IPA_PATH="build/ios/ipa/ash_trail.ipa"
 
-# Build number: argument > env > auto-increment from pubspec
-if [ -n "${1:-}" ]; then
-  BUILD_NUMBER="$1"
+# ── Parse arguments ───────────────────────────────────────────────────────────
+BUMP_TYPE="patch"  # default: bump patch version
+EXPLICIT_BUILD=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --major)  BUMP_TYPE="major"; shift ;;
+    --minor)  BUMP_TYPE="minor"; shift ;;
+    --patch)  BUMP_TYPE="patch"; shift ;;
+    --no-bump) BUMP_TYPE="none"; shift ;;
+    --build)
+      if [ -n "${2:-}" ]; then
+        EXPLICIT_BUILD="$2"; shift 2
+      else
+        echo -e "${RED}✗ --build requires a number${NC}"; exit 1
+      fi
+      ;;
+    [0-9]*)
+      # Legacy support: bare number = explicit build number
+      EXPLICIT_BUILD="$1"; shift ;;
+    *)
+      echo -e "${RED}✗ Unknown argument: $1${NC}"
+      echo "Usage: $0 [--major|--minor|--patch|--no-bump] [--build N]"
+      exit 1
+      ;;
+  esac
+done
+
+# ── Version bumping ───────────────────────────────────────────────────────────
+# Read current version from pubspec.yaml
+CURRENT_VERSION_LINE=$(grep '^version:' pubspec.yaml)
+CURRENT_VERSION=$(echo "$CURRENT_VERSION_LINE" | sed 's/version: //' | sed 's/+.*//')
+CURRENT_BUILD=$(echo "$CURRENT_VERSION_LINE" | sed 's/.*+//')
+
+# Split version into major.minor.patch
+IFS='.' read -r V_MAJOR V_MINOR V_PATCH <<< "$CURRENT_VERSION"
+
+case "$BUMP_TYPE" in
+  major)
+    V_MAJOR=$((V_MAJOR + 1))
+    V_MINOR=0
+    V_PATCH=0
+    ;;
+  minor)
+    V_MINOR=$((V_MINOR + 1))
+    V_PATCH=0
+    ;;
+  patch)
+    V_PATCH=$((V_PATCH + 1))
+    ;;
+  none)
+    # Keep current version
+    ;;
+esac
+
+VERSION_NAME="${V_MAJOR}.${V_MINOR}.${V_PATCH}"
+
+# Build number: explicit > env > auto-increment
+if [ -n "$EXPLICIT_BUILD" ]; then
+  BUILD_NUMBER="$EXPLICIT_BUILD"
 elif [ -n "${BUILD_NUMBER:-}" ]; then
   BUILD_NUMBER="$BUILD_NUMBER"
 else
-  # Extract current build number from pubspec.yaml and increment
-  CURRENT_BUILD=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
   BUILD_NUMBER=$((CURRENT_BUILD + 1))
 fi
 
-# Version name from pubspec (e.g. 1.0.1)
-VERSION_NAME=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+# Update pubspec.yaml with new version
+NEW_VERSION_LINE="version: ${VERSION_NAME}+${BUILD_NUMBER}"
+sed -i '' "s/^version:.*/$NEW_VERSION_LINE/" pubspec.yaml
+echo -e "${GREEN}✓${NC} Updated pubspec.yaml: ${CURRENT_VERSION}+${CURRENT_BUILD} → ${VERSION_NAME}+${BUILD_NUMBER}"
 
 echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║       TestFlight Build & Deploy               ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
 echo -e "${BLUE}  Version:      ${NC}${VERSION_NAME}+${BUILD_NUMBER}"
+echo -e "${BLUE}  Bump:         ${NC}${BUMP_TYPE}"
 echo -e "${BLUE}  Bundle ID:    ${NC}${BUNDLE_ID}"
 echo ""
 

@@ -1,18 +1,24 @@
-name: Deploy Web to GitHub Pages
+name: Build Flutter Web
+
+# Docs now deploy to GitHub Pages via docs.yml.
+# This workflow builds the Flutter web app as a CI check only.
+# To deploy the web app, use a manual workflow_dispatch and download the artifact.
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'web/**'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "deploy-pages"
+  group: "build-web"
   cancel-in-progress: true
 
 jobs:
@@ -35,17 +41,8 @@ jobs:
         run: flutter build web --release --base-href=/ash_trail/
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: flutter-web-build
           path: build/web
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          retention-days: 30

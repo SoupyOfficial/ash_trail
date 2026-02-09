@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/services/analytics_service.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
+import 'package:ash_trail/utils/day_boundary.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -127,7 +128,9 @@ void main() {
       () async {
         // GIVEN: User has 30 days of logs
         final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day, 12);
+        // Use DayBoundary-aware today to align with the 6am day boundary
+        final dayStart = DayBoundary.getDayStart(now);
+        final today = DateTime(dayStart.year, dayStart.month, dayStart.day, 12);
         final records = <LogRecord>[];
 
         // Create logs within rolling window (use 0-29 days ago for safety)
@@ -249,7 +252,9 @@ void main() {
     test('Story 18: As a user, I want custom time range selection', () async {
       // GIVEN: User has logs spanning 90 days
       final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day, 12);
+      // Use DayBoundary-aware today to align with the 6am day boundary
+      final dayStart = DayBoundary.getDayStart(now);
+      final today = DateTime(dayStart.year, dayStart.month, dayStart.day, 12);
       final records = <LogRecord>[];
 
       for (int i = 0; i < 90; i++) {

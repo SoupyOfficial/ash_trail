@@ -1,0 +1,101 @@
+site_name: Ash Trail Documentation
+site_description: UI documentation for Ash Trail — a vaping/smoking tracking app
+site_url: https://soupyofficial.github.io/ash_trail/
+repo_url: https://github.com/SoupyOfficial/ash_trail
+repo_name: SoupyOfficial/ash_trail
+edit_uri: edit/main/docs/ui/
+
+docs_dir: ui
+site_dir: ../build/docs-site
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mermaid2:
+      arguments:
+        theme: dark
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.mark
+  - pymdownx.keys
+
+nav:
+  - Home: README.md
+  - Key Concepts & Glossary: glossary.md
+  - Architecture & Data Flow: architecture.md
+  - Feature Catalog: features.md
+  - Screen Reference: screens.md
+  - Widget Catalog:
+      - Overview: widgets/README.md
+      - Time-Based: widgets/time-based.md
+      - Duration-Based: widgets/duration-based.md
+      - Count-Based: widgets/count-based.md
+      - Comparison: widgets/comparison.md
+      - Pattern: widgets/pattern.md
+      - Secondary Data: widgets/secondary-data.md
+      - Action: widgets/action.md
+      - Customization: widgets/customization.md
+  - Logging & Entry Fields: logging.md
+  - Trend Indicators: trends.md
+  - Data, Sync & Export: data-sync.md
+  - Developer Guide: developer-guide.md
+  - Quick Reference: quick-reference.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/SoupyOfficial/ash_trail

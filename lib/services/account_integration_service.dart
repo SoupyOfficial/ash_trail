@@ -18,7 +18,7 @@ final accountIntegrationServiceProvider = Provider<AccountIntegrationService>((
   final accountService = AccountService();
   final sessionManager = AccountSessionManager(accountService: accountService);
   final tokenService = TokenService();
-  
+
   return AccountIntegrationService(
     authService: ref.watch(authServiceProvider),
     accountService: accountService,
@@ -52,7 +52,12 @@ class AccountIntegrationService {
     User firebaseUser, {
     bool makeActive = true,
   }) async {
-    _log.d('syncAccountFromFirebaseUser: ${firebaseUser.uid} (${firebaseUser.email}), makeActive: $makeActive');
+    _log.w(
+      '[SYNC_ACCOUNT] syncAccountFromFirebaseUser: '
+      'uid=${firebaseUser.uid}, email=${firebaseUser.email}, '
+      'displayName=${firebaseUser.displayName}, makeActive=$makeActive, '
+      'providers=${firebaseUser.providerData.map((p) => p.providerId).toList()}',
+    );
 
     // Check if account already exists
     Account? existingAccount = await accountService.getAccountByUserId(
@@ -91,7 +96,11 @@ class AccountIntegrationService {
         await sessionManager.setActiveAccount(firebaseUser.uid);
       }
 
-      _log.i('Updated existing account');
+      _log.w(
+        '[SYNC_ACCOUNT] Updated EXISTING account: '
+        'email=${existingAccount.email}, provider=${existingAccount.authProvider}, '
+        'isActive=${makeActive}',
+      );
       resultAccount = existingAccount;
     } else {
       // Create new account
@@ -113,7 +122,11 @@ class AccountIntegrationService {
         await sessionManager.setActiveAccount(firebaseUser.uid);
       }
 
-      _log.i('Created new account');
+      _log.w(
+        '[SYNC_ACCOUNT] Created NEW account: '
+        'userId=${newAccount.userId}, email=${newAccount.email}, '
+        'provider=${newAccount.authProvider}, isActive=${makeActive}',
+      );
       resultAccount = newAccount;
     }
 
@@ -131,13 +144,23 @@ class AccountIntegrationService {
   /// Custom tokens are valid for 48 hours.
   Future<void> _generateAndStoreCustomToken(String uid) async {
     try {
-      _log.d('Generating custom token for seamless switching');
+      _log.w(
+        '[CUSTOM_TOKEN] Generating custom token for uid=$uid (enables seamless switching)',
+      );
       final tokenData = await tokenService.generateCustomToken(uid);
       final customToken = tokenData['customToken'] as String;
+      final expiresIn = tokenData['expiresIn'];
       await sessionManager.storeCustomToken(uid, customToken);
-      _log.i('Custom token generated and stored for $uid');
+      _log.w(
+        '[CUSTOM_TOKEN] Token stored: ${customToken.length} chars, '
+        'expiresIn=${expiresIn}s for uid=$uid',
+      );
     } catch (e) {
-      _log.w('Failed to generate custom token; account switching may require re-authentication', error: e);
+      _log.e(
+        '[CUSTOM_TOKEN] FAILED to generate token for uid=$uid — '
+        'account switching may require re-authentication',
+        error: e,
+      );
     }
   }
 
@@ -192,7 +215,7 @@ class AccountIntegrationService {
   /// In multi-account mode, adds this account to the logged-in list
   Future<Account> signInWithGoogle({bool makeActive = true}) async {
     try {
-      _log.d('signInWithGoogle');
+      _log.w('[GMAIL_FLOW_START] signInWithGoogle(makeActive=$makeActive)');
       CrashReportingService.logMessage('Starting Google sign-in');
 
       final userCredential = await authService.signInWithGoogle();
@@ -200,6 +223,11 @@ class AccountIntegrationService {
       if (userCredential.user == null) {
         throw Exception('Failed to sign in with Google');
       }
+
+      _log.w(
+        '[GMAIL_FLOW] Firebase user obtained: uid=${userCredential.user!.uid}, '
+        'email=${userCredential.user!.email}',
+      );
 
       final account = await syncAccountFromFirebaseUser(
         userCredential.user!,
@@ -210,8 +238,18 @@ class AccountIntegrationService {
       await CrashReportingService.setUserId(account.userId);
       CrashReportingService.logMessage('User signed in: ${account.email}');
 
+      _log.w(
+        '[GMAIL_FLOW_END] Google sign-in complete: '
+        'userId=${account.userId}, email=${account.email}, '
+        'provider=${account.authProvider}, isActive=${account.isActive}, '
+        'isLoggedIn=${account.isLoggedIn}',
+      );
       return account;
     } catch (e) {
+      _log.e(
+        '[GMAIL_FLOW_FAIL] Google sign-in failed: type=${e.runtimeType}',
+        error: e,
+      );
       CrashReportingService.recordError(
         e,
         StackTrace.current,

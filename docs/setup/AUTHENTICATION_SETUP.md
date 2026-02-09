@@ -100,6 +100,14 @@ Your Playwright tests expect:
 - Password: `TestPassword123!`
 - Username: `testuser`
 
+#### Gmail Test Accounts (Google Sign-In)
+
+For multi-account auth testing with Google Sign-In:
+- Account 4: `ashtraildev3@gmail.com` / `AshTestPass123!`
+- Account 5: `ashtraildev4@gmail.com` / `AshTestPass456!`
+
+See [TEST_ACCOUNTS_SETUP.md](./TEST_ACCOUNTS_SETUP.md) for full setup instructions.
+
 **To enable Playwright tests:**
 1. Go to [Firebase Console](https://console.firebase.google.com/project/smokelog-17303/authentication/users)
 2. Enable Email/Password authentication provider

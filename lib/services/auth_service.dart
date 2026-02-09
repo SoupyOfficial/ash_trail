@@ -90,60 +90,115 @@ class AuthService {
 
   /// Sign in with Google
   Future<UserCredential> signInWithGoogle() async {
+    final stopwatch = Stopwatch()..start();
     try {
+      _log.w('[GOOGLE_SIGN_IN_START] Beginning Google sign-in flow');
       CrashReportingService.logMessage('Starting Google sign-in');
 
-      _log.d('GoogleSignIn instance: $_googleSignIn');
+      _log.d(
+        '[GOOGLE_SIGN_IN] GoogleSignIn config: clientId=${_googleSignIn.clientId}, '
+        'scopes=${_googleSignIn.scopes}',
+      );
 
       try {
+        _log.d('[GOOGLE_SIGN_IN] Signing out previous Google session...');
         await _googleSignIn.signOut();
+        _log.d('[GOOGLE_SIGN_IN] Previous Google session cleared');
       } catch (e) {
-        _log.w('Could not sign out before sign-in', error: e);
+        _log.w(
+          '[GOOGLE_SIGN_IN] Could not sign out before sign-in (non-fatal)',
+          error: e,
+        );
       }
 
+      _log.w('[GOOGLE_SIGN_IN] Presenting Google sign-in UI...');
       CrashReportingService.logMessage('Calling GoogleSignIn.signIn()');
 
       // Trigger Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
+        _log.w('[GOOGLE_SIGN_IN] User cancelled Google sign-in dialog');
         throw Exception('Google sign-in was cancelled by user');
       }
 
+      _log.w(
+        '[GOOGLE_SIGN_IN] Google account selected: '
+        'email=${googleUser.email}, id=${googleUser.id}, '
+        'displayName=${googleUser.displayName}',
+      );
       CrashReportingService.logMessage(
         'Google user obtained: ${googleUser.email}',
       );
 
       // Obtain auth details
+      _log.d('[GOOGLE_SIGN_IN] Requesting Google auth tokens...');
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
       // Validate tokens
-      if (googleAuth.accessToken == null) {
+      final hasAccessToken = googleAuth.accessToken != null;
+      final hasIdToken = googleAuth.idToken != null;
+      _log.w(
+        '[GOOGLE_SIGN_IN] Token status: '
+        'accessToken=${hasAccessToken ? "present (${googleAuth.accessToken!.length} chars)" : "MISSING"}, '
+        'idToken=${hasIdToken ? "present (${googleAuth.idToken!.length} chars)" : "MISSING"}',
+      );
+
+      if (!hasAccessToken) {
+        _log.e('[GOOGLE_SIGN_IN] CRITICAL: No access token from Google');
         throw Exception('Failed to obtain Google access token');
       }
 
       CrashReportingService.logMessage('Google auth tokens obtained');
 
       // Create Firebase credential
+      _log.d(
+        '[GOOGLE_SIGN_IN] Creating Firebase credential from Google tokens...',
+      );
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
       // Sign in to Firebase
+      _log.w(
+        '[GOOGLE_SIGN_IN] Signing in to Firebase with Google credential...',
+      );
       final userCredential = await _auth.signInWithCredential(credential);
 
       if (userCredential.user == null) {
+        _log.e(
+          '[GOOGLE_SIGN_IN] Firebase returned null user after credential sign-in',
+        );
         throw Exception('Firebase authentication failed');
       }
+
+      final user = userCredential.user!;
+      _log.w(
+        '[GOOGLE_SIGN_IN] Firebase auth SUCCESS: '
+        'uid=${user.uid}, email=${user.email}, '
+        'displayName=${user.displayName}, '
+        'isNewUser=${userCredential.additionalUserInfo?.isNewUser}, '
+        'providerId=${userCredential.additionalUserInfo?.providerId}, '
+        'providerData=${user.providerData.map((p) => p.providerId).toList()}',
+      );
 
       // Store user info securely
       await _storeUserInfo(userCredential.user);
 
+      stopwatch.stop();
+      _log.w(
+        '[GOOGLE_SIGN_IN_END] Google sign-in completed in ${stopwatch.elapsedMilliseconds}ms',
+      );
       CrashReportingService.logMessage('Google sign-in successful');
       return userCredential;
     } on FirebaseAuthException catch (e) {
+      stopwatch.stop();
+      _log.e(
+        '[GOOGLE_SIGN_IN] Firebase auth exception after ${stopwatch.elapsedMilliseconds}ms: '
+        'code=${e.code}, message=${e.message}',
+      );
       CrashReportingService.recordError(
         e,
         StackTrace.current,
@@ -151,6 +206,11 @@ class AuthService {
       );
       throw _handleAuthException(e);
     } catch (e) {
+      stopwatch.stop();
+      _log.e(
+        '[GOOGLE_SIGN_IN] Error after ${stopwatch.elapsedMilliseconds}ms: '
+        'type=${e.runtimeType}, message=$e',
+      );
       // Report the error to Crashlytics
       CrashReportingService.recordError(
         e,
@@ -158,7 +218,6 @@ class AuthService {
         reason: 'Google sign-in failed',
       );
 
-      _log.e('Google sign-in error', error: e);
       throw Exception('Failed to sign in with Google: $e');
     }
   }

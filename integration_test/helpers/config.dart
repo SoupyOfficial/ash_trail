@@ -7,6 +7,14 @@ const testPassword = 'TestPass123!';
 const testEmail2 = 'test2@ashtrail.dev';
 const testPassword2 = 'TestPass456!';
 
+// Account 4 (Gmail — Google Sign-In)
+const testEmail4 = 'ashtraildev3@gmail.com';
+const testPassword4 = 'AshTestPass123!';
+
+// Account 5 (Gmail — Google Sign-In)
+const testEmail5 = 'ashtraildev4@gmail.com';
+const testPassword5 = 'AshTestPass456!';
+
 // ─── Patrol configuration ────────────────────────────────────────────────────
 
 /// Default PatrolTesterConfig shared across all E2E tests.

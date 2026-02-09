@@ -7,6 +7,7 @@ import '../services/account_integration_service.dart';
 import 'profile_screen.dart';
 import 'export_screen.dart';
 import 'login_screen.dart';
+import 'multi_account_diagnostics_screen.dart';
 import '../utils/design_constants.dart';
 
 /// Static test account ID for persistence testing
@@ -88,10 +89,28 @@ class AccountsScreen extends ConsumerWidget {
                     }
                   }
                 }
+              } else if (value == 'diagnostics') {
+                if (context.mounted) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const MultiAccountDiagnosticsScreen(),
+                    ),
+                  );
+                }
               }
             },
             itemBuilder:
                 (context) => [
+                  const PopupMenuItem(
+                    value: 'diagnostics',
+                    child: Row(
+                      children: [
+                        Icon(Icons.bug_report),
+                        SizedBox(width: 8),
+                        Text('Diagnostics'),
+                      ],
+                    ),
+                  ),
                   const PopupMenuItem(
                     value: 'sign_out_all',
                     child: Row(
@@ -108,7 +127,6 @@ class AccountsScreen extends ConsumerWidget {
       ),
       body: accountsAsync.when(
         data: (List<Account> accounts) {
-
           final activeAccount = activeAccountAsync.maybeWhen(
             data: (account) => account,
             orElse: () => null,
@@ -129,9 +147,9 @@ class AccountsScreen extends ConsumerWidget {
                   child: Text(
                     'Logged In (${loggedInAccounts.length})',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 ...loggedInAccounts.asMap().entries.map((entry) {
@@ -232,17 +250,13 @@ class AccountsScreen extends ConsumerWidget {
 
     return Card(
       key: cardIndex != null ? Key('account_card_$cardIndex') : null,
-      elevation: isActive
-          ? ElevationLevel.lg.value
-          : ElevationLevel.sm.value,
+      elevation: isActive ? ElevationLevel.lg.value : ElevationLevel.sm.value,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadii.md,
-        side: isActive
-            ? BorderSide(
-                color: theme.colorScheme.primary,
-                width: 2,
-              )
-            : BorderSide.none,
+        side:
+            isActive
+                ? BorderSide(color: theme.colorScheme.primary, width: 2)
+                : BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadii.md,
@@ -576,34 +590,32 @@ class AccountsScreen extends ConsumerWidget {
             Icon(
               Icons.account_circle_outlined,
               size: IconSize.xxxl.value,
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
             ),
             SizedBox(height: Spacing.xl.value),
             Text(
               'No Accounts',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: Spacing.sm.value),
             Text(
               'Sign in to start tracking',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
             SizedBox(height: Spacing.xl.value),
             FilledButton.icon(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
               },
               icon: const Icon(Icons.person_add),
               label: const Text('Add Account'),

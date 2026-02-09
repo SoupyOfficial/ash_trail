@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../logging/app_logger.dart';
 import '../services/account_integration_service.dart';
 import '../widgets/auth_button.dart';
 import 'signup_screen.dart';
@@ -13,6 +14,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  static final _log = AppLogger.logger('LoginScreen');
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -54,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
+    _log.w('[LOGIN_SCREEN] User tapped Google sign-in button');
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -61,12 +64,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       final integrationService = ref.read(accountIntegrationServiceProvider);
-      await integrationService.signInWithGoogle();
+      _log.d('[LOGIN_SCREEN] Calling integrationService.signInWithGoogle()');
+      final account = await integrationService.signInWithGoogle();
+      _log.w(
+        '[LOGIN_SCREEN] Google sign-in SUCCESS: '
+        'uid=${account.userId}, email=${account.email}, '
+        'provider=${account.authProvider}',
+      );
       // On success, pop all screens back to root so AuthWrapper can rebuild and show Home
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
+      _log.e('[LOGIN_SCREEN] Google sign-in FAILED', error: e);
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;

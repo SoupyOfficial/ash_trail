@@ -48,6 +48,12 @@ const kTestUser2Email = 'test2@ashtrail.dev';
 const kTestUser3Id = 'test-realistic-user-003';
 const kTestUser3Email = 'test3@ashtrail.dev';
 
+// Gmail-based test accounts for Google Sign-In multi-account testing
+const kTestUser4Id = 'test-realistic-user-004';
+const kTestUser4Email = 'ashtraildev3@gmail.com';
+const kTestUser5Id = 'test-realistic-user-005';
+const kTestUser5Email = 'ashtraildev4@gmail.com';
+
 /// Encapsulates a fresh Hive environment for each test.
 ///
 /// Creates real Hive boxes in a temp directory, builds real repositories,

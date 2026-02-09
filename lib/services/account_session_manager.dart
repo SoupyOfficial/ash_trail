@@ -114,7 +114,8 @@ class AccountSessionManager {
   /// They are valid for 48 hours from the time they were generated.
   Future<void> storeCustomToken(String uid, String customToken) async {
     try {
-      _log.d('Storing custom token for $uid');
+      _log.w('[TOKEN_STORE] Storing custom token for uid=$uid '
+          '(${customToken.length} chars)');
 
       // Store the custom token
       await _secureStorage.write(
@@ -129,9 +130,9 @@ class AccountSessionManager {
         value: timestamp,
       );
 
-      _log.i('Custom token stored for $uid');
+      _log.w('[TOKEN_STORE] Custom token stored for uid=$uid at ${DateTime.now().toIso8601String()}');
     } catch (e) {
-      _log.e('Error storing custom token', error: e);
+      _log.e('[TOKEN_STORE] Error storing custom token for uid=$uid', error: e);
       rethrow;
     }
   }
@@ -150,7 +151,7 @@ class AccountSessionManager {
         key: '$_customTokenPrefix$uid',
       );
       if (customToken == null) {
-        _log.d('No custom token found for $uid');
+        _log.w('[TOKEN_GET] No custom token found for uid=$uid');
         return null;
       }
 
@@ -159,7 +160,7 @@ class AccountSessionManager {
         key: '$_customTokenTimestampPrefix$uid',
       );
       if (timestampStr == null) {
-        _log.d('No timestamp found for custom token $uid');
+        _log.w('[TOKEN_GET] No timestamp found for custom token uid=$uid (orphaned token)');
         return null;
       }
 
@@ -170,17 +171,22 @@ class AccountSessionManager {
 
       if (tokenAge > maxAge) {
         final ageHours = tokenAge / 3600000;
-        _log.w('Custom token for $uid has expired (age: ${ageHours.toStringAsFixed(1)} hours)');
+        _log.w('[TOKEN_GET] Token EXPIRED for uid=$uid '
+            '(age: ${ageHours.toStringAsFixed(1)}h, max: 47h)');
         // Remove expired token
         await removeCustomToken(uid);
         return null;
       }
 
       final ageHours = tokenAge / 3600000;
-      _log.d('Retrieved valid custom token for $uid (age: ${ageHours.toStringAsFixed(1)} hours)');
+      final remainingHours = 47 - ageHours;
+      _log.d('[TOKEN_GET] Valid token for uid=$uid '
+          '(age: ${ageHours.toStringAsFixed(1)}h, '
+          'remaining: ${remainingHours.toStringAsFixed(1)}h, '
+          '${customToken.length} chars)');
       return customToken;
     } catch (e) {
-      _log.e('Error retrieving custom token', error: e);
+      _log.e('[TOKEN_GET] Error retrieving custom token for uid=$uid', error: e);
       return null;
     }
   }
@@ -205,6 +211,70 @@ class AccountSessionManager {
   Future<bool> hasValidCustomToken(String uid) async {
     final token = await getValidCustomToken(uid);
     return token != null;
+  }
+
+  /// Generate a diagnostic summary of all account sessions for TestFlight debugging.
+  ///
+  /// Returns a map with:
+  /// - 'activeUserId': currently active user ID
+  /// - 'loggedInAccounts': list of logged-in account summaries
+  /// - 'tokenStatus': map of userId -> token validity info
+  /// - 'timestamp': when this diagnostic was generated
+  Future<Map<String, dynamic>> getDiagnosticSummary() async {
+    _log.w('[DIAGNOSTICS] Generating multi-account diagnostic summary...');
+    try {
+      final activeUserId = await getActiveUserId();
+      final loggedInAccounts = await getLoggedInAccounts();
+      final tokenStatus = <String, Map<String, dynamic>>{};
+
+      for (final account in loggedInAccounts) {
+        final hasToken = await hasValidCustomToken(account.userId);
+        final timestampStr = await _secureStorage.read(
+          key: '$_customTokenTimestampPrefix${account.userId}',
+        );
+        double? ageHours;
+        double? remainingHours;
+        if (timestampStr != null) {
+          final timestamp = int.parse(timestampStr);
+          final tokenAge = DateTime.now().millisecondsSinceEpoch - timestamp;
+          ageHours = tokenAge / 3600000;
+          remainingHours = 47.0 - ageHours;
+        }
+        tokenStatus[account.userId] = {
+          'email': account.email,
+          'hasValidToken': hasToken,
+          'tokenAgeHours': ageHours?.toStringAsFixed(1),
+          'tokenRemainingHours': remainingHours?.toStringAsFixed(1),
+          'authProvider': account.authProvider.toString(),
+          'isActive': account.userId == activeUserId,
+          'lastAccessed': account.lastAccessedAt?.toIso8601String(),
+        };
+      }
+
+      final summary = {
+        'activeUserId': activeUserId,
+        'loggedInCount': loggedInAccounts.length,
+        'loggedInAccounts': loggedInAccounts.map((a) => {
+          'userId': a.userId,
+          'email': a.email,
+          'displayName': a.displayName,
+          'provider': a.authProvider.toString(),
+        }).toList(),
+        'tokenStatus': tokenStatus,
+        'timestamp': DateTime.now().toIso8601String(),
+        'logging': AppLogger.diagnostics,
+      };
+
+      _log.w('[DIAGNOSTICS] Summary: '\
+          'activeUser=$activeUserId, '\
+          'loggedIn=${loggedInAccounts.length}, '\
+          'tokens=${tokenStatus.entries.map((e) => "${e.value['email']}:${e.value['hasValidToken']}").join(", ")}');
+
+      return summary;
+    } catch (e) {
+      _log.e('[DIAGNOSTICS] Error generating summary', error: e);
+      return {'error': e.toString(), 'timestamp': DateTime.now().toIso8601String()};
+    }
   }
 
   /// Clear session for a specific account (sign out single account)

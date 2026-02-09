@@ -28,8 +28,10 @@ class TokenService {
   ///
   /// Throws an exception if the Cloud Function call fails.
   Future<Map<String, dynamic>> generateCustomToken(String uid) async {
+    final stopwatch = Stopwatch()..start();
     try {
-      _log.d('Requesting custom token for user: $uid');
+      _log.w('[TOKEN_GEN_START] Requesting custom token for uid=$uid');
+      _log.d('[TOKEN_GEN] POST $_tokenEndpoint');
 
       final response = await http.post(
         Uri.parse(_tokenEndpoint),
@@ -37,21 +39,38 @@ class TokenService {
         body: jsonEncode({'uid': uid}),
       );
 
+      stopwatch.stop();
+      _log.w(
+        '[TOKEN_GEN] Response: HTTP ${response.statusCode} '
+        'in ${stopwatch.elapsedMilliseconds}ms, '
+        'bodyLength=${response.body.length}',
+      );
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _log.d('Custom token received successfully');
-        return {
-          'customToken': data['customToken'],
-          'expiresIn': data['expiresIn'] ?? 172800, // Default 48 hours in seconds
-        };
+        final tokenLength = (data['customToken'] as String?)?.length ?? 0;
+        final expiresIn = data['expiresIn'] ?? 172800;
+        _log.w(
+          '[TOKEN_GEN_END] Custom token received: '
+          '${tokenLength} chars, expiresIn=${expiresIn}s '
+          '(${(expiresIn as int) ~/ 3600}h)',
+        );
+        return {'customToken': data['customToken'], 'expiresIn': expiresIn};
       } else {
         final errorMsg =
             'Failed to generate custom token: HTTP ${response.statusCode}, ${response.body}';
-        _log.e(errorMsg);
+        _log.e(
+          '[TOKEN_GEN_FAIL] $errorMsg (took ${stopwatch.elapsedMilliseconds}ms)',
+        );
         throw Exception(errorMsg);
       }
     } catch (e) {
-      _log.e('Error generating custom token', error: e);
+      if (stopwatch.isRunning) stopwatch.stop();
+      _log.e(
+        '[TOKEN_GEN_FAIL] Error after ${stopwatch.elapsedMilliseconds}ms: '
+        'type=${e.runtimeType}',
+        error: e,
+      );
       rethrow;
     }
   }
@@ -60,9 +79,9 @@ class TokenService {
   ///
   /// This can be used to verify connectivity before attempting token generation.
   Future<bool> isEndpointReachable() async {
+    final stopwatch = Stopwatch()..start();
     try {
-      // Just check if we can reach the endpoint (OPTIONS or HEAD would be better but
-      // Cloud Functions may not support them, so we'll just catch errors on POST)
+      _log.d('[TOKEN_HEALTH] Checking endpoint reachability...');
       final response = await http
           .post(
             Uri.parse(_tokenEndpoint),
@@ -71,10 +90,19 @@ class TokenService {
           )
           .timeout(const Duration(seconds: 5));
 
-      // Even a 400 error means the endpoint is reachable
-      return response.statusCode < 500;
+      stopwatch.stop();
+      final reachable = response.statusCode < 500;
+      _log.w(
+        '[TOKEN_HEALTH] Endpoint ${reachable ? "REACHABLE" : "UNREACHABLE"}: '
+        'HTTP ${response.statusCode} in ${stopwatch.elapsedMilliseconds}ms',
+      );
+      return reachable;
     } catch (e) {
-      _log.w('Endpoint not reachable', error: e);
+      stopwatch.stop();
+      _log.w(
+        '[TOKEN_HEALTH] Endpoint UNREACHABLE after ${stopwatch.elapsedMilliseconds}ms',
+        error: e,
+      );
       return false;
     }
   }

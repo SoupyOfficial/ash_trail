@@ -13,6 +13,7 @@ class LoginComponent {
   Finder get emailField => find.byKey(const Key('email-input'));
   Finder get passwordField => find.byKey(const Key('password-input'));
   Finder get loginButton => find.byKey(const Key('login-button'));
+  Finder get googleSignInButton => find.text('Continue with Google');
 
   // ── Waiters ──
   Future<void> waitUntilVisible() async {
@@ -33,6 +34,11 @@ class LoginComponent {
 
   Future<void> tapLogin() async {
     await $(loginButton).tap(settlePolicy: SettlePolicy.noSettle);
+  }
+
+  /// Tap the "Continue with Google" button to initiate Google Sign-In.
+  Future<void> tapGoogleSignIn() async {
+    await $(googleSignInButton).tap(settlePolicy: SettlePolicy.noSettle);
   }
 
   /// Convenience: fill both fields and tap login in one call.

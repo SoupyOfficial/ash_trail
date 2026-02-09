@@ -101,8 +101,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
       case HomeWidgetType.weeklyPattern:
         return _buildWeeklyPattern(context, metrics);
 
-      case HomeWidgetType.hourlyHeatmap:
-        return _buildHourlyHeatmap(context, metrics);
+      case HomeWidgetType.weekdayHeatmap:
+        return _buildWeekdayHeatmap(context, metrics);
+
+      case HomeWidgetType.weekendHeatmap:
+        return _buildWeekendHeatmap(context, metrics);
 
       // ===== SECONDARY =====
       case HomeWidgetType.moodPhysicalAvg:
@@ -690,11 +693,18 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildHourlyHeatmap(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildFilteredHeatmap(
+    BuildContext context,
+    HomeMetricsService metrics, {
+    required String title,
+    required bool Function(DateTime) dayFilter,
+  }) {
     final hourCounts = List.filled(24, 0);
 
     for (final record in records.where((r) => !r.isDeleted)) {
-      hourCounts[record.eventAt.hour]++;
+      if (dayFilter(record.eventAt)) {
+        hourCounts[record.eventAt.hour]++;
+      }
     }
 
     final maxCount = hourCounts.reduce((a, b) => a > b ? a : b);
@@ -713,10 +723,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Hourly Heatmap',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
               ],
             ),
             const SizedBox(height: 12),
@@ -767,6 +774,34 @@ class HomeWidgetBuilder extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildWeekdayHeatmap(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
+    return _buildFilteredHeatmap(
+      context,
+      metrics,
+      title: 'Weekday Heatmap',
+      dayFilter:
+          (dt) =>
+              dt.weekday >= DateTime.monday && dt.weekday <= DateTime.friday,
+    );
+  }
+
+  Widget _buildWeekendHeatmap(
+    BuildContext context,
+    HomeMetricsService metrics,
+  ) {
+    return _buildFilteredHeatmap(
+      context,
+      metrics,
+      title: 'Weekend Heatmap',
+      dayFilter:
+          (dt) =>
+              dt.weekday == DateTime.saturday || dt.weekday == DateTime.sunday,
     );
   }
 

@@ -418,3 +418,307 @@ class WeeklyHeatmap extends StatelessWidget {
     );
   }
 }
+
+/// Weekday-only heatmap (Mon–Fri) showing activity by hour
+class WeekdayHourlyHeatmap extends StatelessWidget {
+  final List<LogRecord> records;
+  final String title;
+  final Color baseColor;
+
+  const WeekdayHourlyHeatmap({
+    super.key,
+    required this.records,
+    this.title = 'Weekday Activity by Hour',
+    this.baseColor = Colors.blue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final weekdayRecords =
+        records
+            .where(
+              (r) =>
+                  !r.isDeleted &&
+                  r.eventAt.weekday >= DateTime.monday &&
+                  r.eventAt.weekday <= DateTime.friday,
+            )
+            .toList();
+
+    if (weekdayRecords.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    final hourCounts = _computeHourlyCounts(weekdayRecords);
+    final maxCount = hourCounts.values.fold(0, (a, b) => a > b ? a : b);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              'Mon – Fri · Tap a cell to see details',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildHeatmapGrid(context, hourCounts, maxCount),
+            const SizedBox(height: 16),
+            _buildLegend(context, maxCount),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Map<int, int> _computeHourlyCounts(List<LogRecord> filtered) {
+    final counts = <int, int>{};
+    for (var hour = 0; hour < 24; hour++) {
+      counts[hour] = 0;
+    }
+    for (final record in filtered) {
+      counts[record.eventAt.hour] = (counts[record.eventAt.hour] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  Widget _buildHeatmapGrid(
+    BuildContext context,
+    Map<int, int> counts,
+    int maxCount,
+  ) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 6,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
+      ),
+      itemCount: 24,
+      itemBuilder: (context, index) {
+        final count = counts[index] ?? 0;
+        final intensity = maxCount > 0 ? count.toDouble() / maxCount : 0.0;
+
+        return _HeatmapCell(
+          hour: index,
+          count: count,
+          intensity: intensity,
+          baseColor: baseColor,
+        );
+      },
+    );
+  }
+
+  Widget _buildLegend(BuildContext context, int maxCount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Less', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(width: 8),
+        ...List.generate(5, (index) {
+          final intensity = index / 4;
+          return Container(
+            width: 20,
+            height: 20,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: baseColor.withValues(alpha: 0.1 + intensity * 0.8),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          );
+        }),
+        const SizedBox(width: 8),
+        Text('More', style: Theme.of(context).textTheme.bodySmall),
+        const Spacer(),
+        Text(
+          'Max: $maxCount entries/hour',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(
+                Icons.work_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No weekday data',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Weekend-only heatmap (Sat–Sun) showing activity by hour
+class WeekendHourlyHeatmap extends StatelessWidget {
+  final List<LogRecord> records;
+  final String title;
+  final Color baseColor;
+
+  const WeekendHourlyHeatmap({
+    super.key,
+    required this.records,
+    this.title = 'Weekend Activity by Hour',
+    this.baseColor = Colors.orange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final weekendRecords =
+        records
+            .where(
+              (r) =>
+                  !r.isDeleted &&
+                  (r.eventAt.weekday == DateTime.saturday ||
+                      r.eventAt.weekday == DateTime.sunday),
+            )
+            .toList();
+
+    if (weekendRecords.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    final hourCounts = _computeHourlyCounts(weekendRecords);
+    final maxCount = hourCounts.values.fold(0, (a, b) => a > b ? a : b);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(
+              'Sat – Sun · Tap a cell to see details',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildHeatmapGrid(context, hourCounts, maxCount),
+            const SizedBox(height: 16),
+            _buildLegend(context, maxCount),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Map<int, int> _computeHourlyCounts(List<LogRecord> filtered) {
+    final counts = <int, int>{};
+    for (var hour = 0; hour < 24; hour++) {
+      counts[hour] = 0;
+    }
+    for (final record in filtered) {
+      counts[record.eventAt.hour] = (counts[record.eventAt.hour] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  Widget _buildHeatmapGrid(
+    BuildContext context,
+    Map<int, int> counts,
+    int maxCount,
+  ) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 6,
+        childAspectRatio: 1.5,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
+      ),
+      itemCount: 24,
+      itemBuilder: (context, index) {
+        final count = counts[index] ?? 0;
+        final intensity = maxCount > 0 ? count.toDouble() / maxCount : 0.0;
+
+        return _HeatmapCell(
+          hour: index,
+          count: count,
+          intensity: intensity,
+          baseColor: baseColor,
+        );
+      },
+    );
+  }
+
+  Widget _buildLegend(BuildContext context, int maxCount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Less', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(width: 8),
+        ...List.generate(5, (index) {
+          final intensity = index / 4;
+          return Container(
+            width: 20,
+            height: 20,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: baseColor.withValues(alpha: 0.1 + intensity * 0.8),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          );
+        }),
+        const SizedBox(width: 8),
+        Text('More', style: Theme.of(context).textTheme.bodySmall),
+        const Spacer(),
+        Text(
+          'Max: $maxCount entries/hour',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Center(
+          child: Column(
+            children: [
+              Icon(
+                Icons.weekend,
+                size: 48,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No weekend data',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

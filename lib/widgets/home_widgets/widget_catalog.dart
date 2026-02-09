@@ -70,8 +70,11 @@ enum HomeWidgetType {
   /// Day-of-week distribution mini chart
   weeklyPattern,
 
-  /// Activity by hour compact heatmap
-  hourlyHeatmap,
+  /// Activity by hour – weekday heatmap
+  weekdayHeatmap,
+
+  /// Activity by hour – weekend heatmap
+  weekendHeatmap,
 
   // ===== SECONDARY DATA WIDGETS =====
   /// Average mood and physical ratings
@@ -316,10 +319,18 @@ class WidgetCatalog {
       category: WidgetCategory.pattern,
       size: WidgetSize.standard,
     ),
-    HomeWidgetType.hourlyHeatmap: WidgetCatalogEntry(
-      type: HomeWidgetType.hourlyHeatmap,
-      displayName: 'Hourly Heatmap',
-      description: 'Activity by hour',
+    HomeWidgetType.weekdayHeatmap: WidgetCatalogEntry(
+      type: HomeWidgetType.weekdayHeatmap,
+      displayName: 'Weekday Heatmap',
+      description: 'Activity by hour (Mon–Fri)',
+      icon: Icons.grid_on,
+      category: WidgetCategory.pattern,
+      size: WidgetSize.large,
+    ),
+    HomeWidgetType.weekendHeatmap: WidgetCatalogEntry(
+      type: HomeWidgetType.weekendHeatmap,
+      displayName: 'Weekend Heatmap',
+      description: 'Activity by hour (Sat–Sun)',
       icon: Icons.grid_on,
       category: WidgetCategory.pattern,
       size: WidgetSize.large,
@@ -369,9 +380,7 @@ class WidgetCatalog {
 
   /// Get all entries for a category
   static List<WidgetCatalogEntry> getByCategory(WidgetCategory category) {
-    return entries.values
-        .where((entry) => entry.category == category)
-        .toList();
+    return entries.values.where((entry) => entry.category == category).toList();
   }
 
   /// Get all entries grouped by category

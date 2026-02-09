@@ -175,12 +175,19 @@ class _AnalyticsChartsWidgetState extends ConsumerState<AnalyticsChartsWidget> {
                   _buildActivityChart(context, _stats!),
                   const SizedBox(height: 24),
 
-                  // Hourly activity heatmap
-                  // Use filtered records to match the selected date range
-                  HourlyHeatmap(
+                  // Weekday hourly activity heatmap
+                  WeekdayHourlyHeatmap(
                     records: _currentFilteredRecords ?? widget.records,
-                    title: 'Activity by Hour',
+                    title: 'Weekday Activity by Hour',
                     baseColor: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Weekend hourly activity heatmap
+                  WeekendHourlyHeatmap(
+                    records: _currentFilteredRecords ?? widget.records,
+                    title: 'Weekend Activity by Hour',
+                    baseColor: Colors.orange,
                   ),
                   const SizedBox(height: 24),
 

@@ -129,6 +129,7 @@ echo -e "  This may take a few minutes..."
 flutter build ipa \
   --release \
   --build-number="$BUILD_NUMBER" \
+  --dart-define=VERBOSE_LOGGING=true \
   --obfuscate \
   --split-debug-info=build/app/debug-info \
   2>&1 | while IFS= read -r line; do

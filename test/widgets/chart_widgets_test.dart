@@ -41,11 +41,7 @@ void main() {
   group('ActivityBarChart', () {
     testWidgets('renders empty state when no rollups', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ActivityBarChart(rollups: []),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: ActivityBarChart(rollups: []))),
       );
 
       expect(find.byType(Card), findsOneWidget);
@@ -60,11 +56,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ActivityBarChart(rollups: rollups),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: ActivityBarChart(rollups: rollups))),
       );
 
       expect(find.byType(ActivityBarChart), findsOneWidget);
@@ -77,11 +69,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ActivityBarChart(rollups: rollups),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: ActivityBarChart(rollups: rollups))),
       );
 
       expect(find.byType(Card), findsOneWidget);
@@ -93,11 +81,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ActivityBarChart(rollups: rollups),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: ActivityBarChart(rollups: rollups))),
       );
 
       expect(find.byType(Card), findsOneWidget);
@@ -133,11 +117,7 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ActivityBarChart(rollups: rollups),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: ActivityBarChart(rollups: rollups))),
       );
 
       expect(find.byType(Card), findsOneWidget);
@@ -148,9 +128,7 @@ void main() {
     testWidgets('renders empty state when no data', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: EventTypePieChart(eventTypeCounts: {}),
-          ),
+          home: Scaffold(body: EventTypePieChart(eventTypeCounts: {})),
         ),
       );
 
@@ -178,9 +156,7 @@ void main() {
     });
 
     testWidgets('handles single event type', (tester) async {
-      const eventTypeCounts = {
-        EventType.vape: 15,
-      };
+      const eventTypeCounts = {EventType.vape: 15};
 
       await tester.pumpWidget(
         const MaterialApp(
@@ -233,137 +209,119 @@ void main() {
     });
   });
 
-  group('HourlyHeatmap', () {
+  group('WeekdayHourlyHeatmap', () {
     testWidgets('renders empty state when no records', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: HourlyHeatmap(records: []),
-          ),
+          home: Scaffold(body: WeekdayHourlyHeatmap(records: [])),
         ),
       );
 
       expect(find.byType(Card), findsOneWidget);
-      expect(find.text('No activity data'), findsOneWidget);
+      expect(find.text('No weekday data'), findsOneWidget);
     });
 
-    testWidgets('renders heatmap with data', (tester) async {
+    testWidgets('renders heatmap with weekday data', (tester) async {
       final records = [
         createTestLogRecord(
           logId: 'log-1',
-          eventAt: DateTime(2024, 6, 1, 9, 30), // 9:30 AM
+          eventAt: DateTime(2024, 6, 3, 9, 30), // Monday 9:30 AM
         ),
         createTestLogRecord(
           logId: 'log-2',
-          eventAt: DateTime(2024, 6, 1, 14, 0), // 2:00 PM
+          eventAt: DateTime(2024, 6, 4, 14, 0), // Tuesday 2:00 PM
         ),
         createTestLogRecord(
           logId: 'log-3',
-          eventAt: DateTime(2024, 6, 1, 21, 15), // 9:15 PM
+          eventAt: DateTime(2024, 6, 5, 21, 15), // Wednesday 9:15 PM
         ),
       ];
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: HourlyHeatmap(records: records),
-          ),
+          home: Scaffold(body: WeekdayHourlyHeatmap(records: records)),
         ),
       );
 
-      expect(find.byType(HourlyHeatmap), findsOneWidget);
-      expect(find.text('No data available'), findsNothing);
+      expect(find.byType(WeekdayHourlyHeatmap), findsOneWidget);
     });
 
-    testWidgets('handles single record', (tester) async {
+    testWidgets('excludes weekend records', (tester) async {
       final records = [
         createTestLogRecord(
           logId: 'log-1',
-          eventAt: DateTime(2024, 6, 1, 12, 0),
-        ),
-      ];
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: HourlyHeatmap(records: records),
-          ),
-        ),
-      );
-
-      expect(find.byType(Card), findsOneWidget);
-    });
-
-    testWidgets('handles records at different hours', (tester) async {
-      final records = List.generate(
-        24,
-        (hour) => createTestLogRecord(
-          logId: 'log-$hour',
-          eventAt: DateTime(2024, 6, 1, hour, 0),
-        ),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: HourlyHeatmap(records: records),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(HourlyHeatmap), findsOneWidget);
-    });
-
-    testWidgets('handles multiple records in same hour', (tester) async {
-      final records = [
-        createTestLogRecord(
-          logId: 'log-1',
-          eventAt: DateTime(2024, 6, 1, 14, 0),
+          eventAt: DateTime(2024, 6, 1, 12, 0), // Saturday
         ),
         createTestLogRecord(
           logId: 'log-2',
-          eventAt: DateTime(2024, 6, 1, 14, 15),
-        ),
-        createTestLogRecord(
-          logId: 'log-3',
-          eventAt: DateTime(2024, 6, 1, 14, 45),
+          eventAt: DateTime(2024, 6, 2, 12, 0), // Sunday
         ),
       ];
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: HourlyHeatmap(records: records),
-          ),
+          home: Scaffold(body: WeekdayHourlyHeatmap(records: records)),
+        ),
+      );
+
+      // Only weekend records => empty state
+      expect(find.text('No weekday data'), findsOneWidget);
+    });
+  });
+
+  group('WeekendHourlyHeatmap', () {
+    testWidgets('renders empty state when no records', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: WeekendHourlyHeatmap(records: [])),
         ),
       );
 
       expect(find.byType(Card), findsOneWidget);
+      expect(find.text('No weekend data'), findsOneWidget);
     });
 
-    testWidgets('handles records at midnight boundary', (tester) async {
+    testWidgets('renders heatmap with weekend data', (tester) async {
       final records = [
         createTestLogRecord(
           logId: 'log-1',
-          eventAt: DateTime(2024, 6, 1, 0, 0),
+          eventAt: DateTime(2024, 6, 1, 10, 0), // Saturday 10 AM
         ),
         createTestLogRecord(
           logId: 'log-2',
-          eventAt: DateTime(2024, 6, 1, 23, 59),
+          eventAt: DateTime(2024, 6, 2, 15, 0), // Sunday 3 PM
         ),
       ];
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: HourlyHeatmap(records: records),
-          ),
+          home: Scaffold(body: WeekendHourlyHeatmap(records: records)),
         ),
       );
 
-      expect(find.byType(Card), findsOneWidget);
+      expect(find.byType(WeekendHourlyHeatmap), findsOneWidget);
+    });
+
+    testWidgets('excludes weekday records', (tester) async {
+      final records = [
+        createTestLogRecord(
+          logId: 'log-1',
+          eventAt: DateTime(2024, 6, 3, 12, 0), // Monday
+        ),
+        createTestLogRecord(
+          logId: 'log-2',
+          eventAt: DateTime(2024, 6, 4, 12, 0), // Tuesday
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: WeekendHourlyHeatmap(records: records)),
+        ),
+      );
+
+      // Only weekday records => empty state
+      expect(find.text('No weekend data'), findsOneWidget);
     });
   });
 
@@ -373,10 +331,7 @@ void main() {
         createTestRollup(date: '2024-06-01', eventCount: 5, totalValue: 100),
       ];
 
-      const eventTypeCounts = {
-        EventType.vape: 10,
-        EventType.inhale: 5,
-      };
+      const eventTypeCounts = {EventType.vape: 10, EventType.inhale: 5};
 
       final records = [
         createTestLogRecord(
@@ -410,15 +365,15 @@ void main() {
   group('Chart Edge Cases', () {
     testWidgets('ActivityBarChart handles very large values', (tester) async {
       final List<DailyRollup> rollups = [
-        createTestRollup(date: '2024-06-01', eventCount: 1000000, totalValue: 99999999),
+        createTestRollup(
+          date: '2024-06-01',
+          eventCount: 1000000,
+          totalValue: 99999999,
+        ),
       ];
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ActivityBarChart(rollups: rollups),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: ActivityBarChart(rollups: rollups))),
       );
 
       expect(find.byType(Card), findsOneWidget);
@@ -453,9 +408,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SingleChildScrollView(
-              child: HourlyHeatmap(records: records),
-            ),
+            body: SingleChildScrollView(child: HourlyHeatmap(records: records)),
           ),
         ),
       );

@@ -5,50 +5,120 @@ import 'package:ash_trail/widgets/home_widgets/widget_catalog.dart';
 void main() {
   group('HomeWidgetType enum', () {
     test('has all expected time-based widget types', () {
-      expect(HomeWidgetType.values.contains(HomeWidgetType.timeSinceLastHit), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.avgTimeBetween), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.longestGapToday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.firstHitToday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.lastHitTime), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.timeSinceLastHit),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.avgTimeBetween),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.longestGapToday),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.firstHitToday),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.lastHitTime),
+        isTrue,
+      );
       expect(HomeWidgetType.values.contains(HomeWidgetType.peakHour), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.activeHoursToday), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.activeHoursToday),
+        isTrue,
+      );
     });
 
     test('has all expected duration-based widget types', () {
-      expect(HomeWidgetType.values.contains(HomeWidgetType.totalDurationToday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.avgDurationPerHit), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.longestHitToday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.shortestHitToday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.totalDurationWeek), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.durationTrend), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.totalDurationToday),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.avgDurationPerHit),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.longestHitToday),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.shortestHitToday),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.totalDurationWeek),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.durationTrend),
+        isTrue,
+      );
     });
 
     test('has all expected count-based widget types', () {
       expect(HomeWidgetType.values.contains(HomeWidgetType.hitsToday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.hitsThisWeek), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.dailyAvgHits), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.hitsPerActiveHour), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.hitsThisWeek),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.dailyAvgHits),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.hitsPerActiveHour),
+        isTrue,
+      );
     });
 
     test('has all expected comparison widget types', () {
-      expect(HomeWidgetType.values.contains(HomeWidgetType.todayVsYesterday), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.todayVsWeekAvg), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.weekdayVsWeekend), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.todayVsYesterday),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.todayVsWeekAvg),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.weekdayVsWeekend),
+        isTrue,
+      );
     });
 
     test('has all expected pattern widget types', () {
-      expect(HomeWidgetType.values.contains(HomeWidgetType.weeklyPattern), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.hourlyHeatmap), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.weeklyPattern),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.weekdayHeatmap),
+        isTrue,
+      );
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.weekendHeatmap),
+        isTrue,
+      );
     });
 
     test('has all expected secondary data widget types', () {
-      expect(HomeWidgetType.values.contains(HomeWidgetType.moodPhysicalAvg), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.moodPhysicalAvg),
+        isTrue,
+      );
       expect(HomeWidgetType.values.contains(HomeWidgetType.topReasons), isTrue);
     });
 
     test('has all expected action widget types', () {
       expect(HomeWidgetType.values.contains(HomeWidgetType.quickLog), isTrue);
-      expect(HomeWidgetType.values.contains(HomeWidgetType.recentEntries), isTrue);
+      expect(
+        HomeWidgetType.values.contains(HomeWidgetType.recentEntries),
+        isTrue,
+      );
     });
   });
 
@@ -143,9 +213,9 @@ void main() {
 
     test('creates entry with custom size', () {
       const entry = WidgetCatalogEntry(
-        type: HomeWidgetType.hourlyHeatmap,
-        displayName: 'Heatmap',
-        description: 'Hourly heatmap',
+        type: HomeWidgetType.weekdayHeatmap,
+        displayName: 'Weekday Heatmap',
+        description: 'Weekday hourly heatmap',
         icon: Icons.grid_on,
         category: WidgetCategory.pattern,
         size: WidgetSize.large,
@@ -198,7 +268,8 @@ void main() {
         expect(
           entry.key,
           equals(entry.value.type),
-          reason: 'Key ${entry.key} does not match entry type ${entry.value.type}',
+          reason:
+              'Key ${entry.key} does not match entry type ${entry.value.type}',
         );
       }
     });
@@ -303,7 +374,8 @@ void main() {
       test('all pattern widgets belong to pattern category', () {
         final patternWidgets = [
           HomeWidgetType.weeklyPattern,
-          HomeWidgetType.hourlyHeatmap,
+          HomeWidgetType.weekdayHeatmap,
+          HomeWidgetType.weekendHeatmap,
         ];
 
         for (final type in patternWidgets) {
@@ -399,7 +471,7 @@ void main() {
         final entries = WidgetCatalog.getByCategory(category);
         final displayNames = entries.map((e) => e.displayName).toList();
         final uniqueNames = displayNames.toSet();
-        
+
         expect(
           displayNames.length,
           equals(uniqueNames.length),

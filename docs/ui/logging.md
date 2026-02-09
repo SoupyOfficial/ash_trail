@@ -1,6 +1,6 @@
 # Logging & Entry Fields Reference
 
-This file documents all fields you can record on a log entry, the three ways to create entries, and the lifecycle of an entry from creation to sync. This is your field-by-field reference for understanding what gets stored when you log.
+This file documents all fields you can record on a log [entry](glossary.md#entry), the three ways to create entries, and the lifecycle of an entry from creation to sync. This is your field-by-field reference for understanding what gets stored when you log. All timestamps respect the [day boundary](glossary.md#day-boundary) (6 AM to 5:59 AM).
 
 ← [Back to Index](README.md)
 

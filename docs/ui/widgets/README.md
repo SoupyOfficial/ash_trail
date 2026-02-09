@@ -72,6 +72,25 @@ flowchart LR
 
 ---
 
+## Empty, Loading & Error States
+
+Widgets handle missing data consistently across all categories. There are no separate loading spinners or illustrated empty-state screens. Instead:
+
+| Condition | What the widget shows |
+|-----------|----------------------|
+| **No entries at all** (new account, first launch) | Primary value displays **`--`** (two dashes). Subtitles are hidden. Trend arrows are omitted. |
+| **No entries today** (but historical data exists) | Time-based and count-based widgets show `--` for "today" values. Subtitle may still show 7-day averages. |
+| **Not enough data for comparison** (e.g., no yesterday for "Today vs Yesterday") | The comparison value shows `--`. No trend arrow appears. |
+| **Null optional fields** (no mood/physical rating set) | Mood/Physical Avg widget shows `--`. Only entries with non-null ratings contribute to averages — entries without ratings are excluded, not counted as zero. |
+| **All entries deleted** | Same as "no entries" — widgets show `--`. Soft-deleted entries are excluded from all calculations. |
+| **Fewer than 2 entries** | Gap-based widgets (Average Gap, Longest Gap) return `--` because gaps require at least 2 entries to compute. |
+| **Count = 0** | Count-based widgets show `0` (not `--`) since zero is a valid count. Duration totals also show `0:00`. |
+| **Sync error** | Widget data is unaffected — widgets read from the local Hive database, not from Firestore. Sync errors only affect the sync state badge, not widget calculations. |
+
+> **Design note:** The `--` placeholder pattern is implemented in `home_widget_builder.dart`. Each metric service method returns `null` when data is insufficient, and the builder renders `'--'` as the display value. This means you never see stale or misleading data — either the number is current and correct, or you see dashes.
+
+---
+
 See [Widget Customization](customization.md) for how to manage your widget layout (edit mode, drag-drop, defaults).
 
 ← [Back to Index](../README.md)

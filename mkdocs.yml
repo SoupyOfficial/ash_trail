@@ -6,30 +6,28 @@ repo_name: SoupyOfficial/ash_trail
 edit_uri: edit/main/docs/
 copyright: "&copy; 2025–2026 Ash Trail"
 
-docs_dir: .
-site_dir: ../build/docs-site
+docs_dir: docs
+site_dir: build/docs-site
 
 theme:
   name: material
-  custom_dir: overrides
+  custom_dir: docs/overrides
   language: en
   font:
     text: Inter
     code: JetBrains Mono
   palette:
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: deep purple
-      accent: amber
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: deep purple
-      accent: amber
+    - scheme: slate
+      primary: indigo
+      accent: light blue
       toggle:
         icon: material/weather-sunny
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/weather-night
         name: Switch to dark mode
   features:
     - announce.dismiss

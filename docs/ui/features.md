@@ -1,6 +1,6 @@
 # Feature Catalog
 
-This is a high-level inventory of every user-facing feature in Ash Trail, organized by domain. Each feature is described in more detail in its respective documentation file — see [Screen Reference](screens.md) for screen-related features, [Widget Catalog](widgets/README.md) for dashboard features, [Logging & Entry Fields](logging.md) for logging features, and [Data, Sync & Export](data-sync.md) for data management.
+This is a high-level inventory of every user-facing feature in Ash Trail, organized by domain. Each feature is described in more detail in its respective documentation file — see [Screen Reference](screens.md) for screen-related features, [Widget Catalog](widgets/README.md) for dashboard features, [Logging & Entry Fields](logging.md) for logging features, and [Data, Sync & Export](data-sync.md) for data management. Key terms like [entry](glossary.md#entry), [day boundary](glossary.md#day-boundary), [soft delete](glossary.md#soft-delete), and [sync state](glossary.md#sync-state) are defined in the [Glossary](glossary.md).
 
 ← [Back to Index](README.md)
 

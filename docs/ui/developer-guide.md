@@ -1,6 +1,6 @@
 # Developer Quick-Start: Where Is X?
 
-This file is your lifeline when you come back after weeks or months and need to find where something is implemented. Every row answers a concrete question with an exact file path.
+This file is your lifeline when you come back after weeks or months and need to find where something is implemented. Every row answers a concrete question with an exact file path. See the [Glossary](glossary.md) for term definitions including [day boundary](glossary.md#day-boundary), [entry](glossary.md#entry), and [sync state](glossary.md#sync-state).
 
 ← [Back to Index](README.md)
 
@@ -142,6 +142,109 @@ Follow these steps to add a new widget to the home screen:
 5. **Build the widget** — Create the widget UI (typically using `StatCardWidget` for stat cards, or a custom widget for visual/interactive widgets)
 
 See the [Widget Catalog](widgets/README.md) for detailed documentation of all existing widgets and the [rendering pipeline diagram](widgets/README.md).
+
+---
+
+## Testing Strategy
+
+The project uses a multi-layered test pyramid. See `docs/TESTING_STRATEGY.md` for the full strategy document and `docs/testing/COVERAGE_GUIDE.md` for coverage details.
+
+**Coverage target:** 85% line coverage (enforced via `scripts/coverage/check_coverage.sh`). Generated files (`*.g.dart`, `*.freezed.dart`, `firebase_options.dart`) are excluded.
+
+| Layer | Location | Count | What it tests |
+|-------|----------|-------|---------------|
+| Unit tests | `test/services/`, `test/models/` | 74 files | Service logic, model serialization, enum mappings, validation rules |
+| Widget tests | `test/widgets/`, `test/screens/` | (included above) | Widget rendering, user interaction, provider state |
+| Integration tests | `integration_test/` | 22 files | Full screen flows, multi-account switching, navigation, data persistence |
+| E2E tests | `playwright/` | 5+ specs | Cross-platform browser testing via Playwright |
+
+**Key test areas:**
+- `test/services/` — 13 user story tests + 21 service tests covering HomeMetricsService, SyncService, ExportService, etc.
+- `test/models/` — LogRecord, DailyRollup, Account, Enums, RangeQuerySpec serialization and equality
+- `test/providers/` — LogDraftProvider state management tests
+- `integration_test/flows/` — End-to-end user flows (login, logging, analytics, history)
+
+**Running tests:**
+
+| Task | Command |
+|------|---------|
+| All unit/widget tests | `flutter test` |
+| Single file | `flutter test test/path/to/file_test.dart` |
+| Integration tests | `flutter test integration_test/` |
+| Coverage report | `flutter test --coverage && genhtml coverage/lcov.info -o coverage/html` |
+| Coverage gate (85%) | `MIN_COVERAGE=85 bash scripts/coverage/check_coverage.sh` |
+
+---
+
+## Release Process
+
+### TestFlight Deployment
+
+The deploy script (`scripts/deploy_testflight.sh`) is a 6-step pipeline:
+
+1. **Preflight** — Verifies `flutter`, `xcrun`, and App Store Connect API key (`.p8` file or base64 from CI)
+2. **Clean & deps** — `flutter clean` + `flutter pub get` (skip with `SKIP_CLEAN=1`)
+3. **Tests** — `flutter test` (skip with `SKIP_TESTS=1`; failures are warnings, not blockers)
+4. **Build IPA** — `flutter build ipa --release --obfuscate --split-debug-info=...`
+5. **Validate** — `xcrun altool --validate-app`
+6. **Upload** — `xcrun altool --upload-app` to TestFlight
+
+### Version Bumping
+
+The script handles version bumping automatically:
+
+| Flag | Behavior |
+|------|----------|
+| `--patch` (default) | 1.0.1 → 1.0.2 |
+| `--minor` | 1.0.1 → 1.1.0 |
+| `--major` | 1.0.1 → 2.0.0 |
+| `--no-bump` | Keep current version |
+| `--build N` | Set explicit build number |
+
+The version and build number are written back to `pubspec.yaml` automatically.
+
+### Environment Variables for CI
+
+| Variable | Purpose |
+|----------|---------|
+| `APP_STORE_CONNECT_API_KEY` | API key ID for upload |
+| `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID for upload |
+| `APP_STORE_CONNECT_API_KEY_BASE64` | Base64-encoded `.p8` key (CI environments) |
+| `BUILD_NUMBER` | Explicit build number override |
+| `SKIP_TESTS` | Skip test step (`1` = skip) |
+| `SKIP_CLEAN` | Skip flutter clean (`1` = skip) |
+
+### Release Checklist
+
+Before every release:
+
+- [ ] All tests pass: `flutter test`
+- [ ] No analyzer warnings: `flutter analyze`
+- [ ] Update `CHANGELOG.md` with user-facing changes under the new version
+- [ ] Deploy: `./scripts/deploy_testflight.sh` (bumps patch version by default)
+- [ ] Verify build appears in App Store Connect / TestFlight
+- [ ] Test the build on a physical device from TestFlight
+- [ ] Commit the version bump: `git add pubspec.yaml CHANGELOG.md && git commit -m "release: vX.Y.Z"`
+
+---
+
+## Accessibility
+
+Ash Trail uses Material 3, which provides baseline accessibility out of the box (focus management, touch targets, color contrast). Additional semantics are centralized in `lib/utils/a11y_utils.dart`.
+
+**Current state:**
+- `a11y_utils.dart` provides semantic label utilities (15 usages)
+- `home_screen.dart`, `widget_standardization.dart`, and `home_quick_log_widget.dart` use explicit `Semantics` wrappers
+- Material 3 widgets (buttons, text fields, sliders) include built-in accessibility labels
+- The app respects system dark/light theme and dynamic type sizing
+
+**Gaps to address:**
+- Semantic labels are not applied to all 27 home widgets — only a few have explicit labels
+- Custom chart widgets (bar, line, pie, heatmap) lack `Semantics` descriptions for screen readers
+- No VoiceOver/TalkBack testing has been documented
+- Color-only indicators (trend arrows: green vs red) should have text alternatives for colorblind users — the arrow direction (↑/↓) partially addresses this
+
+**Best practice:** When adding new widgets, wrap them with `Semantics(label: '...')` using the helpers in `a11y_utils.dart`. The label should describe the widget's current value (e.g., "Time since last hit: 2 hours 15 minutes").
 
 ---
 

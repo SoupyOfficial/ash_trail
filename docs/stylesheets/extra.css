@@ -1,0 +1,184 @@
+/* ── Ash Trail Docs — Custom Styles ──────────────────────────────── */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Hero / Landing Section ─────────────────────────────────────── */
+.md-typeset .hero {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+}
+
+.md-typeset .hero h1 {
+  font-weight: 800;
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #448aff, #40c4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.md-typeset .hero p {
+  font-size: 1.15rem;
+  opacity: 0.85;
+  max-width: 640px;
+  margin: 0 auto 1.5rem;
+}
+
+/* ── Card Grid ──────────────────────────────────────────────────── */
+.md-typeset .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.md-typeset .grid .card {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.6rem;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.2s ease;
+  background: var(--md-default-bg-color);
+}
+
+.md-typeset .grid .card:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid .card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.md-typeset .grid .card h3 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+.md-typeset .grid .card p {
+  font-size: 0.88rem;
+  opacity: 0.8;
+  margin-bottom: 0;
+}
+
+/* ── Tabs polish ────────────────────────────────────────────────── */
+.md-tabs {
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* ── Header shadow ──────────────────────────────────────────────── */
+.md-header {
+  box-shadow: 0 0 0.4rem rgba(0, 0, 0, 0.1);
+}
+
+[data-md-color-scheme="slate"] .md-header {
+  box-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.3);
+}
+
+/* ── Code blocks ────────────────────────────────────────────────── */
+.md-typeset code {
+  border-radius: 0.25rem;
+}
+
+.md-typeset pre > code {
+  border-radius: 0.4rem;
+}
+
+/* ── Admonition polish ──────────────────────────────────────────── */
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Table styling ──────────────────────────────────────────────── */
+.md-typeset table:not([class]) {
+  border-radius: 0.4rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.md-typeset table:not([class]) th {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+.md-footer {
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* ── Navigation sections ────────────────────────────────────────── */
+.md-nav--primary .md-nav__title {
+  font-weight: 700;
+}
+
+/* ── Status badges ──────────────────────────────────────────────── */
+.md-typeset .badge {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 1em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.md-typeset .badge--green {
+  background: #00c853;
+  color: #121212;
+}
+
+.md-typeset .badge--blue {
+  background: #448aff;
+  color: #fff;
+}
+
+.md-typeset .badge--orange {
+  background: #ff9100;
+  color: #121212;
+}
+
+/* ── Smooth transition on content ───────────────────────────────── */
+.md-content {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive tweaks ──────────────────────────────────────────── */
+@media screen and (max-width: 76.1875em) {
+  .md-typeset .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-typeset .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── Mermaid diagrams ───────────────────────────────────────────── */
+.mermaid {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* ── Back-to-top button ─────────────────────────────────────────── */
+.md-top {
+  border-radius: 2rem;
+}
+
+/* ── Search bar polish ──────────────────────────────────────────── */
+.md-search__input {
+  border-radius: 0.4rem;
+}

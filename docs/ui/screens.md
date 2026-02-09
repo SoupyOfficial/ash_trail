@@ -1,6 +1,6 @@
 # Screen Reference & Navigation
 
-This file documents all screens in Ash Trail, how to navigate between them, and what each screen shows the user. The app uses a simple navigation model: an auth gate that routes to either the welcome flow or the main app, and a 3-tab bottom navigation bar for the main experience.
+This file documents all screens in Ash Trail, how to navigate between them, and what each screen shows the user. The app uses a simple navigation model: an auth gate that routes to either the welcome flow or the main app, and a 3-tab bottom navigation bar for the main experience. All screens respect the [day boundary](glossary.md#day-boundary) — a "day" runs from 6 AM to 5:59 AM — when displaying [entries](glossary.md#entry), metrics, and charts.
 
 ← [Back to Index](README.md)
 
@@ -106,11 +106,11 @@ The account creation form with fields for email, display name, and password. Pas
 
 ### 4. HomeScreen
 
-The primary screen and default tab. It displays a customizable grid of [widgets](widgets/README.md) that show real-time metrics about usage patterns. The app bar contains icons for navigating to the AccountsScreen and LoggingScreen. A floating action button (FAB) opens the BackdateDialog for logging past events. Pulling down triggers a refresh of all widget data. Tapping the pencil (✏️) icon enters [edit mode](widgets/customization.md) where you can drag-to-reorder, remove, and add widgets.
+The primary screen and default tab. It displays a customizable grid of [widgets](widgets/README.md) that show real-time metrics about usage patterns. Each widget uses [entries](glossary.md#entry) from the active account only. The app bar contains icons for navigating to the AccountsScreen and LoggingScreen. A floating action button (FAB) opens the BackdateDialog for logging past events. Pulling down triggers a refresh of all widget data. Tapping the pencil (✏️) icon enters [edit mode](widgets/customization.md) where you can drag-to-reorder, remove, and add widgets.
 
 ### 5. AnalyticsScreen
 
-The second tab, focused on charts and aggregate statistics. Four summary cards at the top show total entries, synced count, pending count, and total duration. Below them, an interactive chart area supports bar charts (daily activity count or duration), line charts (trend lines), pie charts (event type breakdown), and heatmaps (hourly/weekday/weekend activity grids). A time range filter lets you select 7, 14, or 30 days, or a custom date range. A trend direction indicator shows whether usage is increasing or decreasing across the selected period by comparing the first half to the second half.
+The second tab, focused on charts and aggregate statistics. Four summary cards at the top show total [entries](glossary.md#entry), synced count, pending count, and total [duration](glossary.md#duration). Below them, an interactive chart area supports bar charts (daily activity count or duration), line charts (trend lines), pie charts (event type breakdown), and heatmaps (hourly/weekday/weekend activity grids). A time range filter lets you select 7, 14, or 30 days, or a custom date range. A trend direction indicator shows whether usage is increasing or decreasing across the selected period by comparing the first half to the second half.
 
 Below the charts, a list of the 10 most recent entries is displayed with event type icons, timestamps, and durations.
 
@@ -167,7 +167,7 @@ An import section exists but is currently disabled with a "coming soon" note. Im
 
 ### 10. LoggingScreen
 
-Accessed from the app bar on the HomeScreen. Contains two tabs: **Detailed** and **Backdate**. The Detailed tab provides a full logging form with all fields: event type dropdown, duration input (manual or press-and-hold timer), reason chips (multi-select), mood slider (1–10), physical slider (1–10), notes text field, and auto-captured location with map preview. The Backdate tab provides a simplified interface for logging past events with quick-offset buttons (-5m, -15m, -30m, -1h) and a date/time picker. See [Logging & Entry Fields](logging.md) for complete field reference.
+Accessed from the app bar on the HomeScreen. Contains two tabs: **Detailed** and **Backdate**. See [Logging & Entry Fields](logging.md) for complete field reference and the [entry](glossary.md#entry) lifecycle. The Detailed tab provides a full logging form with all fields: event type dropdown, duration input (manual or press-and-hold timer), reason chips (multi-select), mood slider (1–10), physical slider (1–10), notes text field, and auto-captured location with map preview. The Backdate tab provides a simplified interface for logging past events with quick-offset buttons (-5m, -15m, -30m, -1h) and a date/time picker. See [Logging & Entry Fields](logging.md) for complete field reference.
 
 ---
 

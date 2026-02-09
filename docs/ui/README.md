@@ -25,8 +25,9 @@ Ash Trail is a comprehensive vaping and smoking habit tracker built with Flutter
 | ↳ [Widget Customization](widgets/customization.md) | How to reorder, add, remove widgets and manage per-account layouts |
 | [Logging & Entry Fields](logging.md) | Complete field reference for log entries, logging modes, and entry lifecycle |
 | [Understanding Trend Indicators](trends.md) | Color convention explainer for the trend arrows on widgets |
-| [Data, Sync & Export](data-sync.md) | Offline-first storage, cloud sync state machine, and export formats |
-| [Developer Quick-Start](developer-guide.md) | "Where Is X?" file map, folder structure, and common commands cheat sheet |
+| [Data, Sync & Export](data-sync.md) | Offline-first storage, cloud sync state machine, export formats, Firebase contracts, and privacy |
+| [Developer Quick-Start](developer-guide.md) | "Where Is X?" file map, folder structure, testing strategy, release process, and accessibility |
+| [Troubleshooting & FAQ](troubleshooting.md) | Common issues, diagnosis steps, and development gotchas |
 | [Quick-Reference Card](quick-reference.md) | Appendix with scannable summary tables of all widgets, screens, and fields |
 
 ---

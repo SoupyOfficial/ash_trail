@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'lib-docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'lib-docs/**'
       - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
@@ -42,6 +44,9 @@ jobs:
 
       - name: Install MkDocs and plugins
         run: pip install -r docs/requirements.txt
+
+      - name: Copy lib-docs into docs
+        run: cp -r lib-docs docs/lib-docs
 
       - name: Build docs site
         run: mkdocs build

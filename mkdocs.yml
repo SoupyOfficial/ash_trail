@@ -219,6 +219,46 @@ nav:
           - Summary: FIGMA_WORKFLOW_SUMMARY.md
           - Test Results: FIGMA_TEST_RESULTS.md
 
+  - Code Reference:
+      - Overview: lib-docs/main.md
+      - Logging:
+          - AppLogger: lib-docs/logging/app_logger.md
+      - Models:
+          - Account: lib-docs/models/account.md
+          - DailyRollup: lib-docs/models/daily_rollup.md
+          - Enums: lib-docs/models/enums.md
+          - HomeWidgetConfig: lib-docs/models/home_widget_config.md
+          - LogRecord: lib-docs/models/log_record.md
+          - ModelConverters: lib-docs/models/model_converters.md
+          - RangeQuerySpec: lib-docs/models/range_query_spec.md
+          - SyncMetadata: lib-docs/models/sync_metadata.md
+          - UserAccount: lib-docs/models/user_account.md
+          - WebModels: lib-docs/models/web_models.md
+      - Navigation:
+          - MainNavigation: lib-docs/navigation/main_navigation.md
+      - Providers:
+          - AccountProvider: lib-docs/providers/account_provider.md
+          - AuthProvider: lib-docs/providers/auth_provider.md
+          - HomeWidgetConfigProvider: lib-docs/providers/home_widget_config_provider.md
+          - LogRecordProvider: lib-docs/providers/log_record_provider.md
+          - SyncProvider: lib-docs/providers/sync_provider.md
+      - Repositories:
+          - AccountRepository: lib-docs/repositories/account_repository.md
+          - AccountRepositoryHive: lib-docs/repositories/account_repository_hive.md
+          - LogRecordRepository: lib-docs/repositories/log_record_repository.md
+          - LogRecordRepositoryHive: lib-docs/repositories/log_record_repository_hive.md
+      - Screens:
+          - AccountsScreen: lib-docs/screens/accounts_screen.md
+          - AnalyticsScreen: lib-docs/screens/analytics_screen.md
+          - ExportScreen: lib-docs/screens/export_screen.md
+          - HistoryScreen: lib-docs/screens/history_screen.md
+          - HomeScreen: lib-docs/screens/home_screen.md
+          - LoggingScreen: lib-docs/screens/logging_screen.md
+          - LoginScreen: lib-docs/screens/login_screen.md
+          - MultiAccountDiagnosticsScreen: lib-docs/screens/multi_account_diagnostics_screen.md
+          - ProfileScreen: lib-docs/screens/profile_screen.md
+          - SignupScreen: lib-docs/screens/signup_screen.md
+
   - Guides:
       - Edit Log Enhancement: EDIT_LOG_ENHANCEMENT.md
       - Logging Conventions: LOGGING_CONVENTIONS.md

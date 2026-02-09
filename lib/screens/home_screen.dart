@@ -72,15 +72,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  /// Build a welcome greeting from the account's name, falling back to email
+  /// prefix, then generic "Home".
+  String _buildGreeting(Account? account) {
+    if (account == null) return 'Home';
+    final name =
+        account.displayName ??
+        account.firstName ??
+        account.email.split('@').first;
+    return 'Welcome, $name';
+  }
+
   @override
   Widget build(BuildContext context) {
     final activeAccountAsync = ref.watch(activeAccountProvider);
     final isEditMode = ref.watch(homeEditModeProvider);
 
+    final account = activeAccountAsync.asData?.value;
+    final greeting = _buildGreeting(account);
+
     return Scaffold(
       appBar: AppBar(
         key: const Key('app_bar_home'),
-        title: Text(isEditMode ? 'Edit Home' : 'Home'),
+        title: Text(isEditMode ? 'Edit Home' : greeting),
         actions: [
           // Edit mode toggle
           if (activeAccountAsync.asData?.value != null)

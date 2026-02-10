@@ -1,6 +1,7 @@
 import 'database_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../logging/app_logger.dart';
+import '../models/app_error.dart';
 
 /// Hive implementation for all platforms (web, iOS, Android, desktop)
 /// Uses IndexedDB on web, native storage on mobile/desktop
@@ -53,7 +54,10 @@ class HiveDatabaseService implements DatabaseService {
   dynamic get boxes {
     if (!_initialized) {
       _log.e('Database not initialized - call initialize() first');
-      throw Exception('Database not initialized. Call initialize() first.');
+      throw AppError.database(
+        message: 'Database not initialized. Please restart the app.',
+        code: 'DATABASE_NOT_INITIALIZED',
+      );
     }
     return {
       'accounts': _accountsBox,

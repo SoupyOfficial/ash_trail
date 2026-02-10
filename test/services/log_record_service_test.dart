@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ash_trail/services/log_record_service.dart';
+import 'package:ash_trail/models/app_error.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/repositories/log_record_repository.dart';
@@ -205,7 +206,7 @@ void main() {
           eventAt: DateTime.now(),
           moodRating: 11, // Invalid: > 10
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
 
@@ -217,7 +218,7 @@ void main() {
           eventAt: DateTime.now(),
           physicalRating: 0, // Invalid: < 1
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
 
@@ -478,7 +479,7 @@ void main() {
           latitude: 37.7749,
           longitude: null,
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
 
@@ -491,7 +492,7 @@ void main() {
           latitude: null,
           longitude: -122.4194,
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
   });
@@ -527,7 +528,7 @@ void main() {
           eventAt: tooOld,
           eventType: EventType.vape,
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
 
@@ -540,7 +541,7 @@ void main() {
           eventAt: future,
           eventType: EventType.vape,
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
 
@@ -611,7 +612,7 @@ void main() {
           accountId: 'test-account',
           durationMs: 500, // 0.5 seconds
         ),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<AppError>()),
       );
     });
 

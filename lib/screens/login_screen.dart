@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../logging/app_logger.dart';
+import '../models/app_error.dart';
 import '../services/account_integration_service.dart';
+import '../services/error_reporting_service.dart';
 import '../widgets/auth_button.dart';
 import 'signup_screen.dart';
 
@@ -47,9 +49,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
-    } catch (e) {
+    } catch (e, st) {
+      final appError = AppError.from(e, st);
+      ErrorReportingService.instance.report(
+        appError,
+        stackTrace: st,
+        context: 'LoginScreen.signInWithEmail',
+      );
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = appError.message;
         _isLoading = false;
       });
     }
@@ -75,10 +83,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
-    } catch (e) {
+    } catch (e, st) {
       _log.e('[LOGIN_SCREEN] Google sign-in FAILED', error: e);
+      final appError = AppError.from(e, st);
+      ErrorReportingService.instance.report(
+        appError,
+        stackTrace: st,
+        context: 'LoginScreen.signInWithGoogle',
+      );
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = appError.message;
         _isLoading = false;
       });
     }
@@ -97,9 +111,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
-    } catch (e) {
+    } catch (e, st) {
+      final appError = AppError.from(e, st);
+      ErrorReportingService.instance.report(
+        appError,
+        stackTrace: st,
+        context: 'LoginScreen.signInWithApple',
+      );
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = appError.message;
         _isLoading = false;
       });
     }

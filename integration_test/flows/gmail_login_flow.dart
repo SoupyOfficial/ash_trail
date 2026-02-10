@@ -227,41 +227,74 @@ Future<void> addGmailAccount(
 
 // ── Native Google Account Picker ─────────────────────────────────────────────
 
-/// Handle the native Google account picker that appears after tapping
-/// "Continue with Google".
+/// Handle the native Google account picker / web sign-in sheet that
+/// appears after tapping "Continue with Google".
 ///
-/// On iOS, this is a web view or native sheet. On Android, it's a
-/// system dialog. Patrol can interact with native UI elements.
+/// On iOS, Google Sign-In uses `ASWebAuthenticationSession` (Safari-based
+/// web view) presented within the app's own process — **not** Chrome.
 ///
-/// If [selectAccountEmail] is provided, attempts to tap the account
-/// matching that email in the native picker. Otherwise, waits for the
-/// user to select manually or picks the first available account.
+/// If [selectAccountEmail] is provided, attempts to tap a native view
+/// containing that email. Otherwise, logs available native views and
+/// waits for the flow to complete or the user to interact.
 Future<void> _handleGoogleAccountPicker(
   PatrolIntegrationTester $,
   String? selectAccountEmail,
 ) async {
-  _flowLog('Waiting for Google account picker...');
-  await $.pump(const Duration(seconds: 2));
+  _flowLog('Waiting for Google Sign-In native UI...');
+  await $.pump(const Duration(seconds: 3));
 
+  // ── Discover what's on screen ──────────────────────────────────────────
+  try {
+    final views = await $.native.getNativeViews(Selector(textContains: ''));
+    _flowLog('Native views found: ${views.length}');
+    for (final v in views.take(15)) {
+      _flowLog(
+        '  native: text="${v.text}" resourceName="${v.resourceName}" '
+        'className="${v.className}"',
+      );
+    }
+  } catch (e) {
+    _flowLog('getNativeViews error (non-fatal): $e');
+  }
+
+  // ── Try to interact with the Google account picker ─────────────────────
   try {
     if (selectAccountEmail != null) {
       _flowLog('Looking for account: $selectAccountEmail');
-      // Try to find and tap the specific account email in native UI
-      await $.native.tap(
-        Selector(textContains: selectAccountEmail),
-        appId: 'com.google.chrome',
-      );
-      _flowLog('Tapped $selectAccountEmail in Google picker');
+
+      // Attempt 1: Tap in the app's own process (no appId — default)
+      try {
+        await $.native.tap(
+          Selector(textContains: selectAccountEmail),
+          timeout: const Duration(seconds: 10),
+        );
+        _flowLog('Tapped $selectAccountEmail in Google picker (app context)');
+        await $.pump(const Duration(seconds: 3));
+        return;
+      } catch (e) {
+        _flowLog('Could not tap in app context: $e');
+      }
+
+      // Attempt 2: Look for "Continue" / "Sign in" buttons in the web view
+      for (final label in ['Continue', 'Sign in', 'Next', selectAccountEmail]) {
+        try {
+          await $.native.tap(
+            Selector(textContains: label),
+            timeout: const Duration(seconds: 3),
+          );
+          _flowLog('Tapped "$label" in native UI');
+          await $.pump(const Duration(seconds: 2));
+        } catch (_) {
+          // Not found — try next label
+        }
+      }
     } else {
-      // Wait for native sign-in to complete automatically
-      // (e.g. single account on device auto-selects)
       _flowLog('No specific account — waiting for sign-in to complete...');
+      // Wait longer for auto-selection or cancellation
+      await $.pump(const Duration(seconds: 5));
     }
   } catch (e) {
-    _flowLog('Google picker interaction: $e');
-    // The native picker may have completed automatically or the
-    // webview-based flow handles it. Continue and let the test
-    // wait for the nav_home key to confirm login succeeded.
+    _flowLog('Google picker interaction error: $e');
   }
 
   // Give the auth flow time to complete

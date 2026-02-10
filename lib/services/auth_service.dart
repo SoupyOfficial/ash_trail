@@ -6,7 +6,9 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';
 import '../logging/app_logger.dart';
+import '../models/app_error.dart';
 import 'crash_reporting_service.dart';
+import 'error_reporting_service.dart';
 
 /// Service for handling authentication with Firebase Auth
 /// Supports email/password, Google Sign-In, and Apple Sign-In
@@ -63,8 +65,8 @@ class AuthService {
       await _storeUserInfo(userCredential.user);
 
       return userCredential;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
     }
   }
 
@@ -83,8 +85,8 @@ class AuthService {
       await _storeUserInfo(userCredential.user);
 
       return userCredential;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
     }
   }
 
@@ -119,7 +121,10 @@ class AuthService {
 
       if (googleUser == null) {
         _log.w('[GOOGLE_SIGN_IN] User cancelled Google sign-in dialog');
-        throw Exception('Google sign-in was cancelled by user');
+        throw AppError.auth(
+          message: 'Google sign-in was cancelled.',
+          code: 'AUTH_GOOGLE_CANCELLED',
+        );
       }
 
       _log.w(
@@ -147,7 +152,10 @@ class AuthService {
 
       if (!hasAccessToken) {
         _log.e('[GOOGLE_SIGN_IN] CRITICAL: No access token from Google');
-        throw Exception('Failed to obtain Google access token');
+        throw AppError.auth(
+          message: 'Failed to obtain Google access token. Please try again.',
+          code: 'AUTH_GOOGLE_NO_TOKEN',
+        );
       }
 
       CrashReportingService.logMessage('Google auth tokens obtained');
@@ -171,7 +179,10 @@ class AuthService {
         _log.e(
           '[GOOGLE_SIGN_IN] Firebase returned null user after credential sign-in',
         );
-        throw Exception('Firebase authentication failed');
+        throw AppError.auth(
+          message: 'Authentication failed. Please try again.',
+          code: 'AUTH_FIREBASE_NULL_USER',
+        );
       }
 
       final user = userCredential.user!;
@@ -193,32 +204,40 @@ class AuthService {
       );
       CrashReportingService.logMessage('Google sign-in successful');
       return userCredential;
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, st) {
       stopwatch.stop();
       _log.e(
         '[GOOGLE_SIGN_IN] Firebase auth exception after ${stopwatch.elapsedMilliseconds}ms: '
         'code=${e.code}, message=${e.message}',
       );
-      CrashReportingService.recordError(
-        e,
-        StackTrace.current,
-        reason: 'Firebase auth error during Google sign-in: ${e.code}',
+      final appError = _toAppError(e, st);
+      ErrorReportingService.instance.report(
+        appError,
+        stackTrace: st,
+        context: 'AuthService.signInWithGoogle',
       );
-      throw _handleAuthException(e);
-    } catch (e) {
+      throw appError;
+    } on AppError {
+      stopwatch.stop();
+      rethrow;
+    } catch (e, st) {
       stopwatch.stop();
       _log.e(
         '[GOOGLE_SIGN_IN] Error after ${stopwatch.elapsedMilliseconds}ms: '
         'type=${e.runtimeType}, message=$e',
       );
-      // Report the error to Crashlytics
-      CrashReportingService.recordError(
-        e,
-        StackTrace.current,
-        reason: 'Google sign-in failed',
+      final appError = AppError.auth(
+        message: 'Failed to sign in with Google. Please try again.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_GOOGLE_FAILED',
       );
-
-      throw Exception('Failed to sign in with Google: $e');
+      ErrorReportingService.instance.report(
+        appError,
+        stackTrace: st,
+        context: 'AuthService.signInWithGoogle',
+      );
+      throw appError;
     }
   }
 
@@ -259,12 +278,22 @@ class AuthService {
       await _storeUserInfo(userCredential.user);
 
       return userCredential;
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } on SignInWithAppleAuthorizationException catch (e) {
-      throw Exception('Apple sign-in failed: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to sign in with Apple: $e');
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
+    } on SignInWithAppleAuthorizationException catch (e, st) {
+      throw AppError.auth(
+        message: 'Apple sign-in failed: ${e.message}',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_APPLE_FAILED',
+      );
+    } catch (e, st) {
+      throw AppError.auth(
+        message: 'Failed to sign in with Apple. Please try again.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_APPLE_FAILED',
+      );
     }
   }
 
@@ -299,8 +328,13 @@ class AuthService {
 
       // Clear stored user info
       await _clearUserInfo();
-    } catch (e) {
-      throw Exception('Failed to sign out: $e');
+    } catch (e, st) {
+      throw AppError.auth(
+        message: 'Failed to sign out. Please try again.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_SIGNOUT_FAILED',
+      );
     }
   }
 
@@ -308,8 +342,8 @@ class AuthService {
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
     }
   }
 
@@ -318,7 +352,10 @@ class AuthService {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        throw Exception('No user currently signed in');
+        throw AppError.auth(
+          message: 'No user currently signed in.',
+          code: 'AUTH_NO_USER',
+        );
       }
 
       if (displayName != null) {
@@ -334,10 +371,15 @@ class AuthService {
 
       // Update stored info
       await _storeUserInfo(_auth.currentUser);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('Failed to update profile: $e');
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
+    } catch (e, st) {
+      throw AppError.auth(
+        message: 'Failed to update profile.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_PROFILE_UPDATE_FAILED',
+      );
     }
   }
 
@@ -346,17 +388,25 @@ class AuthService {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        throw Exception('No user currently signed in');
+        throw AppError.auth(
+          message: 'No user currently signed in.',
+          code: 'AUTH_NO_USER',
+        );
       }
 
       await user.verifyBeforeUpdateEmail(newEmail);
 
       // Update stored info
       await _storeUserInfo(_auth.currentUser);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('Failed to update email: $e');
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
+    } catch (e, st) {
+      throw AppError.auth(
+        message: 'Failed to update email.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_EMAIL_UPDATE_FAILED',
+      );
     }
   }
 
@@ -368,11 +418,17 @@ class AuthService {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        throw Exception('No user currently signed in');
+        throw AppError.auth(
+          message: 'No user currently signed in.',
+          code: 'AUTH_NO_USER',
+        );
       }
 
       if (user.email == null) {
-        throw Exception('Email is required to change password');
+        throw AppError.auth(
+          message: 'Email is required to change password.',
+          code: 'AUTH_NO_EMAIL',
+        );
       }
 
       // Re-authenticate user with current password
@@ -385,10 +441,15 @@ class AuthService {
 
       // Update password
       await user.updatePassword(newPassword);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('Failed to change password: $e');
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
+    } catch (e, st) {
+      throw AppError.auth(
+        message: 'Failed to change password.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_PASSWORD_CHANGE_FAILED',
+      );
     }
   }
 
@@ -397,7 +458,10 @@ class AuthService {
     try {
       final user = _auth.currentUser;
       if (user == null) {
-        throw Exception('No user currently signed in');
+        throw AppError.auth(
+          message: 'No user currently signed in.',
+          code: 'AUTH_NO_USER',
+        );
       }
 
       // Re-authenticate for security
@@ -414,10 +478,15 @@ class AuthService {
 
       // Clear stored user info
       await _clearUserInfo();
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    } catch (e) {
-      throw Exception('Failed to delete account: $e');
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
+    } catch (e, st) {
+      throw AppError.auth(
+        message: 'Failed to delete account.',
+        originalError: e,
+        stackTrace: st,
+        code: 'AUTH_DELETE_FAILED',
+      );
     }
   }
 
@@ -426,7 +495,10 @@ class AuthService {
     try {
       final user = _auth.currentUser;
       if (user == null || user.email == null) {
-        throw Exception('User not signed in or email not available');
+        throw AppError.auth(
+          message: 'User not signed in or email not available.',
+          code: 'AUTH_NO_USER',
+        );
       }
 
       final credential = EmailAuthProvider.credential(
@@ -435,8 +507,8 @@ class AuthService {
       );
 
       await user.reauthenticateWithCredential(credential);
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
+    } on FirebaseAuthException catch (e, st) {
+      throw _toAppError(e, st);
     }
   }
 
@@ -474,29 +546,49 @@ class AuthService {
     return await _secureStorage.read(key: _keyDisplayName);
   }
 
-  /// Handle Firebase Auth exceptions
-  String _handleAuthException(FirebaseAuthException e) {
+  /// Convert a [FirebaseAuthException] into a typed [AppError].
+  AppError _toAppError(FirebaseAuthException e, [StackTrace? st]) {
+    final String message;
+    final String code;
+
     switch (e.code) {
       case 'weak-password':
-        return 'The password provided is too weak.';
+        message = 'The password provided is too weak.';
+        code = 'AUTH_WEAK_PASSWORD';
       case 'email-already-in-use':
-        return 'An account already exists for that email.';
+        message = 'An account already exists for that email.';
+        code = 'AUTH_EMAIL_IN_USE';
       case 'user-not-found':
-        return 'No user found for that email.';
+        message = 'No user found for that email.';
+        code = 'AUTH_USER_NOT_FOUND';
       case 'wrong-password':
-        return 'Wrong password provided.';
+        message = 'Wrong password provided.';
+        code = 'AUTH_WRONG_PASSWORD';
       case 'invalid-email':
-        return 'The email address is not valid.';
+        message = 'The email address is not valid.';
+        code = 'AUTH_INVALID_EMAIL';
       case 'user-disabled':
-        return 'This user account has been disabled.';
+        message = 'This user account has been disabled.';
+        code = 'AUTH_USER_DISABLED';
       case 'too-many-requests':
-        return 'Too many requests. Please try again later.';
+        message = 'Too many requests. Please try again later.';
+        code = 'AUTH_RATE_LIMITED';
       case 'operation-not-allowed':
-        return 'This sign-in method is not enabled.';
+        message = 'This sign-in method is not enabled.';
+        code = 'AUTH_METHOD_DISABLED';
       case 'network-request-failed':
-        return 'Network error. Please check your connection.';
+        message = 'Network error. Please check your connection.';
+        code = 'AUTH_NETWORK';
       default:
-        return e.message ?? 'An authentication error occurred.';
+        message = e.message ?? 'An authentication error occurred.';
+        code = 'AUTH_${e.code.toUpperCase()}';
     }
+
+    return AppError.auth(
+      message: message,
+      originalError: e,
+      stackTrace: st,
+      code: code,
+    );
   }
 }

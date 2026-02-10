@@ -36,7 +36,7 @@ class AccountSessionManager {
   static const String _sessionPrefix = 'session_';
   static const String _activeSessionKey = 'active_session_user_id';
   static const String _loggedInAccountsKey = 'logged_in_accounts';
-  
+
   // Custom token storage keys (for seamless multi-account switching)
   static const String _customTokenPrefix = 'custom_token_';
   static const String _customTokenTimestampPrefix = 'custom_token_timestamp_';
@@ -114,8 +114,10 @@ class AccountSessionManager {
   /// They are valid for 48 hours from the time they were generated.
   Future<void> storeCustomToken(String uid, String customToken) async {
     try {
-      _log.w('[TOKEN_STORE] Storing custom token for uid=$uid '
-          '(${customToken.length} chars)');
+      _log.w(
+        '[TOKEN_STORE] Storing custom token for uid=$uid '
+        '(${customToken.length} chars)',
+      );
 
       // Store the custom token
       await _secureStorage.write(
@@ -130,7 +132,9 @@ class AccountSessionManager {
         value: timestamp,
       );
 
-      _log.w('[TOKEN_STORE] Custom token stored for uid=$uid at ${DateTime.now().toIso8601String()}');
+      _log.w(
+        '[TOKEN_STORE] Custom token stored for uid=$uid at ${DateTime.now().toIso8601String()}',
+      );
     } catch (e) {
       _log.e('[TOKEN_STORE] Error storing custom token for uid=$uid', error: e);
       rethrow;
@@ -160,7 +164,9 @@ class AccountSessionManager {
         key: '$_customTokenTimestampPrefix$uid',
       );
       if (timestampStr == null) {
-        _log.w('[TOKEN_GET] No timestamp found for custom token uid=$uid (orphaned token)');
+        _log.w(
+          '[TOKEN_GET] No timestamp found for custom token uid=$uid (orphaned token)',
+        );
         return null;
       }
 
@@ -171,8 +177,10 @@ class AccountSessionManager {
 
       if (tokenAge > maxAge) {
         final ageHours = tokenAge / 3600000;
-        _log.w('[TOKEN_GET] Token EXPIRED for uid=$uid '
-            '(age: ${ageHours.toStringAsFixed(1)}h, max: 47h)');
+        _log.w(
+          '[TOKEN_GET] Token EXPIRED for uid=$uid '
+          '(age: ${ageHours.toStringAsFixed(1)}h, max: 47h)',
+        );
         // Remove expired token
         await removeCustomToken(uid);
         return null;
@@ -180,13 +188,18 @@ class AccountSessionManager {
 
       final ageHours = tokenAge / 3600000;
       final remainingHours = 47 - ageHours;
-      _log.d('[TOKEN_GET] Valid token for uid=$uid '
-          '(age: ${ageHours.toStringAsFixed(1)}h, '
-          'remaining: ${remainingHours.toStringAsFixed(1)}h, '
-          '${customToken.length} chars)');
+      _log.d(
+        '[TOKEN_GET] Valid token for uid=$uid '
+        '(age: ${ageHours.toStringAsFixed(1)}h, '
+        'remaining: ${remainingHours.toStringAsFixed(1)}h, '
+        '${customToken.length} chars)',
+      );
       return customToken;
     } catch (e) {
-      _log.e('[TOKEN_GET] Error retrieving custom token for uid=$uid', error: e);
+      _log.e(
+        '[TOKEN_GET] Error retrieving custom token for uid=$uid',
+        error: e,
+      );
       return null;
     }
   }
@@ -254,26 +267,36 @@ class AccountSessionManager {
       final summary = {
         'activeUserId': activeUserId,
         'loggedInCount': loggedInAccounts.length,
-        'loggedInAccounts': loggedInAccounts.map((a) => {
-          'userId': a.userId,
-          'email': a.email,
-          'displayName': a.displayName,
-          'provider': a.authProvider.toString(),
-        }).toList(),
+        'loggedInAccounts':
+            loggedInAccounts
+                .map(
+                  (a) => {
+                    'userId': a.userId,
+                    'email': a.email,
+                    'displayName': a.displayName,
+                    'provider': a.authProvider.toString(),
+                  },
+                )
+                .toList(),
         'tokenStatus': tokenStatus,
         'timestamp': DateTime.now().toIso8601String(),
         'logging': AppLogger.diagnostics,
       };
 
-      _log.w('[DIAGNOSTICS] Summary: '\
-          'activeUser=$activeUserId, '\
-          'loggedIn=${loggedInAccounts.length}, '\
-          'tokens=${tokenStatus.entries.map((e) => "${e.value['email']}:${e.value['hasValidToken']}").join(", ")}');
+      _log.w(
+        '[DIAGNOSTICS] Summary: '
+        'activeUser=$activeUserId, '
+        'loggedIn=${loggedInAccounts.length}, '
+        'tokens=${tokenStatus.entries.map((e) => "${e.value['email']}:${e.value['hasValidToken']}").join(", ")}',
+      );
 
       return summary;
     } catch (e) {
       _log.e('[DIAGNOSTICS] Error generating summary', error: e);
-      return {'error': e.toString(), 'timestamp': DateTime.now().toIso8601String()};
+      return {
+        'error': e.toString(),
+        'timestamp': DateTime.now().toIso8601String(),
+      };
     }
   }
 
@@ -282,7 +305,7 @@ class AccountSessionManager {
     _log.d('clearSession($userId)');
 
     await _secureStorage.delete(key: '$_sessionPrefix$userId');
-    
+
     // Also remove custom token for this account
     await removeCustomToken(userId);
 
@@ -309,7 +332,7 @@ class AccountSessionManager {
     final loggedInUserIds = await _getLoggedInList();
     for (final userId in loggedInUserIds) {
       await _secureStorage.delete(key: '$_sessionPrefix$userId');
-      
+
       // Also remove custom tokens
       await removeCustomToken(userId);
 

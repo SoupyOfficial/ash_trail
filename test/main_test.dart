@@ -125,7 +125,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Error'), findsOneWidget);
+      expect(find.textContaining('unexpected error'), findsOneWidget);
     });
 
     testWidgets('shows error message on account error', (tester) async {
@@ -145,7 +145,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Error'), findsOneWidget);
+      expect(find.textContaining('unexpected error'), findsOneWidget);
     });
   });
 

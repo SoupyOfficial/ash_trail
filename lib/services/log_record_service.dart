@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 import '../logging/app_logger.dart';
+import '../models/app_error.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
@@ -78,31 +79,35 @@ class LogRecordService {
       final exists = await _accountService.accountExists(accountId);
       if (!exists) {
         _log.e('Attempted to create log for non-existent account: $accountId');
-        throw ArgumentError(
-          'Cannot create log record: Account "$accountId" does not exist. '
-          'Please ensure the account is created before logging.',
+        throw AppError.validation(
+          message:
+              'Account not found. Please select a valid account before logging.',
+          code: 'VALIDATION_ACCOUNT_NOT_FOUND',
+          technicalDetail: 'accountId=$accountId does not exist',
         );
       }
     }
 
     // Validate location cross-field constraint: both present or both null
     if (!ValidationService.isValidLocationPair(latitude, longitude)) {
-      throw ArgumentError(
-        'Location coordinates must both be present or both be null. '
-        'Cannot have latitude without longitude or vice versa.',
+      throw const AppError.validation(
+        message: 'Location coordinates must both be present or both be null.',
+        code: 'VALIDATION_LOCATION_PAIR',
       );
     }
 
     // Validate ratings are in correct range (1-10, not 0-10)
     // Per design 5.5: Ratings can be null (not set) or 1-10, but zero is not allowed
     if (moodRating != null && (moodRating < 1 || moodRating > 10)) {
-      throw ArgumentError(
-        'Mood rating must be null (not set) or between 1 and 10 inclusive (zero not allowed)',
+      throw const AppError.validation(
+        message: 'Mood rating must be between 1 and 10.',
+        code: 'VALIDATION_MOOD_RANGE',
       );
     }
     if (physicalRating != null && (physicalRating < 1 || physicalRating > 10)) {
-      throw ArgumentError(
-        'Physical rating must be null (not set) or between 1 and 10 inclusive (zero not allowed)',
+      throw const AppError.validation(
+        message: 'Physical rating must be between 1 and 10.',
+        code: 'VALIDATION_PHYSICAL_RANGE',
       );
     }
 
@@ -512,7 +517,10 @@ class LogRecordService {
 
     // Validate backdate time
     if (!ValidationService.isValidBackdateTime(eventAt)) {
-      throw ArgumentError('Backdate time is too far in the past (max 30 days)');
+      throw const AppError.validation(
+        message: 'Backdate time is too far in the past (max 30 days).',
+        code: 'VALIDATION_BACKDATE_TOO_OLD',
+      );
     }
 
     // Detect clock skew and set time confidence
@@ -563,7 +571,10 @@ class LogRecordService {
 
     // Validate minimum threshold (e.g., 1 second minimum)
     if (durationSeconds < 1.0) {
-      throw ArgumentError('Duration too short (minimum 1 second)');
+      throw const AppError.validation(
+        message: 'Duration too short (minimum 1 second).',
+        code: 'VALIDATION_DURATION_SHORT',
+      );
     }
 
     // Clamp duration to reasonable maximum (e.g., 1 hour)

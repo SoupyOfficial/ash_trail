@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../logging/app_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/app_error.dart';
 import '../models/enums.dart';
 import '../providers/log_record_provider.dart';
 import '../widgets/backdate_dialog.dart';
 import '../services/log_record_service.dart';
 import '../services/location_service.dart';
+import '../utils/error_display.dart';
 import '../widgets/location_map_picker.dart';
 import '../widgets/reason_chips_grid.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -1087,9 +1089,15 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
 
   Future<void> _submitLog(LogDraft draft) async {
     if (!draft.isValid) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please check your input')));
+      if (mounted) {
+        ErrorDisplay.showSnackBar(
+          context,
+          const AppError.validation(
+            message: 'Please check your input before submitting.',
+          ),
+          reportContext: 'LoggingScreen.submitLog',
+        );
+      }
       return;
     }
 
@@ -1131,11 +1139,14 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
           context,
         ).showSnackBar(SnackBar(content: Text(locationMessage)));
       }
-    } catch (e) {
+    } catch (e, st) {
       if (mounted) {
-        ScaffoldMessenger.of(
+        ErrorDisplay.showException(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+          e,
+          stackTrace: st,
+          reportContext: 'LoggingScreen.submitLog',
+        );
       }
     } finally {
       if (mounted) {

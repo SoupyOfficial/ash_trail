@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../logging/app_logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
+import '../models/app_error.dart';
 import '../models/enums.dart';
 import '../models/account.dart';
 import '../services/log_record_service.dart';
 import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
 import '../services/location_service.dart';
+import '../utils/error_display.dart';
 import 'reason_chips_grid.dart';
 
 /// Minimal quick-log widget for home screen
@@ -177,13 +179,13 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
       if (durationMs < 1000) {
         _log.w('[QUICK_LOG] ABORT — Duration too short: ${durationMs}ms');
         if (mounted) {
-          final messenger = ScaffoldMessenger.of(context);
-          messenger.clearSnackBars();
-          messenger.showSnackBar(
-            const SnackBar(
-              content: Text('Duration too short (minimum 1 second)'),
-              duration: Duration(seconds: 3),
+          ErrorDisplay.showSnackBar(
+            context,
+            const AppError.validation(
+              message: 'Duration too short (minimum 1 second)',
+              code: 'VALIDATION_DURATION_SHORT',
             ),
+            reportContext: 'QuickLog.submit',
           );
         }
         return;
@@ -281,14 +283,11 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
         stackTrace: st,
       );
       if (mounted) {
-        final messenger = ScaffoldMessenger.of(context);
-        messenger.clearSnackBars();
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('Error logging: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ErrorDisplay.showException(
+          context,
+          e,
+          stackTrace: st,
+          reportContext: 'QuickLog.submit',
         );
       }
     }

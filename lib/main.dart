@@ -1,17 +1,21 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'logging/app_logger.dart';
+import 'models/app_error.dart';
 import 'services/hive_database_service.dart';
 import 'services/crash_reporting_service.dart';
+import 'services/error_reporting_service.dart';
 import 'services/location_service.dart';
 import 'screens/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
 import 'providers/home_widget_config_provider.dart';
 import 'navigation/main_navigation.dart';
+import 'utils/error_display.dart';
 
 final _log = AppLogger.logger('main');
 
@@ -94,14 +98,27 @@ void main() async {
   }
 
   _log.i('Starting ProviderScope and WidgetApp');
-  runApp(
-    ProviderScope(
-      overrides: [
-        if (sharedPrefs != null)
-          sharedPreferencesProvider.overrideWithValue(sharedPrefs),
-      ],
-      child: const AshTrailApp(),
-    ),
+
+  // Global error zone – catches any unhandled async errors.
+  runZonedGuarded(
+    () {
+      runApp(
+        ProviderScope(
+          overrides: [
+            if (sharedPrefs != null)
+              sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+          ],
+          child: const AshTrailApp(),
+        ),
+      );
+    },
+    (error, stackTrace) {
+      ErrorReportingService.instance.report(
+        AppError.from(error, stackTrace),
+        stackTrace: stackTrace,
+        context: 'runZonedGuarded',
+      );
+    },
   );
 }
 
@@ -185,13 +202,12 @@ class AuthWrapper extends ConsumerWidget {
                   body: Center(child: CircularProgressIndicator()),
                 ),
             error: (error, stack) {
-              _log.e(
-                'Active account provider error',
-                error: error,
-                stackTrace: stack,
-              );
               return Scaffold(
-                body: Center(child: Text('Error: ${error.toString()}')),
+                body: ErrorDisplay.asyncError(
+                  error,
+                  stack,
+                  reportContext: 'AuthWrapper.activeAccount',
+                ),
               );
             },
           );
@@ -201,9 +217,12 @@ class AuthWrapper extends ConsumerWidget {
               body: Center(child: CircularProgressIndicator()),
             ),
         error: (error, stack) {
-          _log.e('Auth state provider error', error: error, stackTrace: stack);
           return Scaffold(
-            body: Center(child: Text('Error: ${error.toString()}')),
+            body: ErrorDisplay.asyncError(
+              error,
+              stack,
+              reportContext: 'AuthWrapper.authState',
+            ),
           );
         },
       );

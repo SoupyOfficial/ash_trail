@@ -4,6 +4,7 @@ import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
 import 'account_service.dart';
 import 'database_service.dart';
+import 'error_reporting_service.dart';
 
 /// Results from a data integrity check
 class IntegrityCheckResult {
@@ -134,7 +135,7 @@ class DataIntegrityService {
   final LogRecordRepository _repository;
 
   /// Create a DataIntegrityService with the given dependencies.
-  /// 
+  ///
   /// Requires [accountValidator] to check account existence.
   /// If [repository] is not provided, creates a default one from DatabaseService.
   DataIntegrityService({
@@ -177,7 +178,9 @@ class DataIntegrityService {
       // Check for orphaned records
       if (!validAccountIds.contains(record.accountId)) {
         orphanedRecords.add(record);
-        _log.w('Orphaned record: ${record.logId} (accountId: ${record.accountId})');
+        _log.w(
+          'Orphaned record: ${record.logId} (accountId: ${record.accountId})',
+        );
       }
 
       // Check for duplicates
@@ -200,7 +203,9 @@ class DataIntegrityService {
       if (record.eventAt.isBefore(tenYearsAgo) ||
           record.eventAt.isAfter(oneDayFromNow)) {
         invalidTimestamps.add(record);
-        _log.w('Invalid timestamp: ${record.logId} (eventAt: ${record.eventAt})');
+        _log.w(
+          'Invalid timestamp: ${record.logId} (eventAt: ${record.eventAt})',
+        );
       }
 
       // Check for invalid ratings
@@ -209,14 +214,18 @@ class DataIntegrityService {
           (record.physicalRating != null &&
               (record.physicalRating! < 1 || record.physicalRating! > 10))) {
         invalidRatings.add(record);
-        _log.w('Invalid rating: ${record.logId} (mood: ${record.moodRating}, physical: ${record.physicalRating})');
+        _log.w(
+          'Invalid rating: ${record.logId} (mood: ${record.moodRating}, physical: ${record.physicalRating})',
+        );
       }
 
       // Check for invalid location (one coordinate but not both)
       if ((record.latitude != null && record.longitude == null) ||
           (record.latitude == null && record.longitude != null)) {
         invalidLocations.add(record);
-        _log.w('Invalid location: ${record.logId} (lat: ${record.latitude}, lon: ${record.longitude})');
+        _log.w(
+          'Invalid location: ${record.logId} (lat: ${record.latitude}, lon: ${record.longitude})',
+        );
       }
     }
 
@@ -356,7 +365,13 @@ class DataIntegrityService {
               await _repository.update(fixedRecord);
               orphansReassigned++;
               _log.i('Reassigned ${record.logId} to $targetAccountId');
-            } catch (e) {
+            } catch (e, st) {
+              _log.e('Failed to reassign ${record.logId}', error: e);
+              ErrorReportingService.instance.reportException(
+                e,
+                stackTrace: st,
+                context: 'DataIntegrityService.repairIssues',
+              );
               errors.add('Failed to reassign ${record.logId}: $e');
             }
           }
@@ -377,7 +392,16 @@ class DataIntegrityService {
             await _repository.delete(duplicates[i].logId);
             duplicatesRemoved++;
             _log.i('Removed duplicate ${duplicates[i].logId}');
-          } catch (e) {
+          } catch (e, st) {
+            _log.e(
+              'Failed to remove duplicate ${duplicates[i].logId}',
+              error: e,
+            );
+            ErrorReportingService.instance.reportException(
+              e,
+              stackTrace: st,
+              context: 'DataIntegrityService.repairIssues',
+            );
             errors.add('Failed to remove duplicate ${duplicates[i].logId}: $e');
           }
         }
@@ -409,7 +433,13 @@ class DataIntegrityService {
             ratingsFixed++;
             _log.i('Fixed ratings for ${record.logId}');
           }
-        } catch (e) {
+        } catch (e, st) {
+          _log.e('Failed to fix ratings for ${record.logId}', error: e);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'DataIntegrityService.repairIssues',
+          );
           errors.add('Failed to fix ratings for ${record.logId}: $e');
         }
       }
@@ -426,7 +456,13 @@ class DataIntegrityService {
           await _repository.update(record);
           locationsCleared++;
           _log.i('Cleared invalid location for ${record.logId}');
-        } catch (e) {
+        } catch (e, st) {
+          _log.e('Failed to clear location for ${record.logId}', error: e);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'DataIntegrityService.repairIssues',
+          );
           errors.add('Failed to clear location for ${record.logId}: $e');
         }
       }

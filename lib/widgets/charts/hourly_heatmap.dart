@@ -297,7 +297,7 @@ class WeeklyHeatmap extends StatelessWidget {
         // Hour labels header
         Row(
           children: [
-            const SizedBox(width: 32), // Space for day labels
+            const SizedBox(width: 48), // Space for day labels
             ...List.generate(24, (hour) {
               if (hour % 4 == 0) {
                 return Expanded(
@@ -322,7 +322,7 @@ class WeeklyHeatmap extends StatelessWidget {
           return Row(
             children: [
               SizedBox(
-                width: 32,
+                width: 48,
                 child: Text(
                   days[dayIndex],
                   style: Theme.of(context).textTheme.bodySmall,

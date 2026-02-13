@@ -169,6 +169,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   Widget _buildFirstHitToday(BuildContext context, HomeMetricsService metrics) {
     final firstHit = metrics.getFirstHitToday(records);
+    final firstHitYesterday = metrics.getFirstHitYesterday(records);
 
     String value = '--';
     if (firstHit != null) {
@@ -179,11 +180,37 @@ class HomeWidgetBuilder extends ConsumerWidget {
       value = '$hour12:${minute.toString().padLeft(2, '0')} $period';
     }
 
+    String? subtitle;
+    int? deltaMinutes;
+    if (firstHit != null && firstHitYesterday != null) {
+      // Compare time-of-day only (hours + minutes)
+      final todayMinutes = firstHit.hour * 60 + firstHit.minute;
+      final yesterdayMinutes =
+          firstHitYesterday.hour * 60 + firstHitYesterday.minute;
+      deltaMinutes = todayMinutes - yesterdayMinutes;
+      if (deltaMinutes == 0) {
+        subtitle = 'vs yesterday';
+      } else {
+        subtitle = 'vs yesterday';
+      }
+    } else {
+      subtitle = 'today';
+    }
+
     return StatCardWidget(
       title: 'First Hit',
       value: value,
-      subtitle: 'today',
+      subtitle: subtitle,
       icon: Icons.wb_sunny_outlined,
+      // Later first hit = good (delayed use), so invert colors
+      trendWidget:
+          deltaMinutes != null && deltaMinutes != 0
+              ? TrendIndicator(
+                percentChange: deltaMinutes.toDouble(),
+                invertColors: true,
+                suffix: 'min',
+              )
+              : null,
     );
   }
 

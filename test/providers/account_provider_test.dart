@@ -131,6 +131,14 @@ class MockAccountSessionManager implements AccountSessionManager {
   Future<bool> hasValidCustomToken(String uid) async {
     return _customTokens.containsKey(uid);
   }
+
+  @override
+  Future<Map<String, dynamic>> getDiagnosticSummary() async {
+    return {
+      'loggedInCount': _loggedInAccounts.length,
+      'activeUserId': _activeUserId,
+    };
+  }
 }
 
 /// Mock TokenService for testing (avoids Firebase/HTTP in unit tests)

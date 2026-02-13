@@ -126,9 +126,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _navigateToSignup() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const SignupScreen()));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: const RouteSettings(name: 'SignupScreen'),
+        builder: (_) => const SignupScreen(),
+      ),
+    );
   }
 
   @override

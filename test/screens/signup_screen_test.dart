@@ -346,7 +346,10 @@ void main() {
       await tester.tap(find.byKey(const Key('signup-button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Exception: Email already in use'), findsOneWidget);
+      expect(
+        find.text('Something went wrong. Please try again.'),
+        findsOneWidget,
+      );
       expect(fakeService.signUpCalls, 1);
     });
 

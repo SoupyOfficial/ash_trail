@@ -242,7 +242,10 @@ void main() {
       await tester.tap(find.byKey(const Key('login-button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Exception: Invalid credentials'), findsOneWidget);
+      expect(
+        find.text('An unexpected error occurred. Please try again.'),
+        findsOneWidget,
+      );
       expect(fakeService.signInCalls, 1);
     });
 

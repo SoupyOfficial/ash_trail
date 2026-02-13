@@ -164,6 +164,21 @@ echo -e "  ${GREEN}✓${NC} Flutter $(flutter --version --machine 2>/dev/null | 
 echo -e "\n${YELLOW}[2/6] Clean & dependencies...${NC}"
 
 if [ -z "${SKIP_CLEAN:-}" ]; then
+  # Archive previous build's dSYMs before clean wipes them
+  if [ -d "build/ios/archive/Runner.xcarchive/dSYMs" ]; then
+    PREV_VERSION=$(plutil -extract CFBundleShortVersionString raw \
+      build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist 2>/dev/null || echo "unknown")
+    PREV_BUILD=$(plutil -extract CFBundleVersion raw \
+      build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist 2>/dev/null || echo "0")
+    ARCHIVE_DIR="build/dsym_archive/${PREV_VERSION}+${PREV_BUILD}"
+    mkdir -p "$ARCHIVE_DIR"
+    cp -R build/ios/archive/Runner.xcarchive/dSYMs/* "$ARCHIVE_DIR/" 2>/dev/null || true
+    if [ -d "build/app/debug-info" ]; then
+      cp -R build/app/debug-info/* "$ARCHIVE_DIR/" 2>/dev/null || true
+    fi
+    echo -e "  Archived previous dSYMs (${PREV_VERSION}+${PREV_BUILD}) to ${ARCHIVE_DIR}"
+  fi
+
   echo -e "  Cleaning build artifacts..."
   flutter clean > /dev/null 2>&1
 else
@@ -219,6 +234,71 @@ fi
 
 IPA_SIZE=$(du -h "$IPA_PATH" | cut -f1)
 echo -e "  ${GREEN}✓${NC} IPA built: ${IPA_PATH} (${IPA_SIZE})"
+
+# ── Step 4.5: Upload dSYMs to Firebase Crashlytics ───────────────────────────
+echo -e "\n${YELLOW}[4.5/6] Uploading dSYMs to Crashlytics...${NC}"
+UPLOAD_SCRIPT=$(find "${PWD}/ios/Pods/FirebaseCrashlytics" -name "upload-symbols" -type f 2>/dev/null | head -1)
+if [ -n "$UPLOAD_SCRIPT" ]; then
+  echo -e "  Uploading archive dSYMs ($(find build/ios/archive/Runner.xcarchive/dSYMs -name '*.dSYM' -type d 2>/dev/null | wc -l | tr -d ' ') bundles)..."
+  "$UPLOAD_SCRIPT" --skip-dsym-validation \
+    -gsp "ios/Runner/GoogleService-Info.plist" -p ios \
+    "build/ios/archive/Runner.xcarchive/dSYMs" 2>&1 | tail -5
+  echo -e "  ${GREEN}✓${NC} dSYMs uploaded"
+
+  # Also upload obfuscation mapping from --split-debug-info
+  if [ -d "build/app/debug-info" ]; then
+    "$UPLOAD_SCRIPT" --skip-dsym-validation \
+      -gsp "ios/Runner/GoogleService-Info.plist" -p ios \
+      "build/app/debug-info" 2>&1 | tail -5
+    echo -e "  ${GREEN}✓${NC} Debug info symbols uploaded"
+  fi
+
+  # Archive this build's dSYMs for future reference
+  DSYM_ARCHIVE="build/dsym_archive/${VERSION_NAME}+${BUILD_NUMBER}"
+  mkdir -p "$DSYM_ARCHIVE"
+  cp -R build/ios/archive/Runner.xcarchive/dSYMs/* "$DSYM_ARCHIVE/" 2>/dev/null || true
+  if [ -d "build/app/debug-info" ]; then
+    cp -R build/app/debug-info/* "$DSYM_ARCHIVE/" 2>/dev/null || true
+  fi
+  echo -e "  ${GREEN}✓${NC} dSYMs archived to ${DSYM_ARCHIVE}"
+else
+  echo -e "  ${YELLOW}⚠  upload-symbols script not found — install FirebaseCrashlytics pod${NC}"
+fi
+
+# ── Step 4.6: Verify observability configuration ─────────────────────────────
+echo -e "\n${YELLOW}[4.6/6] Verifying observability configuration...${NC}"
+
+# 1. Verify PrivacyInfo.xcprivacy is in the built IPA
+#    Note: use a subshell to isolate from pipefail — unzip may return a
+#    non-zero warning code even when it produces valid output, which causes
+#    the pipeline to fail under `set -o pipefail`.
+if ! ( unzip -l "$IPA_PATH" 2>/dev/null || true ) | grep -q "PrivacyInfo.xcprivacy"; then
+  echo -e "  ${RED}✗ PrivacyInfo.xcprivacy NOT found in IPA — Apple will reject this build${NC}"
+  exit 1
+fi
+echo -e "  ${GREEN}✓${NC} PrivacyInfo.xcprivacy present in IPA"
+
+# 2. Verify GoogleService-Info.plist has analytics enabled (not disabled)
+if grep -q "FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED" ios/Runner/GoogleService-Info.plist 2>/dev/null; then
+  echo -e "  ${RED}✗ Analytics collection DEACTIVATED in GoogleService-Info.plist${NC}"
+  exit 1
+fi
+echo -e "  ${GREEN}✓${NC} Analytics collection not deactivated in plist"
+
+# 3. Verify dSYMs were generated
+if [ -z "$(find build/ios/archive -name '*.dSYM' 2>/dev/null)" ]; then
+  echo -e "  ${YELLOW}⚠  WARNING: No dSYMs found — Crashlytics traces will be unreadable${NC}"
+fi
+echo -e "  ${GREEN}✓${NC} dSYM verification complete"
+
+# 4. Verify no kDebugMode guards around collection-enable calls
+if grep -rn 'kDebugMode.*setAnalyticsCollectionEnabled\|kDebugMode.*setCrashlyticsCollectionEnabled\|kDebugMode.*setPerformanceCollectionEnabled' lib/ 2>/dev/null; then
+  echo -e "  ${RED}✗ Found kDebugMode guards on collection-enable calls — analytics will not work in release${NC}"
+  exit 1
+fi
+echo -e "  ${GREEN}✓${NC} No kDebugMode guards on collection-enable calls"
+
+echo -e "  ${GREEN}✓${NC} Observability verification passed"
 
 # ── Step 5: Validate IPA ──────────────────────────────────────────────────────
 echo -e "\n${YELLOW}[5/6] Validating IPA...${NC}"

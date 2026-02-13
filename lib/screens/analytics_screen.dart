@@ -8,8 +8,10 @@ import '../providers/log_record_provider.dart'
         activeAccountLogRecordsProvider,
         logRecordNotifierProvider;
 import '../providers/account_provider.dart';
+import '../models/app_error.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
+import '../services/error_reporting_service.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import '../widgets/analytics_charts.dart';
 import '../utils/design_constants.dart';
@@ -48,11 +50,35 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             return statisticsAsync.when(
               data: (stats) => _buildAnalyticsView(context, records, stats),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Error: $error')),
+              error: (error, _) {
+                ErrorReportingService.instance.reportException(
+                  error,
+                  context: 'AnalyticsScreen.logRecordStatsProvider',
+                );
+                return Center(
+                  child: Text(
+                    (error is AppError)
+                        ? error.message
+                        : 'Something went wrong. Please try again.',
+                  ),
+                );
+              },
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('Error: $error')),
+          error: (error, _) {
+            ErrorReportingService.instance.reportException(
+              error,
+              context: 'AnalyticsScreen.activeAccountLogRecordsProvider',
+            );
+            return Center(
+              child: Text(
+                (error is AppError)
+                    ? error.message
+                    : 'Something went wrong. Please try again.',
+              ),
+            );
+          },
         ),
       ),
     );
@@ -88,9 +114,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           // Charts section
           Text(
             'Charts',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: Spacing.md.value),
           activeAccountAsync.when(
@@ -105,9 +131,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 height: 600,
                 child: Card(
                   elevation: ElevationLevel.sm.value,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadii.md,
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadii.md),
                   child: Padding(
                     padding: Paddings.lg,
                     child: AnalyticsChartsWidget(
@@ -119,43 +143,50 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('Error: $e')),
+            error: (e, _) {
+              ErrorReportingService.instance.reportException(
+                e,
+                context: 'AnalyticsScreen.activeAccountProvider',
+              );
+              return Center(
+                child: Text(
+                  (e is AppError)
+                      ? e.message
+                      : 'Something went wrong. Please try again.',
+                ),
+              );
+            },
           ),
           SizedBox(height: Spacing.xl.value),
 
           // Recent entries section
           Text(
             'Recent Entries',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           SizedBox(height: Spacing.md.value),
-          ...records.take(10).map(
+          ...records
+              .take(10)
+              .map(
                 (record) => Padding(
                   padding: EdgeInsets.only(bottom: Spacing.sm.value),
                   child: Card(
                     elevation: ElevationLevel.sm.value,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadii.md,
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadii.md),
                     child: ListTile(
                       contentPadding: Paddings.md,
                       leading: CircleAvatar(
                         radius: 20,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .primaryContainer,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
                         child: _getSyncStateIcon(record.syncState),
                       ),
                       title: Text(
                         DateFormat('MMM dd, yyyy HH:mm').format(record.eventAt),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       subtitle: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -175,44 +206,46 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             padding: EdgeInsets.only(top: Spacing.xs.value),
                             child: Text(
                               '${record.eventType.name} • ${record.syncState.name}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelSmall?.copyWith(
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      trailing: record.duration > 0
-                          ? Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: Spacing.sm.value,
-                                vertical: Spacing.xs.value,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                borderRadius: BorderRadii.sm,
-                              ),
-                              child: Text(
-                                '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            )
-                          : null,
+                      trailing:
+                          record.duration > 0
+                              ? Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: Spacing.sm.value,
+                                  vertical: Spacing.xs.value,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadii.sm,
+                                ),
+                                child: Text(
+                                  '${record.duration.toStringAsFixed(1)} ${record.unit.name}',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelMedium?.copyWith(
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              )
+                              : null,
                       onTap: () => _showLogRecordActions(context, record),
                     ),
                   ),
@@ -228,10 +261,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         records.where((r) => r.syncState == SyncState.synced).length;
     final pendingCount =
         records.where((r) => r.syncState == SyncState.pending).length;
-    final totalDuration = records.fold<double>(
-      0,
-      (sum, r) => sum + r.duration,
-    );
+    final totalDuration = records.fold<double>(0, (sum, r) => sum + r.duration);
 
     return ResponsiveGrid(
       mobileColumns: 2,
@@ -239,7 +269,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       desktopColumns: 4,
       spacing: Spacing.md.value,
       // Use wider aspect ratio for compact cards (width:height)
-      mobileAspectRatio: 1.4,  // Shorter cards on mobile
+      mobileAspectRatio: 1.4, // Shorter cards on mobile
       tabletAspectRatio: 1.2,
       desktopAspectRatio: 1.5,
       children: [
@@ -282,9 +312,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   ]) {
     return Card(
       elevation: ElevationLevel.sm.value,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadii.md,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadii.md),
       child: Padding(
         padding: Paddings.sm,
         child: Column(
@@ -299,15 +327,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             SizedBox(height: Spacing.xs.value),
             Text(
               value,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -341,24 +369,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             Icon(
               Icons.analytics_outlined,
               size: IconSize.xxxl.value,
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
             ),
             SizedBox(height: Spacing.lg.value),
             Text(
               'No data yet',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: Spacing.sm.value),
             Text(
               'Start logging to see your analytics',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -498,7 +525,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting entry: $e'),
+            content: Text(
+              (e is AppError)
+                  ? e.message
+                  : 'Something went wrong. Please try again.',
+            ),
             backgroundColor: Colors.red,
           ),
         );

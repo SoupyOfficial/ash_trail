@@ -4,12 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../logging/app_logger.dart';
 import '../models/log_record.dart';
+import 'app_analytics_service.dart';
 import '../models/account.dart';
 import '../models/enums.dart';
 import 'log_record_service.dart';
 import 'legacy_data_adapter.dart';
 import 'account_session_manager.dart';
 import 'token_service.dart';
+import 'error_reporting_service.dart';
 
 /// SyncService handles bidirectional synchronization with Firestore
 ///
@@ -97,6 +99,7 @@ class SyncService {
 
     // Pull records for all logged-in accounts periodically
     _pullTimer = Timer.periodic(pullInterval, (_) => pullAllLoggedInAccounts());
+    AppAnalyticsService.instance.setSyncStatus('enabled');
   }
 
   /// Stop automatic background sync
@@ -105,6 +108,7 @@ class SyncService {
     _pullTimer?.cancel();
     _syncTimer = null;
     _pullTimer = null;
+    AppAnalyticsService.instance.setSyncStatus('disabled');
   }
 
   /// Run an immediate pull + push cycle for the current account and schedule periodic syncs
@@ -260,7 +264,7 @@ class SyncService {
           try {
             await _uploadRecord(currentRecord);
             successCount++;
-          } catch (e) {
+          } catch (e, st) {
             // Check if this is a "modified during upload" error - these should be skipped, not failed
             if (e.toString().contains('modified during upload') ||
                 e.toString().contains('not in syncable state')) {
@@ -270,13 +274,28 @@ class SyncService {
               skippedCount++;
             } else {
               // Real error - mark as failed
+              _log.e(
+                'Failed to upload record ${record.logId}',
+                error: e,
+                stackTrace: st,
+              );
+              ErrorReportingService.instance.reportException(
+                e,
+                stackTrace: st,
+                context: 'SyncService.syncPendingRecords',
+              );
               failedCount++;
               await _logRecordService.markSyncError(record, e.toString());
             }
           }
-        } catch (e) {
+        } catch (e, st) {
           // Catch any errors from re-fetching or validation
           _log.e('Error processing record ${record.logId}', error: e);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.syncPendingRecords',
+          );
           failedCount++;
           await _logRecordService.markSyncError(record, e.toString());
         }
@@ -555,7 +574,13 @@ class SyncService {
               successCount++;
             }
           }
-        } catch (e) {
+        } catch (e, st) {
+          _log.e('Failed to process record', error: e, stackTrace: st);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.pullRecordsForAccount',
+          );
           failedCount++;
         }
       }
@@ -566,7 +591,13 @@ class SyncService {
         skipped: 0,
         message: 'Pulled $successCount records',
       );
-    } catch (e) {
+    } catch (e, st) {
+      _log.e('Error pulling records for account', error: e, stackTrace: st);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService.pullRecordsForAccount',
+      );
       return SyncResult(
         success: 0,
         failed: 0,
@@ -660,7 +691,13 @@ class SyncService {
               successCount++;
             }
           }
-        } catch (e) {
+        } catch (e, st) {
+          _log.e('Failed to process record', error: e, stackTrace: st);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.pullRecordsForAccountIncludingLegacy',
+          );
           failedCount++;
         }
       }
@@ -672,7 +709,17 @@ class SyncService {
         message:
             'Pulled $successCount records (${currentRecords.length} current, ${legacyRecords.length} legacy)',
       );
-    } catch (e) {
+    } catch (e, st) {
+      _log.e(
+        'Error pulling records including legacy',
+        error: e,
+        stackTrace: st,
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService.pullRecordsForAccountIncludingLegacy',
+      );
       return SyncResult(
         success: 0,
         failed: 0,
@@ -705,8 +752,13 @@ class SyncService {
       return querySnapshot.docs
           .map((doc) => LogRecord.fromFirestore(doc.data()))
           .toList();
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error pulling current records', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService._pullCurrentRecords',
+      );
       return [];
     }
   }
@@ -721,8 +773,13 @@ class SyncService {
         since: since,
         limit: 100,
       );
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error pulling legacy records', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService._pullLegacyRecords',
+      );
       return [];
     }
   }
@@ -818,14 +875,24 @@ class SyncService {
             );
             importedCount++;
           }
-        } catch (e) {
+        } catch (e, st) {
           _log.e('Error importing legacy record ${record.logId}', error: e);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.importLegacyDataForAccount',
+          );
         }
       }
 
       return importedCount;
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error importing legacy data', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService.importLegacyDataForAccount',
+      );
       rethrow;
     }
   }
@@ -847,8 +914,17 @@ class SyncService {
                   change.doc.data()!,
                 );
                 yield remoteRecord;
-              } catch (e) {
-                // Skip invalid records
+              } catch (e, st) {
+                _log.e(
+                  'Failed to parse record in watch stream',
+                  error: e,
+                  stackTrace: st,
+                );
+                ErrorReportingService.instance.reportException(
+                  e,
+                  stackTrace: st,
+                  context: 'SyncService.watchAccountLogsIncludingLegacy',
+                );
               }
             }
           }
@@ -950,10 +1026,15 @@ class SyncService {
           );
           totalSuccess += result.success;
           totalFailed += result.failed;
-        } catch (e) {
+        } catch (e, st) {
           _log.e(
             '[MULTI_SYNC] Failed to sync account ${account.email} (${account.userId})',
             error: e,
+          );
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.syncAllLoggedInAccounts',
           );
           totalFailed++;
         }
@@ -974,10 +1055,15 @@ class SyncService {
               '[MULTI_SYNC] No valid token to restore original auth for ${originalUser.uid}',
             );
           }
-        } catch (e) {
+        } catch (e, st) {
           _log.w(
             '[MULTI_SYNC] Could not restore original auth state',
             error: e,
+          );
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.syncAllLoggedInAccounts',
           );
         }
       }
@@ -987,6 +1073,11 @@ class SyncService {
         '[MULTI_SYNC_END] ${loggedInAccounts.length} accounts synced in ${stopwatch.elapsedMilliseconds}ms: '
         '$totalSuccess success, $totalFailed failed',
       );
+      AppAnalyticsService.instance.logSyncCompleted(
+        pushed: totalSuccess,
+        failed: totalFailed,
+        durationMs: stopwatch.elapsedMilliseconds,
+      );
       return SyncResult(
         success: totalSuccess,
         failed: totalFailed,
@@ -994,11 +1085,16 @@ class SyncService {
         message:
             'Synced ${loggedInAccounts.length} accounts: $totalSuccess success, $totalFailed failed',
       );
-    } catch (e) {
+    } catch (e, st) {
       stopwatch.stop();
       _log.e(
         '[MULTI_SYNC_FAIL] Error after ${stopwatch.elapsedMilliseconds}ms',
         error: e,
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService.syncAllLoggedInAccounts',
       );
       return SyncResult(
         success: 0,
@@ -1064,10 +1160,15 @@ class SyncService {
           );
           totalSuccess += result.success;
           totalFailed += result.failed;
-        } catch (e) {
+        } catch (e, st) {
           _log.e(
             '[MULTI_PULL] Failed to pull for account ${account.email} (${account.userId})',
             error: e,
+          );
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.pullAllLoggedInAccounts',
           );
           totalFailed++;
         }
@@ -1088,10 +1189,15 @@ class SyncService {
               '[MULTI_PULL] No valid token to restore original auth for ${originalUser.uid}',
             );
           }
-        } catch (e) {
+        } catch (e, st) {
           _log.w(
             '[MULTI_PULL] Could not restore original auth state',
             error: e,
+          );
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'SyncService.pullAllLoggedInAccounts',
           );
         }
       }
@@ -1101,6 +1207,11 @@ class SyncService {
         '[MULTI_PULL_END] ${loggedInAccounts.length} accounts pulled in ${stopwatch.elapsedMilliseconds}ms: '
         '$totalSuccess success, $totalFailed failed',
       );
+      AppAnalyticsService.instance.logSyncCompleted(
+        pulled: totalSuccess,
+        failed: totalFailed,
+        durationMs: stopwatch.elapsedMilliseconds,
+      );
       return SyncResult(
         success: totalSuccess,
         failed: totalFailed,
@@ -1108,11 +1219,16 @@ class SyncService {
         message:
             'Pulled records for ${loggedInAccounts.length} accounts: $totalSuccess success, $totalFailed failed',
       );
-    } catch (e) {
+    } catch (e, st) {
       stopwatch.stop();
       _log.e(
         '[MULTI_PULL_FAIL] Error after ${stopwatch.elapsedMilliseconds}ms',
         error: e,
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService.pullAllLoggedInAccounts',
       );
       return SyncResult(
         success: 0,
@@ -1156,10 +1272,15 @@ class SyncService {
         customToken = tokenData['customToken'] as String;
         await _sessionManager.storeCustomToken(account.userId, customToken);
         _log.d('[SWITCH_AUTH] New token generated for ${account.email}');
-      } catch (e) {
+      } catch (e, st) {
         _log.e(
           '[SWITCH_AUTH] Token generation FAILED for ${account.email}',
           error: e,
+        );
+        ErrorReportingService.instance.reportException(
+          e,
+          stackTrace: st,
+          context: 'SyncService._switchToAccount',
         );
         throw Exception(
           'Could not get custom token for account ${account.userId}',
@@ -1178,10 +1299,15 @@ class SyncService {
         '[SWITCH_AUTH] Switched to ${account.email} (${account.userId}) — '
         'Firebase uid now: ${auth.currentUser?.uid}',
       );
-    } catch (e) {
+    } catch (e, st) {
       _log.w(
         '[SWITCH_AUTH] First attempt FAILED for ${account.email}, refreshing token...',
         error: e,
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'SyncService._switchToAccount',
       );
       // Token might be invalid, try to regenerate
       try {

@@ -13,7 +13,6 @@ class NavBarComponent {
   Finder get homeTab => find.byKey(const Key('nav_home'));
   Finder get analyticsTab => find.byKey(const Key('nav_analytics'));
   Finder get historyTab => find.byKey(const Key('nav_history'));
-  Finder get logTab => find.byKey(const Key('nav_log'));
 
   // ── Actions ──
   Future<void> tapHome() async {
@@ -31,11 +30,6 @@ class NavBarComponent {
     await settle($);
   }
 
-  Future<void> tapLog() async {
-    await $(logTab).tap(settlePolicy: SettlePolicy.noSettle);
-    await settle($);
-  }
-
   // ── Assertions ──
   void verifyVisible() {
     expect(homeTab, findsOneWidget, reason: 'Home nav tab should be visible');
@@ -49,6 +43,5 @@ class NavBarComponent {
       findsOneWidget,
       reason: 'History nav tab should be visible',
     );
-    expect(logTab, findsOneWidget, reason: 'Log nav tab should be visible');
   }
 }

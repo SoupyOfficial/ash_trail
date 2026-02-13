@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../models/app_error.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
+import '../services/error_reporting_service.dart';
 import '../providers/log_record_provider.dart';
 import '../widgets/edit_log_record_dialog.dart';
 import '../utils/design_constants.dart';
@@ -90,9 +92,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               decoration: InputDecoration(
                 hintText: 'Search entries...',
                 prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadii.md,
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadii.md),
                 filled: true,
               ),
               onChanged: (value) {
@@ -117,9 +117,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   }
                   return _buildGroupedList(context, filtered);
                 },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text('Error: $error')),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) {
+                  ErrorReportingService.instance.reportException(
+                    error,
+                    context: 'HistoryScreen.activeAccountLogRecordsProvider',
+                  );
+                  return Center(
+                    child: Text(
+                      (error is AppError)
+                          ? error.message
+                          : 'Something went wrong. Please try again.',
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -205,25 +216,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             Icon(
               Icons.history,
               size: IconSize.xxxl.value,
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
             ),
             SizedBox(height: Spacing.lg.value),
             Text(
               _hasActiveFilters ? 'No matching entries' : 'No entries yet',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (_hasActiveFilters) ...[
               SizedBox(height: Spacing.sm.value),
               Text(
                 'Try adjusting your filters',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               SizedBox(height: Spacing.md.value),
               FilledButton.icon(
@@ -412,16 +422,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Widget _buildGroupHeader(String title) {
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: Spacing.sm.value,
-        top: Spacing.md.value,
-      ),
+      padding: EdgeInsets.only(bottom: Spacing.sm.value, top: Spacing.md.value),
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }
@@ -693,7 +700,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error deleting entry: $e'),
+          content: Text(
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.',
+          ),
           backgroundColor: Colors.red,
         ),
       );

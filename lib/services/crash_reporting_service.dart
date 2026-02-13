@@ -1,5 +1,8 @@
+import 'dart:io' show Platform;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import '../logging/app_logger.dart';
 
 /// Service for reporting crashes and errors to Firebase Crashlytics
@@ -30,18 +33,61 @@ class CrashReportingService {
         return true;
       };
 
-      // Enable collection in debug mode for testing (optional)
-      if (kDebugMode) {
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-          true,
-        );
-      }
+      // Enable collection unconditionally in ALL build modes
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
 
       if (kDebugMode) {
         _log.i('Crash reporting initialized');
       }
     } catch (e) {
       _log.e('Error initializing crash reporting', error: e);
+    }
+  }
+
+  /// Set device context keys on Crashlytics for triage.
+  /// Called once after initialize().
+  static Future<void> setDeviceContext() async {
+    try {
+      // App version info
+      final packageInfo = await PackageInfo.fromPlatform();
+      await FirebaseCrashlytics.instance.setCustomKey(
+        'app_version',
+        packageInfo.version,
+      );
+      await FirebaseCrashlytics.instance.setCustomKey(
+        'build_number',
+        packageInfo.buildNumber,
+      );
+
+      // Platform-specific device info
+      if (!kIsWeb) {
+        final deviceInfo = DeviceInfoPlugin();
+        if (Platform.isIOS) {
+          final ios = await deviceInfo.iosInfo;
+          await FirebaseCrashlytics.instance.setCustomKey(
+            'device_model',
+            ios.utsname.machine,
+          );
+          await FirebaseCrashlytics.instance.setCustomKey(
+            'os_version',
+            ios.systemVersion,
+          );
+        } else if (Platform.isAndroid) {
+          final android = await deviceInfo.androidInfo;
+          await FirebaseCrashlytics.instance.setCustomKey(
+            'device_model',
+            android.model,
+          );
+          await FirebaseCrashlytics.instance.setCustomKey(
+            'os_version',
+            'Android ${android.version.release}',
+          );
+        }
+      }
+
+      _log.i('Device context set on Crashlytics');
+    } catch (e) {
+      _log.e('Failed to set device context', error: e);
     }
   }
 

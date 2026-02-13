@@ -39,4 +39,37 @@ platform :ios do
       distribute_external: false
     )
   end
+
+  desc "Download dSYMs from App Store Connect and upload to Crashlytics"
+  lane :refresh_dsyms do |options|
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_filepath: File.expand_path("~/.private_keys/AuthKey_#{ENV['APP_STORE_CONNECT_API_KEY']}.p8"),
+      duration: 1200,
+      in_house: false
+    )
+
+    output_dir = options[:output_directory] || "../build/dsyms_from_appstore"
+    version = options[:version] || nil
+
+    download_args = {
+      api_key: api_key,
+      app_identifier: "com.soup.smokeLog",
+      output_directory: output_dir,
+      wait_for_dsym_processing: true,
+      wait_timeout: 300
+    }
+    download_args[:version] = version if version
+
+    download_dsyms(**download_args)
+
+    # Upload downloaded dSYMs to Crashlytics
+    upload_symbols_to_crashlytics(
+      gsp_path: "Runner/GoogleService-Info.plist",
+      dsym_path: output_dir
+    )
+
+    clean_build_artifacts
+  end
 end

@@ -7,9 +7,13 @@ import 'firebase_options.dart';
 import 'logging/app_logger.dart';
 import 'models/app_error.dart';
 import 'services/hive_database_service.dart';
+import 'services/app_analytics_service.dart';
+import 'services/app_performance_service.dart';
 import 'services/crash_reporting_service.dart';
 import 'services/error_reporting_service.dart';
 import 'services/location_service.dart';
+import 'services/otel_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'screens/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
@@ -48,6 +52,43 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _log.i('WidgetsFlutterBinding initialized');
 
+  // Set custom error widget for release builds
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    ErrorReportingService.instance.reportException(
+      details.exception,
+      stackTrace: details.stack,
+      context: 'ErrorWidget.builder',
+    );
+    return Material(
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 48,
+              color: Colors.orange,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Something went wrong',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This section encountered an error. Try navigating away and back.',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  };
+
   try {
     _log.i('Initializing Firebase...');
     await Firebase.initializeApp(
@@ -58,18 +99,50 @@ void main() async {
     _log.e('Firebase initialization error', error: e);
   }
 
+  // Initialize OpenTelemetry (before any traced operations so dual-write
+  // captures startup spans). Non-fatal — app works without OTel.
+  try {
+    await OTelService.instance.initialize();
+    _log.i('OTelService initialized');
+  } catch (e) {
+    _log.e('OTel initialization error (non-fatal)', error: e);
+  }
+
   try {
     _log.i('Initializing CrashReportingService...');
-    await CrashReportingService.initialize();
+    await AppPerformanceService.instance.traceStartup('crashlytics', () async {
+      await CrashReportingService.initialize();
+      await CrashReportingService.setDeviceContext();
+    });
     _log.i('CrashReportingService initialized');
   } catch (e) {
     _log.e('Crash reporting initialization error', error: e);
   }
 
+  // --- Observability init (always-on, all build modes) ---
+
+  // Wire logger breadcrumbs → Crashlytics (D2)
+  AppLogger.onErrorLog = (name, message) {
+    CrashReportingService.logMessage('[$name] $message');
+  };
+
+  // Initialize analytics — explicitly enable collection
+  try {
+    await AppAnalyticsService.instance.initialize();
+    _log.i('AppAnalyticsService initialized');
+  } catch (e) {
+    _log.e('Analytics initialization error', error: e);
+  }
+
+  // Performance SDK auto-starts with Firebase — custom traces available immediately
+  _log.i('AppPerformanceService ready (auto-started with Firebase)');
+
   try {
     _log.i('Initializing Hive database...');
-    final db = HiveDatabaseService();
-    await db.initialize();
+    await AppPerformanceService.instance.traceStartup('hive', () async {
+      final db = HiveDatabaseService();
+      await db.initialize();
+    });
     _log.i('Hive database initialized');
   } catch (e) {
     _log.e('Hive database initialization error', error: e);
@@ -91,11 +164,25 @@ void main() async {
   SharedPreferences? sharedPrefs;
   try {
     _log.i('Initializing SharedPreferences...');
-    sharedPrefs = await SharedPreferences.getInstance();
+    sharedPrefs = await AppPerformanceService.instance.traceStartup(
+      'shared_prefs',
+      () async {
+        return await SharedPreferences.getInstance();
+      },
+    );
     _log.i('SharedPreferences initialized');
   } catch (e) {
     _log.e('SharedPreferences initialization error', error: e);
   }
+
+  // Set app version user property
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+    AppAnalyticsService.instance.setAppVersion(packageInfo.version);
+  } catch (_) {}
+
+  // Log cold launch
+  AppAnalyticsService.instance.logAppOpen();
 
   _log.i('Starting ProviderScope and WidgetApp');
 
@@ -169,6 +256,10 @@ class AshTrailApp extends ConsumerWidget {
         ),
       ),
       themeMode: ThemeMode.system,
+      navigatorObservers: [
+        if (AppAnalyticsService.instance.observer != null)
+          AppAnalyticsService.instance.observer!,
+      ],
       home: const AuthWrapper(),
     );
   }
@@ -276,6 +367,7 @@ class WelcomeScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
+                        settings: const RouteSettings(name: 'LoginScreen'),
                         builder: (context) => const LoginScreen(),
                       ),
                     );

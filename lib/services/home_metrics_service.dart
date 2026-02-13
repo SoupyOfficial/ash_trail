@@ -51,11 +51,11 @@ class HomeMetricsService {
     // sorted is newest first, so .last is the first hit of the day
     final firstHit = sorted.last.eventAt;
     final lastHit = sorted.first.eventAt;
-    
+
     // Total time span from first to last hit, divided by number of gaps
     final totalSpan = lastHit.difference(firstHit);
     final numberOfGaps = sorted.length - 1;
-    
+
     return Duration(milliseconds: totalSpan.inMilliseconds ~/ numberOfGaps);
   }
 
@@ -92,6 +92,15 @@ class HomeMetricsService {
     if (today.isEmpty) return null;
 
     final sorted = _getNonDeletedSorted(today);
+    return sorted.isEmpty ? null : sorted.last.eventAt;
+  }
+
+  /// Get time of first hit yesterday
+  DateTime? getFirstHitYesterday(List<LogRecord> records) {
+    final yesterday = _filterYesterday(records);
+    if (yesterday.isEmpty) return null;
+
+    final sorted = _getNonDeletedSorted(yesterday);
     return sorted.isEmpty ? null : sorted.last.eventAt;
   }
 
@@ -176,10 +185,8 @@ class HomeMetricsService {
     double trendVsYesterday,
     double? trendVsWeekAvg,
     int count,
-  }) getTodayDurationUpTo(
-    List<LogRecord> records, {
-    DateTime? asOf,
-  }) {
+  })
+  getTodayDurationUpTo(List<LogRecord> records, {DateTime? asOf}) {
     final cutoff = asOf ?? DateTime.now();
     final todayStart = DayBoundary.getTodayStart();
 
@@ -194,9 +201,10 @@ class HomeMetricsService {
     }
 
     final todayRecords = _filterToday(records);
-    final upToRecords = todayRecords
-        .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
-        .toList();
+    final upToRecords =
+        todayRecords
+            .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
+            .toList();
     final duration = getTotalDuration(upToRecords);
     final count = upToRecords.length;
 
@@ -204,8 +212,10 @@ class HomeMetricsService {
     final yesterdayDuration = getTotalDuration(yesterdayRecords);
 
     const secondsPerDay = 24 * 60 * 60;
-    final elapsed =
-        cutoff.difference(todayStart).inSeconds.clamp(0, secondsPerDay);
+    final elapsed = cutoff
+        .difference(todayStart)
+        .inSeconds
+        .clamp(0, secondsPerDay);
     final fraction = elapsed / secondsPerDay;
     final expectedByNow = yesterdayDuration * fraction;
 
@@ -259,8 +269,9 @@ class HomeMetricsService {
 
     if (nonDeleted.isEmpty) return null;
 
-    return nonDeleted.reduce((a, b) =>
-        _getDurationInSeconds(a) > _getDurationInSeconds(b) ? a : b);
+    return nonDeleted.reduce(
+      (a, b) => _getDurationInSeconds(a) > _getDurationInSeconds(b) ? a : b,
+    );
   }
 
   /// Get shortest hit (minimum single duration)
@@ -270,8 +281,9 @@ class HomeMetricsService {
 
     if (nonDeleted.isEmpty) return null;
 
-    return nonDeleted.reduce((a, b) =>
-        _getDurationInSeconds(a) < _getDurationInSeconds(b) ? a : b);
+    return nonDeleted.reduce(
+      (a, b) => _getDurationInSeconds(a) < _getDurationInSeconds(b) ? a : b,
+    );
   }
 
   // ===== COUNT-BASED METRICS =====
@@ -330,17 +342,33 @@ class HomeMetricsService {
     // Use 6am day boundary for more natural period comparisons
     // Current period
     final currentStart = DayBoundary.getDayStartDaysAgo(currentDays - 1);
-    final currentRecords = records.where((r) =>
-        !r.isDeleted &&
-        r.eventAt.isAfter(currentStart.subtract(const Duration(seconds: 1)))).toList();
+    final currentRecords =
+        records
+            .where(
+              (r) =>
+                  !r.isDeleted &&
+                  r.eventAt.isAfter(
+                    currentStart.subtract(const Duration(seconds: 1)),
+                  ),
+            )
+            .toList();
 
     // Previous period
     final previousStart = currentStart.subtract(Duration(days: previousDays));
     final previousEnd = currentStart.subtract(const Duration(seconds: 1));
-    final previousRecords = records.where((r) =>
-        !r.isDeleted &&
-        r.eventAt.isAfter(previousStart.subtract(const Duration(seconds: 1))) &&
-        r.eventAt.isBefore(previousEnd.add(const Duration(seconds: 1)))).toList();
+    final previousRecords =
+        records
+            .where(
+              (r) =>
+                  !r.isDeleted &&
+                  r.eventAt.isAfter(
+                    previousStart.subtract(const Duration(seconds: 1)),
+                  ) &&
+                  r.eventAt.isBefore(
+                    previousEnd.add(const Duration(seconds: 1)),
+                  ),
+            )
+            .toList();
 
     double current = 0;
     double previous = 0;
@@ -360,15 +388,12 @@ class HomeMetricsService {
         break;
     }
 
-    final percentChange = previous > 0
-        ? ((current - previous) / previous) * 100
-        : (current > 0 ? 100.0 : 0.0);
+    final percentChange =
+        previous > 0
+            ? ((current - previous) / previous) * 100
+            : (current > 0 ? 100.0 : 0.0);
 
-    return (
-      current: current,
-      previous: previous,
-      percentChange: percentChange,
-    );
+    return (current: current, previous: previous, percentChange: percentChange);
   }
 
   /// Get today vs yesterday comparison
@@ -379,7 +404,8 @@ class HomeMetricsService {
     double yesterdayDuration,
     double countChange,
     double durationChange,
-  }) getTodayVsYesterday(List<LogRecord> records) {
+  })
+  getTodayVsYesterday(List<LogRecord> records) {
     final todayRecords = _filterToday(records);
     final yesterdayRecords = _filterYesterday(records);
 
@@ -388,12 +414,14 @@ class HomeMetricsService {
     final todayDuration = getTotalDuration(todayRecords);
     final yesterdayDuration = getTotalDuration(yesterdayRecords);
 
-    final countChange = yesterdayCount > 0
-        ? ((todayCount - yesterdayCount) / yesterdayCount) * 100
-        : (todayCount > 0 ? 100.0 : 0.0);
-    final durationChange = yesterdayDuration > 0
-        ? ((todayDuration - yesterdayDuration) / yesterdayDuration) * 100
-        : (todayDuration > 0 ? 100.0 : 0.0);
+    final countChange =
+        yesterdayCount > 0
+            ? ((todayCount - yesterdayCount) / yesterdayCount) * 100
+            : (todayCount > 0 ? 100.0 : 0.0);
+    final durationChange =
+        yesterdayDuration > 0
+            ? ((todayDuration - yesterdayDuration) / yesterdayDuration) * 100
+            : (todayDuration > 0 ? 100.0 : 0.0);
 
     return (
       todayCount: todayCount,
@@ -411,12 +439,15 @@ class HomeMetricsService {
     double weekendAvgCount,
     double weekdayAvgDuration,
     double weekendAvgDuration,
-  }) getWeekdayVsWeekend(List<LogRecord> records, {int days = 7}) {
+  })
+  getWeekdayVsWeekend(List<LogRecord> records, {int days = 7}) {
     final filtered = _filterByDays(records, days);
     final nonDeleted = filtered.where((r) => !r.isDeleted).toList();
 
-    final weekdayRecords = nonDeleted.where((r) => r.eventAt.weekday <= 5).toList();
-    final weekendRecords = nonDeleted.where((r) => r.eventAt.weekday > 5).toList();
+    final weekdayRecords =
+        nonDeleted.where((r) => r.eventAt.weekday <= 5).toList();
+    final weekendRecords =
+        nonDeleted.where((r) => r.eventAt.weekday > 5).toList();
 
     // Count unique weekdays and weekend days (using 6am day boundary)
     final weekdayDays = <int>{};
@@ -448,19 +479,25 @@ class HomeMetricsService {
   /// Get average mood rating
   double? getAverageMood(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;
-    final withMood = filtered.where((r) => !r.isDeleted && r.moodRating != null).toList();
+    final withMood =
+        filtered.where((r) => !r.isDeleted && r.moodRating != null).toList();
 
     if (withMood.isEmpty) return null;
-    return withMood.map((r) => r.moodRating!).reduce((a, b) => a + b) / withMood.length;
+    return withMood.map((r) => r.moodRating!).reduce((a, b) => a + b) /
+        withMood.length;
   }
 
   /// Get average physical rating
   double? getAveragePhysical(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;
-    final withPhysical = filtered.where((r) => !r.isDeleted && r.physicalRating != null).toList();
+    final withPhysical =
+        filtered
+            .where((r) => !r.isDeleted && r.physicalRating != null)
+            .toList();
 
     if (withPhysical.isEmpty) return null;
-    return withPhysical.map((r) => r.physicalRating!).reduce((a, b) => a + b) / withPhysical.length;
+    return withPhysical.map((r) => r.physicalRating!).reduce((a, b) => a + b) /
+        withPhysical.length;
   }
 
   /// Get top reasons
@@ -480,46 +517,66 @@ class HomeMetricsService {
       }
     }
 
-    final sorted = reasonCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final sorted =
+        reasonCounts.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
-    return sorted.take(limit).map((e) => (reason: e.key, count: e.value)).toList();
+    return sorted
+        .take(limit)
+        .map((e) => (reason: e.key, count: e.value))
+        .toList();
   }
 
   // ===== HELPER METHODS =====
 
   /// Get non-deleted records sorted by eventAt (newest first)
   List<LogRecord> _getNonDeletedSorted(List<LogRecord> records) {
-    return records
-        .where((r) => !r.isDeleted)
-        .toList()
+    return records.where((r) => !r.isDeleted).toList()
       ..sort((a, b) => b.eventAt.compareTo(a.eventAt));
   }
 
   /// Filter records to today only (using 6am day boundary)
   List<LogRecord> _filterToday(List<LogRecord> records) {
     final todayStart = DayBoundary.getTodayStart();
-    return records.where((r) =>
-        r.eventAt.isAfter(todayStart.subtract(const Duration(seconds: 1))) ||
-        r.eventAt.isAtSameMomentAs(todayStart)).toList();
+    return records
+        .where(
+          (r) =>
+              r.eventAt.isAfter(
+                todayStart.subtract(const Duration(seconds: 1)),
+              ) ||
+              r.eventAt.isAtSameMomentAs(todayStart),
+        )
+        .toList();
   }
 
   /// Filter records to yesterday only (using 6am day boundary)
   List<LogRecord> _filterYesterday(List<LogRecord> records) {
     final todayStart = DayBoundary.getTodayStart();
     final yesterdayStart = DayBoundary.getYesterdayStart();
-    return records.where((r) =>
-        (r.eventAt.isAfter(yesterdayStart.subtract(const Duration(seconds: 1))) ||
-            r.eventAt.isAtSameMomentAs(yesterdayStart)) &&
-        r.eventAt.isBefore(todayStart)).toList();
+    return records
+        .where(
+          (r) =>
+              (r.eventAt.isAfter(
+                    yesterdayStart.subtract(const Duration(seconds: 1)),
+                  ) ||
+                  r.eventAt.isAtSameMomentAs(yesterdayStart)) &&
+              r.eventAt.isBefore(todayStart),
+        )
+        .toList();
   }
 
   /// Filter records to last N days (using 6am day boundary)
   List<LogRecord> _filterByDays(List<LogRecord> records, int days) {
     final startDate = DayBoundary.getDayStartDaysAgo(days - 1);
-    return records.where((r) =>
-        r.eventAt.isAfter(startDate.subtract(const Duration(seconds: 1))) ||
-        r.eventAt.isAtSameMomentAs(startDate)).toList();
+    return records
+        .where(
+          (r) =>
+              r.eventAt.isAfter(
+                startDate.subtract(const Duration(seconds: 1)),
+              ) ||
+              r.eventAt.isAtSameMomentAs(startDate),
+        )
+        .toList();
   }
 
   /// Get duration in seconds regardless of unit

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/app_error.dart';
 import '../providers/auth_provider.dart';
 import '../services/account_integration_service.dart';
+import '../services/error_reporting_service.dart';
 
 /// Profile screen for viewing and editing account information
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -72,7 +74,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage =
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.';
       });
     } finally {
       setState(() {
@@ -108,7 +113,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage =
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.';
       });
     } finally {
       setState(() {
@@ -161,7 +169,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage =
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.';
       });
     } finally {
       setState(() {
@@ -252,7 +263,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = e.toString();
+          _errorMessage =
+              (e is AppError)
+                  ? e.message
+                  : 'Something went wrong. Please try again.';
           _isLoading = false;
         });
       }
@@ -650,7 +664,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) {
+          ErrorReportingService.instance.reportException(
+            error,
+            context: 'ProfileScreen.authStateProvider',
+          );
+          return Center(
+            child: Text(
+              (error is AppError)
+                  ? error.message
+                  : 'Something went wrong. Please try again.',
+            ),
+          );
+        },
       ),
     );
   }

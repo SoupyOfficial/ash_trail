@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart' as enums;
+import 'error_reporting_service.dart';
 
 /// LegacyDataAdapter handles querying and converting legacy Firestore tables
 /// Supports backward compatibility for:
@@ -47,17 +48,27 @@ class LegacyDataAdapter {
             doc.id,
           );
           records.add(record);
-        } catch (e) {
+        } catch (e, st) {
           _log.e(
             'Error converting legacy record from $collectionName/${doc.id}',
             error: e,
+          );
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'LegacyDataAdapter.queryLegacyCollection',
           );
         }
       }
 
       return records;
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error querying legacy collection $collectionName', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LegacyDataAdapter.queryLegacyCollection',
+      );
       return [];
     }
   }
@@ -266,8 +277,13 @@ class LegacyDataAdapter {
         if (snapshot.docs.isNotEmpty) {
           return true;
         }
-      } catch (e) {
-        // Continue checking other collections
+      } catch (e, st) {
+        _log.w('Error checking legacy data in collection', error: e);
+        ErrorReportingService.instance.reportException(
+          e,
+          stackTrace: st,
+          context: 'LegacyDataAdapter.hasLegacyData',
+        );
       }
     }
 
@@ -288,8 +304,13 @@ class LegacyDataAdapter {
                 .get();
 
         totalCount += snapshot.count ?? 0;
-      } catch (e) {
-        // Continue counting other collections
+      } catch (e, st) {
+        _log.w('Error counting legacy records in collection', error: e);
+        ErrorReportingService.instance.reportException(
+          e,
+          stackTrace: st,
+          context: 'LegacyDataAdapter.getLegacyRecordCount',
+        );
       }
     }
 
@@ -319,8 +340,13 @@ class LegacyDataAdapter {
                     change.doc.id,
                   );
                   yield record;
-                } catch (e) {
+                } catch (e, st) {
                   _log.e('Error processing legacy record', error: e);
+                  ErrorReportingService.instance.reportException(
+                    e,
+                    stackTrace: st,
+                    context: 'LegacyDataAdapter.watchLegacyCollections',
+                  );
                 }
               }
             }

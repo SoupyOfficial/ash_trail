@@ -1,5 +1,85 @@
 # Gmail Login Testing Guide for Simulator
 
+## Gmail Auth Persistence (Seed Once, Run Forever)
+
+### How It Works
+
+In default Patrol mode (no `--full-isolation`), Google Sign-In state persists across repeated test runs because:
+
+1. **Firebase Auth** stores its refresh token in the **iOS Keychain** — survives hot-restarts, app reinstalls, and simulator reboots
+2. **ASWebAuthenticationSession** shares cookies with the Safari process — persisted at the OS level
+3. **Default Patrol mode** hot-restarts the app (resets Dart statics) but does NOT uninstall it
+
+Once you complete Google Sign-In manually **once**, `ensureGmailLoggedIn()` detects the persisted session (app lands on Home) and skips the entire native OAuth flow on all subsequent runs.
+
+### State Persistence Table
+
+| Store | Hot-Restart | App Reinstall | Sim Reboot | Sim Erase | `--full-isolation` |
+|-------|:-----------:|:------------:|:----------:|:---------:|:-----------------:|
+| iOS Keychain (Firebase token) | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Hive local DB (accounts, logs) | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Safari cookies (ASWebAuth) | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Dart static variables | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+### One-Time Manual Seeding Procedure
+
+1. **Boot the simulator and run the Gmail test suite:**
+   ```bash
+   open -a Simulator
+   patrol test --target integration_test/gmail_multi_account_test.dart \
+     --device "iPhone 16 Pro Max"
+   ```
+
+2. **Complete manual sign-in when prompted (~15 seconds per account):**
+   - The ASWebAuthenticationSession sheet appears in the simulator
+   - Tap **Continue**, enter credentials, complete sign-in
+   - Account 4: `ashtraildev3@gmail.com`
+   - Account 5: `soupsterx@live.com`
+
+3. **All subsequent runs are fully automatic** — no manual interaction needed.
+
+### When Re-Seeding Is Required
+
+| Action | Destroys Auth State? | Re-Seed? |
+|--------|:-------------------:|:--------:|
+| `patrol test` (default mode) | No | No |
+| `xcrun simctl shutdown` + `boot` | No | No |
+| Mac reboot / Xcode restart | No | No |
+| `xcrun simctl erase <uuid>` | **Yes** | **Yes** |
+| `patrol test --full-isolation` | **Yes** | **Yes** |
+| Delete simulator in Xcode | **Yes** | **Yes** |
+| Xcode version upgrade | Maybe | Check |
+
+### CI / Headless: Firebase Custom Token Bypass
+
+For CI environments where no human is present:
+```bash
+# Generate a token via the Cloud Function
+TOKEN=$(curl -s -X POST \
+  https://us-central1-smokelog-17303.cloudfunctions.net/generate_refresh_token \
+  -H 'Content-Type: application/json' \
+  -d '{"uid": "<FIREBASE_UID>"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['customToken'])")
+
+# Pass to Patrol
+patrol test --target integration_test/gmail_multi_account_test.dart \
+  --dart-define=FIREBASE_TEST_TOKEN=$TOKEN
+```
+
+This uses `signInWithCustomToken()` to bypass the native OAuth flow entirely.
+
+### Why No Framework Can Automate Google Sign-In
+
+`ASWebAuthenticationSession` is a system-level Safari view controller that runs in a separate process. No testing framework (Patrol, Maestro, Appium, raw XCUITest) can reliably interact with Google's dynamic sign-in forms inside it. See the [framework comparison](../../.github/prompts/plan-gmailLoginPersistence.prompt.md#framework-comparison-for-ios-simulator-testing) for details.
+
+### Preflight Check
+
+Run before tests to verify the simulator is ready:
+```bash
+./scripts/preflight_gmail_check.sh
+```
+
+---
+
 ## Prerequisites Checklist
 - [ ] iOS Simulator running (iPhone 16 Pro Max or iPhone 13 Pro)
 - [ ] Flutter app built and deployed on simulator

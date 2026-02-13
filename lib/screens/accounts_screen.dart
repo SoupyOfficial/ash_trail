@@ -35,18 +35,24 @@ class AccountsScreen extends ConsumerWidget {
             icon: const Icon(Icons.import_export),
             tooltip: 'Import / Export',
             onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const ExportScreen()));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  settings: const RouteSettings(name: 'ExportScreen'),
+                  builder: (_) => const ExportScreen(),
+                ),
+              );
             },
           ),
           IconButton(
             icon: const Icon(Icons.person),
             tooltip: 'Profile',
             onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  settings: const RouteSettings(name: 'ProfileScreen'),
+                  builder: (_) => const ProfileScreen(),
+                ),
+              );
             },
           ),
           // Sign out all accounts
@@ -93,6 +99,7 @@ class AccountsScreen extends ConsumerWidget {
                 if (context.mounted) {
                   Navigator.of(context).push(
                     MaterialPageRoute(
+                      settings: const RouteSettings(name: 'DiagnosticsScreen'),
                       builder: (_) => const MultiAccountDiagnosticsScreen(),
                     ),
                   );
@@ -217,7 +224,10 @@ class AccountsScreen extends ConsumerWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      MaterialPageRoute(
+                        settings: const RouteSettings(name: 'LoginScreen'),
+                        builder: (_) => const LoginScreen(),
+                      ),
                     );
                   },
                 ),
@@ -282,7 +292,10 @@ class AccountsScreen extends ConsumerWidget {
                 : () {
                   // Re-sign in to this account
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    MaterialPageRoute(
+                      settings: const RouteSettings(name: 'LoginScreen'),
+                      builder: (_) => const LoginScreen(),
+                    ),
                   );
                 },
         child: Padding(
@@ -613,9 +626,12 @@ class AccountsScreen extends ConsumerWidget {
             SizedBox(height: Spacing.xl.value),
             FilledButton.icon(
               onPressed: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    settings: const RouteSettings(name: 'LoginScreen'),
+                    builder: (_) => const LoginScreen(),
+                  ),
+                );
               },
               icon: const Icon(Icons.person_add),
               label: const Text('Add Account'),

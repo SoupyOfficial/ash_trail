@@ -26,6 +26,24 @@ Implemented comprehensive E2E testing that runs on iOS Simulator to catch integr
 ./scripts/run_e2e_tests.sh
 ```
 
+### Auth State Persistence (Gmail Tests)
+
+Gmail multi-account tests (`gmail_multi_account_test.dart`) use Google Sign-In via `ASWebAuthenticationSession`, which **cannot be automated** by any testing framework. The solution is a **seed-once** approach:
+
+1. **First run:** Complete Google Sign-In manually once per simulator (~15 seconds per account)
+2. **All subsequent runs:** Fully automatic — Firebase Auth token persists in iOS Keychain
+
+**Key rules:**
+- **Never use `--full-isolation`** for Gmail tests — it uninstalls the app and wipes the Keychain, destroying auth state
+- **Never run `xcrun simctl erase`** on a seeded simulator
+- Default Patrol mode preserves all platform state (Keychain, Hive, Safari cookies) across hot-restarts
+
+**For CI:** Use `--dart-define=FIREBASE_TEST_TOKEN=<token>` to bypass OAuth entirely via `signInWithCustomToken()`. See [Gmail Login Test Guide](../deployment/GMAIL_LOGIN_TEST_GUIDE.md) for token generation.
+
+**Preflight check:** Run `./scripts/preflight_gmail_check.sh` before Gmail tests to verify simulator readiness.
+
+**Seed the simulator:** Run `./scripts/seed_gmail_simulator.sh` for a guided first-time seeding process.
+
 **Build and run time:** The first run (or after a clean) can take **about 5–10 minutes** to build the app and start the simulator; the full test suite adds more time. For quicker feedback, run only smoke tests: `./scripts/run_e2e_tests.sh --tags smoke` or pass `--device "iPhone 16 Pro Max"` (or your simulator name) when calling `patrol` directly.
 
 **Manual Patrol commands (use a simulator device):**

@@ -7,6 +7,8 @@ import 'dart:convert';
 import 'dart:math';
 import '../logging/app_logger.dart';
 import '../models/app_error.dart';
+import 'app_analytics_service.dart';
+import 'app_performance_service.dart';
 import 'crash_reporting_service.dart';
 import 'error_reporting_service.dart';
 
@@ -64,6 +66,9 @@ class AuthService {
       // Store user info securely
       await _storeUserInfo(userCredential.user);
 
+      AppAnalyticsService.instance.logLogin(method: 'email_signup');
+      AppAnalyticsService.instance.setAuthMethod('email');
+      CrashReportingService.setUserId(userCredential.user?.uid ?? '');
       return userCredential;
     } on FirebaseAuthException catch (e, st) {
       throw _toAppError(e, st);
@@ -84,6 +89,9 @@ class AuthService {
       // Store user info securely
       await _storeUserInfo(userCredential.user);
 
+      AppAnalyticsService.instance.logLogin(method: 'email');
+      AppAnalyticsService.instance.setAuthMethod('email');
+      CrashReportingService.setUserId(userCredential.user?.uid ?? '');
       return userCredential;
     } on FirebaseAuthException catch (e, st) {
       throw _toAppError(e, st);
@@ -92,209 +100,222 @@ class AuthService {
 
   /// Sign in with Google
   Future<UserCredential> signInWithGoogle() async {
-    final stopwatch = Stopwatch()..start();
-    try {
-      _log.w('[GOOGLE_SIGN_IN_START] Beginning Google sign-in flow');
-      CrashReportingService.logMessage('Starting Google sign-in');
-
-      _log.d(
-        '[GOOGLE_SIGN_IN] GoogleSignIn config: clientId=${_googleSignIn.clientId}, '
-        'scopes=${_googleSignIn.scopes}',
-      );
-
+    return AppPerformanceService.instance.traceGoogleSignIn(() async {
+      final stopwatch = Stopwatch()..start();
       try {
-        _log.d('[GOOGLE_SIGN_IN] Signing out previous Google session...');
-        await _googleSignIn.signOut();
-        _log.d('[GOOGLE_SIGN_IN] Previous Google session cleared');
-      } catch (e) {
+        _log.w('[GOOGLE_SIGN_IN_START] Beginning Google sign-in flow');
+        CrashReportingService.logMessage('Starting Google sign-in');
+
+        _log.d(
+          '[GOOGLE_SIGN_IN] GoogleSignIn config: clientId=${_googleSignIn.clientId}, '
+          'scopes=${_googleSignIn.scopes}',
+        );
+
+        try {
+          _log.d('[GOOGLE_SIGN_IN] Signing out previous Google session...');
+          await _googleSignIn.signOut();
+          _log.d('[GOOGLE_SIGN_IN] Previous Google session cleared');
+        } catch (e) {
+          _log.w(
+            '[GOOGLE_SIGN_IN] Could not sign out before sign-in (non-fatal)',
+            error: e,
+          );
+        }
+
+        _log.w('[GOOGLE_SIGN_IN] Presenting Google sign-in UI...');
+        CrashReportingService.logMessage('Calling GoogleSignIn.signIn()');
+
+        // Trigger Google Sign-In flow
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+        if (googleUser == null) {
+          _log.w('[GOOGLE_SIGN_IN] User cancelled Google sign-in dialog');
+          throw AppError.auth(
+            message: 'Google sign-in was cancelled.',
+            code: 'AUTH_GOOGLE_CANCELLED',
+          );
+        }
+
         _log.w(
-          '[GOOGLE_SIGN_IN] Could not sign out before sign-in (non-fatal)',
-          error: e,
+          '[GOOGLE_SIGN_IN] Google account selected: '
+          'email=${googleUser.email}, id=${googleUser.id}, '
+          'displayName=${googleUser.displayName}',
         );
-      }
-
-      _log.w('[GOOGLE_SIGN_IN] Presenting Google sign-in UI...');
-      CrashReportingService.logMessage('Calling GoogleSignIn.signIn()');
-
-      // Trigger Google Sign-In flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-
-      if (googleUser == null) {
-        _log.w('[GOOGLE_SIGN_IN] User cancelled Google sign-in dialog');
-        throw AppError.auth(
-          message: 'Google sign-in was cancelled.',
-          code: 'AUTH_GOOGLE_CANCELLED',
+        CrashReportingService.logMessage(
+          'Google user obtained: ${googleUser.email}',
         );
-      }
 
-      _log.w(
-        '[GOOGLE_SIGN_IN] Google account selected: '
-        'email=${googleUser.email}, id=${googleUser.id}, '
-        'displayName=${googleUser.displayName}',
-      );
-      CrashReportingService.logMessage(
-        'Google user obtained: ${googleUser.email}',
-      );
+        // Obtain auth details
+        _log.d('[GOOGLE_SIGN_IN] Requesting Google auth tokens...');
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
 
-      // Obtain auth details
-      _log.d('[GOOGLE_SIGN_IN] Requesting Google auth tokens...');
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Validate tokens
-      final hasAccessToken = googleAuth.accessToken != null;
-      final hasIdToken = googleAuth.idToken != null;
-      _log.w(
-        '[GOOGLE_SIGN_IN] Token status: '
-        'accessToken=${hasAccessToken ? "present (${googleAuth.accessToken!.length} chars)" : "MISSING"}, '
-        'idToken=${hasIdToken ? "present (${googleAuth.idToken!.length} chars)" : "MISSING"}',
-      );
-
-      if (!hasAccessToken) {
-        _log.e('[GOOGLE_SIGN_IN] CRITICAL: No access token from Google');
-        throw AppError.auth(
-          message: 'Failed to obtain Google access token. Please try again.',
-          code: 'AUTH_GOOGLE_NO_TOKEN',
+        // Validate tokens
+        final hasAccessToken = googleAuth.accessToken != null;
+        final hasIdToken = googleAuth.idToken != null;
+        _log.w(
+          '[GOOGLE_SIGN_IN] Token status: '
+          'accessToken=${hasAccessToken ? "present (${googleAuth.accessToken!.length} chars)" : "MISSING"}, '
+          'idToken=${hasIdToken ? "present (${googleAuth.idToken!.length} chars)" : "MISSING"}',
         );
-      }
 
-      CrashReportingService.logMessage('Google auth tokens obtained');
+        if (!hasAccessToken) {
+          _log.e('[GOOGLE_SIGN_IN] CRITICAL: No access token from Google');
+          throw AppError.auth(
+            message: 'Failed to obtain Google access token. Please try again.',
+            code: 'AUTH_GOOGLE_NO_TOKEN',
+          );
+        }
 
-      // Create Firebase credential
-      _log.d(
-        '[GOOGLE_SIGN_IN] Creating Firebase credential from Google tokens...',
-      );
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+        CrashReportingService.logMessage('Google auth tokens obtained');
 
-      // Sign in to Firebase
-      _log.w(
-        '[GOOGLE_SIGN_IN] Signing in to Firebase with Google credential...',
-      );
-      final userCredential = await _auth.signInWithCredential(credential);
+        // Create Firebase credential
+        _log.d(
+          '[GOOGLE_SIGN_IN] Creating Firebase credential from Google tokens...',
+        );
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-      if (userCredential.user == null) {
+        // Sign in to Firebase
+        _log.w(
+          '[GOOGLE_SIGN_IN] Signing in to Firebase with Google credential...',
+        );
+        final userCredential = await _auth.signInWithCredential(credential);
+
+        if (userCredential.user == null) {
+          _log.e(
+            '[GOOGLE_SIGN_IN] Firebase returned null user after credential sign-in',
+          );
+          throw AppError.auth(
+            message: 'Authentication failed. Please try again.',
+            code: 'AUTH_FIREBASE_NULL_USER',
+          );
+        }
+
+        final user = userCredential.user!;
+        _log.w(
+          '[GOOGLE_SIGN_IN] Firebase auth SUCCESS: '
+          'uid=${user.uid}, email=${user.email}, '
+          'displayName=${user.displayName}, '
+          'isNewUser=${userCredential.additionalUserInfo?.isNewUser}, '
+          'providerId=${userCredential.additionalUserInfo?.providerId}, '
+          'providerData=${user.providerData.map((p) => p.providerId).toList()}',
+        );
+
+        // Store user info securely
+        await _storeUserInfo(userCredential.user);
+
+        stopwatch.stop();
+        _log.w(
+          '[GOOGLE_SIGN_IN_END] Google sign-in completed in ${stopwatch.elapsedMilliseconds}ms',
+        );
+        CrashReportingService.logMessage('Google sign-in successful');
+        AppAnalyticsService.instance.logLogin(method: 'google');
+        AppAnalyticsService.instance.setAuthMethod('google');
+        CrashReportingService.setUserId(userCredential.user?.uid ?? '');
+        return userCredential;
+      } on FirebaseAuthException catch (e, st) {
+        stopwatch.stop();
         _log.e(
-          '[GOOGLE_SIGN_IN] Firebase returned null user after credential sign-in',
+          '[GOOGLE_SIGN_IN] Firebase auth exception after ${stopwatch.elapsedMilliseconds}ms: '
+          'code=${e.code}, message=${e.message}',
         );
-        throw AppError.auth(
-          message: 'Authentication failed. Please try again.',
-          code: 'AUTH_FIREBASE_NULL_USER',
+        final appError = _toAppError(e, st);
+        ErrorReportingService.instance.report(
+          appError,
+          stackTrace: st,
+          context: 'AuthService.signInWithGoogle',
         );
+        throw appError;
+      } on AppError {
+        stopwatch.stop();
+        rethrow;
+      } catch (e, st) {
+        stopwatch.stop();
+        _log.e(
+          '[GOOGLE_SIGN_IN] Error after ${stopwatch.elapsedMilliseconds}ms: '
+          'type=${e.runtimeType}, message=$e',
+        );
+        final appError = AppError.auth(
+          message: 'Failed to sign in with Google. Please try again.',
+          originalError: e,
+          stackTrace: st,
+          code: 'AUTH_GOOGLE_FAILED',
+        );
+        ErrorReportingService.instance.report(
+          appError,
+          stackTrace: st,
+          context: 'AuthService.signInWithGoogle',
+        );
+        throw appError;
       }
-
-      final user = userCredential.user!;
-      _log.w(
-        '[GOOGLE_SIGN_IN] Firebase auth SUCCESS: '
-        'uid=${user.uid}, email=${user.email}, '
-        'displayName=${user.displayName}, '
-        'isNewUser=${userCredential.additionalUserInfo?.isNewUser}, '
-        'providerId=${userCredential.additionalUserInfo?.providerId}, '
-        'providerData=${user.providerData.map((p) => p.providerId).toList()}',
-      );
-
-      // Store user info securely
-      await _storeUserInfo(userCredential.user);
-
-      stopwatch.stop();
-      _log.w(
-        '[GOOGLE_SIGN_IN_END] Google sign-in completed in ${stopwatch.elapsedMilliseconds}ms',
-      );
-      CrashReportingService.logMessage('Google sign-in successful');
-      return userCredential;
-    } on FirebaseAuthException catch (e, st) {
-      stopwatch.stop();
-      _log.e(
-        '[GOOGLE_SIGN_IN] Firebase auth exception after ${stopwatch.elapsedMilliseconds}ms: '
-        'code=${e.code}, message=${e.message}',
-      );
-      final appError = _toAppError(e, st);
-      ErrorReportingService.instance.report(
-        appError,
-        stackTrace: st,
-        context: 'AuthService.signInWithGoogle',
-      );
-      throw appError;
-    } on AppError {
-      stopwatch.stop();
-      rethrow;
-    } catch (e, st) {
-      stopwatch.stop();
-      _log.e(
-        '[GOOGLE_SIGN_IN] Error after ${stopwatch.elapsedMilliseconds}ms: '
-        'type=${e.runtimeType}, message=$e',
-      );
-      final appError = AppError.auth(
-        message: 'Failed to sign in with Google. Please try again.',
-        originalError: e,
-        stackTrace: st,
-        code: 'AUTH_GOOGLE_FAILED',
-      );
-      ErrorReportingService.instance.report(
-        appError,
-        stackTrace: st,
-        context: 'AuthService.signInWithGoogle',
-      );
-      throw appError;
-    }
+    });
   }
 
   /// Sign in with Apple
   Future<UserCredential> signInWithApple() async {
-    try {
-      // Generate nonce for security
-      final rawNonce = _generateNonce();
-      final nonce = _sha256ofString(rawNonce);
+    return AppPerformanceService.instance.trace('apple_sign_in', () async {
+      try {
+        // Generate nonce for security
+        final rawNonce = _generateNonce();
+        final nonce = _sha256ofString(rawNonce);
 
-      // Request credential from Apple
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: nonce,
-      );
+        // Request credential from Apple
+        final appleCredential = await SignInWithApple.getAppleIDCredential(
+          scopes: [
+            AppleIDAuthorizationScopes.email,
+            AppleIDAuthorizationScopes.fullName,
+          ],
+          nonce: nonce,
+        );
 
-      // Create Firebase credential
-      final oauthCredential = OAuthProvider(
-        'apple.com',
-      ).credential(idToken: appleCredential.identityToken, rawNonce: rawNonce);
+        // Create Firebase credential
+        final oauthCredential = OAuthProvider('apple.com').credential(
+          idToken: appleCredential.identityToken,
+          rawNonce: rawNonce,
+        );
 
-      // Sign in to Firebase
-      final userCredential = await _auth.signInWithCredential(oauthCredential);
+        // Sign in to Firebase
+        final userCredential = await _auth.signInWithCredential(
+          oauthCredential,
+        );
 
-      // Update display name if provided and not already set
-      if (userCredential.user?.displayName == null &&
-          appleCredential.givenName != null) {
-        final displayName =
-            '${appleCredential.givenName} ${appleCredential.familyName ?? ''}'
-                .trim();
-        await userCredential.user?.updateDisplayName(displayName);
+        // Update display name if provided and not already set
+        if (userCredential.user?.displayName == null &&
+            appleCredential.givenName != null) {
+          final displayName =
+              '${appleCredential.givenName} ${appleCredential.familyName ?? ''}'
+                  .trim();
+          await userCredential.user?.updateDisplayName(displayName);
+        }
+
+        // Store user info securely
+        await _storeUserInfo(userCredential.user);
+
+        AppAnalyticsService.instance.logLogin(method: 'apple');
+        AppAnalyticsService.instance.setAuthMethod('apple');
+        CrashReportingService.setUserId(userCredential.user?.uid ?? '');
+        return userCredential;
+      } on FirebaseAuthException catch (e, st) {
+        throw _toAppError(e, st);
+      } on SignInWithAppleAuthorizationException catch (e, st) {
+        throw AppError.auth(
+          message: 'Apple sign-in failed: ${e.message}',
+          originalError: e,
+          stackTrace: st,
+          code: 'AUTH_APPLE_FAILED',
+        );
+      } catch (e, st) {
+        throw AppError.auth(
+          message: 'Failed to sign in with Apple. Please try again.',
+          originalError: e,
+          stackTrace: st,
+          code: 'AUTH_APPLE_FAILED',
+        );
       }
-
-      // Store user info securely
-      await _storeUserInfo(userCredential.user);
-
-      return userCredential;
-    } on FirebaseAuthException catch (e, st) {
-      throw _toAppError(e, st);
-    } on SignInWithAppleAuthorizationException catch (e, st) {
-      throw AppError.auth(
-        message: 'Apple sign-in failed: ${e.message}',
-        originalError: e,
-        stackTrace: st,
-        code: 'AUTH_APPLE_FAILED',
-      );
-    } catch (e, st) {
-      throw AppError.auth(
-        message: 'Failed to sign in with Apple. Please try again.',
-        originalError: e,
-        stackTrace: st,
-        code: 'AUTH_APPLE_FAILED',
-      );
-    }
+    });
   }
 
   /// Generate a cryptographically secure random nonce
@@ -328,6 +349,10 @@ class AuthService {
 
       // Clear stored user info
       await _clearUserInfo();
+
+      AppAnalyticsService.instance.logSignOut();
+      AppAnalyticsService.instance.clearUserProperties();
+      CrashReportingService.setUserId('');
     } catch (e, st) {
       throw AppError.auth(
         message: 'Failed to sign out. Please try again.',

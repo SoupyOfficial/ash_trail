@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/app_error.dart';
 import '../services/account_integration_service.dart';
 import '../widgets/auth_button.dart';
 
@@ -52,7 +53,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage =
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.';
         _isLoading = false;
       });
     }
@@ -73,7 +77,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage =
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.';
         _isLoading = false;
       });
     }
@@ -94,7 +101,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage =
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.';
         _isLoading = false;
       });
     }

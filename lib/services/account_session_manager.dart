@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../models/account.dart';
 import '../models/enums.dart';
 import 'account_service.dart';
+import 'error_reporting_service.dart';
 
 /// Manages multiple authenticated sessions for multi-account support.
 ///
@@ -98,8 +99,13 @@ class AccountSessionManager {
 
     try {
       return jsonDecode(sessionJson) as Map<String, dynamic>;
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Failed to decode session', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSessionManager.getSession',
+      );
       return null;
     }
   }
@@ -135,8 +141,13 @@ class AccountSessionManager {
       _log.w(
         '[TOKEN_STORE] Custom token stored for uid=$uid at ${DateTime.now().toIso8601String()}',
       );
-    } catch (e) {
+    } catch (e, st) {
       _log.e('[TOKEN_STORE] Error storing custom token for uid=$uid', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSessionManager.storeCustomToken',
+      );
       rethrow;
     }
   }
@@ -195,10 +206,15 @@ class AccountSessionManager {
         '${customToken.length} chars)',
       );
       return customToken;
-    } catch (e) {
+    } catch (e, st) {
       _log.e(
         '[TOKEN_GET] Error retrieving custom token for uid=$uid',
         error: e,
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSessionManager.getValidCustomToken',
       );
       return null;
     }
@@ -215,8 +231,13 @@ class AccountSessionManager {
       await _secureStorage.delete(key: '$_customTokenPrefix$uid');
       await _secureStorage.delete(key: '$_customTokenTimestampPrefix$uid');
       _log.i('Removed custom token for $uid');
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error removing custom token', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSessionManager.removeCustomToken',
+      );
     }
   }
 
@@ -291,8 +312,13 @@ class AccountSessionManager {
       );
 
       return summary;
-    } catch (e) {
+    } catch (e, st) {
       _log.e('[DIAGNOSTICS] Error generating summary', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSessionManager.getDiagnosticSummary',
+      );
       return {
         'error': e.toString(),
         'timestamp': DateTime.now().toIso8601String(),
@@ -484,7 +510,13 @@ class AccountSessionManager {
     try {
       final list = jsonDecode(listJson) as List;
       return list.cast<String>();
-    } catch (e) {
+    } catch (e, st) {
+      _log.e('Failed to decode logged-in accounts list', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSessionManager._getLoggedInList',
+      );
       return [];
     }
   }

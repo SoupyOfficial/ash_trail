@@ -27,6 +27,10 @@ class AppLogger {
   /// release builds. Use this for TestFlight / QA diagnostics.
   static bool _verboseLogging = false;
 
+  /// Optional callback invoked on every log at Level.error or higher.
+  /// Wired to CrashReportingService.logMessage() in main.dart.
+  static void Function(String loggerName, String message)? onErrorLog;
+
   /// Enable or disable verbose logging in release/profile builds.
   ///
   /// When enabled, the log filter will pass all events regardless of build
@@ -75,6 +79,7 @@ class AppLogger {
           debug: '[$name]',
           trace: '[$name]',
         ),
+        output: _BreadcrumbLogOutput(name, ConsoleOutput()),
       );
       return l;
     });
@@ -113,5 +118,32 @@ class _AppLogFilter extends LogFilter {
       return false;
     }
     return event.level.index >= Logger.level.index;
+  }
+}
+
+/// Wraps the default ConsoleOutput and additionally invokes
+/// [AppLogger.onErrorLog] for Level.error and above.
+///
+/// This turns every high-severity log statement into a Crashlytics
+/// breadcrumb without the caller needing to call CrashReportingService
+/// explicitly.
+class _BreadcrumbLogOutput extends LogOutput {
+  final String name;
+  final LogOutput _delegate;
+  _BreadcrumbLogOutput(this.name, this._delegate);
+
+  @override
+  void output(OutputEvent event) {
+    // Always delegate to console first
+    _delegate.output(event);
+
+    // Forward errors+ to Crashlytics breadcrumbs
+    if (event.level.index >= Level.error.index &&
+        AppLogger.onErrorLog != null) {
+      final message = event.lines.join('\n');
+      final truncated =
+          message.length > 1024 ? message.substring(0, 1024) : message;
+      AppLogger.onErrorLog!(name, truncated);
+    }
   }
 }

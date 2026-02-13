@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
+import '../services/error_reporting_service.dart';
 import '../services/log_record_service.dart';
 import 'account_provider.dart';
 
@@ -603,6 +604,11 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
       );
       state = AsyncValue.data(updated);
     } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LogRecordNotifier.updateLogRecord',
+      );
       state = AsyncValue.error(e, st);
     }
   }
@@ -615,6 +621,11 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
       await service.deleteLogRecord(record);
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LogRecordNotifier.deleteLogRecord',
+      );
       state = AsyncValue.error(e, st);
     }
   }
@@ -627,6 +638,11 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
       await service.restoreDeleted(record);
       state = AsyncValue.data(record);
     } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LogRecordNotifier.restoreLogRecord',
+      );
       state = AsyncValue.error(e, st);
     }
   }

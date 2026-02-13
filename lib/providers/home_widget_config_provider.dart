@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../logging/app_logger.dart';
 import '../models/home_widget_config.dart';
+import '../services/error_reporting_service.dart';
 import '../widgets/home_widgets/widget_catalog.dart';
 import 'account_provider.dart';
 
@@ -17,13 +19,15 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('SharedPreferences must be overridden in main.dart');
 });
 
+final _log = AppLogger.logger('HomeLayoutConfigNotifier');
+
 /// State notifier for home layout configuration
 class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
   final Ref ref;
   final String? accountId;
 
   HomeLayoutConfigNotifier(this.ref, this.accountId)
-      : super(HomeLayoutConfig.defaultConfig()) {
+    : super(HomeLayoutConfig.defaultConfig()) {
     _loadConfig();
   }
 
@@ -41,7 +45,13 @@ class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
         state = HomeLayoutConfig.defaultConfig();
         await _saveConfig();
       }
-    } catch (e) {
+    } catch (e, st) {
+      _log.e('Error loading home layout config', error: e, stackTrace: st);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'HomeLayoutConfigNotifier._loadConfig',
+      );
       // Fall back to default on error
       state = HomeLayoutConfig.defaultConfig();
     }
@@ -53,13 +63,21 @@ class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
       final prefs = ref.read(sharedPreferencesProvider);
       final key = _getStorageKey(accountId);
       await prefs.setString(key, state.toJsonString());
-    } catch (e) {
-      // Silently fail on save error
+    } catch (e, st) {
+      _log.e('Error saving home layout config', error: e, stackTrace: st);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'HomeLayoutConfigNotifier._saveConfig',
+      );
     }
   }
 
   /// Add a new widget to the layout
-  Future<void> addWidget(HomeWidgetType type, {Map<String, dynamic>? settings}) async {
+  Future<void> addWidget(
+    HomeWidgetType type, {
+    Map<String, dynamic>? settings,
+  }) async {
     // Check if widget already exists (for non-multiple types)
     final entry = WidgetCatalog.getEntry(type);
     if (!entry.allowMultiple && state.hasWidgetType(type)) {
@@ -110,12 +128,13 @@ class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
     Map<String, dynamic> settings,
   ) async {
     state = HomeLayoutConfig(
-      widgets: state.widgets.map((w) {
-        if (w.id == widgetId) {
-          return w.copyWith(settings: {...?w.settings, ...settings});
-        }
-        return w;
-      }).toList(),
+      widgets:
+          state.widgets.map((w) {
+            if (w.id == widgetId) {
+              return w.copyWith(settings: {...?w.settings, ...settings});
+            }
+            return w;
+          }).toList(),
       version: state.version,
     );
     await _saveConfig();
@@ -125,12 +144,12 @@ class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
 /// Provider for home layout configuration (account-specific)
 final homeLayoutConfigProvider =
     StateNotifierProvider<HomeLayoutConfigNotifier, HomeLayoutConfig>((ref) {
-  // Watch active account to get account-specific layout
-  final accountAsync = ref.watch(activeAccountProvider);
-  final accountId = accountAsync.asData?.value?.userId;
+      // Watch active account to get account-specific layout
+      final accountAsync = ref.watch(activeAccountProvider);
+      final accountId = accountAsync.asData?.value?.userId;
 
-  return HomeLayoutConfigNotifier(ref, accountId);
-});
+      return HomeLayoutConfigNotifier(ref, accountId);
+    });
 
 /// Provider for visible widgets only (convenience accessor)
 final visibleHomeWidgetsProvider = Provider<List<HomeWidgetConfig>>((ref) {
@@ -142,7 +161,10 @@ final visibleHomeWidgetsProvider = Provider<List<HomeWidgetConfig>>((ref) {
 final homeEditModeProvider = StateProvider<bool>((ref) => false);
 
 /// Provider to check if a widget type is already added
-final isWidgetTypeAddedProvider = Provider.family<bool, HomeWidgetType>((ref, type) {
+final isWidgetTypeAddedProvider = Provider.family<bool, HomeWidgetType>((
+  ref,
+  type,
+) {
   final config = ref.watch(homeLayoutConfigProvider);
   return config.hasWidgetType(type);
 });

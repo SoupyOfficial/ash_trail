@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../logging/app_logger.dart';
 import '../providers/account_provider.dart';
-import '../services/token_service.dart';
+import '../services/otel_service.dart';
 
 /// A diagnostics screen for TestFlight builds that surfaces the full
 /// multi-account state: logged-in accounts, custom token validity,
@@ -241,6 +241,15 @@ class _MultiAccountDiagnosticsScreenState
                     'Logging Configuration',
                     Icons.bug_report,
                     _buildLoggingInfo(theme),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // OpenTelemetry Status
+                  _buildSection(
+                    context,
+                    'OpenTelemetry',
+                    Icons.insights,
+                    _buildOTelInfo(theme),
                   ),
                 ],
               ),
@@ -497,6 +506,38 @@ class _MultiAccountDiagnosticsScreenState
           'Active Loggers',
           (logging['activeLoggers'] as List?)?.length.toString() ?? '0',
         ),
+      ],
+    );
+  }
+
+  Widget _buildOTelInfo(ThemeData theme) {
+    final otel = OTelService.instance.diagnostics;
+    final initialized = otel['initialized'] == true;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              initialized ? Icons.check_circle : Icons.info_outline,
+              size: 16,
+              color: initialized ? Colors.green : Colors.grey,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              initialized ? 'Active' : 'Inactive',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: initialized ? Colors.green : Colors.grey,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _infoRow('Endpoint', otel['endpoint']?.toString() ?? 'not configured'),
+        _infoRow('Enabled', otel['enabled']?.toString() ?? 'true'),
+        _infoRow('Has Tracer', otel['hasTracer']?.toString() ?? 'false'),
+        _infoRow('Has Meter', otel['hasMeter']?.toString() ?? 'false'),
       ],
     );
   }

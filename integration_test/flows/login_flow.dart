@@ -52,6 +52,32 @@ AppScreen detectScreen(PatrolIntegrationTester $) {
 /// statics but keeps platform state (Firebase auth token, Keychain, Hive).
 /// So the app may land on Welcome *or* Home depending on whether a previous
 /// test already logged in.
+///
+/// ### What resets on hot-restart (Dart statics)
+///
+/// - `AppComponent._launched` → `false` (so `main()` runs again)
+/// - All Riverpod provider state (rebuilt from Hive/Firebase on next read)
+/// - Any in-memory caches (e.g. `LogRecordService` query caches)
+///
+/// ### What persists across hot-restarts (platform state)
+///
+/// - **iOS Keychain** — Firebase Auth refresh token (long-lived, auto-refreshes)
+/// - **Hive local DB** — accounts, log records, settings
+///   (`~/Library/Developer/CoreSimulator/.../Documents/`)
+/// - **SharedPreferences** — `NSUserDefaults` on iOS
+/// - **Safari cookies** — ASWebAuthenticationSession session cookies
+///
+/// ### Destructive actions that wipe ALL persisted state
+///
+/// - `xcrun simctl erase <uuid>` — wipes the entire simulator filesystem
+/// - `patrol test --full-isolation` — uninstalls app, wipes Keychain entries
+/// - Deleting the simulator in Xcode
+/// - Xcode version upgrades may silently reset simulators
+///
+/// After any of these actions, Gmail tests will require manual re-seeding
+/// (completing Google Sign-In once in the simulator). See the
+/// [Gmail Login Test Guide](../../docs/deployment/GMAIL_LOGIN_TEST_GUIDE.md)
+/// for the re-seeding procedure.
 Future<AppScreen> launchAndDetect(PatrolIntegrationTester $) async {
   final app = AppComponent($);
   await app.launch();

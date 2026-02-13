@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../screens/home_screen.dart';
 import '../screens/analytics_screen.dart';
 import '../screens/history_screen.dart';
+import '../services/app_analytics_service.dart';
 // import '../screens/logging_screen.dart';
 
 /// Main navigation wrapper with bottom navigation bar
@@ -24,6 +25,12 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    AppAnalyticsService.instance.logScreenView(screenName: 'home');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
@@ -33,6 +40,11 @@ class _MainNavigationState extends ConsumerState<MainNavigation> {
           setState(() {
             _currentIndex = index;
           });
+          const tabNames = ['home', 'analytics', 'history'];
+          AppAnalyticsService.instance.logTabSwitch(tabName: tabNames[index]);
+          AppAnalyticsService.instance.logScreenView(
+            screenName: tabNames[index],
+          );
         },
         destinations: const [
           NavigationDestination(

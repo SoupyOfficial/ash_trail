@@ -12,6 +12,7 @@ import '../components/welcome.dart';
 import '../components/login.dart';
 import '../components/home.dart';
 import '../components/nav_bar.dart';
+import '../helpers/auth_bypass.dart';
 import '../helpers/pump.dart';
 
 // ── Diagnostics ──────────────────────────────────────────────────────────────
@@ -87,11 +88,83 @@ Future<void> ensureGmailLoggedIn(
   PatrolIntegrationTester $, {
   String? selectAccountEmail,
 }) async {
+  // ── CI Auth Bypass ──
+  // If a FIREBASE_TEST_TOKEN was provided via --dart-define, attempt
+  // programmatic sign-in BEFORE screen detection. This bypasses the
+  // native Google OAuth flow entirely (which cannot be automated).
+  if (hasAuthBypassToken) {
+    _flowLog('FIREBASE_TEST_TOKEN detected — attempting CI auth bypass');
+    // Must launch the app first so Firebase is initialized
+    final app = AppComponent($);
+    await app.launch();
+    await handleNativePermissionDialogs($);
+
+    final bypassed = await attemptAuthBypass(expectedEmail: selectAccountEmail);
+    if (bypassed) {
+      _flowLog('Auth bypass succeeded — waiting for Home screen');
+      await pumpUntilFound(
+        $,
+        find.byKey(const Key('nav_home')),
+        timeout: const Duration(seconds: 30),
+      );
+      await handlePermissionDialogs($);
+      await settle($, frames: 20);
+      _flowLog('ensureGmailLoggedIn complete (via CI bypass)');
+      return;
+    }
+    _flowLog('Auth bypass failed — falling through to UI detection');
+  }
+
   final screen = await gmailLaunchAndDetect($);
   await handlePermissionDialogs($);
 
   switch (screen) {
     case GmailAppScreen.home:
+      // ── Persisted session detection ──
+      // In default Patrol mode (no --full-isolation), Firebase Auth
+      // persists its refresh token in the iOS Keychain across hot-restarts,
+      // app reinstalls, and simulator reboots. If a previous run completed
+      // Google Sign-In manually, this session is reused automatically.
+      // The only actions that destroy it:
+      //   • xcrun simctl erase (wipes entire simulator)
+      //   • patrol test --full-isolation (uninstalls app + wipes Keychain)
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        _flowLog(
+          'Persisted session found: ${currentUser.email} '
+          '(uid: ${currentUser.uid.substring(0, 8)}...)',
+        );
+        if (selectAccountEmail != null &&
+            currentUser.email != selectAccountEmail) {
+          _flowLog(
+            'NOTE: Active user ${currentUser.email} differs from '
+            'requested $selectAccountEmail — caller may need to switch',
+          );
+        }
+        // Verify the token can still refresh (auto-refreshes from Keychain)
+        try {
+          await currentUser.getIdToken();
+          _flowLog('Firebase token refresh OK — session valid');
+        } catch (e) {
+          _flowLog('Token refresh failed (may need re-seed): $e');
+        }
+        // Verify Hive account is in sync with Firebase
+        try {
+          final hiveAccount = await AccountService().getActiveAccount();
+          if (hiveAccount != null) {
+            _flowLog(
+              'Hive active account: ${hiveAccount.email} '
+              '(matches Firebase: ${hiveAccount.userId == currentUser.uid})',
+            );
+          } else {
+            _flowLog('Hive has no active account — app may re-create it');
+          }
+        } catch (e) {
+          _flowLog('Hive check error (non-fatal): $e');
+        }
+      } else {
+        _flowLog('On Home but no Firebase user — unexpected state');
+      }
       _flowLog('Already on Home — tapping Home tab');
       final nav = NavBarComponent($);
       await nav.tapHome();
@@ -231,73 +304,67 @@ Future<void> addGmailAccount(
 /// appears after tapping "Continue with Google".
 ///
 /// On iOS, Google Sign-In uses `ASWebAuthenticationSession` (Safari-based
-/// web view) presented within the app's own process — **not** Chrome.
+/// web view) which is a system-level security dialog that cannot be automated.
 ///
-/// If [selectAccountEmail] is provided, attempts to tap a native view
-/// containing that email. Otherwise, logs available native views and
-/// waits for the flow to complete or the user to interact.
+/// ⚠️  ONE-TIME MANUAL INTERACTION REQUIRED  ⚠️
+///
+/// This only happens on the **first run** of a fresh simulator (or after
+/// an erase / `--full-isolation`). Once completed, the Firebase refresh
+/// token persists in the iOS Keychain and `ensureGmailLoggedIn()` will
+/// detect the persisted session on all subsequent runs — the native
+/// picker never appears again.
+///
+/// When the Google Sign-In dialog appears:
+/// 1. Tap "Continue" to proceed with the authentication
+/// 2. Select the appropriate Gmail account
+/// 3. Grant any requested permissions
+///
+/// The test polls every 2 s for up to 120 s, breaking immediately once
+/// the sign-in completes (detected by `nav_home` appearing).
 Future<void> _handleGoogleAccountPicker(
   PatrolIntegrationTester $,
   String? selectAccountEmail,
 ) async {
-  _flowLog('Waiting for Google Sign-In native UI...');
-  await $.pump(const Duration(seconds: 3));
+  _flowLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  _flowLog('⚠️  ONE-TIME MANUAL INTERACTION REQUIRED ⚠️');
+  _flowLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  if (selectAccountEmail != null) {
+    _flowLog('Please select account: $selectAccountEmail');
+  }
+  _flowLog('1. Tap "Continue" in the ASWebAuthenticationSession dialog');
+  _flowLog('2. Select the Gmail account when prompted');
+  _flowLog('3. Complete the sign-in flow');
+  _flowLog('');
+  _flowLog('This is a ONE-TIME step. Once completed, the session persists');
+  _flowLog('in the iOS Keychain across all future test runs (until the');
+  _flowLog('simulator is erased or --full-isolation is used).');
+  _flowLog('');
+  _flowLog('Polling for sign-in completion (up to 120s)...');
+  _flowLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-  // ── Discover what's on screen ──────────────────────────────────────────
-  try {
-    final views = await $.native.getNativeViews(Selector(textContains: ''));
-    _flowLog('Native views found: ${views.length}');
-    for (final v in views.take(15)) {
-      _flowLog(
-        '  native: text="${v.text}" resourceName="${v.resourceName}" '
-        'className="${v.className}"',
-      );
+  // ASWebAuthenticationSession cannot be automated by any framework.
+  // Poll every 2s for the Home screen to appear (sign-in complete),
+  // instead of hard-waiting a fixed duration.
+  final deadline = DateTime.now().add(const Duration(seconds: 120));
+  int elapsed = 0;
+  while (DateTime.now().isBefore(deadline)) {
+    await $.pump(const Duration(seconds: 2));
+    elapsed += 2;
+
+    // Check if sign-in completed — app navigated to Home
+    if ($.tester.any(find.byKey(const Key('nav_home')))) {
+      _flowLog('Sign-in completed after ~${elapsed}s — session will persist');
+      return;
     }
-  } catch (e) {
-    _flowLog('getNativeViews error (non-fatal): $e');
+
+    // Progress heartbeat every 10s
+    if (elapsed % 10 == 0) {
+      _flowLog('Waiting for manual sign-in… (${elapsed}s elapsed)');
+    }
   }
 
-  // ── Try to interact with the Google account picker ─────────────────────
-  try {
-    if (selectAccountEmail != null) {
-      _flowLog('Looking for account: $selectAccountEmail');
-
-      // Attempt 1: Tap in the app's own process (no appId — default)
-      try {
-        await $.native.tap(
-          Selector(textContains: selectAccountEmail),
-          timeout: const Duration(seconds: 10),
-        );
-        _flowLog('Tapped $selectAccountEmail in Google picker (app context)');
-        await $.pump(const Duration(seconds: 3));
-        return;
-      } catch (e) {
-        _flowLog('Could not tap in app context: $e');
-      }
-
-      // Attempt 2: Look for "Continue" / "Sign in" buttons in the web view
-      for (final label in ['Continue', 'Sign in', 'Next', selectAccountEmail]) {
-        try {
-          await $.native.tap(
-            Selector(textContains: label),
-            timeout: const Duration(seconds: 3),
-          );
-          _flowLog('Tapped "$label" in native UI');
-          await $.pump(const Duration(seconds: 2));
-        } catch (_) {
-          // Not found — try next label
-        }
-      }
-    } else {
-      _flowLog('No specific account — waiting for sign-in to complete...');
-      // Wait longer for auto-selection or cancellation
-      await $.pump(const Duration(seconds: 5));
-    }
-  } catch (e) {
-    _flowLog('Google picker interaction error: $e');
-  }
-
-  // Give the auth flow time to complete
-  await $.pump(const Duration(seconds: 3));
-  _flowLog('Google account picker handling complete');
+  _flowLog(
+    'Manual interaction window expired (120s) — '
+    'sign-in may have failed or not been attempted',
+  );
 }

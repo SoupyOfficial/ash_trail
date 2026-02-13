@@ -42,18 +42,20 @@ class StatCardWidget extends StatelessWidget {
         ),
       ),
       child: InkWell(
-        onTap: onTap != null
-            ? () {
-                HapticFeedback.lightImpact();
-                onTap!();
-              }
-            : null,
-        onLongPress: onLongPress != null
-            ? () {
-                HapticFeedback.mediumImpact();
-                onLongPress!();
-              }
-            : null,
+        onTap:
+            onTap != null
+                ? () {
+                  HapticFeedback.lightImpact();
+                  onTap!();
+                }
+                : null,
+        onLongPress:
+            onLongPress != null
+                ? () {
+                  HapticFeedback.mediumImpact();
+                  onLongPress!();
+                }
+                : null,
         borderRadius: BorderRadii.md,
         child: Padding(
           padding: Paddings.md,
@@ -77,9 +79,9 @@ class StatCardWidget extends StatelessWidget {
                     child: Text(
                       title,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withOpacity(0.8),
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -95,7 +97,10 @@ class StatCardWidget extends StatelessWidget {
                   return FadeTransition(
                     opacity: animation,
                     child: ScaleTransition(
-                      scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                      scale: Tween<double>(
+                        begin: 0.95,
+                        end: 1.0,
+                      ).animate(animation),
                       child: child,
                     ),
                   );
@@ -104,9 +109,9 @@ class StatCardWidget extends StatelessWidget {
                   value,
                   key: ValueKey<String>(value),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -119,9 +124,13 @@ class StatCardWidget extends StatelessWidget {
                       Flexible(
                         child: Text(
                           subtitle!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant.withOpacity(0.7),
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withOpacity(
+                              0.7,
+                            ),
+                          ),
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -144,12 +153,15 @@ class StatCardWidget extends StatelessWidget {
 /// Trend indicator widget showing percentage change
 class TrendIndicator extends StatelessWidget {
   final double percentChange;
-  final bool invertColors; // If true, positive = bad (red), negative = good (green)
+  final bool
+  invertColors; // If true, positive = bad (red), negative = good (green)
+  final String suffix; // Unit suffix (default: '%')
 
   const TrendIndicator({
     super.key,
     required this.percentChange,
     this.invertColors = false,
+    this.suffix = '%',
   });
 
   @override
@@ -177,10 +189,7 @@ class TrendIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -188,7 +197,7 @@ class TrendIndicator extends StatelessWidget {
           Icon(icon, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
-            '${isUp ? '+' : ''}${percentChange.abs().toStringAsFixed(0)}%',
+            '${isUp ? '+' : ''}${percentChange.abs().toStringAsFixed(0)}$suffix',
             style: TextStyle(
               fontSize: 10,
               color: color,
@@ -214,12 +223,12 @@ class StatCardRow extends StatelessWidget {
           .map((child) => Expanded(child: child))
           .toList()
           .fold<List<Widget>>([], (list, child) {
-        if (list.isNotEmpty) {
-          list.add(SizedBox(width: Spacing.sm.value));
-        }
-        list.add(child);
-        return list;
-      }),
+            if (list.isNotEmpty) {
+              list.add(SizedBox(width: Spacing.sm.value));
+            }
+            list.add(child);
+            return list;
+          }),
     );
   }
 }

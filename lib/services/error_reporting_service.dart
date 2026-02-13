@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../logging/app_logger.dart';
 import '../models/app_error.dart';
+import 'app_analytics_service.dart';
 import 'crash_reporting_service.dart';
+import 'otel_service.dart';
 
 /// Centralized error reporting service that bridges [AppError], [AppLogger],
 /// and [CrashReportingService] into a single, consistent pipeline.
@@ -39,6 +41,7 @@ class ErrorReportingService {
   final Map<ErrorCategory, int> _errorCounts = {};
   final List<_ErrorEntry> _recentErrors = [];
   static const int _maxRecentErrors = 50;
+  final Set<String> _reportedThisSession = {};
 
   /// Report an [AppError] through the unified pipeline.
   ///
@@ -89,6 +92,12 @@ class ErrorReportingService {
     if (!kDebugMode || error.severity == ErrorSeverity.fatal) {
       _forwardToCrashlytics(error, stackTrace);
     }
+
+    // 5. Forward to Analytics as a counted event
+    AppAnalyticsService.instance.logError(error.category, error.severity);
+
+    // 6. Record OTel error metric (no-op if OTel is disabled)
+    OTelService.instance.recordError(error.category.name);
   }
 
   /// Convenience: report a raw exception, auto-classifying it.
@@ -165,6 +174,12 @@ class ErrorReportingService {
   void reset() {
     _errorCounts.clear();
     _recentErrors.clear();
+    _reportedThisSession.clear();
+  }
+
+  /// Reset dedup session (call on app foreground if needed).
+  void resetSession() {
+    _reportedThisSession.clear();
   }
 
   // ---------------------------------------------------------------------------
@@ -172,6 +187,12 @@ class ErrorReportingService {
   // ---------------------------------------------------------------------------
 
   void _forwardToCrashlytics(AppError error, StackTrace? stackTrace) {
+    // Deduplicate: only report each unique error code once per cold start
+    final dedupKey =
+        '${error.category.name}:${error.code ?? error.message.hashCode}';
+    if (_reportedThisSession.contains(dedupKey)) return;
+    _reportedThisSession.add(dedupKey);
+
     try {
       // Set contextual keys
       if (error.code != null) {

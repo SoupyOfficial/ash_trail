@@ -6,6 +6,7 @@ import '../services/account_service.dart';
 import '../services/account_session_manager.dart';
 import '../services/crash_reporting_service.dart';
 import '../services/token_service.dart';
+import '../services/error_reporting_service.dart';
 import '../providers/auth_provider.dart';
 import '../models/account.dart';
 import '../models/enums.dart' as enums;
@@ -155,11 +156,16 @@ class AccountIntegrationService {
         '[CUSTOM_TOKEN] Token stored: ${customToken.length} chars, '
         'expiresIn=${expiresIn}s for uid=$uid',
       );
-    } catch (e) {
+    } catch (e, st) {
       _log.e(
         '[CUSTOM_TOKEN] FAILED to generate token for uid=$uid — '
         'account switching may require re-authentication',
         error: e,
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountIntegrationService._generateAndStoreCustomToken',
       );
     }
   }
@@ -245,7 +251,7 @@ class AccountIntegrationService {
         'isLoggedIn=${account.isLoggedIn}',
       );
       return account;
-    } catch (e) {
+    } catch (e, st) {
       _log.e(
         '[GMAIL_FLOW_FAIL] Google sign-in failed: type=${e.runtimeType}',
         error: e,
@@ -254,6 +260,11 @@ class AccountIntegrationService {
         e,
         StackTrace.current,
         reason: 'Failed to sign in with Google and sync account',
+      );
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountIntegrationService.signInWithGoogle',
       );
       rethrow;
     }

@@ -1,61 +1,79 @@
 import 'dart:convert';
+import '../logging/app_logger.dart';
 import '../models/log_record.dart';
 import '../models/enums.dart';
+import 'app_analytics_service.dart';
+import 'app_performance_service.dart';
+import 'error_reporting_service.dart';
 
 /// Export service per design doc 23. Import - Export
 /// Provides CSV and JSON export functionality for log records
 class ExportService {
+  static final _log = AppLogger.logger('ExportService');
+
   /// Export log records to CSV format per design doc 23.4.1
   /// Returns CSV string with headers and data rows
   Future<String> exportToCsv(List<LogRecord> records) async {
-    // Per design doc 23.4.1: Flat format for spreadsheets
-    // Fields: id, accountId, eventType, eventAt, duration, note, etc.
+    return AppPerformanceService.instance.traceExport(() async {
+      // Per design doc 23.4.1: Flat format for spreadsheets
+      // Fields: id, accountId, eventType, eventAt, duration, note, etc.
 
-    final buffer = StringBuffer();
+      final buffer = StringBuffer();
 
-    // CSV Header - includes logId as the stable identifier
-    buffer.writeln(
-      'logId,accountId,eventType,eventAt,duration,unit,note,moodRating,physicalRating,latitude,longitude,source,syncState,createdAt,updatedAt',
-    );
-
-    // Data rows
-    for (final record in records) {
+      // CSV Header - includes logId as the stable identifier
       buffer.writeln(
-        '${record.logId},'
-        '${record.accountId},'
-        '${record.eventType.name},'
-        '${record.eventAt.toIso8601String()},'
-        '${record.duration},'
-        '${record.unit.name},'
-        '"${_escapeCsv(record.note ?? '')}",'
-        '${record.moodRating ?? ''},'
-        '${record.physicalRating ?? ''},'
-        '${record.latitude ?? ''},'
-        '${record.longitude ?? ''},'
-        '${record.source.name},'
-        '${record.syncState.name},'
-        '${record.createdAt.toIso8601String()},'
-        '${record.updatedAt.toIso8601String()}',
+        'logId,accountId,eventType,eventAt,duration,unit,note,moodRating,physicalRating,latitude,longitude,source,syncState,createdAt,updatedAt',
       );
-    }
 
-    return buffer.toString();
+      // Data rows
+      for (final record in records) {
+        buffer.writeln(
+          '${record.logId},'
+          '${record.accountId},'
+          '${record.eventType.name},'
+          '${record.eventAt.toIso8601String()},'
+          '${record.duration},'
+          '${record.unit.name},'
+          '"${_escapeCsv(record.note ?? '')}",'
+          '${record.moodRating ?? ''},'
+          '${record.physicalRating ?? ''},'
+          '${record.latitude ?? ''},'
+          '${record.longitude ?? ''},'
+          '${record.source.name},'
+          '${record.syncState.name},'
+          '${record.createdAt.toIso8601String()},'
+          '${record.updatedAt.toIso8601String()}',
+        );
+      }
+
+      AppAnalyticsService.instance.logExport(
+        format: 'csv',
+        recordCount: records.length,
+      );
+      return buffer.toString();
+    }, attributes: {'format': 'csv'});
   }
 
   /// Export log records to JSON format per design doc 23.4.2
   /// Returns JSON string with full-fidelity backup
   Future<String> exportToJson(List<LogRecord> records) async {
-    // Per design doc 23.4.2: Full-fidelity backup format
+    return AppPerformanceService.instance.traceExport(() async {
+      // Per design doc 23.4.2: Full-fidelity backup format
 
-    final exportData = {
-      'version': '1.0.0',
-      'exportedAt': DateTime.now().toIso8601String(),
-      'recordCount': records.length,
-      'records': records.map((r) => _recordToJson(r)).toList(),
-    };
+      final exportData = {
+        'version': '1.0.0',
+        'exportedAt': DateTime.now().toIso8601String(),
+        'recordCount': records.length,
+        'records': records.map((r) => _recordToJson(r)).toList(),
+      };
 
-    // Use dart:convert for proper JSON encoding with escaping
-    return const JsonEncoder.withIndent('  ').convert(exportData);
+      // Use dart:convert for proper JSON encoding with escaping
+      AppAnalyticsService.instance.logExport(
+        format: 'json',
+        recordCount: records.length,
+      );
+      return const JsonEncoder.withIndent('  ').convert(exportData);
+    }, attributes: {'format': 'json'});
   }
 
   /// Import log records from CSV per design doc 23.6.1
@@ -116,7 +134,13 @@ class ExportService {
           if (record != null) {
             records.add(record);
           }
-        } catch (e) {
+        } catch (e, st) {
+          _log.e('Error parsing CSV row ${i + 1}', error: e);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'ExportService.importFromCsv',
+          );
           errors.add('Row ${i + 1}: $e');
         }
       }
@@ -132,7 +156,13 @@ class ExportService {
         errors: errors,
         records: records,
       );
-    } catch (e) {
+    } catch (e, st) {
+      _log.e('Failed to parse CSV', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'ExportService.importFromCsv',
+      );
       return ImportResult(
         success: false,
         message: 'Failed to parse CSV: $e',
@@ -180,7 +210,13 @@ class ExportService {
           if (record != null) {
             records.add(record);
           }
-        } catch (e) {
+        } catch (e, st) {
+          _log.e('Error parsing JSON record $i', error: e);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: st,
+            context: 'ExportService.importFromJson',
+          );
           errors.add('Record $i: $e');
         }
       }
@@ -196,7 +232,13 @@ class ExportService {
         errors: errors,
         records: records,
       );
-    } catch (e) {
+    } catch (e, st) {
+      _log.e('Failed to parse JSON', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'ExportService.importFromJson',
+      );
       return ImportResult(
         success: false,
         message: 'Failed to parse JSON: $e',

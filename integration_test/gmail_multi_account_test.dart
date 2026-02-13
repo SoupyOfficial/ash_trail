@@ -13,7 +13,6 @@ import 'components/home.dart';
 import 'components/login.dart';
 import 'components/nav_bar.dart';
 import 'components/history.dart';
-import 'components/welcome.dart';
 import 'flows/gmail_login_flow.dart';
 import 'helpers/config.dart';
 import 'helpers/pump.dart';
@@ -260,6 +259,85 @@ bool _verifyTopHistoryRecord(
 }
 
 void main() {
+  // ─────────────────────────────────────────────────────────────────────────
+  // Gmail Test 0: Auth Persistence Smoke Test (pre-check)
+  // ─────────────────────────────────────────────────────────────────────────
+  patrolTest(
+    'Gmail: Auth persistence pre-check',
+    config: defaultPatrolConfig,
+    nativeAutomatorConfig: defaultNativeConfig,
+    ($) async {
+      _log.testStart(
+        0,
+        'Gmail: Auth persistence pre-check',
+        description:
+            'Lightweight smoke test that checks if Firebase Auth\n'
+            'state has persisted from a previous run. Logs the result\n'
+            'but does NOT fail — the first actual login test handles\n'
+            'the manual flow if needed.',
+      );
+
+      // Launch the app so Firebase is initialized
+      _log.stepStart('G0.1', 'Launch app and check Firebase Auth state');
+      _log.arrange('Launching app to initialize Firebase...');
+      await ensureGmailLoggedIn($, selectAccountEmail: testEmail4);
+      _log.stepEnd('G0.1', summary: 'App launched and logged in');
+
+      // Check Firebase Auth current user
+      _log.stepStart('G0.2', 'Verify Firebase Auth state');
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser != null) {
+        _log.pass(
+          'Persisted session found: ${currentUser.email} '
+          '(uid: ${currentUser.uid.substring(0, 8)}...)',
+        );
+
+        // Verify token can refresh
+        try {
+          await currentUser.getIdToken();
+          _log.pass('Firebase token refresh OK — session valid');
+        } catch (e) {
+          _log.warn('Token refresh failed: $e');
+        }
+
+        // Check Hive account sync
+        try {
+          final hiveAccount = await AccountService().getActiveAccount();
+          if (hiveAccount != null) {
+            _log.pass(
+              'Hive active account: ${hiveAccount.email} '
+              '(matches Firebase: ${hiveAccount.userId == currentUser.uid})',
+            );
+          } else {
+            _log.warn(
+              'Hive has no active account — app AuthWrapper will re-create it',
+            );
+          }
+        } catch (e) {
+          _log.warn('Hive check error: $e');
+        }
+
+        await debugDumpAccountState($, 'Auth persistence pre-check');
+      } else {
+        _log.info(
+          'No cached auth — manual seeding required on first run. '
+          'ensureGmailLoggedIn() will handle the manual flow.',
+        );
+      }
+
+      _log.stepEnd('G0.2');
+
+      await takeScreenshot($, 'gmail_precheck_state');
+
+      _log.testEnd(0, 'Gmail: Auth persistence pre-check', [
+        currentUser != null
+            ? '✓ Persisted session: ${currentUser.email}'
+            : 'ℹ No cached session (first run — manual seeding will occur)',
+      ]);
+    },
+  );
+
   // ─────────────────────────────────────────────────────────────────────────
   // Gmail Test 1: Add second Gmail account
   // ─────────────────────────────────────────────────────────────────────────
@@ -1008,10 +1086,15 @@ void main() {
   );
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Gmail Test 5: Sign out single account — verify auto-switch
+  // Gmail Test 5: Sign out single account — SKIPPED to preserve auth state
   // ─────────────────────────────────────────────────────────────────────────
+  // NOTE: Signing out destroys persisted Google Sign-In state in the iOS
+  // Keychain.  Re-seeding requires manual OAuth interaction, so this test
+  // is intentionally disabled.  The underlying sign-out logic is still
+  // covered by non-Gmail (email/password) tests.
   patrolTest(
     'Gmail multi-account: sign out one account, verify auto-switch',
+    skip: true,
     config: defaultPatrolConfig,
     nativeAutomatorConfig: defaultNativeConfig,
     ($) async {
@@ -1151,7 +1234,7 @@ void main() {
   // Gmail Test 6: Full cycle — add, switch, log, verify isolation, sign out
   // ─────────────────────────────────────────────────────────────────────────
   patrolTest(
-    'Gmail multi-account: full cycle (add → switch → log → verify → signout)',
+    'Gmail multi-account: full cycle (add → switch → log → verify)',
     config: defaultPatrolConfig,
     nativeAutomatorConfig: defaultNativeConfig,
     ($) async {
@@ -1161,54 +1244,24 @@ void main() {
         description:
             'Comprehensive end-to-end lifecycle with Gmail:\n'
             'Google Sign-In → log → verify → add Gmail account →\n'
-            'switch → log → verify → data isolation → cleanup',
+            'switch → log → verify → data isolation',
       );
 
       debugDumpLoggerConfig('Gmail Test 6 start');
 
-      // ── Phase 1: Start clean → Login Gmail account 4 via Google Sign-In ──
-      _log.stepStart('G6.1', 'Clean start — login Gmail account 4');
+      // ── Phase 1: Ensure Gmail account 4 is logged in ──
+      _log.stepStart('G6.1', 'Ensure Gmail account 4 logged in');
       _log.arrange(
-        'Logging out all accounts, then signing in with Gmail account 4',
+        'Ensuring Gmail account 4 is signed in (persisted or fresh)',
       );
-      await ensureGmailLoggedOut($);
-      await debugDumpAccountState($, 'Clean start — logged out');
-      await takeScreenshot($, 'gmail_full_01_logged_out');
+      await ensureGmailLoggedIn($, selectAccountEmail: testEmail4);
+      await handlePermissionDialogs($);
+      await settle($, frames: 20);
 
       final home = HomeComponent($);
       final nav = NavBarComponent($);
       final accounts = AccountsComponent($);
-      final welcome = WelcomeComponent($);
       final login = LoginComponent($);
-
-      _log.action('Tapping Sign In on Welcome screen');
-      await welcome.tapSignIn();
-      await login.waitUntilVisible();
-
-      // Use Google Sign-In instead of email/password
-      _log.action('Tapping "Continue with Google"');
-      await login.tapGoogleSignIn();
-
-      // Handle native Google account picker
-      await $.pump(const Duration(seconds: 2));
-      try {
-        await $.native.tap(
-          Selector(textContains: testEmail4),
-          appId: 'com.google.chrome',
-        );
-        _log.pass('Selected $testEmail4 in Google picker');
-      } catch (e) {
-        _log.warn('Google picker interaction: $e');
-      }
-      await $.pump(const Duration(seconds: 3));
-
-      await pumpUntilFound(
-        $,
-        find.byKey(const Key('nav_home')),
-        timeout: const Duration(seconds: 60),
-      );
-      await handlePermissionDialogs($);
-      await settle($, frames: 20);
       await debugDumpAccountState($, 'Gmail account 4 logged in');
       await takeScreenshot($, 'gmail_full_02_acct4_home');
       _log.stepEnd('G6.1', summary: 'Gmail account 4 logged in');
@@ -1452,23 +1505,9 @@ void main() {
       _log.pass('Data isolation verified — Gmail account 4 History intact');
       _log.stepEnd('G6.6');
 
-      // ── Phase 7: Cleanup ──
-      _log.stepStart('G6.7', 'Cleanup — sign out all');
-      _log.act('Signing out all accounts programmatically');
-      await debugDumpAccountState($, 'Before cleanup');
-
-      await FirebaseAuth.instance.signOut();
-      try {
-        await AccountService().deactivateAllAccounts();
-      } catch (e) {
-        _log.warn('deactivateAllAccounts error: $e');
-      }
-      await settle($, frames: 30);
-      await $.pump(const Duration(seconds: 2));
-      await settle($, frames: 10);
-      await debugDumpAccountState($, 'After cleanup');
-      await takeScreenshot($, 'gmail_full_10_cleanup');
-      _log.stepEnd('G6.7', summary: 'Cleanup complete');
+      // ── Phase 7: Skipped — no cleanup sign-out ──
+      // NOTE: Sign-out intentionally removed to preserve persisted
+      // Google Sign-In state in the iOS Keychain across test runs.
 
       _log.testEnd(6, 'Gmail: Full multi-account cycle', [
         '✓ Gmail account 4 logged in via Google Sign-In and baseline log recorded',
@@ -1477,7 +1516,6 @@ void main() {
         '✓ Quick log success after switch: $logSuccess',
         '✓ History verification: passed',
         '✓ Data isolation: verified',
-        '✓ Cleanup: completed',
       ]);
     },
   );

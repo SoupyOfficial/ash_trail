@@ -4,7 +4,6 @@ import 'components/home.dart';
 import 'components/nav_bar.dart';
 import 'components/history.dart';
 import 'components/analytics.dart';
-import 'components/logging.dart';
 import 'flows/login_flow.dart';
 import 'helpers/config.dart';
 import 'helpers/pump.dart';
@@ -19,7 +18,7 @@ import 'helpers/pump.dart';
 
 void main() {
   patrolTest(
-    'All 4 nav tabs reachable with correct screens',
+    'All 3 nav tabs reachable with correct screens',
     config: defaultPatrolConfig,
     nativeAutomatorConfig: defaultNativeConfig,
     ($) async {
@@ -29,18 +28,11 @@ void main() {
       final home = HomeComponent($);
       final history = HistoryComponent($);
       final analytics = AnalyticsComponent($);
-      final logging = LoggingComponent($);
 
       // Already on Home
       nav.verifyVisible();
       home.verifyVisible();
       await takeScreenshot($, 'nav_home_tab');
-
-      // Navigate to History
-      await nav.tapHistory();
-      await history.waitUntilVisible();
-      history.verifyVisible();
-      await takeScreenshot($, 'nav_history_tab');
 
       // Navigate to Analytics
       await nav.tapAnalytics();
@@ -48,12 +40,11 @@ void main() {
       analytics.verifyVisible();
       await takeScreenshot($, 'nav_analytics_tab');
 
-      // Navigate to Log
-      await nav.tapLog();
-      await handlePermissionDialogs($);
-      await logging.waitUntilVisible();
-      logging.verifyVisible();
-      await takeScreenshot($, 'nav_logging_tab');
+      // Navigate to History
+      await nav.tapHistory();
+      await history.waitUntilVisible();
+      history.verifyVisible();
+      await takeScreenshot($, 'nav_history_tab');
 
       // Navigate back to Home
       await nav.tapHome();
@@ -75,9 +66,8 @@ void main() {
 
       // Cycle through tabs 3 times rapidly
       for (int i = 0; i < 3; i++) {
-        await nav.tapHistory();
         await nav.tapAnalytics();
-        await nav.tapLog();
+        await nav.tapHistory();
         await nav.tapHome();
       }
 

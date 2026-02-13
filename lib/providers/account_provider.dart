@@ -4,6 +4,9 @@ import '../logging/app_logger.dart';
 import '../models/account.dart';
 import '../services/account_service.dart';
 import '../services/account_session_manager.dart';
+import '../services/app_analytics_service.dart';
+import '../services/app_performance_service.dart';
+import '../services/error_reporting_service.dart';
 import '../services/token_service.dart';
 import 'log_record_provider.dart';
 
@@ -65,12 +68,18 @@ final allAccountsProvider = FutureProvider<List<Account>>((ref) async {
   try {
     final accounts = await service.getAllAccounts();
     _accountLog.d('allAccountsProvider loaded ${accounts.length} accounts');
+    AppAnalyticsService.instance.setAccountCount(accounts.length);
     return accounts;
   } catch (error, stackTrace) {
     _accountLog.e(
       'allAccountsProvider error',
       error: error,
       stackTrace: stackTrace,
+    );
+    ErrorReportingService.instance.reportException(
+      error,
+      stackTrace: stackTrace,
+      context: 'allAccountsProvider',
     );
     rethrow;
   }
@@ -94,6 +103,11 @@ final loggedInAccountsProvider = FutureProvider<List<Account>>((ref) async {
       'loggedInAccountsProvider error',
       error: error,
       stackTrace: stackTrace,
+    );
+    ErrorReportingService.instance.reportException(
+      error,
+      stackTrace: stackTrace,
+      context: 'loggedInAccountsProvider',
     );
     rethrow;
   }
@@ -128,95 +142,113 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
   ///
   /// The account must be logged in (have a valid session).
   Future<void> switchAccount(String userId) async {
-    _accountLog.w('[SWITCH_START] switchAccount($userId)');
-    final stopwatch = Stopwatch()..start();
-    state = const AsyncValue.loading();
-    try {
-      final sessionManager = _ref.read(accountSessionManagerProvider);
-      final tokenService = _ref.read(tokenServiceProvider);
-      final auth = FirebaseAuth.instance;
+    return AppPerformanceService.instance.traceAccountSwitch(() async {
+      _accountLog.w('[SWITCH_START] switchAccount($userId)');
+      final stopwatch = Stopwatch()..start();
+      state = const AsyncValue.loading();
+      try {
+        final sessionManager = _ref.read(accountSessionManagerProvider);
+        final tokenService = _ref.read(tokenServiceProvider);
+        final auth = FirebaseAuth.instance;
 
-      // Check if already authenticated as this user
-      final currentAuthUid = auth.currentUser?.uid;
-      _accountLog.w(
-        '[SWITCH] Firebase currentUser uid=$currentAuthUid, '
-        'target=$userId, needsAuth=${currentAuthUid != userId}',
-      );
-
-      if (currentAuthUid != userId) {
-        String? customToken = await sessionManager.getValidCustomToken(userId);
+        // Check if already authenticated as this user
+        final currentAuthUid = auth.currentUser?.uid;
         _accountLog.w(
-          '[SWITCH] Cached custom token: ${customToken != null ? 'found (${customToken.length} chars)' : 'NOT FOUND'}',
+          '[SWITCH] Firebase currentUser uid=$currentAuthUid, '
+          'target=$userId, needsAuth=${currentAuthUid != userId}',
         );
 
-        if (customToken == null) {
-          try {
-            _accountLog.w(
-              '[SWITCH] Generating new custom token via Cloud Function...',
-            );
-            final tokenData = await tokenService.generateCustomToken(userId);
-            customToken = tokenData['customToken'] as String;
-            await sessionManager.storeCustomToken(userId, customToken);
-            _accountLog.w('[SWITCH] New custom token generated and stored');
-          } catch (e) {
-            _accountLog.e('[SWITCH] Failed to generate custom token', error: e);
-          }
-        }
+        if (currentAuthUid != userId) {
+          String? customToken = await sessionManager.getValidCustomToken(
+            userId,
+          );
+          _accountLog.w(
+            '[SWITCH] Cached custom token: ${customToken != null ? 'found (${customToken.length} chars)' : 'NOT FOUND'}',
+          );
 
-        if (customToken != null) {
-          try {
-            _accountLog.w('[SWITCH] Signing in with custom token...');
-            await auth.signInWithCustomToken(customToken);
-            _accountLog.w(
-              '[SWITCH] Firebase signInWithCustomToken SUCCESS — '
-              'uid=${auth.currentUser?.uid}, email=${auth.currentUser?.email}',
-            );
-          } catch (e) {
-            _accountLog.w(
-              '[SWITCH] signInWithCustomToken FAILED — retrying',
-              error: e,
-            );
-            await sessionManager.removeCustomToken(userId);
+          if (customToken == null) {
             try {
+              _accountLog.w(
+                '[SWITCH] Generating new custom token via Cloud Function...',
+              );
               final tokenData = await tokenService.generateCustomToken(userId);
               customToken = tokenData['customToken'] as String;
               await sessionManager.storeCustomToken(userId, customToken);
-              await auth.signInWithCustomToken(customToken);
-              _accountLog.w('[SWITCH] Retry signIn SUCCESS');
-            } catch (retryError) {
-              _accountLog.e('[SWITCH] Retry signIn FAILED', error: retryError);
+              _accountLog.w('[SWITCH] New custom token generated and stored');
+            } catch (e) {
+              _accountLog.e(
+                '[SWITCH] Failed to generate custom token',
+                error: e,
+              );
             }
           }
-        } else {
-          _accountLog.w(
-            '[SWITCH] No custom token available — Firebase auth NOT updated',
-          );
+
+          if (customToken != null) {
+            try {
+              _accountLog.w('[SWITCH] Signing in with custom token...');
+              await auth.signInWithCustomToken(customToken);
+              _accountLog.w(
+                '[SWITCH] Firebase signInWithCustomToken SUCCESS — '
+                'uid=${auth.currentUser?.uid}, email=${auth.currentUser?.email}',
+              );
+            } catch (e) {
+              _accountLog.w(
+                '[SWITCH] signInWithCustomToken FAILED — retrying',
+                error: e,
+              );
+              await sessionManager.removeCustomToken(userId);
+              try {
+                final tokenData = await tokenService.generateCustomToken(
+                  userId,
+                );
+                customToken = tokenData['customToken'] as String;
+                await sessionManager.storeCustomToken(userId, customToken);
+                await auth.signInWithCustomToken(customToken);
+                _accountLog.w('[SWITCH] Retry signIn SUCCESS');
+              } catch (retryError) {
+                _accountLog.e(
+                  '[SWITCH] Retry signIn FAILED',
+                  error: retryError,
+                );
+              }
+            }
+          } else {
+            _accountLog.w(
+              '[SWITCH] No custom token available — Firebase auth NOT updated',
+            );
+          }
         }
+
+        _accountLog.w('[SWITCH] Setting active account in Hive...');
+        await sessionManager.setActiveAccount(userId);
+        _accountLog.w(
+          '[SWITCH] Hive active account set. Resetting draft + invalidating providers...',
+        );
+        _ref.read(logDraftProvider.notifier).reset();
+        _invalidateProviders();
+
+        stopwatch.stop();
+        _accountLog.w(
+          '[SWITCH_END] switchAccount($userId) completed in ${stopwatch.elapsedMilliseconds}ms',
+        );
+
+        AppAnalyticsService.instance.logAccountSwitch();
+        state = const AsyncValue.data(null);
+      } catch (e, st) {
+        stopwatch.stop();
+        _accountLog.e(
+          '[SWITCH_END] switchAccount ERROR after ${stopwatch.elapsedMilliseconds}ms',
+          error: e,
+          stackTrace: st,
+        );
+        ErrorReportingService.instance.reportException(
+          e,
+          stackTrace: st,
+          context: 'AccountSwitcher.switchAccount',
+        );
+        state = AsyncValue.error(e, st);
       }
-
-      _accountLog.w('[SWITCH] Setting active account in Hive...');
-      await sessionManager.setActiveAccount(userId);
-      _accountLog.w(
-        '[SWITCH] Hive active account set. Resetting draft + invalidating providers...',
-      );
-      _ref.read(logDraftProvider.notifier).reset();
-      _invalidateProviders();
-
-      stopwatch.stop();
-      _accountLog.w(
-        '[SWITCH_END] switchAccount($userId) completed in ${stopwatch.elapsedMilliseconds}ms',
-      );
-
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      stopwatch.stop();
-      _accountLog.e(
-        '[SWITCH_END] switchAccount ERROR after ${stopwatch.elapsedMilliseconds}ms',
-        error: e,
-        stackTrace: st,
-      );
-      state = AsyncValue.error(e, st);
-    }
+    });
   }
 
   /// Helper to invalidate all account-related providers
@@ -242,6 +274,11 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
 
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSwitcher.addAccount',
+      );
       state = AsyncValue.error(e, st);
     }
   }
@@ -260,6 +297,11 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
 
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSwitcher.signOutAccount',
+      );
       state = AsyncValue.error(e, st);
     }
   }
@@ -278,6 +320,11 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
 
       state = const AsyncValue.data(null);
     } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'AccountSwitcher.deleteAccount',
+      );
       state = AsyncValue.error(e, st);
     }
   }

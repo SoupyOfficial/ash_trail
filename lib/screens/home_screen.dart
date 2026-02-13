@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/account.dart';
+import '../models/app_error.dart';
 import '../models/home_widget_config.dart';
 import '../models/log_record.dart';
 import '../providers/account_provider.dart';
@@ -12,6 +13,8 @@ import '../providers/home_widget_config_provider.dart';
 import '../providers/log_record_provider.dart'
     show activeAccountLogRecordsProvider, logRecordNotifierProvider;
 import '../providers/sync_provider.dart';
+import '../services/error_reporting_service.dart';
+import '../services/sync_service.dart';
 import '../widgets/backdate_dialog.dart';
 import '../widgets/home_widgets/home_widgets.dart';
 import '../utils/design_constants.dart';
@@ -28,6 +31,9 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _lastAccountId;
 
+  /// Cached reference so [dispose] doesn't call ref.read() after unmount.
+  SyncService? _syncService;
+
   /// Last successful records list; shown during refresh so we don't unmount
   /// the widget tree (preserves quick-log recording state and form values).
   List<LogRecord>? _lastRecords;
@@ -38,20 +44,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // Trigger initial sync after first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncService = ref.read(syncServiceProvider);
       final account = ref.read(activeAccountProvider).asData?.value;
       if (account != null) {
         _lastAccountId = account.userId;
-        final syncService = ref.read(syncServiceProvider);
-        syncService.startAccountSync(accountId: account.userId);
+        _syncService!.startAccountSync(accountId: account.userId);
       }
     });
   }
 
   void _checkAccountChange(Account? account) {
-    final syncService = ref.read(syncServiceProvider);
+    _syncService ??= ref.read(syncServiceProvider);
 
     if (account == null) {
-      syncService.stopAutoSync();
+      _syncService!.stopAutoSync();
       _lastAccountId = null;
       _lastRecords = null;
       return;
@@ -61,14 +67,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (_lastAccountId != account.userId) {
       _lastAccountId = account.userId;
       _lastRecords = null;
-      syncService.startAccountSync(accountId: account.userId);
+      _syncService!.startAccountSync(accountId: account.userId);
     }
   }
 
   @override
   void dispose() {
-    final syncService = ref.read(syncServiceProvider);
-    syncService.stopAutoSync();
+    _syncService?.stopAutoSync();
     super.dispose();
   }
 
@@ -114,7 +119,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AccountsScreen()),
+                MaterialPageRoute(
+                  settings: const RouteSettings(name: 'AccountsScreen'),
+                  builder: (context) => const AccountsScreen(),
+                ),
               );
             },
             tooltip: 'Accounts',
@@ -140,7 +148,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             return _buildMainView(context, ref);
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('Error: $error')),
+          error: (error, _) {
+            ErrorReportingService.instance.reportException(
+              error,
+              context: 'HomeScreen.activeAccountProvider',
+            );
+            return Center(
+              child: Text(
+                (error is AppError)
+                    ? error.message
+                    : 'Something went wrong. Please try again.',
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: activeAccountAsync.maybeWhen(
@@ -187,7 +207,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AccountsScreen()),
+                MaterialPageRoute(
+                  settings: const RouteSettings(name: 'AccountsScreen'),
+                  builder: (context) => const AccountsScreen(),
+                ),
               );
             },
             icon: const Icon(Icons.add),
@@ -228,38 +251,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
         return const Center(child: CircularProgressIndicator());
       },
-      error:
-          (error, _) => Center(
-            child: Card(
-              margin: const EdgeInsets.all(16),
-              child: Padding(
-                padding: Paddings.lg,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
+      error: (error, _) {
+        ErrorReportingService.instance.reportException(
+          error,
+          context: 'HomeScreen.activeAccountLogRecordsProvider',
+        );
+        return Center(
+          child: Card(
+            margin: const EdgeInsets.all(16),
+            child: Padding(
+              padding: Paddings.lg,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Theme.of(context).colorScheme.error,
+                    size: IconSize.xl.value,
+                  ),
+                  SizedBox(height: Spacing.md.value),
+                  Text(
+                    'Error loading entries',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  SizedBox(height: Spacing.xs.value),
+                  Text(
+                    (error is AppError)
+                        ? error.message
+                        : 'Something went wrong. Please try again.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.error,
-                      size: IconSize.xl.value,
                     ),
-                    SizedBox(height: Spacing.md.value),
-                    Text(
-                      'Error loading entries',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    SizedBox(height: Spacing.xs.value),
-                    Text(
-                      error.toString(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
+        );
+      },
     );
   }
 
@@ -579,7 +609,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error deleting entry: $e'),
+          content: Text(
+            (e is AppError)
+                ? e.message
+                : 'Something went wrong. Please try again.',
+          ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 3),
         ),

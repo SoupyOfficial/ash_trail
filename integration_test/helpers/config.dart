@@ -12,8 +12,11 @@ const testEmail4 = 'ashtraildev3@gmail.com';
 const testPassword4 = 'AshTestPass123!';
 
 // Account 5 (Gmail — Google Sign-In)
-const testEmail5 = 'ashtraildev4@gmail.com';
-const testPassword5 = 'AshTestPass456!';
+// const testEmail5 = 'ashtraildev4@gmail.com';
+// const testPassword5 = 'AshTestPass456!';
+// Account 5 (Gmail — Google Sign-In)
+const testEmail5 = 'soupsterx@live.com';
+const testPassword5 = 'Achieve23!';
 
 // ─── Patrol configuration ────────────────────────────────────────────────────
 

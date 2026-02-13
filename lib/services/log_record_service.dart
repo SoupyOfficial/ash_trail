@@ -5,6 +5,7 @@ import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../repositories/log_record_repository.dart';
 import 'validation_service.dart';
+import 'app_analytics_service.dart';
 import 'database_service.dart';
 import 'account_service.dart';
 
@@ -144,6 +145,7 @@ class LogRecordService {
       '[CREATE_LOG_END] Record persisted: logId=${created.logId}, '
       'accountId=${created.accountId}',
     );
+    AppAnalyticsService.instance.logLogCreated(eventType: eventType.name);
     return created;
   }
 
@@ -246,12 +248,14 @@ class LogRecordService {
     // Mark as dirty
     record.markDirty();
 
+    AppAnalyticsService.instance.logLogUpdated();
     return await _repository.update(record);
   }
 
   /// Soft delete a log record
   Future<void> deleteLogRecord(LogRecord record) async {
     record.softDelete();
+    AppAnalyticsService.instance.logLogDeleted();
     await _repository.update(record);
   }
 
@@ -498,6 +502,10 @@ class LogRecordService {
       timeConfidence: TimeConfidence.high,
     );
 
+    AppAnalyticsService.instance.logLogCreated(
+      quickLog: true,
+      eventType: (eventType ?? EventType.vape).name,
+    );
     return await _repository.create(record);
   }
 
@@ -611,6 +619,7 @@ class LogRecordService {
     record.deletedAt = null;
     record.markDirty();
 
+    AppAnalyticsService.instance.logLogDeleted(restored: true);
     await _repository.update(record);
   }
 

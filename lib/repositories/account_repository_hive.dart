@@ -4,6 +4,7 @@ import '../logging/app_logger.dart';
 import '../models/account.dart';
 import '../models/web_models.dart';
 import '../models/model_converters.dart';
+import '../services/error_reporting_service.dart';
 import 'account_repository.dart';
 
 /// Web implementation of AccountRepository using Hive
@@ -71,10 +72,20 @@ class AccountRepositoryHive implements AccountRepository {
               error: addError,
               stackTrace: addStackTrace,
             );
+            ErrorReportingService.instance.reportException(
+              addError,
+              stackTrace: addStackTrace,
+              context: 'AccountRepositoryHive._emitChanges.add',
+            );
           }
         })
         .catchError((e, stackTrace) {
           _log.e('Error in _emitChanges', error: e, stackTrace: stackTrace);
+          ErrorReportingService.instance.reportException(
+            e,
+            stackTrace: stackTrace,
+            context: 'AccountRepositoryHive._emitChanges',
+          );
           if (!_controller.isClosed) {
             try {
               _controller.addError(e, stackTrace);
@@ -83,6 +94,11 @@ class AccountRepositoryHive implements AccountRepository {
                 'Error adding error to stream',
                 error: addError,
                 stackTrace: addStackTrace,
+              );
+              ErrorReportingService.instance.reportException(
+                addError,
+                stackTrace: addStackTrace,
+                context: 'AccountRepositoryHive._emitChanges.addError',
               );
             }
           }
@@ -103,6 +119,11 @@ class AccountRepositoryHive implements AccountRepository {
         accounts.add(account);
       } catch (e, stackTrace) {
         _log.e('Error processing key "$key"', error: e, stackTrace: stackTrace);
+        ErrorReportingService.instance.reportException(
+          e,
+          stackTrace: stackTrace,
+          context: 'AccountRepositoryHive.getAll',
+        );
       }
     }
     return accounts;
@@ -227,7 +248,12 @@ class AccountRepositoryHive implements AccountRepository {
     return _controller.stream.map((accounts) {
       try {
         return accounts.firstWhere((a) => a.isActive);
-      } catch (_) {
+      } catch (e, st) {
+        _log.t(
+          'No active account found in watchActive',
+          error: e,
+          stackTrace: st,
+        );
         return null;
       }
     });

@@ -991,6 +991,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
     final result = await Navigator.push<LatLng?>(
       context,
       MaterialPageRoute(
+        settings: const RouteSettings(name: 'LocationMapPicker'),
         builder:
             (context) => LocationMapPicker(
               initialLatitude: draft.latitude,

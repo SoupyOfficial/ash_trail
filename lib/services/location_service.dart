@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../logging/app_logger.dart';
+import 'error_reporting_service.dart';
 
 /// Service for handling location permissions and access
 /// Follows design doc 22.3: Handle permission requests gracefully
@@ -44,8 +45,13 @@ class LocationService {
 
       return permission == LocationPermission.whileInUse ||
           permission == LocationPermission.always;
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error requesting location permission', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LocationService.requestLocationPermission',
+      );
       return false;
     }
   }
@@ -74,8 +80,13 @@ class LocationService {
       );
 
       return position;
-    } catch (e) {
+    } catch (e, st) {
       _log.e('Error getting location', error: e);
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LocationService.getCurrentLocation',
+      );
       return null;
     }
   }

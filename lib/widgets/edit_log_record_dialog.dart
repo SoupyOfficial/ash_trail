@@ -651,6 +651,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
     final result = await Navigator.push<LatLng?>(
       context,
       MaterialPageRoute(
+        settings: const RouteSettings(name: 'LocationMapPicker'),
         builder:
             (context) => LocationMapPicker(
               initialLatitude: _latitude,

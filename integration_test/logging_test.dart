@@ -1,11 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
-import 'components/logging.dart';
-import 'components/nav_bar.dart';
-import 'flows/login_flow.dart';
 import 'helpers/config.dart';
-import 'helpers/pump.dart';
 
 /// Logging screen E2E tests — tabs, buttons, form visibility.
 ///

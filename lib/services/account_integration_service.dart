@@ -100,7 +100,7 @@ class AccountIntegrationService {
       _log.w(
         '[SYNC_ACCOUNT] Updated EXISTING account: '
         'email=${existingAccount.email}, provider=${existingAccount.authProvider}, '
-        'isActive=${makeActive}',
+        'isActive=$makeActive',
       );
       resultAccount = existingAccount;
     } else {
@@ -126,7 +126,7 @@ class AccountIntegrationService {
       _log.w(
         '[SYNC_ACCOUNT] Created NEW account: '
         'userId=${newAccount.userId}, email=${newAccount.email}, '
-        'provider=${newAccount.authProvider}, isActive=${makeActive}',
+        'provider=${newAccount.authProvider}, isActive=$makeActive',
       );
       resultAccount = newAccount;
     }

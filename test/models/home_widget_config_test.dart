@@ -204,10 +204,7 @@ void main() {
       });
 
       test('fromJson uses defaults for missing optional fields', () {
-        final json = {
-          'id': 'test-id',
-          'type': 'timeSinceLastHit',
-        };
+        final json = {'id': 'test-id', 'type': 'timeSinceLastHit'};
 
         final config = HomeWidgetConfig.fromJson(json);
         expect(config.isVisible, isTrue);
@@ -216,11 +213,7 @@ void main() {
       });
 
       test('fromJson uses default type for unknown type', () {
-        final json = {
-          'id': 'test-id',
-          'type': 'unknown_type',
-          'order': 0,
-        };
+        final json = {'id': 'test-id', 'type': 'unknown_type', 'order': 0};
 
         final config = HomeWidgetConfig.fromJson(json);
         expect(config.type, HomeWidgetType.timeSinceLastHit);
@@ -298,29 +291,49 @@ void main() {
     test('creates with widgets list', () {
       final config = HomeLayoutConfig(
         widgets: [
-          HomeWidgetConfig.create(type: HomeWidgetType.timeSinceLastHit, order: 0),
+          HomeWidgetConfig.create(
+            type: HomeWidgetType.timeSinceLastHit,
+            order: 0,
+          ),
           HomeWidgetConfig.create(type: HomeWidgetType.quickLog, order: 1),
         ],
       );
 
       expect(config.widgets.length, 2);
-      expect(config.version, 1); // default
+      expect(config.version, 2); // default
     });
 
     test('defaultConfig creates standard widget set', () {
       final config = HomeLayoutConfig.defaultConfig();
       expect(config.widgets, isNotEmpty);
-      expect(config.version, 1);
+      expect(config.version, 2);
     });
 
     group('visibleWidgets', () {
       test('returns only visible widgets sorted by order', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w3', type: HomeWidgetType.quickLog, order: 2),
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0),
-            const HomeWidgetConfig(id: 'hidden', type: HomeWidgetType.recentEntries, order: 1, isVisible: false),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.totalDurationToday, order: 1),
+            const HomeWidgetConfig(
+              id: 'w3',
+              type: HomeWidgetType.quickLog,
+              order: 2,
+            ),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
+            const HomeWidgetConfig(
+              id: 'hidden',
+              type: HomeWidgetType.recentEntries,
+              order: 1,
+              isVisible: false,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.totalDurationToday,
+              order: 1,
+            ),
           ],
         );
 
@@ -334,7 +347,12 @@ void main() {
       test('returns empty list when all hidden', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0, isVisible: false),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+              isVisible: false,
+            ),
           ],
         );
 
@@ -346,7 +364,10 @@ void main() {
       test('returns true when type exists', () {
         final config = HomeLayoutConfig(
           widgets: [
-            HomeWidgetConfig.create(type: HomeWidgetType.timeSinceLastHit, order: 0),
+            HomeWidgetConfig.create(
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
           ],
         );
 
@@ -356,7 +377,10 @@ void main() {
       test('returns false when type does not exist', () {
         final config = HomeLayoutConfig(
           widgets: [
-            HomeWidgetConfig.create(type: HomeWidgetType.timeSinceLastHit, order: 0),
+            HomeWidgetConfig.create(
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
           ],
         );
 
@@ -368,8 +392,16 @@ void main() {
       test('adds widget with next order', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.quickLog, order: 1),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.quickLog,
+              order: 1,
+            ),
           ],
         );
 
@@ -400,8 +432,16 @@ void main() {
       test('removes widget by id', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.quickLog, order: 1),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.quickLog,
+              order: 1,
+            ),
           ],
         );
 
@@ -413,7 +453,11 @@ void main() {
       test('returns unchanged if id not found', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
           ],
         );
 
@@ -426,7 +470,12 @@ void main() {
       test('hides visible widget', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0, isVisible: true),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+              isVisible: true,
+            ),
           ],
         );
 
@@ -437,7 +486,12 @@ void main() {
       test('shows hidden widget', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0, isVisible: false),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+              isVisible: false,
+            ),
           ],
         );
 
@@ -448,8 +502,18 @@ void main() {
       test('does not change other widgets', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0, isVisible: true),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.quickLog, order: 1, isVisible: true),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+              isVisible: true,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.quickLog,
+              order: 1,
+              isVisible: true,
+            ),
           ],
         );
 
@@ -462,9 +526,21 @@ void main() {
       test('reorders widgets forward', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w0', type: HomeWidgetType.timeSinceLastHit, order: 0),
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.quickLog, order: 1),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.totalDurationToday, order: 2),
+            const HomeWidgetConfig(
+              id: 'w0',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.quickLog,
+              order: 1,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.totalDurationToday,
+              order: 2,
+            ),
           ],
         );
 
@@ -479,9 +555,21 @@ void main() {
       test('reorders widgets backward', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w0', type: HomeWidgetType.timeSinceLastHit, order: 0),
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.quickLog, order: 1),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.totalDurationToday, order: 2),
+            const HomeWidgetConfig(
+              id: 'w0',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.quickLog,
+              order: 1,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.totalDurationToday,
+              order: 2,
+            ),
           ],
         );
 
@@ -496,7 +584,11 @@ void main() {
       test('handles invalid old index', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w0', type: HomeWidgetType.timeSinceLastHit, order: 0),
+            const HomeWidgetConfig(
+              id: 'w0',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
           ],
         );
 
@@ -507,7 +599,11 @@ void main() {
       test('handles invalid new index', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w0', type: HomeWidgetType.timeSinceLastHit, order: 0),
+            const HomeWidgetConfig(
+              id: 'w0',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
           ],
         );
 
@@ -518,14 +614,30 @@ void main() {
       test('preserves hidden widgets after reorder', () {
         final config = HomeLayoutConfig(
           widgets: [
-            const HomeWidgetConfig(id: 'w0', type: HomeWidgetType.timeSinceLastHit, order: 0),
-            const HomeWidgetConfig(id: 'hidden', type: HomeWidgetType.quickLog, order: 1, isVisible: false),
-            const HomeWidgetConfig(id: 'w2', type: HomeWidgetType.totalDurationToday, order: 2),
+            const HomeWidgetConfig(
+              id: 'w0',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
+            const HomeWidgetConfig(
+              id: 'hidden',
+              type: HomeWidgetType.quickLog,
+              order: 1,
+              isVisible: false,
+            ),
+            const HomeWidgetConfig(
+              id: 'w2',
+              type: HomeWidgetType.totalDurationToday,
+              order: 2,
+            ),
           ],
         );
 
         final updated = config.reorder(0, 2);
-        expect(updated.widgets.any((w) => w.id == 'hidden' && !w.isVisible), isTrue);
+        expect(
+          updated.widgets.any((w) => w.id == 'hidden' && !w.isVisible),
+          isTrue,
+        );
       });
     });
 
@@ -534,7 +646,11 @@ void main() {
         final config = HomeLayoutConfig(
           version: 2,
           widgets: [
-            const HomeWidgetConfig(id: 'w1', type: HomeWidgetType.timeSinceLastHit, order: 0),
+            const HomeWidgetConfig(
+              id: 'w1',
+              type: HomeWidgetType.timeSinceLastHit,
+              order: 0,
+            ),
           ],
         );
 
@@ -561,13 +677,13 @@ void main() {
       test('fromJson uses defaults for missing fields', () {
         final json = <String, dynamic>{};
         final config = HomeLayoutConfig.fromJson(json);
-        expect(config.version, 1);
+        expect(config.version, 2);
         expect(config.widgets, isEmpty);
       });
 
       test('roundtrip preserves data', () {
         final original = HomeLayoutConfig(
-          version: 3,
+          version: 2,
           widgets: [
             const HomeWidgetConfig(
               id: 'w1',
@@ -582,7 +698,7 @@ void main() {
         final json = original.toJson();
         final restored = HomeLayoutConfig.fromJson(json);
 
-        expect(restored.version, original.version);
+        expect(restored.version, 2);
         expect(restored.widgets.length, original.widgets.length);
         expect(restored.widgets.first.id, original.widgets.first.id);
       });
@@ -591,7 +707,10 @@ void main() {
         final config = HomeLayoutConfig.defaultConfig();
         final jsonString = config.toJsonString();
         expect(jsonString, isNotEmpty);
-        expect(() => HomeLayoutConfig.fromJsonString(jsonString), returnsNormally);
+        expect(
+          () => HomeLayoutConfig.fromJsonString(jsonString),
+          returnsNormally,
+        );
       });
 
       test('fromJsonString returns default on invalid JSON', () {
@@ -605,6 +724,52 @@ void main() {
         expect(config.version, 2);
         expect(config.widgets, isEmpty);
       });
+    });
+  });
+
+  group('WidgetSize.columnSpan', () {
+    test('compact spans 1 column regardless of crossAxisCount', () {
+      expect(WidgetSize.compact.columnSpan(2), 1);
+      expect(WidgetSize.compact.columnSpan(3), 1);
+      expect(WidgetSize.compact.columnSpan(4), 1);
+    });
+
+    test('standard spans 2 columns', () {
+      expect(WidgetSize.standard.columnSpan(2), 2);
+      expect(WidgetSize.standard.columnSpan(3), 2);
+      expect(WidgetSize.standard.columnSpan(4), 2);
+    });
+
+    test('large spans full crossAxisCount', () {
+      expect(WidgetSize.large.columnSpan(2), 2);
+      expect(WidgetSize.large.columnSpan(3), 3);
+      expect(WidgetSize.large.columnSpan(4), 4);
+    });
+  });
+
+  group('HomeLayoutConfig - v1 to v2 migration', () {
+    test('fromJson migrates v1 to v2', () {
+      final json = {
+        'version': 1,
+        'widgets': [
+          {'id': 'w1', 'type': 'quickLog', 'order': 0, 'isVisible': true},
+        ],
+      };
+
+      final config = HomeLayoutConfig.fromJson(json);
+      expect(config.version, 2);
+      expect(config.widgets.length, 1);
+    });
+
+    test('fromJson migrates missing version to v2', () {
+      final json = {
+        'widgets': [
+          {'id': 'w1', 'type': 'timeSinceLastHit', 'order': 0},
+        ],
+      };
+
+      final config = HomeLayoutConfig.fromJson(json);
+      expect(config.version, 2);
     });
   });
 }

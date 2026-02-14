@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'widget_catalog.dart';
 
 /// Wrapper component for home widgets that provides:
-/// - Drag handle in edit mode
+/// - Drag handle in edit mode (whole header bar is the drag affordance)
 /// - Remove button in edit mode
 /// - Consistent styling and animation
 class HomeWidgetWrapper extends StatelessWidget {
@@ -12,7 +12,6 @@ class HomeWidgetWrapper extends StatelessWidget {
   final Widget child;
   final bool isEditMode;
   final VoidCallback? onRemove;
-  final int index;
 
   const HomeWidgetWrapper({
     super.key,
@@ -21,7 +20,6 @@ class HomeWidgetWrapper extends StatelessWidget {
     required this.child,
     required this.isEditMode,
     this.onRemove,
-    required this.index,
   });
 
   @override
@@ -35,27 +33,25 @@ class HomeWidgetWrapper extends StatelessWidget {
         horizontal: isEditMode ? 4 : 0,
         vertical: isEditMode ? 4 : 0,
       ),
-      decoration: isEditMode
-          ? BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                width: 2,
-              ),
-            )
-          : null,
+      decoration:
+          isEditMode
+              ? BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  width: 2,
+                ),
+              )
+              : null,
       child: Stack(
         fit: StackFit.passthrough,
         children: [
           // Main widget content - fill available space
-          SizedBox(
-            width: double.infinity,
-            child: child,
-          ),
+          SizedBox(width: double.infinity, child: child),
 
           // Edit mode overlay
           if (isEditMode) ...[
-            // Drag handle at top
+            // Drag handle at top (whole header is the drag affordance)
             Positioned(
               top: 0,
               left: 0,
@@ -64,11 +60,7 @@ class HomeWidgetWrapper extends StatelessWidget {
             ),
 
             // Remove button at top-right
-            Positioned(
-              top: 4,
-              right: 4,
-              child: _buildRemoveButton(context),
-            ),
+            Positioned(top: 4, right: 4, child: _buildRemoveButton(context)),
           ],
         ],
       ),
@@ -85,20 +77,14 @@ class HomeWidgetWrapper extends StatelessWidget {
       child: Row(
         children: [
           // Drag handle icon
-          ReorderableDragStartListener(
-            index: index,
-            child: MouseRegion(
-              cursor: SystemMouseCursors.grab,
-              child: GestureDetector(
-                onTap: () => HapticFeedback.selectionClick(),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  child: Icon(
-                    Icons.drag_handle,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    size: 20,
-                  ),
-                ),
+          MouseRegion(
+            cursor: SystemMouseCursors.grab,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.drag_handle,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                size: 20,
               ),
             ),
           ),
@@ -108,9 +94,9 @@ class HomeWidgetWrapper extends StatelessWidget {
             child: Text(
               entry.displayName,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.w600,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

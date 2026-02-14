@@ -90,11 +90,7 @@ void main() {
 
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: ResponsiveLayout(
-              mobile: Text('Mobile'),
-            ),
-          ),
+          home: Scaffold(body: ResponsiveLayout(mobile: Text('Mobile'))),
         ),
       );
 
@@ -125,8 +121,9 @@ void main() {
   });
 
   group('ResponsiveBuilder', () {
-    testWidgets('provides mobile form factor on narrow screens',
-        (tester) async {
+    testWidgets('provides mobile form factor on narrow screens', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -152,8 +149,9 @@ void main() {
       expect(capturedFormFactor, DeviceFormFactor.mobile);
     });
 
-    testWidgets('provides tablet form factor on medium screens',
-        (tester) async {
+    testWidgets('provides tablet form factor on medium screens', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(800, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -179,8 +177,7 @@ void main() {
       expect(capturedFormFactor, DeviceFormFactor.tablet);
     });
 
-    testWidgets('provides desktop form factor on wide screens',
-        (tester) async {
+    testWidgets('provides desktop form factor on wide screens', (tester) async {
       tester.view.physicalSize = const Size(1400, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -315,10 +312,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: ResponsiveContainer(
-              maxWidth: 600,
-              child: Text('Container'),
-            ),
+            body: ResponsiveContainer(maxWidth: 600, child: Text('Container')),
           ),
         ),
       );
@@ -359,19 +353,16 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: ResponsiveGrid(
-              spacing: 24,
-              children: [
-                Text('A'),
-                Text('B'),
-              ],
-            ),
+            body: ResponsiveGrid(spacing: 24, children: [Text('A'), Text('B')]),
           ),
         ),
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      expect(gridView.gridDelegate, isA<SliverGridDelegateWithFixedCrossAxisCount>());
+      expect(
+        gridView.gridDelegate,
+        isA<SliverGridDelegateWithFixedCrossAxisCount>(),
+      );
     });
   });
 
@@ -400,9 +391,7 @@ void main() {
     testWidgets('renders vertical gap', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: ResponsiveVerticalGap(mobile: 20),
-          ),
+          home: Scaffold(body: ResponsiveVerticalGap(mobile: 20)),
         ),
       );
 
@@ -437,10 +426,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: ResponsiveVisibility(
-              visible: true,
-              child: Text('Visible'),
-            ),
+            body: ResponsiveVisibility(visible: true, child: Text('Visible')),
           ),
         ),
       );
@@ -452,10 +438,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: ResponsiveVisibility(
-              visible: false,
-              child: Text('Visible'),
-            ),
+            body: ResponsiveVisibility(visible: false, child: Text('Visible')),
           ),
         ),
       );
@@ -639,9 +622,7 @@ void main() {
               slivers: [
                 ResponsiveSliverPadding(
                   mobilePadding: 16,
-                  sliver: const SliverToBoxAdapter(
-                    child: Text('Content'),
-                  ),
+                  sliver: const SliverToBoxAdapter(child: Text('Content')),
                 ),
               ],
             ),
@@ -824,9 +805,7 @@ void main() {
             body: AdaptiveDialog(
               title: 'Title',
               content: const Text('Content'),
-              actions: [
-                TextButton(onPressed: () {}, child: const Text('OK')),
-              ],
+              actions: [TextButton(onPressed: () {}, child: const Text('OK'))],
             ),
           ),
         ),
@@ -852,47 +831,67 @@ void main() {
 
   group('DeviceFormFactor', () {
     test('fromWidth returns mobile for narrow screens', () {
-      expect(
-        DeviceFormFactor.fromWidth(400),
-        DeviceFormFactor.mobile,
-      );
+      expect(DeviceFormFactor.fromWidth(400), DeviceFormFactor.mobile);
     });
 
     test('fromWidth returns tablet for medium screens', () {
-      expect(
-        DeviceFormFactor.fromWidth(800),
-        DeviceFormFactor.tablet,
-      );
+      expect(DeviceFormFactor.fromWidth(800), DeviceFormFactor.tablet);
     });
 
     test('fromWidth returns desktop for wide screens', () {
-      expect(
-        DeviceFormFactor.fromWidth(1400),
-        DeviceFormFactor.desktop,
-      );
+      expect(DeviceFormFactor.fromWidth(1400), DeviceFormFactor.desktop);
     });
 
     test('fromWidth handles boundary values', () {
       // Just below tablet breakpoint
-      expect(
-        DeviceFormFactor.fromWidth(599),
-        DeviceFormFactor.mobile,
-      );
+      expect(DeviceFormFactor.fromWidth(599), DeviceFormFactor.mobile);
       // At tablet breakpoint
-      expect(
-        DeviceFormFactor.fromWidth(600),
-        DeviceFormFactor.tablet,
-      );
+      expect(DeviceFormFactor.fromWidth(600), DeviceFormFactor.tablet);
       // Just below desktop breakpoint
-      expect(
-        DeviceFormFactor.fromWidth(1199),
-        DeviceFormFactor.tablet,
-      );
+      expect(DeviceFormFactor.fromWidth(1199), DeviceFormFactor.tablet);
       // At desktop breakpoint
-      expect(
-        DeviceFormFactor.fromWidth(1200),
-        DeviceFormFactor.desktop,
-      );
+      expect(DeviceFormFactor.fromWidth(1200), DeviceFormFactor.desktop);
+    });
+  });
+
+  group('DashboardGridConfig', () {
+    test('mobile: 2 columns for narrow screens', () {
+      final config = DashboardGridConfig.fromWidth(400);
+      expect(config.crossAxisCount, 2);
+      expect(config.crossAxisSpacing, 8);
+      expect(config.mainAxisSpacing, 8);
+      expect(config.padding, 16);
+    });
+
+    test('mobile: 2 columns at max mobile width', () {
+      final config = DashboardGridConfig.fromWidth(599);
+      expect(config.crossAxisCount, 2);
+    });
+
+    test('tablet: 3 columns at tablet breakpoint', () {
+      final config = DashboardGridConfig.fromWidth(600);
+      expect(config.crossAxisCount, 3);
+      expect(config.crossAxisSpacing, 12);
+      expect(config.mainAxisSpacing, 12);
+      expect(config.padding, 24);
+    });
+
+    test('tablet: 3 columns at max tablet width', () {
+      final config = DashboardGridConfig.fromWidth(1199);
+      expect(config.crossAxisCount, 3);
+    });
+
+    test('desktop: 4 columns at desktop breakpoint', () {
+      final config = DashboardGridConfig.fromWidth(1200);
+      expect(config.crossAxisCount, 4);
+      expect(config.crossAxisSpacing, 16);
+      expect(config.mainAxisSpacing, 16);
+      expect(config.padding, 24);
+    });
+
+    test('desktop: 4 columns for very wide screens', () {
+      final config = DashboardGridConfig.fromWidth(2000);
+      expect(config.crossAxisCount, 4);
     });
   });
 }

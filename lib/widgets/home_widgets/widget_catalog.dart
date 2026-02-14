@@ -100,7 +100,17 @@ enum WidgetSize {
   standard,
 
   /// Full width, taller (heatmaps, charts)
-  large,
+  large;
+
+  /// Number of grid columns this widget spans.
+  /// `compact` → 1, `standard` → 2, `large` → full-width (crossAxisCount).
+  int columnSpan(int crossAxisCount) {
+    return switch (this) {
+      WidgetSize.compact => 1,
+      WidgetSize.standard => 2,
+      WidgetSize.large => crossAxisCount,
+    };
+  }
 }
 
 /// Category for organizing widgets in picker

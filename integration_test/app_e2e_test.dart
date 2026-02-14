@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:patrol/patrol.dart';
 
 import 'components/home.dart';

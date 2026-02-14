@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -301,163 +300,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool isEditMode,
   ) {
     final visibleWidgets = layoutConfig.visibleWidgets;
-    final layoutRows = _buildLayoutRows(visibleWidgets);
 
     return Column(
       children: [
         Expanded(
-          child: ReorderableListView.builder(
-            buildDefaultDragHandles: false,
-            padding: EdgeInsets.all(
-              ResponsiveSize.responsive(
-                context: context,
-                mobile: Spacing.lg.value,
-                tablet: Spacing.xl.value,
-                desktop: Spacing.xl.value,
-              ),
-            ),
-            itemCount: layoutRows.length,
+          child: DashboardGrid(
+            visibleWidgets: visibleWidgets,
+            records: records,
+            isEditMode: isEditMode,
             onReorder: (oldIndex, newIndex) {
-              HapticFeedback.mediumImpact();
-              final oldWidgetIndex = _getFirstWidgetIndexForRow(
-                layoutRows,
-                oldIndex,
-              );
-              var newWidgetIndex = _getFirstWidgetIndexForRow(
-                layoutRows,
-                newIndex,
-              );
-              if (newIndex > oldIndex) {
-                newWidgetIndex =
-                    _getFirstWidgetIndexForRow(layoutRows, newIndex - 1) +
-                    layoutRows[newIndex - 1].length;
-              }
               ref
                   .read(homeLayoutConfigProvider.notifier)
-                  .reorder(oldWidgetIndex, newWidgetIndex);
-            },
-            proxyDecorator: (child, index, animation) {
-              return AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) {
-                  final animValue = Curves.easeInOut.transform(animation.value);
-                  final elevation = lerpDouble(0, 8, animValue)!;
-                  final scale = lerpDouble(1, 1.02, animValue)!;
-                  return Transform.scale(
-                    scale: scale,
-                    child: Material(
-                      elevation: elevation,
-                      borderRadius: BorderRadius.circular(16),
-                      child: child,
-                    ),
-                  );
-                },
-                child: child,
-              );
-            },
-            itemBuilder: (context, rowIndex) {
-              final rowWidgets = layoutRows[rowIndex];
-              final widgetIndex = _getFirstWidgetIndexForRow(
-                layoutRows,
-                rowIndex,
-              );
-
-              if (rowWidgets.length == 1) {
-                final config = rowWidgets[0];
-                return Padding(
-                  key: ValueKey('row_${config.id}'),
-                  padding: EdgeInsets.only(bottom: Spacing.md.value),
-                  child: HomeWidgetWrapper(
-                    widgetId: config.id,
-                    type: config.type,
-                    isEditMode: isEditMode,
-                    index: widgetIndex,
-                    onRemove: () => _confirmRemoveWidget(context, ref, config),
-                    child: HomeWidgetEditPadding(
-                      isEditMode: isEditMode,
-                      child: HomeWidgetBuilder(
-                        config: config,
-                        records: records,
-                        onLogCreated:
-                            () =>
-                                ref.invalidate(activeAccountLogRecordsProvider),
-                        onRecordTap: () {},
-                        onRecordDelete: (record) => _deleteLogRecord(record),
-                      ),
-                    ),
-                  ),
-                );
-              }
-
-              return Padding(
-                key: ValueKey('row_${rowWidgets[0].id}_${rowWidgets[1].id}'),
-                padding: EdgeInsets.only(bottom: Spacing.md.value),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: HomeWidgetWrapper(
-                          widgetId: rowWidgets[0].id,
-                          type: rowWidgets[0].type,
-                          isEditMode: isEditMode,
-                          index: widgetIndex,
-                          onRemove:
-                              () => _confirmRemoveWidget(
-                                context,
-                                ref,
-                                rowWidgets[0],
-                              ),
-                          child: HomeWidgetEditPadding(
-                            isEditMode: isEditMode,
-                            child: HomeWidgetBuilder(
-                              config: rowWidgets[0],
-                              records: records,
-                              onLogCreated:
-                                  () => ref.invalidate(
-                                    activeAccountLogRecordsProvider,
-                                  ),
-                              onRecordTap: () {},
-                              onRecordDelete:
-                                  (record) => _deleteLogRecord(record),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: Spacing.sm.value),
-                      Expanded(
-                        child: HomeWidgetWrapper(
-                          widgetId: rowWidgets[1].id,
-                          type: rowWidgets[1].type,
-                          isEditMode: isEditMode,
-                          index: widgetIndex + 1,
-                          onRemove:
-                              () => _confirmRemoveWidget(
-                                context,
-                                ref,
-                                rowWidgets[1],
-                              ),
-                          child: HomeWidgetEditPadding(
-                            isEditMode: isEditMode,
-                            child: HomeWidgetBuilder(
-                              config: rowWidgets[1],
-                              records: records,
-                              onLogCreated:
-                                  () => ref.invalidate(
-                                    activeAccountLogRecordsProvider,
-                                  ),
-                              onRecordTap: () {},
-                              onRecordDelete:
-                                  (record) => _deleteLogRecord(record),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  .reorder(oldIndex, newIndex);
+              // Show undo snackbar
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Widget moved'),
+                  duration: const Duration(seconds: 3),
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: () {
+                      ref.read(homeLayoutConfigProvider.notifier).undoReorder();
+                    },
                   ),
                 ),
               );
             },
+            onRemove: (config) => _confirmRemoveWidget(context, ref, config),
+            onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
+            onRecordTap: () {},
+            onRecordDelete: (record) => _deleteLogRecord(record),
           ),
         ),
         if (isEditMode)
@@ -477,51 +350,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
       ],
     );
-  }
-
-  /// Build layout rows from widget list
-  /// Pairs consecutive compact widgets, others get their own row
-  List<List<HomeWidgetConfig>> _buildLayoutRows(
-    List<HomeWidgetConfig> widgets,
-  ) {
-    final rows = <List<HomeWidgetConfig>>[];
-    int i = 0;
-
-    while (i < widgets.length) {
-      final config = widgets[i];
-      final entry = WidgetCatalog.getEntry(config.type);
-
-      if (entry.size == WidgetSize.compact && i + 1 < widgets.length) {
-        // Check if next widget is also compact
-        final nextConfig = widgets[i + 1];
-        final nextEntry = WidgetCatalog.getEntry(nextConfig.type);
-
-        if (nextEntry.size == WidgetSize.compact) {
-          // Pair them together
-          rows.add([config, nextConfig]);
-          i += 2;
-          continue;
-        }
-      }
-
-      // Single widget row
-      rows.add([config]);
-      i++;
-    }
-
-    return rows;
-  }
-
-  /// Get the first widget index for a given row index
-  int _getFirstWidgetIndexForRow(
-    List<List<HomeWidgetConfig>> rows,
-    int rowIndex,
-  ) {
-    int widgetIndex = 0;
-    for (int i = 0; i < rowIndex && i < rows.length; i++) {
-      widgetIndex += rows[i].length;
-    }
-    return widgetIndex;
   }
 
   void _confirmRemoveWidget(

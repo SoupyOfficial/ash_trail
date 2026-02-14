@@ -186,9 +186,12 @@ class ResponsiveGrid extends StatelessWidget {
         };
 
         final aspectRatio = switch (formFactor) {
-          DeviceFormFactor.mobile => mobileAspectRatio ?? childAspectRatio ?? 1.0,
-          DeviceFormFactor.tablet => tabletAspectRatio ?? childAspectRatio ?? 1.0,
-          DeviceFormFactor.desktop => desktopAspectRatio ?? childAspectRatio ?? 1.0,
+          DeviceFormFactor.mobile =>
+            mobileAspectRatio ?? childAspectRatio ?? 1.0,
+          DeviceFormFactor.tablet =>
+            tabletAspectRatio ?? childAspectRatio ?? 1.0,
+          DeviceFormFactor.desktop =>
+            desktopAspectRatio ?? childAspectRatio ?? 1.0,
         };
 
         return GridView.count(
@@ -202,6 +205,59 @@ class ResponsiveGrid extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+// ============================================================================
+// DASHBOARD GRID CONFIG
+// ============================================================================
+
+/// Computes grid parameters for the dashboard based on available width.
+class DashboardGridConfig {
+  final int crossAxisCount;
+  final double crossAxisSpacing;
+  final double mainAxisSpacing;
+  final double padding;
+
+  const DashboardGridConfig({
+    required this.crossAxisCount,
+    required this.crossAxisSpacing,
+    required this.mainAxisSpacing,
+    required this.padding,
+  });
+
+  /// Compute grid config from screen width using existing [Breakpoints].
+  factory DashboardGridConfig.fromWidth(double width) {
+    if (width < Breakpoints.tabletBreakpoint) {
+      // Mobile portrait
+      return const DashboardGridConfig(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        padding: 16,
+      );
+    } else if (width < Breakpoints.desktopBreakpoint) {
+      // Tablet / mobile landscape
+      return const DashboardGridConfig(
+        crossAxisCount: 3,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        padding: 24,
+      );
+    } else {
+      // Desktop
+      return const DashboardGridConfig(
+        crossAxisCount: 4,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        padding: 24,
+      );
+    }
+  }
+
+  /// Convenience: build from [BuildContext] using [MediaQuery].
+  factory DashboardGridConfig.of(BuildContext context) {
+    return DashboardGridConfig.fromWidth(MediaQuery.of(context).size.width);
   }
 }
 

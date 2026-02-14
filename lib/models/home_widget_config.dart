@@ -114,29 +114,22 @@ class HomeLayoutConfig {
   /// Schema version for migration support
   final int version;
 
-  const HomeLayoutConfig({
-    required this.widgets,
-    this.version = 1,
-  });
+  const HomeLayoutConfig({required this.widgets, this.version = 2});
 
   /// Create default configuration for new users
   factory HomeLayoutConfig.defaultConfig() {
     final defaultTypes = WidgetCatalog.defaultWidgets;
     return HomeLayoutConfig(
-      widgets: defaultTypes.asMap().entries.map((entry) {
-        return HomeWidgetConfig.create(
-          type: entry.value,
-          order: entry.key,
-        );
-      }).toList(),
+      widgets:
+          defaultTypes.asMap().entries.map((entry) {
+            return HomeWidgetConfig.create(type: entry.value, order: entry.key);
+          }).toList(),
     );
   }
 
   /// Get visible widgets sorted by order
   List<HomeWidgetConfig> get visibleWidgets {
-    return widgets
-        .where((w) => w.isVisible)
-        .toList()
+    return widgets.where((w) => w.isVisible).toList()
       ..sort((a, b) => a.order.compareTo(b.order));
   }
 
@@ -146,21 +139,22 @@ class HomeLayoutConfig {
   }
 
   /// Add a new widget
-  HomeLayoutConfig addWidget(HomeWidgetType type, {Map<String, dynamic>? settings}) {
-    final maxOrder = widgets.isEmpty
-        ? -1
-        : widgets.map((w) => w.order).reduce((a, b) => a > b ? a : b);
-    
+  HomeLayoutConfig addWidget(
+    HomeWidgetType type, {
+    Map<String, dynamic>? settings,
+  }) {
+    final maxOrder =
+        widgets.isEmpty
+            ? -1
+            : widgets.map((w) => w.order).reduce((a, b) => a > b ? a : b);
+
     final newWidget = HomeWidgetConfig.create(
       type: type,
       order: maxOrder + 1,
       settings: settings,
     );
 
-    return HomeLayoutConfig(
-      widgets: [...widgets, newWidget],
-      version: version,
-    );
+    return HomeLayoutConfig(widgets: [...widgets, newWidget], version: version);
   }
 
   /// Remove a widget by ID
@@ -174,17 +168,22 @@ class HomeLayoutConfig {
   /// Update a widget's visibility
   HomeLayoutConfig setWidgetVisibility(String widgetId, bool isVisible) {
     return HomeLayoutConfig(
-      widgets: widgets.map((w) {
-        if (w.id == widgetId) {
-          return w.copyWith(isVisible: isVisible);
-        }
-        return w;
-      }).toList(),
+      widgets:
+          widgets.map((w) {
+            if (w.id == widgetId) {
+              return w.copyWith(isVisible: isVisible);
+            }
+            return w;
+          }).toList(),
       version: version,
     );
   }
 
-  /// Reorder widgets after drag-and-drop
+  /// Reorder widgets after drag-and-drop.
+  ///
+  /// For grid-based drag-and-drop, [oldIndex] and [newIndex] are exact
+  /// flat positions in the visible list — no `ReorderableListView`-style
+  /// adjustment needed.
   HomeLayoutConfig reorder(int oldIndex, int newIndex) {
     final visible = visibleWidgets;
     if (oldIndex < 0 || oldIndex >= visible.length) return this;
@@ -197,16 +196,19 @@ class HomeLayoutConfig {
     visible.insert(newIndex, movedWidget);
 
     // Update orders for visible widgets
-    final updatedVisible = visible.asMap().entries.map((entry) {
-      return entry.value.copyWith(order: entry.key);
-    }).toList();
+    final updatedVisible =
+        visible.asMap().entries.map((entry) {
+          return entry.value.copyWith(order: entry.key);
+        }).toList();
 
     // Merge back with hidden widgets (keep their relative order)
     final hidden = widgets.where((w) => !w.isVisible).toList();
-    final maxVisibleOrder = updatedVisible.isEmpty ? -1 : updatedVisible.length - 1;
-    final updatedHidden = hidden.asMap().entries.map((entry) {
-      return entry.value.copyWith(order: maxVisibleOrder + 1 + entry.key);
-    }).toList();
+    final maxVisibleOrder =
+        updatedVisible.isEmpty ? -1 : updatedVisible.length - 1;
+    final updatedHidden =
+        hidden.asMap().entries.map((entry) {
+          return entry.value.copyWith(order: maxVisibleOrder + 1 + entry.key);
+        }).toList();
 
     return HomeLayoutConfig(
       widgets: [...updatedVisible, ...updatedHidden],
@@ -222,17 +224,21 @@ class HomeLayoutConfig {
     };
   }
 
-  /// Create from JSON
+  /// Create from JSON with version migration support
   factory HomeLayoutConfig.fromJson(Map<String, dynamic> json) {
-    final version = json['version'] as int? ?? 1;
+    final _ = json['version'] as int? ?? 1; // reserved for future migrations
     final widgetsList = json['widgets'] as List<dynamic>? ?? [];
 
-    return HomeLayoutConfig(
-      version: version,
-      widgets: widgetsList
-          .map((w) => HomeWidgetConfig.fromJson(w as Map<String, dynamic>))
-          .toList(),
-    );
+    final widgets =
+        widgetsList
+            .map((w) => HomeWidgetConfig.fromJson(w as Map<String, dynamic>))
+            .toList();
+
+    // Migrate v1 → v2: no data shape changes needed (span info comes from
+    // WidgetCatalog, not persisted config), but the version bump ensures
+    // future migrations have a baseline.
+
+    return HomeLayoutConfig(version: 2, widgets: widgets);
   }
 
   /// Serialize to JSON string

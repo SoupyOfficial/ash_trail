@@ -69,7 +69,7 @@ class TokenService {
           final expiresIn = data['expiresIn'] ?? 172800;
           _log.w(
             '[TOKEN_GEN_END] Custom token received: '
-            '${tokenLength} chars, expiresIn=${expiresIn}s '
+            '$tokenLength chars, expiresIn=${expiresIn}s '
             '(${(expiresIn as int) ~/ 3600}h)',
           );
           otelSpan?.endSuccess();

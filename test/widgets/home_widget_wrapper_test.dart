@@ -13,7 +13,6 @@ void main() {
               widgetId: 'test-widget',
               type: HomeWidgetType.hitsToday,
               isEditMode: false,
-              index: 0,
               child: const Text('Child Content'),
             ),
           ),
@@ -23,7 +22,9 @@ void main() {
       expect(find.text('Child Content'), findsOneWidget);
     });
 
-    testWidgets('does not show edit controls when not in edit mode', (tester) async {
+    testWidgets('does not show edit controls when not in edit mode', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -31,7 +32,6 @@ void main() {
               widgetId: 'test-widget',
               type: HomeWidgetType.hitsToday,
               isEditMode: false,
-              index: 0,
               child: const Text('Content'),
             ),
           ),
@@ -47,18 +47,12 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReorderableListView(
-              onReorder: (_, __) {},
-              children: [
-                HomeWidgetWrapper(
-                  key: const ValueKey('test'),
-                  widgetId: 'test-widget',
-                  type: HomeWidgetType.hitsToday,
-                  isEditMode: true,
-                  index: 0,
-                  child: const Text('Content'),
-                ),
-              ],
+            body: HomeWidgetWrapper(
+              key: const ValueKey('test'),
+              widgetId: 'test-widget',
+              type: HomeWidgetType.hitsToday,
+              isEditMode: true,
+              child: const Text('Content'),
             ),
           ),
         ),
@@ -71,19 +65,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReorderableListView(
-              onReorder: (_, __) {},
-              children: [
-                HomeWidgetWrapper(
-                  key: const ValueKey('test'),
-                  widgetId: 'test-widget',
-                  type: HomeWidgetType.hitsToday,
-                  isEditMode: true,
-                  index: 0,
-                  onRemove: () {},
-                  child: const Text('Content'),
-                ),
-              ],
+            body: HomeWidgetWrapper(
+              key: const ValueKey('test'),
+              widgetId: 'test-widget',
+              type: HomeWidgetType.hitsToday,
+              isEditMode: true,
+              onRemove: () {},
+              child: const Text('Content'),
             ),
           ),
         ),
@@ -98,19 +86,13 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReorderableListView(
-              onReorder: (_, __) {},
-              children: [
-                HomeWidgetWrapper(
-                  key: const ValueKey('test'),
-                  widgetId: 'test-widget',
-                  type: HomeWidgetType.hitsToday,
-                  isEditMode: true,
-                  index: 0,
-                  onRemove: () => removed = true,
-                  child: const Text('Content'),
-                ),
-              ],
+            body: HomeWidgetWrapper(
+              key: const ValueKey('test'),
+              widgetId: 'test-widget',
+              type: HomeWidgetType.hitsToday,
+              isEditMode: true,
+              onRemove: () => removed = true,
+              child: const Text('Content'),
             ),
           ),
         ),
@@ -126,18 +108,12 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReorderableListView(
-              onReorder: (_, __) {},
-              children: [
-                HomeWidgetWrapper(
-                  key: const ValueKey('test'),
-                  widgetId: 'test-widget',
-                  type: HomeWidgetType.hitsToday,
-                  isEditMode: true,
-                  index: 0,
-                  child: const Text('Content'),
-                ),
-              ],
+            body: HomeWidgetWrapper(
+              key: const ValueKey('test'),
+              widgetId: 'test-widget',
+              type: HomeWidgetType.hitsToday,
+              isEditMode: true,
+              child: const Text('Content'),
             ),
           ),
         ),
@@ -156,7 +132,6 @@ void main() {
               widgetId: 'test-widget',
               type: HomeWidgetType.quickLog,
               isEditMode: false,
-              index: 0,
               child: const Text('Content'),
             ),
           ),
@@ -170,18 +145,12 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ReorderableListView(
-              onReorder: (_, __) {},
-              children: [
-                HomeWidgetWrapper(
-                  key: const ValueKey('test'),
-                  widgetId: 'test-widget',
-                  type: HomeWidgetType.hitsToday,
-                  isEditMode: true,
-                  index: 0,
-                  child: const Text('Content'),
-                ),
-              ],
+            body: HomeWidgetWrapper(
+              key: const ValueKey('test'),
+              widgetId: 'test-widget',
+              type: HomeWidgetType.hitsToday,
+              isEditMode: true,
+              child: const Text('Content'),
             ),
           ),
         ),
@@ -202,7 +171,6 @@ void main() {
               widgetId: 'test-widget',
               type: HomeWidgetType.hitsToday,
               isEditMode: false,
-              index: 0,
               child: const Text('Content'),
             ),
           ),
@@ -232,7 +200,6 @@ void main() {
                 widgetId: 'test-${type.name}',
                 type: type,
                 isEditMode: false,
-                index: 0,
                 child: Text('Widget: ${type.name}'),
               ),
             ),

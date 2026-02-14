@@ -26,6 +26,9 @@ class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
   final Ref ref;
   final String? accountId;
 
+  /// Previous state for undo-reorder support.
+  HomeLayoutConfig? _previousState;
+
   HomeLayoutConfigNotifier(this.ref, this.accountId)
     : super(HomeLayoutConfig.defaultConfig()) {
     _loadConfig();
@@ -112,8 +115,19 @@ class HomeLayoutConfigNotifier extends StateNotifier<HomeLayoutConfig> {
 
   /// Reorder widgets after drag-and-drop
   Future<void> reorder(int oldIndex, int newIndex) async {
+    _previousState = state;
     state = state.reorder(oldIndex, newIndex);
     await _saveConfig();
+  }
+
+  /// Undo the last reorder operation.
+  /// Returns `true` if an undo was performed.
+  Future<bool> undoReorder() async {
+    if (_previousState == null) return false;
+    state = _previousState!;
+    _previousState = null;
+    await _saveConfig();
+    return true;
   }
 
   /// Reset to default configuration

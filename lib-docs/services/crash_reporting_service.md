@@ -4,106 +4,122 @@
 
 ## Purpose
 
-Wraps Firebase Crashlytics for crash and error reporting. Captures Flutter framework errors, platform-level errors, custom errors, user identifiers, and breadcrumb log messages. Initializes Crashlytics collection at app startup and provides static methods for recording errors and setting context throughout the app lifecycle.
+Singleton wrapper around Firebase Crashlytics. Captures uncaught Flutter framework errors, platform-level fatal errors, and explicit `recordError` calls. Collection is enabled unconditionally in all build modes (debug, profile, release/TestFlight). Provides device context enrichment via `PackageInfo` and `DeviceInfoPlugin`.
 
 ## Dependencies
 
-- `package:firebase_crashlytics/firebase_crashlytics.dart` — Crashlytics SDK
-- `package:flutter/foundation.dart` — `FlutterError`, `PlatformDispatcher`, `kDebugMode`
-- `../logging/app_logger.dart` — Structured logging via `AppLogger`
+- `dart:io` — `Platform` (iOS vs Android detection)
+- `package:firebase_crashlytics/firebase_crashlytics.dart` — `FirebaseCrashlytics`
+- `package:flutter/foundation.dart` — `kDebugMode`, `kIsWeb`, `FlutterError`, `PlatformDispatcher`
+- `package:package_info_plus/package_info_plus.dart` — `PackageInfo.fromPlatform()`
+- `package:device_info_plus/device_info_plus.dart` — `DeviceInfoPlugin`
+- `../logging/app_logger.dart` — Structured logging (`AppLogger`)
 
 ## Pseudo-Code
 
-### Class: CrashReportingService
-
-#### Fields
-- `_log` — static logger tagged `'CrashReportingService'`
-- `_instance` — static singleton instance (factory constructor)
-
-#### Constructor (Singleton)
+### Class: CrashReportingService (Singleton)
 
 ```
-CrashReportingService._internal()   // private
-
-factory CrashReportingService() → _instance
+  _log: AppLogger (tagged 'CrashReportingService')
+  _instance: CrashReportingService (static final, lazy)
+  factory() -> _instance
 ```
 
 ---
 
-#### `initialize() → Future<void>` (static)
+#### `initialize()` -> static Future\<void\>
 
 ```
 TRY:
-  // Hook Flutter framework errors → Crashlytics
-  FlutterError.onError = (errorDetails) →
-    FirebaseCrashlytics.instance.recordFlutterError(errorDetails)
+  // Wire Flutter framework errors -> Crashlytics
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError
 
-  // Hook platform-level uncaught errors → Crashlytics (fatal)
-  PlatformDispatcher.instance.onError = (error, stack) →
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal=true)
+  // Wire uncaught platform errors -> Crashlytics (fatal: true)
+  PlatformDispatcher.instance.onError = (error, stack) ->
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true)
     RETURN true
 
-  IF kDebugMode:
-    AWAIT FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true)
-    LOG 'Crash reporting initialized'
+  // Enable collection in ALL build modes (debug, profile, release)
+  AWAIT FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true)
 
-CATCH e:
-  LOG ERROR 'Error initializing crash reporting'
+  IF kDebugMode -> LOG 'Crash reporting initialized'
+
+CATCH -> LOG error
 ```
 
----
-
-#### `recordError(error, stackTrace?, {reason?, fatal=false}) → Future<void>` (static)
+#### `setDeviceContext()` -> static Future\<void\>
 
 ```
 TRY:
-  AWAIT FirebaseCrashlytics.instance.recordError(error, stackTrace, reason, fatal)
-  IF kDebugMode → LOG 'Error recorded: error, Fatal: fatal'
-CATCH e:
-  LOG ERROR 'Failed to record error'
+  // App version custom keys
+  packageInfo = AWAIT PackageInfo.fromPlatform()
+  SET custom key 'app_version' = packageInfo.version
+  SET custom key 'build_number' = packageInfo.buildNumber
+
+  // Platform-specific device keys (skip web)
+  IF NOT kIsWeb:
+    IF Platform.isIOS:
+      ios = AWAIT DeviceInfoPlugin().iosInfo
+      SET custom key 'device_model' = ios.utsname.machine
+      SET custom key 'os_version' = ios.systemVersion
+    ELSE IF Platform.isAndroid:
+      android = AWAIT DeviceInfoPlugin().androidInfo
+      SET custom key 'device_model' = android.model
+      SET custom key 'os_version' = 'Android ${android.version.release}'
+
+  LOG 'Device context set on Crashlytics'
+
+CATCH -> LOG error (non-fatal)
 ```
 
----
+#### `recordError(error, stackTrace?, {reason?, fatal = false})` -> static Future\<void\>
 
-#### `setCustomKey(String key, dynamic value) → Future<void>` (static)
+```
+TRY:
+  AWAIT FirebaseCrashlytics.instance.recordError(error, stackTrace,
+    reason: reason, fatal: fatal)
+  IF kDebugMode -> LOG 'Error recorded: $error, Fatal: $fatal'
+CATCH -> LOG error
+```
+
+#### `setCustomKey(key, value)` -> static Future\<void\>
 
 ```
 TRY: AWAIT FirebaseCrashlytics.instance.setCustomKey(key, value)
-CATCH: LOG ERROR 'Failed to set custom key'
+CATCH -> LOG error
 ```
 
----
-
-#### `setUserId(String userId) → Future<void>` (static)
+#### `setUserId(userId)` -> static Future\<void\>
 
 ```
 TRY: AWAIT FirebaseCrashlytics.instance.setUserIdentifier(userId)
-CATCH: LOG ERROR 'Failed to set user ID'
+CATCH -> LOG error
 ```
 
----
-
-#### `clearUserId() → Future<void>` (static)
+#### `clearUserId()` -> static Future\<void\>
 
 ```
 TRY: AWAIT FirebaseCrashlytics.instance.setUserIdentifier('')
-CATCH: LOG ERROR 'Failed to clear user ID'
+CATCH -> LOG error
 ```
 
----
-
-#### `logMessage(String message) → void` (static)
+#### `logMessage(message)` -> static void
 
 ```
 TRY: FirebaseCrashlytics.instance.log(message)
-CATCH: LOG ERROR 'Failed to log message'
+CATCH -> LOG error
 ```
 
----
-
-#### `isCrashlyticsCollectionEnabled() → Future<bool>` (static)
+#### `isCrashlyticsCollectionEnabled()` -> static Future\<bool\>
 
 ```
 TRY: RETURN FirebaseCrashlytics.instance.isCrashlyticsCollectionEnabled
-CATCH: LOG ERROR, RETURN false
+CATCH -> LOG error, RETURN false
 ```
+
+## Notes
+
+- Collection is always enabled (`setCrashlyticsCollectionEnabled(true)` in all build modes). Previous versions only enabled in non-debug; this was changed to ensure TestFlight crashes are always captured.
+- `setDeviceContext()` should be called once after `initialize()` at app startup (see `main.dart`). It sets four custom keys: `app_version`, `build_number`, `device_model`, `os_version`.
+- All public methods are `static` — the singleton instance is only used to satisfy the factory constructor pattern. Callers use `CrashReportingService.recordError(...)` etc.
+- Every method wraps its body in try/catch to prevent Crashlytics failures from crashing the app.

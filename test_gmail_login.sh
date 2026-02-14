@@ -6,7 +6,15 @@
 set -e
 
 PROJECT_DIR="/Volumes/Jacob-SSD/Projects/ash_trail"
-DEVICE_ID="0A875592-129B-40B6-A072-A0C0CA94AED3"
+# Auto-detect simulator: prefer iPhone 16 Pro Max, fall back to any iPhone
+DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 Pro Max" | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' || true)
+if [ -z "$DEVICE_ID" ]; then
+    DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' || true)
+fi
+if [ -z "$DEVICE_ID" ]; then
+    echo "❌ No iOS simulator found."
+    exit 1
+fi
 LOG_FILE="$PROJECT_DIR/gmail_test_$(date +%Y%m%d_%H%M%S).log"
 
 echo "======================================"

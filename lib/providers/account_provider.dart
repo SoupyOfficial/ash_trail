@@ -253,10 +253,16 @@ class AccountSwitcher extends StateNotifier<AsyncValue<void>> {
 
   /// Helper to invalidate all account-related providers
   void _invalidateProviders() {
+    _accountLog.w(
+      '[SWITCH] Invalidating providers: '
+      'activeAccountProvider, allAccountsProvider, '
+      'loggedInAccountsProvider, activeAccountLogRecordsProvider',
+    );
     _ref.invalidate(activeAccountProvider);
     _ref.invalidate(allAccountsProvider);
     _ref.invalidate(loggedInAccountsProvider);
     _ref.invalidate(activeAccountLogRecordsProvider);
+    _accountLog.w('[SWITCH] All providers invalidated');
   }
 
   /// Add a new account (for multi-account support)

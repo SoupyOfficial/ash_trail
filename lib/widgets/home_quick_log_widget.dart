@@ -111,17 +111,43 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     );
 
     if (activeAccountAsync.isLoading) {
-      // Wait for account to load
-      _log.w('[QUICK_LOG] Provider is loading — awaiting future...');
+      // Wait for account to load — but with a timeout so we don't hang forever
+      _log.w(
+        '[QUICK_LOG] Provider is loading — awaiting future (5s timeout)...',
+      );
       try {
-        activeAccount = await ref.read(activeAccountProvider.future);
+        activeAccount = await ref
+            .read(activeAccountProvider.future)
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () {
+                _log.e(
+                  '[QUICK_LOG] TIMEOUT waiting for activeAccountProvider.future! '
+                  'The provider never left the Loading state within 5 seconds. '
+                  'This likely means the account stream did not emit after '
+                  'invalidation during account switch.',
+                );
+                return null;
+              },
+            );
         _log.w(
           '[QUICK_LOG] Provider resolved: '
           'userId=${activeAccount?.userId}, email=${activeAccount?.email}',
         );
-      } catch (e) {
-        _log.e('[QUICK_LOG] Error loading active account', error: e);
+      } catch (e, st) {
+        _log.e(
+          '[QUICK_LOG] Error loading active account',
+          error: e,
+          stackTrace: st,
+        );
       }
+    } else if (activeAccountAsync.hasError) {
+      _log.e(
+        '[QUICK_LOG] Provider is in ERROR state: '
+        '${activeAccountAsync.error}',
+        error: activeAccountAsync.error,
+        stackTrace: activeAccountAsync.stackTrace,
+      );
     } else {
       activeAccount = activeAccountAsync.asData?.value;
       _log.w(
@@ -133,13 +159,17 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     if (activeAccount == null) {
       _log.e(
         '[QUICK_LOG] ABORT — No active account! '
-        'Provider state: $activeAccountAsync',
+        'Provider state: isLoading=${activeAccountAsync.isLoading}, '
+        'hasValue=${activeAccountAsync.hasValue}, '
+        'hasError=${activeAccountAsync.hasError}, '
+        'error=${activeAccountAsync.error}, '
+        'widgetAccountId=$_currentAccountId',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No active account selected'),
-            duration: Duration(seconds: 3),
+            content: Text('No active account — try switching accounts again'),
+            duration: Duration(seconds: 4),
           ),
         );
       }
@@ -173,6 +203,37 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     final service = LogRecordService(
       accountService: ref.read(accountServiceProvider),
     );
+
+    // Verify account exists in the database before attempting to create a record
+    try {
+      final accountService = ref.read(accountServiceProvider);
+      final exists = await accountService.accountExists(activeAccount.userId);
+      _log.w('[QUICK_LOG] accountExists(${activeAccount.userId}) = $exists');
+      if (!exists) {
+        _log.e(
+          '[QUICK_LOG] ABORT — account ${activeAccount.userId} / '
+          '${activeAccount.email} does NOT exist in the database! '
+          'Account may not be fully saved after switch.',
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Account not ready yet — please wait and try again',
+              ),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+    } catch (e, st) {
+      _log.e(
+        '[QUICK_LOG] Exception checking accountExists',
+        error: e,
+        stackTrace: st,
+      );
+    }
 
     try {
       // Check minimum threshold
@@ -341,13 +402,34 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
     // form" or after successfully finishing a log.
     if (activeAccountAsync.isLoading) {
       // Loading: do nothing; keep current state
+      _log.w(
+        '[QUICK_LOG_BUILD] activeAccountProvider is LOADING. '
+        'widgetAccountId=$_currentAccountId. '
+        'Quick-log button will use stale _currentAccountId until resolved.',
+      );
+    } else if (activeAccountAsync.hasError) {
+      _log.e(
+        '[QUICK_LOG_BUILD] activeAccountProvider has ERROR: '
+        '${activeAccountAsync.error}',
+        error: activeAccountAsync.error,
+      );
     } else if (activeAccount != null &&
         activeAccount.userId != _currentAccountId) {
+      _log.w(
+        '[QUICK_LOG_BUILD] Account CHANGED: '
+        '$_currentAccountId → ${activeAccount.userId} '
+        '(${activeAccount.email})',
+      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_currentAccountId != null) _cancelRecording();
         _currentAccountId = activeAccount.userId;
+        _log.w(
+          '[QUICK_LOG_BUILD] _currentAccountId updated to '
+          '${activeAccount.userId} (post-frame)',
+        );
       });
     } else if (activeAccount == null && _currentAccountId != null) {
+      _log.w('[QUICK_LOG_BUILD] Account went NULL (was $_currentAccountId)');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _cancelRecording();
         _currentAccountId = null;

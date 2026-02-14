@@ -3,139 +3,157 @@
 > **Source:** `lib/widgets/home_quick_log_widget.dart`
 
 ## Purpose
-Minimal quick-log widget for the home screen. Uses a press-and-hold gesture to record duration (submits on release), with optional mood/physical sliders and reason chips. Hard-coded to eventType=vape, unit=seconds. Includes extensive multi-account diagnostic logging and location capture.
+
+Minimal quick-log widget for the home screen. Provides press-and-hold duration recording (submit on release), mood/physical rating sliders, and reason filter chips. Hard-coded to eventType = vape, unit = seconds. Includes extensive multi-account safety checks and diagnostic logging.
 
 ## Dependencies
+
 - `package:flutter/material.dart` — Flutter UI framework
-- `../logging/app_logger.dart` — AppLogger for diagnostics
 - `package:flutter_riverpod/flutter_riverpod.dart` — State management
-- `dart:async` — Timer for duration recording
-- `../models/enums.dart` — EventType, Unit, LogReason
-- `../models/account.dart` — Account model
-- `../services/log_record_service.dart` — LogRecordService
-- `../providers/account_provider.dart` — activeAccountProvider, accountServiceProvider
-- `../providers/log_record_provider.dart` — activeAccountLogRecordsProvider, logRecordStatsProvider
-- `../services/location_service.dart` — LocationService for GPS
-- `reason_chips_grid.dart` — ReasonChipsGrid widget
+- `dart:async` — `Timer`
+- `../logging/app_logger.dart` — Structured logging
+- `../models/app_error.dart` — `AppError`
+- `../models/enums.dart` — `EventType`, `Unit`, `LogReason`
+- `../models/account.dart` — `Account`
+- `../services/log_record_service.dart` — `LogRecordService`
+- `../providers/account_provider.dart` — `activeAccountProvider`, `accountServiceProvider`
+- `../providers/log_record_provider.dart` — `activeAccountLogRecordsProvider`, `logRecordStatsProvider`
+- `../services/location_service.dart` — `LocationService`
+- `../utils/error_display.dart` — `ErrorDisplay`
+- `reason_chips_grid.dart` — `ReasonChipsGrid`
 
 ## Pseudo-Code
 
 ### Class: HomeQuickLogWidget (ConsumerStatefulWidget)
 
 **Constructor Parameters:**
-- `onLogCreated: VoidCallback?` — callback after successful log
+- `onLogCreated: VoidCallback?` — called after successful log creation
 
-#### State: _HomeQuickLogWidgetState
+### Class: _HomeQuickLogWidgetState
 
-**State Variables:**
-- `_isRecording: bool` — whether long press is active
-- `_recordingStartTime: DateTime?` — when recording started
-- `_recordingTimer: Timer?` — 100ms periodic timer for UI updates
-- `_recordedDuration: Duration` — elapsed recording time
-- `_moodRating, _physicalRating: double?` — slider values
-- `_selectedReasons: Set<LogReason>` — chosen reason chips
-- `_currentAccountId: String?` — tracks account for switch detection
-- `_locationService: LocationService`
+#### Fields
 
-#### Method: _handleLongPressStart(details)
 ```
-SET _isRecording = true
-SET _recordingStartTime = DateTime.now()
-SET _recordedDuration = Duration.zero
-START Timer.periodic(100ms):
-  UPDATE _recordedDuration = now - _recordingStartTime
+  _isRecording: bool = false
+  _recordingStartTime: DateTime?
+  _recordingTimer: Timer?
+  _recordedDuration: Duration = zero
+  _moodRating: double?
+  _physicalRating: double?
+  _selectedReasons: Set<LogReason> = {}
+  _currentAccountId: String?        — tracks account for switch detection
+  _locationService: LocationService
 ```
 
-#### Method: _handleLongPressEnd(details)
-```
-CANCEL _recordingTimer
-IF was recording:
-  COMPUTE durationMs = now - _recordingStartTime
-  CALL _createVapeLog(durationMs)
-  RESET recording state
-```
+---
 
-#### Method: _handleTapCancel()
+#### `_handleLongPressStart(details)`
+
 ```
-CANCEL timer, RESET recording state (no log created)
+SET _isRecording = true, _recordingStartTime = now
+START Timer.periodic(100ms) -> update _recordedDuration
 ```
 
-#### Method: _createVapeLog(int durationMs) → Future<void>
+#### `_handleLongPressEnd(details)`
+
 ```
-LOG diagnostic info at warning level
-
-GET activeAccount from provider:
-  IF loading → AWAIT future
-  IF null → SHOW SnackBar "No active account" → RETURN
-
-CROSS-CHECK: re-read provider in case account changed during async
-CROSS-CHECK: compare with widget-level _currentAccountId
-
-CHECK minimum threshold (1000ms):
-  IF too short → SHOW SnackBar "Duration too short" → RETURN
-
-CONVERT to seconds
-
-CAPTURE location:
-  TRY getCurrentLocation()
-  LOG success or failure
-
-CREATE record via LogRecordService.createLogRecord:
-  accountId, eventType=vape, duration, unit=seconds,
-  moodRating, physicalRating, reasons, latitude, longitude
-
-SHOW SnackBar confirmation with UNDO action:
-  UNDO → deleteLogRecord(record)
-
-RESET form (mood, physical, reasons)
-CALL onLogCreated callback
-INVALIDATE providers (activeAccountLogRecordsProvider, logRecordStatsProvider)
+CANCEL timer
+IF was recording -> _createVapeLog(durationMs)
+RESET recording state
 ```
 
-#### Method: _toggleReason(LogReason)
+#### `_handleTapCancel()`
+
 ```
-IF already selected → REMOVE
-ELSE → ADD
+CANCEL timer, RESET recording state
 ```
 
-#### Method: _resetFormState()
+---
+
+#### `_createVapeLog(durationMs)` -> Future<void>
+
 ```
-CLEAR _moodRating, _physicalRating, _selectedReasons
+LOG '[QUICK_LOG_START]' with diagnostic context
+
+// 1. Get active account (with loading/timeout handling)
+IF provider is loading -> AWAIT .future with 5s timeout
+IF provider has error -> LOG error
+ELSE -> read directly
+
+IF activeAccount == null -> SHOW SnackBar 'No active account' -> RETURN
+
+// 2. Cross-check account ID integrity
+IF account changed during async -> use new account, LOG warning
+IF _currentAccountId mismatch with provider -> LOG warning
+
+// 3. Verify account exists in database
+accountExists = AWAIT accountService.accountExists(userId)
+IF NOT exists -> SHOW SnackBar 'Account not ready yet' -> RETURN
+
+// 4. Minimum duration check
+IF durationMs < 1000 -> ErrorDisplay.showSnackBar(
+  AppError.validation('Duration too short', code: 'VALIDATION_DURATION_SHORT')
+) -> RETURN
+
+// 5. Capture location (optional, non-blocking)
+TRY: position = locationService.getCurrentLocation()
+CATCH: LOG warning (non-fatal)
+
+// 6. Create log record
+record = service.createLogRecord(
+  accountId, eventType: vape, duration: seconds,
+  unit: seconds, moodRating, physicalRating, reasons,
+  latitude, longitude
+)
+
+// 7. Post-creation
+SHOW SnackBar with duration + UNDO action
+RESET form state (_moodRating, _physicalRating, _selectedReasons)
+CALL onLogCreated
+INVALIDATE activeAccountLogRecordsProvider, logRecordStatsProvider
+
+CATCH -> ErrorDisplay.showException(context, e, reportContext: 'QuickLog.submit')
 ```
 
-#### Method: _cancelRecording()
+---
+
+#### `build(context)` -> Widget
+
 ```
-CANCEL timer + RESET recording state (used on account switch)
+WATCH activeAccountProvider
+
+// Account switch detection
+IF provider isLoading -> keep current state (LOG warning)
+IF provider hasError -> LOG error
+IF account changed -> POST-FRAME: _cancelRecording, update _currentAccountId
+IF account went null -> POST-FRAME: _cancelRecording, clear _currentAccountId
+
+Card -> Padding -> Column:
+  // Mood slider (muted until touched, then theme primary)
+  Row: 'Mood' label + SliderTheme(muted) -> Slider(1-10, divisions: 9)
+
+  // Physical slider (same muted pattern)
+  Row: 'Physical' label + SliderTheme(muted) -> Slider(1-10, divisions: 9)
+
+  // Reason chips
+  'Reasons' label + ReasonChipsGrid(selected, onToggle, showIcons: true)
+
+  // Clear form button (visible only when form has values)
+  IF hasFormValues -> TextButton.icon('Clear form') -> _resetFormState
+
+  // Hold-to-record button
+  Semantics(label: 'Hold to record duration') ->
+    GestureDetector(onLongPressStart/End/Cancel) ->
+      Container(full width, rounded, primary border):
+        IF recording -> pause icon + duration text (e.g. '2.35s')
+        ELSE -> touch_app icon + 'Hold to record duration'
 ```
 
-#### Method: build(context) → Widget
-```
-WATCH activeAccountProvider to detect account switches:
-  IF account changed → addPostFrameCallback: cancel recording, update _currentAccountId
-  IF account null → cancel recording, clear _currentAccountId
+## Notes
 
-RETURN Card(margin: vertical 12) → Padding(16) → Column:
-  ├─ Mood Row:
-  │   ├─ Text("Mood") — muted if unset
-  │   └─ Slider(1–10, divisions: 9)
-  │       SliderTheme: muted colors when null, theme primary when set
-  │
-  ├─ Physical Row:
-  │   ├─ Text("Physical") — muted if unset
-  │   └─ Slider(1–10, divisions: 9)
-  │
-  ├─ Reasons section:
-  │   ├─ Text("Reasons")
-  │   └─ ReasonChipsGrid(selected, onToggle, showIcons: true)
-  │
-  ├─ IF hasFormValues:
-  │   └─ TextButton.icon("Clear form") → _resetFormState
-  │
-  └─ Press-and-hold button (GestureDetector):
-      onLongPressStart → _handleLongPressStart
-      onLongPressEnd → _handleLongPressEnd
-      onLongPressCancel → _handleTapCancel
-      Container(rounded, full width):
-        IF recording: primary background + pause icon + elapsed seconds
-        ELSE: surface background + touch_app icon + "Hold to record duration"
-```
+- Form values (mood, physical, reasons) persist across recordings; only reset on Clear or after successful log.
+- Recording is cancelled (not form) on account switch to prevent logging to wrong account.
+- Minimum duration threshold: 1 second. Below that, shows validation error via `ErrorDisplay`.
+- Account existence check prevents creating orphan records after an incomplete account switch.
+- Location capture is best-effort and non-blocking.
+- Extensive warning-level logging for TestFlight/multi-account debugging.

@@ -4,76 +4,86 @@
 
 ## Purpose
 
-Authentication screen for signing into existing accounts via email/password, Google, or Apple sign-in. On successful authentication, pops all navigation back to the root so `AuthWrapper` can rebuild and show the Home screen. Provides a link to the Signup screen and a placeholder for forgot-password functionality.
+Authentication landing screen offering email/password, Google, and Apple sign-in methods. On success, pops back to root so the AuthWrapper rebuilds and shows the home screen. All errors are wrapped as `AppError` and reported via `ErrorReportingService`.
 
 ## Dependencies
 
 - `package:flutter/material.dart` — Flutter UI framework
-- `package:flutter_riverpod/flutter_riverpod.dart` — Riverpod state management
+- `package:flutter_riverpod/flutter_riverpod.dart` — State management
 - `../logging/app_logger.dart` — Structured logging (`AppLogger`)
-- `../services/account_integration_service.dart` — `accountIntegrationServiceProvider` (signInWithEmail, signInWithGoogle, signInWithApple)
-- `../widgets/auth_button.dart` — `AuthButton`, `AuthButtonType` (styled social auth buttons)
-- `signup_screen.dart` — Navigation target for new account creation
+- `../models/app_error.dart` — `AppError.from(e, st)` for typed error wrapping
+- `../services/account_integration_service.dart` — `accountIntegrationServiceProvider`
+- `../services/error_reporting_service.dart` — `ErrorReportingService.instance.report()`
+- `../widgets/auth_button.dart` — `AuthButton`, `AuthButtonType`
+- `signup_screen.dart` — `SignupScreen`
 
 ## Pseudo-Code
 
 ### Class: LoginScreen (ConsumerStatefulWidget)
 
-Creates `_LoginScreenState`.
+### Class: _LoginScreenState
 
-### Class: _LoginScreenState (ConsumerState)
-
-#### State
+#### Fields
 
 ```
-_log:                AppLogger('LoginScreen')
-_formKey:            GlobalKey<FormState>
-_emailController:    TextEditingController
-_passwordController: TextEditingController
-_isLoading:          bool = false
-_obscurePassword:    bool = true
-_errorMessage:       String? = null
+  _log: AppLogger (tagged 'LoginScreen')
+  _formKey: GlobalKey<FormState>
+  _emailController: TextEditingController
+  _passwordController: TextEditingController
+  _isLoading: bool = false
+  _obscurePassword: bool = true
+  _errorMessage: String?
 ```
 
-#### Lifecycle: dispose()
+#### `dispose()`
 
 ```
-_emailController.dispose()
-_passwordController.dispose()
+DISPOSE _emailController, _passwordController
 ```
 
-#### Method: _signInWithEmail() -> Future<void>
+---
+
+#### `_signInWithEmail()` -> Future<void>
 
 ```
-IF !_formKey.currentState!.validate() -> RETURN
+IF form invalid -> RETURN
 
 SET _isLoading = true, _errorMessage = null
 
 TRY:
   integrationService = ref.read(accountIntegrationServiceProvider)
-  AWAIT integrationService.signInWithEmail(email: trimmed, password: raw)
-  IF mounted -> Navigator.popUntil(isFirst)   // back to auth wrapper
-CATCH:
-  SET _errorMessage = e.toString(), _isLoading = false
-```
-
-#### Method: _signInWithGoogle() -> Future<void>
-
-```
-LOG "User tapped Google sign-in button"
-SET _isLoading = true, _errorMessage = null
-
-TRY:
-  integrationService = ref.read(accountIntegrationServiceProvider)
-  account = AWAIT integrationService.signInWithGoogle()
-  LOG success with uid, email, provider
+  AWAIT integrationService.signInWithEmail(email, password)
   IF mounted -> Navigator.popUntil(isFirst)
-CATCH:
-  LOG error
-  SET _errorMessage = e.toString(), _isLoading = false
+
+CATCH (e, st):
+  appError = AppError.from(e, st)
+  ErrorReportingService.instance.report(appError, stackTrace: st,
+    context: 'LoginScreen.signInWithEmail')
+  SET _errorMessage = appError.message, _isLoading = false
 ```
 
-#### Method: _signInWithApple() -> Future<void>
+#### `_signInWithGoogle()` -> Future<void>
+
+```
+LOG '[LOGIN_SCREEN] User tapped Google sign-in button'
+SET _isLoading = true, _errorMessage = null
+
+TRY:
+  integrationService = ref.read(accountIntegrationServiceProvider)
+  LOG 'Calling integrationService.signInWithGoogle()'
+  account = AWAIT integrationService.signInWithGoogle()
+  LOG 'Google sign-in SUCCESS: uid, email, provider'
+  IF mounted -> Navigator.popUntil(isFirst)
+
+CATCH (e, st):
+  LOG '[LOGIN_SCREEN] Google sign-in FAILED'
+  appError = AppError.from(e, st)
+  ErrorReportingService.instance.report(appError, stackTrace: st,
+    context: 'LoginScreen.signInWithGoogle')
+  SET _errorMessage = appError.message, _isLoading = false
+```
+
+#### `_signInWithApple()` -> Future<void>
 
 ```
 SET _isLoading = true, _errorMessage = null
@@ -82,72 +92,67 @@ TRY:
   integrationService = ref.read(accountIntegrationServiceProvider)
   AWAIT integrationService.signInWithApple()
   IF mounted -> Navigator.popUntil(isFirst)
-CATCH:
-  SET _errorMessage = e.toString(), _isLoading = false
+
+CATCH (e, st):
+  appError = AppError.from(e, st)
+  ErrorReportingService.instance.report(appError, stackTrace: st,
+    context: 'LoginScreen.signInWithApple')
+  SET _errorMessage = appError.message, _isLoading = false
 ```
 
-#### Method: _navigateToSignup() -> void
+#### `_navigateToSignup()`
 
 ```
-Navigator.push(SignupScreen)
+Navigator.push -> MaterialPageRoute(
+  settings: RouteSettings(name: 'SignupScreen'),
+  builder: SignupScreen()
+)
 ```
 
-#### Method: build(context) -> Widget
+---
+
+#### `build(context)` -> Widget
 
 ```
-RETURN Scaffold (no appBar):
-  body = SafeArea:
-    Center:
-      SingleChildScrollView (padding 24):
-        ConstrainedBox (maxWidth 400):
-          Form (key: _formKey):
-            Column (center, stretch):
+Scaffold -> SafeArea -> Center -> SingleChildScrollView(padding: 24) ->
+  ConstrainedBox(maxWidth: 400) -> Form(key: _formKey) -> Column:
 
-              [1] LOGO / TITLE
-                Icon: local_fire_department (80, primary)
-                "Ash Trail" headlineLarge bold
-                "Track your journey" bodyLarge
+    // Branding
+    Icon(local_fire_department, size: 80, primary)
+    'Ash Trail' (headlineLarge, bold)
+    'Track your journey' (bodyLarge, muted)
 
-              [2] ERROR MESSAGE (conditional)
-                IF _errorMessage != null:
-                  Container (errorContainer bg, rounded 8):
-                    Text(_errorMessage, onErrorContainer color)
+    // Inline error banner
+    IF _errorMessage != null ->
+      Container(errorContainer bg, rounded) -> Text(_errorMessage)
 
-              [3] EMAIL FIELD
-                TextFormField (key: email-input):
-                  controller = _emailController
-                  labelText = "Email", prefixIcon = email
-                  keyboardType = emailAddress, textInputAction = next
-                  enabled = !_isLoading
-                  validator: required, must contain '@'
+    // Email input (Key: 'email-input')
+    TextFormField(email, prefixIcon, validator: non-empty + contains '@')
 
-              [4] PASSWORD FIELD
-                TextFormField (key: password-input):
-                  controller = _passwordController
-                  labelText = "Password", prefixIcon = lock
-                  suffixIcon = visibility toggle -> toggle _obscurePassword
-                  obscureText = _obscurePassword
-                  textInputAction = done
-                  enabled = !_isLoading
-                  onFieldSubmitted -> _signInWithEmail()
-                  validator: required
+    // Password input (Key: 'password-input')
+    TextFormField(obscure, toggle suffix, onFieldSubmitted -> _signInWithEmail)
 
-              [5] LOGIN BUTTON
-                ElevatedButton (key: login-button):
-                  onPressed = !_isLoading ? _signInWithEmail : null
-                  child = _isLoading ? CircularProgressIndicator : "Log In"
+    // Primary login
+    ElevatedButton(Key: 'login-button', onPressed: _signInWithEmail)
+      IF _isLoading -> CircularProgressIndicator(strokeWidth: 2)
+      ELSE -> 'Log In'
 
-              [6] "OR" DIVIDER
-                Row: Divider — "OR" — Divider
+    // OR divider
+    Row(Divider -- 'OR' -- Divider)
 
-              [7] SOCIAL AUTH BUTTONS
-                AuthButton("Continue with Google",  _signInWithGoogle, google, _isLoading)
-                AuthButton("Continue with Apple",   _signInWithApple,  apple,  _isLoading)
+    // Social sign-in
+    AuthButton(text: 'Continue with Google', type: google, isLoading)
+    AuthButton(text: 'Continue with Apple', type: apple, isLoading)
 
-              [8] SIGN UP LINK
-                Row: "Don't have an account?" + TextButton "Sign Up" -> _navigateToSignup()
-
-              [9] FORGOT PASSWORD
-                TextButton "Forgot Password?":
-                  onPressed -> SnackBar "Password reset coming soon!"  // TODO
+    // Navigation
+    Row: "Don't have an account?" + TextButton('Sign Up') -> _navigateToSignup
+    TextButton('Forgot Password?') -> SnackBar 'coming soon' (TODO)
 ```
+
+## Notes
+
+- All three sign-in catch blocks follow the same pattern: `AppError.from(e, st)` -> `ErrorReportingService.instance.report()` -> show `appError.message` in UI.
+- Google sign-in has additional diagnostic logging at warning level for TestFlight debugging.
+- The `accountIntegrationServiceProvider` is used (not `AuthService` directly) to ensure account creation and sync happen atomically with login.
+- Forgot Password is a placeholder (shows a SnackBar "Password reset coming soon!").
+- All inputs are disabled while `_isLoading` is true to prevent double submission.

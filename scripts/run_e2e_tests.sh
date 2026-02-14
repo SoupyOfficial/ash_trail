@@ -65,7 +65,7 @@ flutter pub get
 
 # Find an available iOS simulator
 echo -e "${BLUE}📱 Finding iOS simulator...${NC}"
-DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15" | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' || true)
+DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 16 Pro Max" | head -1 | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' || true)
 
 if [ -z "$DEVICE_ID" ]; then
     # Fallback to any available iPhone
@@ -84,8 +84,15 @@ BOOTED=$(xcrun simctl list devices | grep "$DEVICE_ID" | grep -c "Booted" || tru
 if [ "$BOOTED" -eq 0 ]; then
     echo -e "${BLUE}🚀 Booting iOS simulator...${NC}"
     xcrun simctl boot "$DEVICE_ID" || true
-    sleep 5
 fi
+
+# Patrol / xcodebuild will clone a new simulator if the target device isn't
+# already booted AND visible in Simulator.app. We guarantee both here so the
+# test run reuses the existing sim (preserving Keychain, auth tokens, etc.).
+echo -e "${BLUE}📱 Opening Simulator.app (prevents xcodebuild from cloning)...${NC}"
+open -a Simulator
+xcrun simctl bootstatus "$DEVICE_ID" -b 2>/dev/null || true
+sleep 2
 
 # Determine test file (default: Patrol E2E as primary runner)
 if [ -n "$1" ]; then

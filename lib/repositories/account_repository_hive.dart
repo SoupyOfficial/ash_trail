@@ -245,7 +245,20 @@ class AccountRepositoryHive implements AccountRepository {
 
   @override
   Stream<Account?> watchActive() {
-    return _controller.stream.map((accounts) {
+    // Fetch current active account to emit immediately.
+    // This prevents a race condition where invalidated StreamProviders
+    // re-subscribe to the broadcast stream AFTER pending emissions have
+    // already been delivered (and missed), leaving the provider stuck
+    // in AsyncLoading forever.
+    final currentAccounts = _getAllAccountsSafe();
+    Account? currentActive;
+    try {
+      currentActive = currentAccounts.firstWhere((a) => a.isActive);
+    } catch (_) {
+      currentActive = null;
+    }
+
+    final mappedStream = _controller.stream.map((accounts) {
       try {
         return accounts.firstWhere((a) => a.isActive);
       } catch (e, st) {
@@ -257,13 +270,50 @@ class AccountRepositoryHive implements AccountRepository {
         return null;
       }
     });
+
+    // Emit current state first, then forward broadcast stream updates.
+    // Mirrors the pattern used by LogRecordRepositoryHive.watchByAccount().
+    return Stream<Account?>.value(currentActive).asyncExpand((initial) async* {
+      yield initial;
+      yield* mappedStream;
+    });
   }
 
   @override
   Stream<List<Account>> watchAll() {
-    return _controller.stream.handleError((error, stackTrace) {
+    // Emit current state immediately, then forward broadcast stream updates.
+    final currentAccounts = _getAllAccountsSafe();
+
+    final forwardedStream = _controller.stream.handleError((error, stackTrace) {
       _log.e('watchAll stream error', error: error, stackTrace: stackTrace);
       throw error;
     });
+
+    return Stream<List<Account>>.value(currentAccounts).asyncExpand((
+      initial,
+    ) async* {
+      yield initial;
+      yield* forwardedStream;
+    });
+  }
+
+  /// Safe version of getAll() that doesn't throw on parse errors.
+  /// Used for initial stream emissions where we need a best-effort snapshot.
+  List<Account> _getAllAccountsSafe() {
+    final accounts = <Account>[];
+    for (var key in _box.keys) {
+      try {
+        final json = Map<String, dynamic>.from(_box.get(key));
+        final webAccount = WebAccount.fromJson(json);
+        final account = AccountWebConversion.fromWebModel(
+          webAccount,
+          id: int.tryParse(webAccount.id) ?? 0,
+        );
+        accounts.add(account);
+      } catch (e, stackTrace) {
+        _log.e('Error processing key "$key"', error: e, stackTrace: stackTrace);
+      }
+    }
+    return accounts;
   }
 }

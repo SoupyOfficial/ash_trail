@@ -101,18 +101,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         key: const Key('app_bar_home'),
         title: Text(isEditMode ? 'Edit Home' : greeting),
+        leading:
+            activeAccountAsync.asData?.value != null
+                ? IconButton(
+                  key: const Key('app_bar_edit_layout'),
+                  icon: Icon(isEditMode ? Icons.done : Icons.edit),
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    ref.read(homeEditModeProvider.notifier).state = !isEditMode;
+                  },
+                  tooltip: isEditMode ? 'Done' : 'Edit Layout',
+                )
+                : null,
         actions: [
-          // Edit mode toggle
-          if (activeAccountAsync.asData?.value != null)
-            IconButton(
-              key: const Key('app_bar_edit_layout'),
-              icon: Icon(isEditMode ? Icons.done : Icons.edit),
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                ref.read(homeEditModeProvider.notifier).state = !isEditMode;
-              },
-              tooltip: isEditMode ? 'Done' : 'Edit Layout',
-            ),
           SemanticIconButton(
             key: const Key('app_bar_settings'),
             icon: Icons.settings,

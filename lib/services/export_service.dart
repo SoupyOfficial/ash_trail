@@ -22,7 +22,7 @@ class ExportService {
 
       // CSV Header - includes logId as the stable identifier
       buffer.writeln(
-        'logId,accountId,eventType,eventAt,duration,unit,note,moodRating,physicalRating,latitude,longitude,source,syncState,createdAt,updatedAt',
+        'logId,accountId,eventType,eventAt,duration,unit,note,moodRating,physicalRating,latitude,longitude,source,syncState,createdAt,updatedAt,transferredFromAccountId,transferredAt,transferredFromLogId',
       );
 
       // Data rows
@@ -42,7 +42,10 @@ class ExportService {
           '${record.source.name},'
           '${record.syncState.name},'
           '${record.createdAt.toIso8601String()},'
-          '${record.updatedAt.toIso8601String()}',
+          '${record.updatedAt.toIso8601String()},'
+          '${record.transferredFromAccountId ?? ''},'
+          '${record.transferredAt?.toIso8601String() ?? ''},'
+          '${record.transferredFromLogId ?? ''}',
         );
       }
 
@@ -370,6 +373,18 @@ class ExportService {
       longitude: longitude,
       source: source,
       syncState: SyncState.pending, // Mark as pending sync
+      transferredFromAccountId:
+          getValue('transferredfromaccountid').isEmpty
+              ? null
+              : getValue('transferredfromaccountid'),
+      transferredAt:
+          getValue('transferredat').isEmpty
+              ? null
+              : DateTime.tryParse(getValue('transferredat')),
+      transferredFromLogId:
+          getValue('transferredfromlogid').isEmpty
+              ? null
+              : getValue('transferredfromlogid'),
     );
   }
 
@@ -461,6 +476,13 @@ class ExportService {
 
     final revision = data['revision'] as int? ?? 0;
 
+    final transferredFromAccountId =
+        data['transferredFromAccountId'] as String?;
+    final transferredAtStr = data['transferredAt'] as String?;
+    final transferredAt =
+        transferredAtStr != null ? DateTime.parse(transferredAtStr) : null;
+    final transferredFromLogId = data['transferredFromLogId'] as String?;
+
     return LogRecord.create(
       logId: logId,
       accountId: accountId,
@@ -484,6 +506,9 @@ class ExportService {
       deletedAt: deletedAt,
       syncState: SyncState.pending, // Mark as pending sync
       revision: revision,
+      transferredFromAccountId: transferredFromAccountId,
+      transferredAt: transferredAt,
+      transferredFromLogId: transferredFromLogId,
     );
   }
 
@@ -517,6 +542,9 @@ class ExportService {
       'deletedAt': record.deletedAt?.toIso8601String(),
       'syncState': record.syncState.name,
       'revision': record.revision,
+      'transferredFromAccountId': record.transferredFromAccountId,
+      'transferredAt': record.transferredAt?.toIso8601String(),
+      'transferredFromLogId': record.transferredFromLogId,
     };
   }
 }

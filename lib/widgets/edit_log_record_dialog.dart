@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/enums.dart';
 import '../models/log_record.dart';
+import '../providers/account_provider.dart';
 import '../providers/log_record_provider.dart';
 import '../services/validation_service.dart';
 import 'location_map_picker.dart';
 import 'reason_chips_grid.dart';
+import 'transfer_log_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// Dialog for editing an existing log record
@@ -604,13 +606,21 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton.icon(
-                    onPressed: _isSubmitting ? null : _confirmDelete,
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    label: const Text(
-                      'Delete',
-                      style: TextStyle(color: Colors.red),
-                    ),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: _isSubmitting ? null : _confirmDelete,
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                        label: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      _buildTransferButton(),
+                    ],
                   ),
                   Row(
                     children: [
@@ -688,6 +698,37 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
           duration: Duration(seconds: 3),
         ),
       );
+    }
+  }
+
+  /// Build the Transfer button — only shown when other accounts are logged in
+  Widget _buildTransferButton() {
+    final loggedInAccounts = ref.watch(loggedInAccountsProvider);
+    return loggedInAccounts.when(
+      data: (accounts) {
+        final otherAccounts =
+            accounts.where((a) => a.userId != widget.record.accountId).toList();
+        if (otherAccounts.isEmpty) return const SizedBox.shrink();
+        return TextButton.icon(
+          onPressed: _isSubmitting ? null : _showTransferDialog,
+          icon: const Icon(Icons.swap_horiz),
+          label: const Text('Transfer'),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Future<void> _showTransferDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => TransferLogDialog(record: widget.record),
+    );
+
+    if (result == true && mounted) {
+      // Transfer was successful, close the edit dialog too
+      Navigator.pop(context, true);
     }
   }
 }

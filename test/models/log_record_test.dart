@@ -241,4 +241,170 @@ void main() {
       expect(record.reasons, [LogReason.recreational, LogReason.social]);
     });
   });
+
+  group('LogRecord Transfer Metadata', () {
+    test('creates record with transfer metadata', () {
+      final transferredAt = DateTime(2025, 3, 15, 10, 0);
+      final record = LogRecord.create(
+        logId: 'transferred-log-1',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        transferredFromAccountId: 'source-account',
+        transferredAt: transferredAt,
+        transferredFromLogId: 'original-log-id',
+      );
+
+      expect(record.transferredFromAccountId, 'source-account');
+      expect(record.transferredAt, transferredAt);
+      expect(record.transferredFromLogId, 'original-log-id');
+    });
+
+    test('creates record without transfer metadata by default', () {
+      final record = LogRecord.create(
+        logId: 'normal-log',
+        accountId: 'account-123',
+        eventType: EventType.vape,
+      );
+
+      expect(record.transferredFromAccountId, isNull);
+      expect(record.transferredAt, isNull);
+      expect(record.transferredFromLogId, isNull);
+    });
+
+    test('copyWith preserves transfer metadata', () {
+      final transferredAt = DateTime(2025, 3, 15, 10, 0);
+      final original = LogRecord.create(
+        logId: 'transferred-log',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        transferredFromAccountId: 'source-account',
+        transferredAt: transferredAt,
+        transferredFromLogId: 'original-log',
+      );
+
+      final copy = original.copyWith(note: 'Updated note');
+
+      expect(copy.transferredFromAccountId, 'source-account');
+      expect(copy.transferredAt, transferredAt);
+      expect(copy.transferredFromLogId, 'original-log');
+      expect(copy.note, 'Updated note');
+    });
+
+    test('copyWith can update transfer metadata', () {
+      final record = LogRecord.create(
+        logId: 'log-1',
+        accountId: 'account-1',
+        eventType: EventType.vape,
+      );
+
+      final now = DateTime.now();
+      final copy = record.copyWith(
+        transferredFromAccountId: 'other-account',
+        transferredAt: now,
+        transferredFromLogId: 'old-log-id',
+      );
+
+      expect(copy.transferredFromAccountId, 'other-account');
+      expect(copy.transferredAt, now);
+      expect(copy.transferredFromLogId, 'old-log-id');
+    });
+
+    test('toFirestore includes transfer metadata', () {
+      final transferredAt = DateTime(2025, 3, 15, 10, 0);
+      final record = LogRecord.create(
+        logId: 'transferred-log',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        transferredFromAccountId: 'source-account',
+        transferredAt: transferredAt,
+        transferredFromLogId: 'original-log',
+      );
+
+      final map = record.toFirestore();
+
+      expect(map['transferredFromAccountId'], 'source-account');
+      expect(map['transferredAt'], transferredAt.toIso8601String());
+      expect(map['transferredFromLogId'], 'original-log');
+    });
+
+    test('toFirestore has null transfer fields when not set', () {
+      final record = LogRecord.create(
+        logId: 'normal-log',
+        accountId: 'account-123',
+        eventType: EventType.vape,
+      );
+
+      final map = record.toFirestore();
+
+      expect(map['transferredFromAccountId'], isNull);
+      expect(map['transferredAt'], isNull);
+      expect(map['transferredFromLogId'], isNull);
+    });
+
+    test('fromFirestore parses transfer metadata', () {
+      final map = {
+        'logId': 'transferred-log',
+        'accountId': 'target-account',
+        'eventAt': '2025-01-01T10:00:00.000',
+        'createdAt': '2025-01-01T10:00:00.000',
+        'updatedAt': '2025-01-01T10:00:00.000',
+        'eventType': 'vape',
+        'duration': 30.0,
+        'isDeleted': false,
+        'revision': 0,
+        'transferredFromAccountId': 'source-account',
+        'transferredAt': '2025-03-15T10:00:00.000',
+        'transferredFromLogId': 'original-log',
+      };
+
+      final record = LogRecord.fromFirestore(map);
+
+      expect(record.transferredFromAccountId, 'source-account');
+      expect(record.transferredAt, DateTime(2025, 3, 15, 10, 0));
+      expect(record.transferredFromLogId, 'original-log');
+    });
+
+    test('fromFirestore handles missing transfer metadata', () {
+      final map = {
+        'logId': 'normal-log',
+        'accountId': 'account-123',
+        'eventAt': '2025-01-01T10:00:00.000',
+        'createdAt': '2025-01-01T10:00:00.000',
+        'updatedAt': '2025-01-01T10:00:00.000',
+        'eventType': 'vape',
+        'duration': 30.0,
+        'isDeleted': false,
+        'revision': 0,
+      };
+
+      final record = LogRecord.fromFirestore(map);
+
+      expect(record.transferredFromAccountId, isNull);
+      expect(record.transferredAt, isNull);
+      expect(record.transferredFromLogId, isNull);
+    });
+
+    test('roundtrip toFirestore/fromFirestore preserves transfer metadata', () {
+      final transferredAt = DateTime(2025, 3, 15, 10, 0);
+      final original = LogRecord.create(
+        logId: 'roundtrip-transfer',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        duration: 30.0,
+        transferredFromAccountId: 'source-account',
+        transferredAt: transferredAt,
+        transferredFromLogId: 'original-log',
+      );
+
+      final map = original.toFirestore();
+      final restored = LogRecord.fromFirestore(map);
+
+      expect(
+        restored.transferredFromAccountId,
+        original.transferredFromAccountId,
+      );
+      expect(restored.transferredAt, original.transferredAt);
+      expect(restored.transferredFromLogId, original.transferredFromLogId);
+    });
+  });
 }

@@ -500,6 +500,51 @@ void main() {
       expect(result.isHealthy, isFalse);
       expect(result.totalIssues, greaterThanOrEqualTo(3));
     });
+
+    test('does not flag transfer-deleted records as orphans', () async {
+      // Record that was soft-deleted as part of a transfer
+      // Its accountId is valid, and it has transferredFromLogId set
+      final transferDeletedRecord = LogRecord.create(
+        logId: 'transfer-original',
+        accountId: kAccount1,
+        eventType: EventType.vape,
+        eventAt: DateTime.now().subtract(const Duration(hours: 1)),
+        isDeleted: true,
+        deletedAt: DateTime.now(),
+        transferredFromLogId: 'some-new-log-id',
+      );
+      mockLogRepo.addRecord(transferDeletedRecord);
+
+      final result = await integrityService.runIntegrityCheck();
+
+      // Transfer-deleted record should be healthy (not flagged)
+      expect(result.isHealthy, isTrue);
+      expect(result.orphanedRecords.length, 0);
+    });
+
+    test(
+      'still flags orphans with non-existent accountId even with transfer metadata',
+      () async {
+        // Record with invalid accountId (orphan) that also has transfer metadata
+        // This is an edge case - record was transferred FROM a deleted account
+        // But sits in a non-existent target account -> should be flagged as orphan
+        final orphanTransfer = LogRecord.create(
+          logId: 'orphan-transfer',
+          accountId: kOrphanAccount, // This account doesn't exist
+          eventType: EventType.vape,
+          eventAt: DateTime.now(),
+          transferredFromAccountId: kAccount1,
+          transferredAt: DateTime.now(),
+          transferredFromLogId: 'old-log',
+        );
+        mockLogRepo.addRecord(orphanTransfer);
+
+        final result = await integrityService.runIntegrityCheck();
+
+        expect(result.isHealthy, isFalse);
+        expect(result.orphanedRecords.length, 1);
+      },
+    );
   });
 
   group('DataIntegrityService - Repair Tests', () {

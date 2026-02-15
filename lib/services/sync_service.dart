@@ -454,6 +454,9 @@ class SyncService {
         source: remoteRecord.source,
         deviceId: remoteRecord.deviceId,
         appVersion: remoteRecord.appVersion,
+        transferredFromAccountId: remoteRecord.transferredFromAccountId,
+        transferredAt: remoteRecord.transferredAt,
+        transferredFromLogId: remoteRecord.transferredFromLogId,
       );
       // If remote is deleted, reflect deletion locally on imported record
       if (remoteRecord.isDeleted) {
@@ -531,6 +534,9 @@ class SyncService {
               source: remoteRecord.source,
               deviceId: remoteRecord.deviceId,
               appVersion: remoteRecord.appVersion,
+              transferredFromAccountId: remoteRecord.transferredFromAccountId,
+              transferredAt: remoteRecord.transferredAt,
+              transferredFromLogId: remoteRecord.transferredFromLogId,
             );
             // If remote is deleted, reflect deletion on imported record
             if (remoteRecord.isDeleted) {
@@ -661,6 +667,9 @@ class SyncService {
               source: remoteRecord.source,
               deviceId: remoteRecord.deviceId,
               appVersion: remoteRecord.appVersion,
+              transferredFromAccountId: remoteRecord.transferredFromAccountId,
+              transferredAt: remoteRecord.transferredAt,
+              transferredFromLogId: remoteRecord.transferredFromLogId,
             );
             successCount++;
           } else {

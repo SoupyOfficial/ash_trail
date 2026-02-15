@@ -647,6 +647,48 @@ class LogRecordNotifier extends StateNotifier<AsyncValue<LogRecord?>> {
     }
   }
 
+  /// Transfer a log record to another account
+  Future<LogRecord?> transferLogRecord(
+    LogRecord record,
+    String targetAccountId,
+  ) async {
+    state = const AsyncValue.loading();
+    try {
+      final service = _ref.read(logRecordServiceProvider);
+      final newRecord = await service.transferLogRecord(
+        record,
+        targetAccountId,
+      );
+      state = AsyncValue.data(newRecord);
+      return newRecord;
+    } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LogRecordNotifier.transferLogRecord',
+      );
+      state = AsyncValue.error(e, st);
+      return null;
+    }
+  }
+
+  /// Undo a transfer (restore original, delete transferred copy)
+  Future<void> undoTransfer(LogRecord transferredRecord) async {
+    state = const AsyncValue.loading();
+    try {
+      final service = _ref.read(logRecordServiceProvider);
+      await service.undoTransfer(transferredRecord);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      ErrorReportingService.instance.reportException(
+        e,
+        stackTrace: st,
+        context: 'LogRecordNotifier.undoTransfer',
+      );
+      state = AsyncValue.error(e, st);
+    }
+  }
+
   /// Reset state
   void reset() {
     state = const AsyncValue.data(null);

@@ -70,6 +70,20 @@ class LogRecordTile extends ConsumerWidget {
         title: Row(
           children: [
             Expanded(child: Text(_formatEventType(record.eventType))),
+            if (record.transferredFromAccountId != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Tooltip(
+                  message: 'Transferred from another account',
+                  child: Icon(
+                    Icons.swap_horiz,
+                    size: 16,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.tertiary.withOpacity(0.7),
+                  ),
+                ),
+              ),
             if (record.hasLocation)
               Icon(
                 Icons.location_on,

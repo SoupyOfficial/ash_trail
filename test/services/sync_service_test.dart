@@ -100,6 +100,9 @@ class MockLogRecordService implements LogRecordService {
     Source source = Source.imported,
     String? deviceId,
     String? appVersion,
+    String? transferredFromAccountId,
+    DateTime? transferredAt,
+    String? transferredFromLogId,
   }) async {
     final record = LogRecord.create(
       logId: logId,
@@ -120,6 +123,9 @@ class MockLogRecordService implements LogRecordService {
       source: source,
       deviceId: deviceId,
       appVersion: appVersion,
+      transferredFromAccountId: transferredFromAccountId,
+      transferredAt: transferredAt,
+      transferredFromLogId: transferredFromLogId,
     );
     _records.add(record);
     return record;

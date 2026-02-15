@@ -65,6 +65,9 @@ extension LogRecordWebConversion on LogRecord {
       isDeleted: isDeleted,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      transferredFromAccountId: transferredFromAccountId,
+      transferredAt: transferredAt,
+      transferredFromLogId: transferredFromLogId,
     );
   }
 
@@ -125,6 +128,17 @@ extension LogRecordWebConversion on LogRecord {
       ..lastRemoteUpdateAt =
           extraFields?['lastRemoteUpdateAt'] != null
               ? DateTime.parse(extraFields!['lastRemoteUpdateAt'])
-              : null;
+              : null
+      ..transferredFromAccountId =
+          web.transferredFromAccountId ??
+          extraFields?['transferredFromAccountId'] as String?
+      ..transferredAt =
+          web.transferredAt ??
+          (extraFields?['transferredAt'] != null
+              ? DateTime.parse(extraFields!['transferredAt'])
+              : null)
+      ..transferredFromLogId =
+          web.transferredFromLogId ??
+          extraFields?['transferredFromLogId'] as String?;
   }
 }

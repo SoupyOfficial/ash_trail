@@ -66,6 +66,9 @@ class LogRecordRepositoryHive implements LogRecordRepository {
     json['syncedAt'] = record.syncedAt?.toIso8601String();
     json['syncError'] = record.syncError;
     json['lastRemoteUpdateAt'] = record.lastRemoteUpdateAt?.toIso8601String();
+    json['transferredFromAccountId'] = record.transferredFromAccountId;
+    json['transferredAt'] = record.transferredAt?.toIso8601String();
+    json['transferredFromLogId'] = record.transferredFromLogId;
     await _box.put(record.logId, json);
     return record;
   }
@@ -82,6 +85,9 @@ class LogRecordRepositoryHive implements LogRecordRepository {
     json['syncedAt'] = record.syncedAt?.toIso8601String();
     json['syncError'] = record.syncError;
     json['lastRemoteUpdateAt'] = record.lastRemoteUpdateAt?.toIso8601String();
+    json['transferredFromAccountId'] = record.transferredFromAccountId;
+    json['transferredAt'] = record.transferredAt?.toIso8601String();
+    json['transferredFromLogId'] = record.transferredFromLogId;
     await _box.put(record.logId, json);
     // Fetch and return the updated record to ensure consistency
     return (await getByLogId(record.logId))!;

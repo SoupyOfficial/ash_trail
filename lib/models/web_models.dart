@@ -91,6 +91,9 @@ class WebLogRecord {
   final bool isDeleted;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? transferredFromAccountId;
+  final DateTime? transferredAt;
+  final String? transferredFromLogId;
 
   WebLogRecord({
     required this.id,
@@ -108,6 +111,9 @@ class WebLogRecord {
     required this.isDeleted,
     required this.createdAt,
     required this.updatedAt,
+    this.transferredFromAccountId,
+    this.transferredAt,
+    this.transferredFromLogId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -126,6 +132,9 @@ class WebLogRecord {
     'isDeleted': isDeleted,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    'transferredFromAccountId': transferredFromAccountId,
+    'transferredAt': transferredAt?.toIso8601String(),
+    'transferredFromLogId': transferredFromLogId,
   };
 
   factory WebLogRecord.fromJson(Map<String, dynamic> json) => WebLogRecord(
@@ -144,6 +153,12 @@ class WebLogRecord {
     isDeleted: json['isDeleted'] ?? false,
     createdAt: DateTime.parse(json['createdAt']),
     updatedAt: DateTime.parse(json['updatedAt']),
+    transferredFromAccountId: json['transferredFromAccountId'] as String?,
+    transferredAt:
+        json['transferredAt'] != null
+            ? DateTime.parse(json['transferredAt'])
+            : null,
+    transferredFromLogId: json['transferredFromLogId'] as String?,
   );
 }
 

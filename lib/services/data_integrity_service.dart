@@ -176,7 +176,10 @@ class DataIntegrityService {
 
     for (final record in allRecords) {
       // Check for orphaned records
-      if (!validAccountIds.contains(record.accountId)) {
+      // Skip orphan flagging for records that were soft-deleted as part of a transfer.
+      // These are legitimate transfer remnants, not orphans.
+      if (!validAccountIds.contains(record.accountId) &&
+          !(record.isDeleted && record.transferredFromLogId != null)) {
         orphanedRecords.add(record);
         _log.w(
           'Orphaned record: ${record.logId} (accountId: ${record.accountId})',

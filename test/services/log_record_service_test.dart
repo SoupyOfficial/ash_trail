@@ -1395,4 +1395,349 @@ void main() {
       );
     });
   });
+
+  group('LogRecordService - Transfer Operations', () {
+    late MockLogRecordRepository mockRepo;
+    late LogRecordService service;
+
+    setUp(() {
+      mockRepo = MockLogRecordRepository();
+      // Disable account validation for transfer tests (no AccountService)
+      service = LogRecordService(
+        repository: mockRepo,
+        validateAccountId: false,
+      );
+    });
+
+    test('transferLogRecord creates new record in target account', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime(2025, 1, 1, 10, 0),
+        duration: 30.0,
+        unit: Unit.seconds,
+        note: 'Test note',
+        moodRating: 7.0,
+        physicalRating: 8.0,
+      );
+
+      final transferred = await service.transferLogRecord(
+        original,
+        'target-account',
+      );
+
+      expect(transferred.accountId, 'target-account');
+      expect(transferred.eventType, EventType.vape);
+      expect(transferred.eventAt, DateTime(2025, 1, 1, 10, 0));
+      expect(transferred.duration, 30.0);
+      expect(transferred.unit, Unit.seconds);
+      expect(transferred.note, 'Test note');
+      expect(transferred.moodRating, 7.0);
+      expect(transferred.physicalRating, 8.0);
+      expect(transferred.logId, isNot(original.logId));
+    });
+
+    test('transferLogRecord sets transfer metadata on new record', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+      );
+
+      final transferred = await service.transferLogRecord(
+        original,
+        'target-account',
+      );
+
+      expect(transferred.transferredFromAccountId, 'source-account');
+      expect(transferred.transferredAt, isNotNull);
+      expect(transferred.transferredFromLogId, original.logId);
+      expect(transferred.source, Source.migration);
+    });
+
+    test('transferLogRecord soft-deletes the original', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+      );
+
+      await service.transferLogRecord(original, 'target-account');
+
+      expect(original.isDeleted, true);
+      expect(original.deletedAt, isNotNull);
+    });
+
+    test('transferLogRecord rejects self-transfer', () async {
+      final record = await service.createLogRecord(
+        accountId: 'same-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+      );
+
+      expect(
+        () => service.transferLogRecord(record, 'same-account'),
+        throwsA(isA<AppError>()),
+      );
+    });
+
+    test('transferLogRecord rejects deleted record', () async {
+      final record = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+      );
+      await service.deleteLogRecord(record);
+
+      expect(
+        () => service.transferLogRecord(record, 'target-account'),
+        throwsA(isA<AppError>()),
+      );
+    });
+
+    test('transferLogRecord preserves location data', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        latitude: 37.7749,
+        longitude: -122.4194,
+      );
+
+      final transferred = await service.transferLogRecord(
+        original,
+        'target-account',
+      );
+
+      expect(transferred.latitude, 37.7749);
+      expect(transferred.longitude, -122.4194);
+    });
+
+    test('transferLogRecord preserves reasons', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        reasons: [LogReason.stress, LogReason.social],
+      );
+
+      final transferred = await service.transferLogRecord(
+        original,
+        'target-account',
+      );
+
+      expect(transferred.reasons, [LogReason.stress, LogReason.social]);
+    });
+
+    test('transferLogRecord marks new record as pending sync', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+      );
+
+      final transferred = await service.transferLogRecord(
+        original,
+        'target-account',
+      );
+
+      expect(transferred.syncState, SyncState.pending);
+    });
+  });
+
+  group('LogRecordService - Undo Transfer', () {
+    late MockLogRecordRepository mockRepo;
+    late LogRecordService service;
+
+    setUp(() {
+      mockRepo = MockLogRecordRepository();
+      service = LogRecordService(
+        repository: mockRepo,
+        validateAccountId: false,
+      );
+    });
+
+    test('undoTransfer restores original and deletes transferred', () async {
+      final original = await service.createLogRecord(
+        accountId: 'source-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        note: 'Original note',
+      );
+      final originalLogId = original.logId;
+
+      final transferred = await service.transferLogRecord(
+        original,
+        'target-account',
+      );
+
+      // The original should be soft-deleted after transfer
+      expect(original.isDeleted, true);
+
+      // Undo the transfer
+      await service.undoTransfer(transferred);
+
+      // Verify original is restored
+      final restoredOriginal = await service.getLogRecordByLogId(originalLogId);
+      expect(restoredOriginal, isNotNull);
+      expect(restoredOriginal!.isDeleted, false);
+      expect(restoredOriginal.deletedAt, isNull);
+
+      // Verify transferred copy is deleted
+      expect(transferred.isDeleted, true);
+    });
+
+    test('undoTransfer rejects record without transfer metadata', () async {
+      final record = await service.createLogRecord(
+        accountId: 'some-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+      );
+
+      expect(() => service.undoTransfer(record), throwsA(isA<AppError>()));
+    });
+
+    test('undoTransfer fails when original not found', () async {
+      // Create a record that looks like it was transferred but has no original
+      final fakeTransferred = await service.importLogRecord(
+        logId: 'fake-transferred',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        transferredFromAccountId: 'source-account',
+        transferredAt: DateTime.now(),
+        transferredFromLogId: 'non-existent-original',
+      );
+
+      expect(
+        () => service.undoTransfer(fakeTransferred),
+        throwsA(isA<AppError>()),
+      );
+    });
+  });
+
+  group('LogRecordService - Import with Transfer Metadata', () {
+    late MockLogRecordRepository mockRepo;
+    late LogRecordService service;
+
+    setUp(() {
+      mockRepo = MockLogRecordRepository();
+      service = LogRecordService(repository: mockRepo);
+    });
+
+    test('importLogRecord preserves transfer metadata', () async {
+      final transferredAt = DateTime(2025, 3, 15, 10, 0);
+      final record = await service.importLogRecord(
+        logId: 'imported-transfer',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        transferredFromAccountId: 'source-account',
+        transferredAt: transferredAt,
+        transferredFromLogId: 'original-log-id',
+      );
+
+      expect(record.transferredFromAccountId, 'source-account');
+      expect(record.transferredAt, transferredAt);
+      expect(record.transferredFromLogId, 'original-log-id');
+    });
+
+    test('importLogRecord defaults transfer metadata to null', () async {
+      final record = await service.importLogRecord(
+        logId: 'imported-no-transfer',
+        accountId: 'account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      expect(record.transferredFromAccountId, isNull);
+      expect(record.transferredAt, isNull);
+      expect(record.transferredFromLogId, isNull);
+    });
+  });
+
+  group('LogRecordService - Clear Transfer Metadata', () {
+    late MockLogRecordRepository mockRepo;
+    late LogRecordService service;
+
+    setUp(() {
+      mockRepo = MockLogRecordRepository();
+      service = LogRecordService(
+        repository: mockRepo,
+        validateAccountId: false,
+      );
+    });
+
+    test('clearTransferMetadataForAccount clears references', () async {
+      // Create a transferred record referencing source-account
+      await service.importLogRecord(
+        logId: 'transferred-log',
+        accountId: 'target-account',
+        eventType: EventType.vape,
+        eventAt: DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        transferredFromAccountId: 'source-account',
+        transferredAt: DateTime.now(),
+        transferredFromLogId: 'original-log',
+      );
+
+      // Clear metadata for source-account
+      await service.clearTransferMetadataForAccount('source-account');
+
+      // Verify metadata was cleared
+      final updated = await service.getLogRecordByLogId('transferred-log');
+      expect(updated, isNotNull);
+      expect(updated!.transferredFromAccountId, isNull);
+      expect(updated.transferredAt, isNull);
+      expect(updated.transferredFromLogId, isNull);
+    });
+
+    test(
+      'clearTransferMetadataForAccount only affects matching records',
+      () async {
+        // Record with matching transfer source
+        await service.importLogRecord(
+          logId: 'matching-log',
+          accountId: 'target-account',
+          eventType: EventType.vape,
+          eventAt: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          transferredFromAccountId: 'account-to-delete',
+          transferredAt: DateTime.now(),
+          transferredFromLogId: 'old-log',
+        );
+
+        // Record with different transfer source
+        await service.importLogRecord(
+          logId: 'other-log',
+          accountId: 'target-account',
+          eventType: EventType.vape,
+          eventAt: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          transferredFromAccountId: 'other-account',
+          transferredAt: DateTime.now(),
+          transferredFromLogId: 'other-original',
+        );
+
+        await service.clearTransferMetadataForAccount('account-to-delete');
+
+        // Matching record should be cleared
+        final matched = await service.getLogRecordByLogId('matching-log');
+        expect(matched!.transferredFromAccountId, isNull);
+
+        // Non-matching record should be untouched
+        final other = await service.getLogRecordByLogId('other-log');
+        expect(other!.transferredFromAccountId, 'other-account');
+      },
+    );
+  });
 }

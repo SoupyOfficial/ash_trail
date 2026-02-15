@@ -10,7 +10,7 @@ class AccountService {
   final LogRecordService _logRecordService;
 
   /// Create an AccountService with the given dependencies.
-  /// 
+  ///
   /// If [repository] is not provided, it will be created from DatabaseService.
   /// If [logRecordService] is not provided, a new instance will be created.
   AccountService({
@@ -61,8 +61,14 @@ class AccountService {
     await _repository.clearActive();
   }
 
-  /// Delete account and all associated data
+  /// Delete account and all associated data.
+  ///
+  /// Before hard-deleting, clears transfer metadata on records in other
+  /// accounts that reference the account being deleted. This prevents
+  /// dangling references in the transfer audit trail.
   Future<void> deleteAccount(String userId) async {
+    // Clear transfer metadata on records in other accounts that reference this account
+    await _logRecordService.clearTransferMetadataForAccount(userId);
     // Delete all log entries for this account first
     await _logRecordService.deleteAllByAccount(userId);
     // Then delete the account

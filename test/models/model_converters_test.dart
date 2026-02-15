@@ -376,6 +376,128 @@ void main() {
         expect(restored.moodRating, equals(original.moodRating));
         expect(restored.physicalRating, equals(original.physicalRating));
       });
+
+      test('toWebModel includes transfer metadata', () {
+        final transferredAt = DateTime(2025, 3, 15, 10, 0);
+        final logRecord = LogRecord.create(
+          logId: 'transfer-log',
+          accountId: 'target-account',
+          eventType: EventType.vape,
+          eventAt: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          duration: 30.0,
+          source: Source.migration,
+          transferredFromAccountId: 'source-account',
+          transferredAt: transferredAt,
+          transferredFromLogId: 'original-log',
+        );
+
+        final webModel = logRecord.toWebModel();
+
+        expect(webModel.transferredFromAccountId, equals('source-account'));
+        expect(webModel.transferredAt, equals(transferredAt));
+        expect(webModel.transferredFromLogId, equals('original-log'));
+      });
+
+      test('toWebModel has null transfer metadata when not set', () {
+        final logRecord = LogRecord.create(
+          logId: 'normal-log',
+          accountId: 'account',
+          eventType: EventType.vape,
+          eventAt: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          duration: 10.0,
+          source: Source.manual,
+        );
+
+        final webModel = logRecord.toWebModel();
+
+        expect(webModel.transferredFromAccountId, isNull);
+        expect(webModel.transferredAt, isNull);
+        expect(webModel.transferredFromLogId, isNull);
+      });
+
+      test('fromWebModel restores transfer metadata from WebLogRecord', () {
+        final transferredAt = DateTime(2025, 3, 15, 10, 0);
+        final webLogRecord = WebLogRecord(
+          id: 'transfer-log',
+          accountId: 'target-account',
+          eventType: 'vape',
+          eventAt: DateTime.now(),
+          duration: 30.0,
+          isDeleted: false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          transferredFromAccountId: 'source-account',
+          transferredAt: transferredAt,
+          transferredFromLogId: 'original-log',
+        );
+
+        final logRecord = LogRecordWebConversion.fromWebModel(webLogRecord);
+
+        expect(logRecord.transferredFromAccountId, equals('source-account'));
+        expect(logRecord.transferredAt, equals(transferredAt));
+        expect(logRecord.transferredFromLogId, equals('original-log'));
+      });
+
+      test('fromWebModel restores transfer metadata from extraFields', () {
+        final transferredAt = DateTime(2025, 3, 15, 10, 0);
+        final webLogRecord = WebLogRecord(
+          id: 'transfer-log-extra',
+          accountId: 'target-account',
+          eventType: 'vape',
+          eventAt: DateTime.now(),
+          duration: 30.0,
+          isDeleted: false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        final logRecord = LogRecordWebConversion.fromWebModel(
+          webLogRecord,
+          extraFields: {
+            'transferredFromAccountId': 'source-account',
+            'transferredAt': transferredAt.toIso8601String(),
+            'transferredFromLogId': 'original-log',
+          },
+        );
+
+        expect(logRecord.transferredFromAccountId, equals('source-account'));
+        expect(logRecord.transferredAt, equals(transferredAt));
+        expect(logRecord.transferredFromLogId, equals('original-log'));
+      });
+
+      test('round-trip conversion preserves transfer metadata', () {
+        final transferredAt = DateTime(2025, 3, 15, 10, 0);
+        final original = LogRecord.create(
+          logId: 'rt-transfer-log',
+          accountId: 'target-account',
+          eventType: EventType.vape,
+          eventAt: DateTime(2025, 1, 1),
+          createdAt: DateTime(2025, 1, 1),
+          updatedAt: DateTime(2025, 1, 1),
+          duration: 30.0,
+          source: Source.migration,
+          transferredFromAccountId: 'source-account',
+          transferredAt: transferredAt,
+          transferredFromLogId: 'original-log',
+        )..id = 999;
+
+        final webModel = original.toWebModel();
+        final restored = LogRecordWebConversion.fromWebModel(webModel, id: 999);
+
+        expect(
+          restored.transferredFromAccountId,
+          equals(original.transferredFromAccountId),
+        );
+        expect(restored.transferredAt, equals(original.transferredAt));
+        expect(
+          restored.transferredFromLogId,
+          equals(original.transferredFromLogId),
+        );
+      });
     });
 
     group('WebAccount JSON Serialization', () {
@@ -578,6 +700,101 @@ void main() {
         expect(restored.physicalRating, equals(original.physicalRating));
         expect(restored.latitude, equals(original.latitude));
         expect(restored.longitude, equals(original.longitude));
+      });
+
+      test('toJson includes transfer metadata', () {
+        final transferredAt = DateTime(2025, 3, 15, 10, 0);
+        final webLogRecord = WebLogRecord(
+          id: 'transfer-json-log',
+          accountId: 'target-account',
+          eventType: 'vape',
+          eventAt: DateTime.now(),
+          duration: 30.0,
+          isDeleted: false,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          transferredFromAccountId: 'source-account',
+          transferredAt: transferredAt,
+          transferredFromLogId: 'original-log',
+        );
+
+        final json = webLogRecord.toJson();
+
+        expect(json['transferredFromAccountId'], equals('source-account'));
+        expect(json['transferredAt'], equals(transferredAt.toIso8601String()));
+        expect(json['transferredFromLogId'], equals('original-log'));
+      });
+
+      test('fromJson parses transfer metadata', () {
+        final json = {
+          'id': 'transfer-json-log',
+          'accountId': 'target-account',
+          'eventType': 'vape',
+          'eventAt': '2025-01-01T10:00:00.000',
+          'duration': 30.0,
+          'isDeleted': false,
+          'createdAt': '2025-01-01T10:00:00.000',
+          'updatedAt': '2025-01-01T10:00:00.000',
+          'transferredFromAccountId': 'source-account',
+          'transferredAt': '2025-03-15T10:00:00.000',
+          'transferredFromLogId': 'original-log',
+        };
+
+        final webLogRecord = WebLogRecord.fromJson(json);
+
+        expect(webLogRecord.transferredFromAccountId, equals('source-account'));
+        expect(
+          webLogRecord.transferredAt,
+          equals(DateTime(2025, 3, 15, 10, 0)),
+        );
+        expect(webLogRecord.transferredFromLogId, equals('original-log'));
+      });
+
+      test('fromJson handles missing transfer metadata', () {
+        final json = {
+          'id': 'normal-json-log',
+          'accountId': 'account',
+          'eventType': 'vape',
+          'eventAt': '2025-01-01T10:00:00.000',
+          'createdAt': '2025-01-01T10:00:00.000',
+          'updatedAt': '2025-01-01T10:00:00.000',
+        };
+
+        final webLogRecord = WebLogRecord.fromJson(json);
+
+        expect(webLogRecord.transferredFromAccountId, isNull);
+        expect(webLogRecord.transferredAt, isNull);
+        expect(webLogRecord.transferredFromLogId, isNull);
+      });
+
+      test('JSON round-trip preserves transfer metadata', () {
+        final transferredAt = DateTime(2025, 3, 15, 10, 0);
+        final original = WebLogRecord(
+          id: 'rt-transfer-json',
+          accountId: 'target-account',
+          eventType: 'vape',
+          eventAt: DateTime(2025, 1, 1, 10, 0),
+          duration: 30.0,
+          isDeleted: false,
+          createdAt: DateTime(2025, 1, 1, 10, 0),
+          updatedAt: DateTime(2025, 1, 1, 10, 0),
+          transferredFromAccountId: 'source-account',
+          transferredAt: transferredAt,
+          transferredFromLogId: 'original-log',
+        );
+
+        final json = original.toJson();
+        final restored = WebLogRecord.fromJson(json);
+
+        expect(
+          restored.transferredFromAccountId,
+          equals(original.transferredFromAccountId),
+        );
+        expect(restored.transferredAt, equals(original.transferredAt));
+        expect(
+          restored.transferredFromLogId,
+          equals(original.transferredFromLogId),
+        );
       });
     });
 

@@ -169,6 +169,9 @@ class LogRecordService {
     Source source = Source.imported,
     String? deviceId,
     String? appVersion,
+    String? transferredFromAccountId,
+    DateTime? transferredAt,
+    String? transferredFromLogId,
   }) async {
     final record = LogRecord.create(
       logId: logId, // Use provided logId instead of generating new one
@@ -189,6 +192,9 @@ class LogRecordService {
       deviceId: deviceId ?? _getDeviceId(),
       appVersion: appVersion ?? _getAppVersion(),
       syncState: SyncState.synced, // Mark as synced since it came from remote
+      transferredFromAccountId: transferredFromAccountId,
+      transferredAt: transferredAt,
+      transferredFromLogId: transferredFromLogId,
     );
 
     return await _repository.create(record);
@@ -257,6 +263,139 @@ class LogRecordService {
     record.softDelete();
     AppAnalyticsService.instance.logLogDeleted();
     await _repository.update(record);
+  }
+
+  /// Transfer a log record from the current account to another account.
+  ///
+  /// Soft-deletes the original record and creates a new copy under the target
+  /// account with transfer metadata for audit trail.
+  /// Returns the newly created record in the target account.
+  Future<LogRecord> transferLogRecord(
+    LogRecord record,
+    String targetAccountId,
+  ) async {
+    _log.w(
+      '[TRANSFER_START] logId=${record.logId}, '
+      'from=${record.accountId}, to=$targetAccountId',
+    );
+
+    // Validate target account is different from source
+    if (targetAccountId == record.accountId) {
+      throw AppError.validation(
+        message: 'Cannot transfer a log to the same account.',
+        code: 'TRANSFER_SELF',
+        technicalDetail: 'targetAccountId=$targetAccountId == record.accountId',
+      );
+    }
+
+    // Validate target account exists
+    if (validateAccountId && _accountService != null) {
+      final exists = await _accountService.accountExists(targetAccountId);
+      if (!exists) {
+        throw AppError.validation(
+          message: 'Target account not found.',
+          code: 'TRANSFER_TARGET_NOT_FOUND',
+          technicalDetail: 'targetAccountId=$targetAccountId does not exist',
+        );
+      }
+    }
+
+    // Validate record is not already deleted
+    if (record.isDeleted) {
+      throw const AppError.validation(
+        message: 'Cannot transfer a deleted log entry.',
+        code: 'TRANSFER_DELETED',
+      );
+    }
+
+    final now = DateTime.now();
+    final newLogId = _uuid.v4();
+
+    // 1. Soft-delete the original record
+    record.softDelete();
+    await _repository.update(record);
+
+    // 2. Create new record under target account with transfer metadata
+    final newRecord = LogRecord.create(
+      logId: newLogId,
+      accountId: targetAccountId,
+      eventType: record.eventType,
+      eventAt: record.eventAt,
+      createdAt: record.createdAt,
+      updatedAt: now,
+      duration: record.duration,
+      unit: record.unit,
+      note: record.note,
+      reasons: record.reasons,
+      moodRating: record.moodRating,
+      physicalRating: record.physicalRating,
+      latitude: record.latitude,
+      longitude: record.longitude,
+      source: Source.migration,
+      deviceId: record.deviceId,
+      appVersion: record.appVersion,
+      timeConfidence: record.timeConfidence,
+      syncState: SyncState.pending,
+      transferredFromAccountId: record.accountId,
+      transferredAt: now,
+      transferredFromLogId: record.logId,
+    );
+
+    final created = await _repository.create(newRecord);
+
+    _log.w(
+      '[TRANSFER_END] original=${record.logId} soft-deleted, '
+      'new=${created.logId} created for $targetAccountId',
+    );
+
+    return created;
+  }
+
+  /// Undo a transfer by restoring the original record and deleting the transferred copy.
+  ///
+  /// Takes the transferred record (the new copy) and reverses the transfer:
+  /// - Finds the original record via [transferredFromLogId]
+  /// - Restores the original (un-soft-deletes it)
+  /// - Soft-deletes the transferred copy
+  Future<void> undoTransfer(LogRecord transferredRecord) async {
+    _log.w(
+      '[UNDO_TRANSFER_START] transferredLogId=${transferredRecord.logId}, '
+      'originalLogId=${transferredRecord.transferredFromLogId}',
+    );
+
+    if (transferredRecord.transferredFromLogId == null) {
+      throw const AppError.validation(
+        message: 'This log was not transferred.',
+        code: 'UNDO_TRANSFER_NOT_TRANSFERRED',
+      );
+    }
+
+    // Find the original record
+    final original = await _repository.getByLogId(
+      transferredRecord.transferredFromLogId!,
+    );
+
+    if (original == null) {
+      throw const AppError.validation(
+        message: 'Original log record not found. Cannot undo transfer.',
+        code: 'UNDO_TRANSFER_ORIGINAL_NOT_FOUND',
+      );
+    }
+
+    // Restore the original record
+    original.isDeleted = false;
+    original.deletedAt = null;
+    original.markDirty();
+    await _repository.update(original);
+
+    // Soft-delete the transferred copy
+    transferredRecord.softDelete();
+    await _repository.update(transferredRecord);
+
+    _log.w(
+      '[UNDO_TRANSFER_END] original=${original.logId} restored, '
+      'transferred=${transferredRecord.logId} deleted',
+    );
   }
 
   /// Hard delete a log record (use with caution)
@@ -388,6 +527,28 @@ class LogRecordService {
   /// Delete all log records for an account (used when deleting account)
   Future<void> deleteAllByAccount(String accountId) async {
     await _repository.deleteByAccount(accountId);
+  }
+
+  /// Clear transfer metadata on records in other accounts that reference the given account.
+  ///
+  /// Called before account deletion to prevent dangling references in transfer audit trails.
+  /// Records that were transferred FROM the deleting account will have their
+  /// [transferredFromAccountId] cleared.
+  Future<void> clearTransferMetadataForAccount(String accountId) async {
+    final allRecords = await _repository.getAll();
+    for (final record in allRecords) {
+      if (record.transferredFromAccountId == accountId) {
+        record.transferredFromAccountId = null;
+        record.transferredAt = null;
+        record.transferredFromLogId = null;
+        record.markDirty();
+        await _repository.update(record);
+        _log.i(
+          'Cleared transfer metadata on ${record.logId} '
+          '(source account $accountId being deleted)',
+        );
+      }
+    }
   }
 
   /// Batch create multiple log records

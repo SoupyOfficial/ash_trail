@@ -85,6 +85,17 @@ class LogRecord {
   /// When this record was deleted (if applicable)
   DateTime? deletedAt;
 
+  // ===== TRANSFER =====
+
+  /// If this record was transferred from another account, the source account's userId
+  String? transferredFromAccountId;
+
+  /// When this record was transferred
+  DateTime? transferredAt;
+
+  /// The original record's logId that this was transferred from
+  String? transferredFromLogId;
+
   // ===== SYNC =====
 
   /// Current sync state
@@ -134,6 +145,9 @@ class LogRecord {
     this.syncedAt,
     this.lastRemoteUpdateAt,
     this.revision = 0,
+    this.transferredFromAccountId,
+    this.transferredAt,
+    this.transferredFromLogId,
   }) {
     this.eventAt = eventAt ?? DateTime.now();
     this.createdAt = createdAt ?? DateTime.now();
@@ -200,6 +214,9 @@ class LogRecord {
     DateTime? syncedAt,
     DateTime? lastRemoteUpdateAt,
     int? revision,
+    String? transferredFromAccountId,
+    DateTime? transferredAt,
+    String? transferredFromLogId,
   }) {
     return LogRecord.create(
       logId: logId ?? this.logId,
@@ -227,6 +244,10 @@ class LogRecord {
       syncedAt: syncedAt ?? this.syncedAt,
       lastRemoteUpdateAt: lastRemoteUpdateAt ?? this.lastRemoteUpdateAt,
       revision: revision ?? this.revision,
+      transferredFromAccountId:
+          transferredFromAccountId ?? this.transferredFromAccountId,
+      transferredAt: transferredAt ?? this.transferredAt,
+      transferredFromLogId: transferredFromLogId ?? this.transferredFromLogId,
     )..id = id;
   }
 
@@ -254,6 +275,9 @@ class LogRecord {
       'isDeleted': isDeleted,
       'deletedAt': deletedAt?.toIso8601String(),
       'revision': revision,
+      'transferredFromAccountId': transferredFromAccountId,
+      'transferredAt': transferredAt?.toIso8601String(),
+      'transferredFromLogId': transferredFromLogId,
     };
   }
 
@@ -308,6 +332,12 @@ class LogRecord {
       revision: data['revision'] as int? ?? 0,
       syncState: SyncState.synced,
       lastRemoteUpdateAt: DateTime.parse(data['updatedAt'] as String),
+      transferredFromAccountId: data['transferredFromAccountId'] as String?,
+      transferredAt:
+          data['transferredAt'] != null
+              ? DateTime.parse(data['transferredAt'] as String)
+              : null,
+      transferredFromLogId: data['transferredFromLogId'] as String?,
     );
   }
 }

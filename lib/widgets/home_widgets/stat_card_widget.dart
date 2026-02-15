@@ -13,6 +13,7 @@ class StatCardWidget extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final Color? accentColor;
+  final bool reduceMotion;
 
   const StatCardWidget({
     super.key,
@@ -24,6 +25,7 @@ class StatCardWidget extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.accentColor,
+    this.reduceMotion = false,
   });
 
   @override
@@ -31,11 +33,18 @@ class StatCardWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final effectiveColor = accentColor ?? colorScheme.primary;
 
+    // Derive borderRadius from CardTheme so settings slider is respected.
+    final cardShape = Theme.of(context).cardTheme.shape;
+    final baseBorderRadius =
+        cardShape is RoundedRectangleBorder
+            ? cardShape.borderRadius as BorderRadius
+            : BorderRadii.md;
+
     return Card(
       margin: EdgeInsets.zero,
-      elevation: ElevationLevel.sm.value,
+      // elevation inherited from CardTheme
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadii.md,
+        borderRadius: baseBorderRadius,
         side: BorderSide(
           color: colorScheme.outlineVariant.withOpacity(0.2),
           width: 1,
@@ -56,7 +65,7 @@ class StatCardWidget extends StatelessWidget {
                   onLongPress!();
                 }
                 : null,
-        borderRadius: BorderRadii.md,
+        borderRadius: baseBorderRadius,
         child: Padding(
           padding: Paddings.md,
           child: Column(
@@ -92,7 +101,10 @@ class StatCardWidget extends StatelessWidget {
               SizedBox(height: Spacing.sm.value),
               // Value - large and prominent
               AnimatedSwitcher(
-                duration: AnimationDuration.fast.duration,
+                duration: resolveAnimationDuration(
+                  AnimationDuration.fast.duration,
+                  reduceMotion || MediaQuery.of(context).disableAnimations,
+                ),
                 transitionBuilder: (Widget child, Animation<double> animation) {
                   return FadeTransition(
                     opacity: animation,

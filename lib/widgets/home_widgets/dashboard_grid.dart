@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../../models/app_settings.dart';
 import '../../models/home_widget_config.dart';
 import '../../models/log_record.dart';
+import '../../utils/design_constants.dart';
 import '../../utils/responsive_layout.dart';
 import 'home_widget_builder.dart';
 import 'home_widget_wrapper.dart';
@@ -22,6 +24,8 @@ class DashboardGrid extends StatefulWidget {
   final VoidCallback? onLogCreated;
   final VoidCallback? onRecordTap;
   final Future<void> Function(LogRecord)? onRecordDelete;
+  final DashboardDensity density;
+  final bool reduceMotion;
 
   const DashboardGrid({
     super.key,
@@ -33,6 +37,8 @@ class DashboardGrid extends StatefulWidget {
     this.onLogCreated,
     this.onRecordTap,
     this.onRecordDelete,
+    this.density = DashboardDensity.comfortable,
+    this.reduceMotion = false,
   });
 
   @override
@@ -78,7 +84,10 @@ class _DashboardGridState extends State<DashboardGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final gridConfig = DashboardGridConfig.of(context);
+    final gridConfig = DashboardGridConfig.withDensity(
+      width: MediaQuery.of(context).size.width,
+      density: widget.density,
+    );
     final crossAxisCount = gridConfig.crossAxisCount;
 
     // Cancel drag if column count changed (orientation/resize — plan note #17)
@@ -144,9 +153,11 @@ class _DashboardGridState extends State<DashboardGrid> {
       widgetId: config.id,
       type: config.type,
       isEditMode: widget.isEditMode,
+      reduceMotion: widget.reduceMotion,
       onRemove: () => widget.onRemove(config),
       child: HomeWidgetEditPadding(
         isEditMode: widget.isEditMode,
+        reduceMotion: widget.reduceMotion,
         child: HomeWidgetBuilder(
           config: config,
           records: widget.records,
@@ -221,7 +232,10 @@ class _DashboardGridState extends State<DashboardGrid> {
             ),
           ),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: resolveAnimationDuration(
+              const Duration(milliseconds: 200),
+              widget.reduceMotion,
+            ),
             decoration:
                 isDropTarget
                     ? BoxDecoration(
@@ -255,7 +269,10 @@ class _DashboardGridState extends State<DashboardGrid> {
   ) {
     // Give explicit dimensions — feedback widget renders in Overlay
     // and doesn't inherit parent constraints (see plan note #4).
-    final gridConfig = DashboardGridConfig.of(context);
+    final gridConfig = DashboardGridConfig.withDensity(
+      width: MediaQuery.of(context).size.width,
+      density: widget.density,
+    );
     final entry = WidgetCatalog.getEntry(config.type);
     final span = entry.size.columnSpan(crossAxisCount).clamp(1, crossAxisCount);
 

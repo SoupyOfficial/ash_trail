@@ -11,6 +11,7 @@ import '../providers/account_provider.dart';
 import '../providers/home_widget_config_provider.dart';
 import '../providers/log_record_provider.dart'
     show activeAccountLogRecordsProvider, logRecordNotifierProvider;
+import '../providers/app_settings_provider.dart';
 import '../providers/sync_provider.dart';
 import '../services/error_reporting_service.dart';
 import '../services/sync_service.dart';
@@ -19,6 +20,7 @@ import '../widgets/home_widgets/home_widgets.dart';
 import '../utils/design_constants.dart';
 import '../utils/a11y_utils.dart';
 import 'accounts_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -111,6 +113,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
               tooltip: isEditMode ? 'Done' : 'Edit Layout',
             ),
+          SemanticIconButton(
+            key: const Key('app_bar_settings'),
+            icon: Icons.settings,
+            semanticLabel: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  settings: const RouteSettings(name: 'SettingsScreen'),
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+            tooltip: 'Settings',
+          ),
           SemanticIconButton(
             key: const Key('app_bar_account'),
             icon: Icons.account_circle,
@@ -308,6 +325,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             visibleWidgets: visibleWidgets,
             records: records,
             isEditMode: isEditMode,
+            density: ref.watch(dashboardDensityProvider),
+            reduceMotion: ref.watch(reduceMotionProvider),
             onReorder: (oldIndex, newIndex) {
               ref
                   .read(homeLayoutConfigProvider.notifier)

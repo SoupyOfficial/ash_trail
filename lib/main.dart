@@ -17,6 +17,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'screens/login_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
+import 'providers/app_settings_provider.dart';
 import 'providers/home_widget_config_provider.dart';
 import 'navigation/main_navigation.dart';
 import 'utils/error_display.dart';
@@ -214,39 +215,43 @@ class AshTrailApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Royal blue and black color scheme
-    const royalBlue = Color(0xFF4169E1);
+    // Provider-driven theme — seed color and mode come from AppSettings
+    final seedColor = ref.watch(activeSeedColorProvider);
+    final themeMode = ref.watch(activeThemeModeProvider);
+    final cardRadius = ref.watch(cardCornerRadiusProvider);
+    final cardElev = ref.watch(cardElevationProvider);
+    final reduceMotion = ref.watch(reduceMotionProvider);
 
     return MaterialApp(
       title: 'Ash Trail',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: royalBlue,
+          seedColor: seedColor,
           brightness: Brightness.light,
         ),
         useMaterial3: true,
         cardTheme: CardThemeData(
-          elevation: 2,
+          elevation: cardElev,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(cardRadius),
           ),
         ),
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: royalBlue,
+          seedColor: seedColor,
           brightness: Brightness.dark,
           surface: const Color(0xFF121212),
         ),
         scaffoldBackgroundColor: Colors.black,
         useMaterial3: true,
         cardTheme: CardThemeData(
-          elevation: 2,
+          elevation: cardElev,
           color: const Color(0xFF1E1E1E),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(cardRadius),
           ),
         ),
         appBarTheme: const AppBarTheme(
@@ -255,11 +260,18 @@ class AshTrailApp extends ConsumerWidget {
           backgroundColor: Colors.black,
         ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       navigatorObservers: [
         if (AppAnalyticsService.instance.observer != null)
           AppAnalyticsService.instance.observer!,
       ],
+      builder:
+          reduceMotion
+              ? (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: child!,
+              )
+              : null,
       home: const AuthWrapper(),
     );
   }

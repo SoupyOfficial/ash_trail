@@ -391,6 +391,14 @@ enum AnimationDuration {
   final Duration duration;
 }
 
+/// Resolves an animation duration respecting the reduce-motion preference.
+///
+/// Returns [Duration.zero] when [reduceMotion] is `true`, otherwise the
+/// original [duration].
+Duration resolveAnimationDuration(Duration duration, bool reduceMotion) {
+  return reduceMotion ? Duration.zero : duration;
+}
+
 /// Standard animation curves
 class AnimationCurves {
   static const Curve easeIn = Curves.easeIn;

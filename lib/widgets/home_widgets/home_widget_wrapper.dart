@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../utils/design_constants.dart';
 import 'widget_catalog.dart';
 
 /// Wrapper component for home widgets that provides:
@@ -11,6 +12,7 @@ class HomeWidgetWrapper extends StatelessWidget {
   final HomeWidgetType type;
   final Widget child;
   final bool isEditMode;
+  final bool reduceMotion;
   final VoidCallback? onRemove;
 
   const HomeWidgetWrapper({
@@ -19,6 +21,7 @@ class HomeWidgetWrapper extends StatelessWidget {
     required this.type,
     required this.child,
     required this.isEditMode,
+    this.reduceMotion = false,
     this.onRemove,
   });
 
@@ -27,7 +30,10 @@ class HomeWidgetWrapper extends StatelessWidget {
     final entry = WidgetCatalog.getEntry(type);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: resolveAnimationDuration(
+        const Duration(milliseconds: 200),
+        reduceMotion,
+      ),
       curve: Curves.easeInOut,
       margin: EdgeInsets.symmetric(
         horizontal: isEditMode ? 4 : 0,
@@ -136,17 +142,22 @@ class HomeWidgetWrapper extends StatelessWidget {
 class HomeWidgetEditPadding extends StatelessWidget {
   final Widget child;
   final bool isEditMode;
+  final bool reduceMotion;
 
   const HomeWidgetEditPadding({
     super.key,
     required this.child,
     required this.isEditMode,
+    this.reduceMotion = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedPadding(
-      duration: const Duration(milliseconds: 200),
+      duration: resolveAnimationDuration(
+        const Duration(milliseconds: 200),
+        reduceMotion,
+      ),
       padding: EdgeInsets.only(top: isEditMode ? 36 : 0),
       child: child,
     );

@@ -4,6 +4,7 @@
 /// to mobile, tablet, and desktop form factors.
 
 import 'package:flutter/material.dart';
+import '../models/app_settings.dart';
 import 'design_constants.dart';
 
 // ============================================================================
@@ -258,6 +259,26 @@ class DashboardGridConfig {
   /// Convenience: build from [BuildContext] using [MediaQuery].
   factory DashboardGridConfig.of(BuildContext context) {
     return DashboardGridConfig.fromWidth(MediaQuery.of(context).size.width);
+  }
+
+  /// Build a density-adjusted config.
+  ///
+  /// Applies [DashboardDensity] multipliers to the base spacing/padding
+  /// derived from the current screen width.
+  factory DashboardGridConfig.withDensity({
+    required double width,
+    required DashboardDensity density,
+  }) {
+    final base = DashboardGridConfig.fromWidth(width);
+    if (density == DashboardDensity.comfortable) return base;
+    return DashboardGridConfig(
+      crossAxisCount: base.crossAxisCount,
+      crossAxisSpacing:
+          (base.crossAxisSpacing * density.spacingMultiplier).roundToDouble(),
+      mainAxisSpacing:
+          (base.mainAxisSpacing * density.spacingMultiplier).roundToDouble(),
+      padding: (base.padding * density.paddingMultiplier).roundToDouble(),
+    );
   }
 }
 

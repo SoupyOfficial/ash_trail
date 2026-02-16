@@ -6,9 +6,9 @@ import '../../models/log_record.dart';
 import '../../models/enums.dart';
 import '../../services/home_metrics_service.dart';
 import '../../utils/design_constants.dart';
-import '../../utils/day_boundary.dart';
 import '../home_quick_log_widget.dart';
 import 'widget_catalog.dart';
+import 'widget_settings_keys.dart';
 import 'stat_card_widget.dart';
 
 /// Builds the appropriate widget for a given HomeWidgetConfig
@@ -32,16 +32,48 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final metrics = HomeMetricsService();
 
+    // ── Extract shared settings ──────────────────────────────────────────
+    final defaults = WidgetSettingsDefaults.defaultsFor(config.type);
+    final days =
+        config.getSetting<int>(kTimeWindowDays) ??
+        defaults[kTimeWindowDays] as int?;
+    final eventTypeFilterRaw =
+        config.getSetting<List<dynamic>>(kEventTypeFilter) ??
+        defaults[kEventTypeFilter] as List<dynamic>?;
+    final eventTypes = _parseEventTypes(eventTypeFilterRaw);
+    final filteredRecords = metrics.filterRecords(
+      records,
+      days: days,
+      eventTypes: eventTypes,
+    );
+    final timeLabel =
+        days != null ? WidgetSettingsDefaults.timeWindowLabel(days) : null;
+    final hasEventFilter = eventTypes != null && eventTypes.isNotEmpty;
+
     switch (config.type) {
       // ===== TIME-BASED =====
       case HomeWidgetType.timeSinceLastHit:
         return _TimeSinceLastHitWidget(records: records, metrics: metrics);
 
       case HomeWidgetType.avgTimeBetween:
-        return _buildAvgTimeBetween(context, metrics);
+        return _buildAvgTimeBetween(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.longestGapToday:
-        return _buildLongestGapToday(context, metrics);
+        return _buildLongestGap(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.firstHitToday:
         return _buildFirstHitToday(context, metrics);
@@ -50,69 +82,184 @@ class HomeWidgetBuilder extends ConsumerWidget {
         return _buildLastHitTime(context, metrics);
 
       case HomeWidgetType.peakHour:
-        return _buildPeakHour(context, metrics);
+        return _buildPeakHour(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.activeHoursToday:
-        return _buildActiveHoursToday(context, metrics);
+        return _buildActiveHours(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       // ===== DURATION-BASED =====
       case HomeWidgetType.totalDurationToday:
-        return _TotalDurationTodayCard(records: records);
+        return _buildTotalDuration(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.avgDurationPerHit:
-        return _buildAvgDurationPerHit(context, metrics);
+        return _buildAvgDurationPerHit(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.longestHitToday:
-        return _buildLongestHitToday(context, metrics);
+        return _buildLongestHit(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.shortestHitToday:
-        return _buildShortestHitToday(context, metrics);
+        return _buildShortestHit(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.totalDurationWeek:
-        return _buildTotalDurationWeek(context, metrics);
+        return _buildTotalDurationWeek(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.durationTrend:
-        return _buildDurationTrend(context, metrics);
+        return _buildDurationTrend(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       // ===== COUNT-BASED =====
       case HomeWidgetType.hitsToday:
-        return _buildHitsToday(context, metrics);
+        return _buildHits(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.hitsThisWeek:
-        return _buildHitsThisWeek(context, metrics);
+        return _buildHitsWeek(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.dailyAvgHits:
-        return _buildDailyAvgHits(context, metrics);
+        return _buildDailyAvgHits(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.hitsPerActiveHour:
-        return _buildHitsPerActiveHour(context, metrics);
+        return _buildHitsPerActiveHour(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       // ===== COMPARISON =====
       case HomeWidgetType.todayVsYesterday:
-        return _buildTodayVsYesterday(context, metrics);
+        return _buildTodayVsYesterday(
+          context,
+          metrics,
+          filteredRecords,
+          config.getSetting<String>(kComparisonTarget) ??
+              defaults[kComparisonTarget] as String? ??
+              'yesterday',
+        );
 
       case HomeWidgetType.todayVsWeekAvg:
-        return _buildTodayVsWeekAvg(context, metrics);
+        return _buildTodayVsWeekAvg(context, metrics, filteredRecords);
 
       case HomeWidgetType.weekdayVsWeekend:
-        return _buildWeekdayVsWeekend(context, metrics);
+        return _buildWeekdayVsWeekend(context, metrics, filteredRecords, days);
 
       // ===== PATTERN =====
       case HomeWidgetType.weeklyPattern:
-        return _buildWeeklyPattern(context, metrics);
+        return _buildWeeklyPattern(context, metrics, filteredRecords, days);
 
       case HomeWidgetType.weekdayHeatmap:
-        return _buildWeekdayHeatmap(context, metrics);
+        return _buildHeatmap(
+          context,
+          metrics,
+          filteredRecords,
+          _resolveHeatmapDayFilter(config, defaults),
+        );
 
       case HomeWidgetType.weekendHeatmap:
-        return _buildWeekendHeatmap(context, metrics);
+        return _buildHeatmap(
+          context,
+          metrics,
+          filteredRecords,
+          _resolveHeatmapDayFilter(config, defaults),
+        );
 
       // ===== SECONDARY =====
       case HomeWidgetType.moodPhysicalAvg:
-        return _buildMoodPhysicalAvg(context, metrics);
+        return _buildMoodPhysicalAvg(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       case HomeWidgetType.topReasons:
-        return _buildTopReasons(context, metrics);
+        return _buildTopReasons(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
 
       // ===== ACTION =====
       case HomeWidgetType.quickLog:
@@ -125,7 +272,51 @@ class HomeWidgetBuilder extends ConsumerWidget {
           onRecordTap: onRecordTap,
           onRecordDelete: onRecordDelete,
         );
+
+      case HomeWidgetType.customStat:
+        return _buildCustomStat(
+          context,
+          metrics,
+          filteredRecords,
+          days,
+          timeLabel,
+          hasEventFilter,
+        );
     }
+  }
+
+  /// Parse event type filter from settings (stored as List<String>).
+  static List<EventType>? _parseEventTypes(List<dynamic>? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    final types = <EventType>[];
+    for (final name in raw) {
+      try {
+        types.add(EventType.values.firstWhere((e) => e.name == name));
+      } catch (_) {
+        // skip unknown values
+      }
+    }
+    return types.isEmpty ? null : types;
+  }
+
+  /// Resolve heatmap day filter from config or defaults.
+  static HeatmapDayFilter _resolveHeatmapDayFilter(
+    HomeWidgetConfig config,
+    Map<String, dynamic> defaults,
+  ) {
+    final name =
+        config.getSetting<String>(kHeatmapDayFilter) ??
+        defaults[kHeatmapDayFilter] as String? ??
+        'all';
+    return HeatmapDayFilter.values.firstWhere(
+      (e) => e.name == name,
+      orElse: () => HeatmapDayFilter.all,
+    );
+  }
+
+  /// Build a subtitle with an optional filter indicator.
+  static String _subtitle(String base, bool hasEventFilter) {
+    return hasEventFilter ? '$base (filtered)' : base;
   }
 
   // ===== TIME-BASED BUILDERS =====
@@ -133,36 +324,42 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget _buildAvgTimeBetween(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    // Calculate average gap from first hit of the day
-    final todayGap = metrics.getAverageGapToday(records);
+    final gap = metrics.getAverageGap(filteredRecords);
     final weekGap = metrics.getAverageGap(records, days: 7);
 
     return StatCardWidget(
-      title: 'Avg Gap (Today)',
-      value:
-          todayGap != null
-              ? HomeMetricsService.formatDurationObject(todayGap)
-              : '--',
-      subtitle:
-          weekGap != null
-              ? '7d avg: ${HomeMetricsService.formatDurationObject(weekGap)}'
-              : null,
+      title: 'Avg Gap',
+      value: gap != null ? HomeMetricsService.formatDurationObject(gap) : '--',
+      subtitle: _subtitle(
+        weekGap != null
+            ? '7d avg: ${HomeMetricsService.formatDurationObject(weekGap)}'
+            : (timeLabel ?? 'today'),
+        hasEventFilter,
+      ),
       icon: Icons.hourglass_empty,
     );
   }
 
-  Widget _buildLongestGapToday(
+  Widget _buildLongestGap(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final gap = metrics.getLongestGap(records, days: 1);
+    final gap = metrics.getLongestGap(filteredRecords);
 
     return StatCardWidget(
       title: 'Longest Gap',
       value:
           gap != null ? HomeMetricsService.formatDurationObject(gap.gap) : '--',
-      subtitle: 'today',
+      subtitle: _subtitle(timeLabel ?? 'today', hasEventFilter),
       icon: Icons.hourglass_full,
     );
   }
@@ -236,73 +433,97 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildPeakHour(BuildContext context, HomeMetricsService metrics) {
-    final peak = metrics.getPeakHour(records, days: 7);
+  Widget _buildPeakHour(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final peak = metrics.getPeakHour(filteredRecords);
 
     return StatCardWidget(
       title: 'Peak Hour',
       value: peak != null ? HomeMetricsService.formatHour(peak.hour) : '--',
-      subtitle:
-          peak != null
-              ? '${peak.percentage.toStringAsFixed(0)}% of hits'
-              : null,
+      subtitle: _subtitle(
+        peak != null
+            ? '${peak.percentage.toStringAsFixed(0)}% of hits'
+            : (timeLabel ?? '7 days'),
+        hasEventFilter,
+      ),
       icon: Icons.schedule,
     );
   }
 
-  Widget _buildActiveHoursToday(
+  Widget _buildActiveHours(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final activeHours = metrics.getActiveHoursToday(records);
+    final activeHours = metrics.getActiveHoursCount(filteredRecords);
 
     return StatCardWidget(
       title: 'Active Hours',
       value: '$activeHours',
-      subtitle: 'today',
+      subtitle: _subtitle(timeLabel ?? 'today', hasEventFilter),
       icon: Icons.view_timeline,
     );
   }
 
   // ===== DURATION-BASED BUILDERS =====
 
-  Widget _buildAvgDurationPerHit(
+  Widget _buildTotalDuration(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final todayAvg = metrics.getAverageDurationToday(records);
-    final yesterdayAvg = metrics.getAverageDuration(
-      records.where((r) {
-        // Use 6am day boundary for more natural grouping
-        final todayStart = DayBoundary.getTodayStart();
-        final yesterdayStart = DayBoundary.getYesterdayStart();
-        return r.eventAt.isAfter(yesterdayStart) &&
-            r.eventAt.isBefore(todayStart);
-      }).toList(),
-    );
-
-    double? percentChange;
-    if (todayAvg != null && yesterdayAvg != null && yesterdayAvg > 0) {
-      percentChange = ((todayAvg - yesterdayAvg) / yesterdayAvg) * 100;
+    // For the "today" case, keep the live-updating card
+    if (days == 1 && !hasEventFilter) {
+      return _TotalDurationTodayCard(records: records);
     }
-
+    final total = metrics.getTotalDuration(filteredRecords);
     return StatCardWidget(
-      title: 'Avg Per Hit',
-      value: todayAvg != null ? '${todayAvg.toStringAsFixed(1)}s' : '--',
-      subtitle: 'today',
-      icon: Icons.av_timer,
-      trendWidget:
-          percentChange != null
-              ? TrendIndicator(percentChange: percentChange)
-              : null,
+      title: 'Total Duration',
+      value: HomeMetricsService.formatDuration(total),
+      subtitle: _subtitle(timeLabel ?? 'duration', hasEventFilter),
+      icon: Icons.today,
     );
   }
 
-  Widget _buildLongestHitToday(
+  Widget _buildAvgDurationPerHit(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final longest = metrics.getLongestHit(records, days: 1);
+    final avg = metrics.getAverageDuration(filteredRecords);
+
+    return StatCardWidget(
+      title: 'Avg Per Hit',
+      value: avg != null ? '${avg.toStringAsFixed(1)}s' : '--',
+      subtitle: _subtitle(timeLabel ?? 'today', hasEventFilter),
+      icon: Icons.av_timer,
+    );
+  }
+
+  Widget _buildLongestHit(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final longest = metrics.getLongestHit(filteredRecords);
 
     return StatCardWidget(
       title: 'Longest Hit',
@@ -310,16 +531,20 @@ class HomeWidgetBuilder extends ConsumerWidget {
           longest != null
               ? HomeMetricsService.formatDuration(longest.duration)
               : '--',
-      subtitle: 'today',
+      subtitle: _subtitle(timeLabel ?? 'today', hasEventFilter),
       icon: Icons.arrow_upward,
     );
   }
 
-  Widget _buildShortestHitToday(
+  Widget _buildShortestHit(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final shortest = metrics.getShortestHit(records, days: 1);
+    final shortest = metrics.getShortestHit(filteredRecords);
 
     return StatCardWidget(
       title: 'Shortest Hit',
@@ -327,7 +552,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
           shortest != null
               ? HomeMetricsService.formatDuration(shortest.duration)
               : '--',
-      subtitle: 'today',
+      subtitle: _subtitle(timeLabel ?? 'today', hasEventFilter),
       icon: Icons.arrow_downward,
     );
   }
@@ -335,24 +560,40 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget _buildTotalDurationWeek(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final total = metrics.getTotalDuration(records, days: 7);
-    final dailyAvg = total / 7;
+    final effectiveDays = days ?? 7;
+    final total = metrics.getTotalDuration(filteredRecords);
+    final dailyAvg = total / effectiveDays;
 
     return StatCardWidget(
-      title: 'Total This Week',
+      title: 'Total Duration',
       value: HomeMetricsService.formatDuration(total),
-      subtitle: 'avg ${HomeMetricsService.formatDuration(dailyAvg)}/day',
+      subtitle: _subtitle(
+        'avg ${HomeMetricsService.formatDuration(dailyAvg)}/day',
+        hasEventFilter,
+      ),
       icon: Icons.date_range,
     );
   }
 
-  Widget _buildDurationTrend(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildDurationTrend(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final effectiveDays = days ?? 3;
     final comparison = metrics.comparePeriods(
-      records: records,
+      records: filteredRecords,
       metric: 'avgDuration',
-      currentDays: 3,
-      previousDays: 3,
+      currentDays: effectiveDays,
+      previousDays: effectiveDays,
     );
 
     return Card(
@@ -373,6 +614,14 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   'Duration Trend',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
+                if (hasEventFilter) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.filter_list,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 12),
@@ -383,7 +632,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Current avg',
+                      'Current avg (${effectiveDays}d)',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     Text(
@@ -404,41 +653,65 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   // ===== COUNT-BASED BUILDERS =====
 
-  Widget _buildHitsToday(BuildContext context, HomeMetricsService metrics) {
-    final count = metrics.getHitCountToday(records);
-    final comparison = metrics.getTodayVsYesterday(records);
+  Widget _buildHits(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final count = metrics.getHitCount(filteredRecords);
 
     return StatCardWidget(
-      title: 'Hits Today',
+      title: 'Hits',
       value: '$count',
-      subtitle: 'count',
+      subtitle: _subtitle(timeLabel ?? 'count', hasEventFilter),
       icon: Icons.touch_app,
-      trendWidget:
-          comparison.yesterdayCount > 0
-              ? TrendIndicator(percentChange: comparison.countChange)
-              : null,
     );
   }
 
-  Widget _buildHitsThisWeek(BuildContext context, HomeMetricsService metrics) {
-    final count = metrics.getHitCount(records, days: 7);
-    final dailyAvg = count / 7;
+  Widget _buildHitsWeek(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final effectiveDays = days ?? 7;
+    final count = metrics.getHitCount(filteredRecords);
+    final dailyAvg = count / effectiveDays;
 
     return StatCardWidget(
-      title: 'Hits This Week',
+      title: 'Hits',
       value: '$count',
-      subtitle: 'avg ${dailyAvg.toStringAsFixed(1)}/day',
+      subtitle: _subtitle(
+        'avg ${dailyAvg.toStringAsFixed(1)}/day',
+        hasEventFilter,
+      ),
       icon: Icons.view_week,
     );
   }
 
-  Widget _buildDailyAvgHits(BuildContext context, HomeMetricsService metrics) {
-    final avg = metrics.getDailyAverageHits(records, days: 7);
+  Widget _buildDailyAvgHits(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final effectiveDays = days ?? 7;
+    final avg = metrics.getDailyAverageHits(
+      filteredRecords,
+      days: effectiveDays,
+    );
 
     return StatCardWidget(
       title: 'Daily Average',
       value: avg.toStringAsFixed(1),
-      subtitle: 'hits/day (7d)',
+      subtitle: _subtitle('hits/day (${effectiveDays}d)', hasEventFilter),
       icon: Icons.equalizer,
     );
   }
@@ -446,13 +719,17 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget _buildHitsPerActiveHour(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final ratio = metrics.getHitsPerActiveHour(records, days: 1);
+    final ratio = metrics.getHitsPerActiveHour(filteredRecords);
 
     return StatCardWidget(
       title: 'Hits/Active Hour',
       value: ratio != null ? ratio.toStringAsFixed(1) : '--',
-      subtitle: 'today',
+      subtitle: _subtitle(timeLabel ?? 'today', hasEventFilter),
       icon: Icons.speed,
     );
   }
@@ -462,8 +739,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget _buildTodayVsYesterday(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    String comparisonTargetName,
   ) {
-    final comparison = metrics.getTodayVsYesterday(records);
+    final comparison = metrics.getTodayVsYesterday(filteredRecords);
 
     return Card(
       child: Padding(
@@ -514,11 +793,13 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget _buildTodayVsWeekAvg(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
   ) {
-    final todayCount = metrics.getHitCountToday(records);
-    final todayDuration = metrics.getTotalDurationToday(records);
-    final weekAvgCount = metrics.getDailyAverageHits(records, days: 7);
-    final weekAvgDuration = metrics.getTotalDuration(records, days: 7) / 7;
+    final todayCount = metrics.getHitCountToday(filteredRecords);
+    final todayDuration = metrics.getTotalDurationToday(filteredRecords);
+    final weekAvgCount = metrics.getDailyAverageHits(filteredRecords, days: 7);
+    final weekAvgDuration =
+        metrics.getTotalDuration(filteredRecords, days: 7) / 7;
 
     final countDiff =
         weekAvgCount > 0
@@ -581,8 +862,14 @@ class HomeWidgetBuilder extends ConsumerWidget {
   Widget _buildWeekdayVsWeekend(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
   ) {
-    final comparison = metrics.getWeekdayVsWeekend(records, days: 7);
+    final effectiveDays = days ?? 7;
+    final comparison = metrics.getWeekdayVsWeekend(
+      filteredRecords,
+      days: effectiveDays,
+    );
 
     return Card(
       child: Padding(
@@ -647,17 +934,18 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
   // ===== PATTERN BUILDERS =====
 
-  Widget _buildWeeklyPattern(BuildContext context, HomeMetricsService metrics) {
-    final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  Widget _buildWeeklyPattern(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+  ) {
+    final dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     final dayCounts = List.filled(7, 0);
 
-    // Use 6am day boundary for more natural grouping of late-night activity
-    final weekStart = DayBoundary.getDayStartDaysAgo(6);
-    for (final record in records.where((r) => !r.isDeleted)) {
-      if (record.eventAt.isAfter(weekStart)) {
-        final dayIndex = record.eventAt.weekday - 1;
-        dayCounts[dayIndex]++;
-      }
+    for (final record in filteredRecords.where((r) => !r.isDeleted)) {
+      final dayIndex = record.eventAt.weekday - 1;
+      dayCounts[dayIndex]++;
     }
 
     final maxCount = dayCounts.reduce((a, b) => a > b ? a : b);
@@ -706,7 +994,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        days[index],
+                        dayLabels[index],
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -720,16 +1008,31 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilteredHeatmap(
+  Widget _buildHeatmap(
     BuildContext context,
-    HomeMetricsService metrics, {
-    required String title,
-    required bool Function(DateTime) dayFilter,
-  }) {
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    HeatmapDayFilter dayFilter,
+  ) {
+    final title = switch (dayFilter) {
+      HeatmapDayFilter.weekday => 'Weekday Heatmap',
+      HeatmapDayFilter.weekend => 'Weekend Heatmap',
+      HeatmapDayFilter.all => 'Hourly Heatmap',
+    };
+
+    bool Function(DateTime) filterFn = switch (dayFilter) {
+      HeatmapDayFilter.weekday =>
+        (dt) => dt.weekday >= DateTime.monday && dt.weekday <= DateTime.friday,
+      HeatmapDayFilter.weekend =>
+        (dt) =>
+            dt.weekday == DateTime.saturday || dt.weekday == DateTime.sunday,
+      HeatmapDayFilter.all => (_) => true,
+    };
+
     final hourCounts = List.filled(24, 0);
 
-    for (final record in records.where((r) => !r.isDeleted)) {
-      if (dayFilter(record.eventAt)) {
+    for (final record in filteredRecords.where((r) => !r.isDeleted)) {
+      if (filterFn(record.eventAt)) {
         hourCounts[record.eventAt.hour]++;
       }
     }
@@ -804,42 +1107,18 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildWeekdayHeatmap(
-    BuildContext context,
-    HomeMetricsService metrics,
-  ) {
-    return _buildFilteredHeatmap(
-      context,
-      metrics,
-      title: 'Weekday Heatmap',
-      dayFilter:
-          (dt) =>
-              dt.weekday >= DateTime.monday && dt.weekday <= DateTime.friday,
-    );
-  }
-
-  Widget _buildWeekendHeatmap(
-    BuildContext context,
-    HomeMetricsService metrics,
-  ) {
-    return _buildFilteredHeatmap(
-      context,
-      metrics,
-      title: 'Weekend Heatmap',
-      dayFilter:
-          (dt) =>
-              dt.weekday == DateTime.saturday || dt.weekday == DateTime.sunday,
-    );
-  }
-
   // ===== SECONDARY BUILDERS =====
 
   Widget _buildMoodPhysicalAvg(
     BuildContext context,
     HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
   ) {
-    final todayMood = metrics.getAverageMood(records, days: 1);
-    final todayPhysical = metrics.getAveragePhysical(records, days: 1);
+    final mood = metrics.getAverageMood(filteredRecords);
+    final physical = metrics.getAveragePhysical(filteredRecords);
     final weekMood = metrics.getAverageMood(records, days: 7);
     final weekPhysical = metrics.getAveragePhysical(records, days: 7);
 
@@ -861,6 +1140,14 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   'Mood & Physical',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
+                if (hasEventFilter) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.filter_list,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: 12),
@@ -869,7 +1156,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 Expanded(
                   child: _RatingColumn(
                     label: 'Mood',
-                    todayValue: todayMood,
+                    todayValue: mood,
                     weekValue: weekMood,
                     icon: Icons.sentiment_satisfied,
                   ),
@@ -878,7 +1165,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 Expanded(
                   child: _RatingColumn(
                     label: 'Physical',
-                    todayValue: todayPhysical,
+                    todayValue: physical,
                     weekValue: weekPhysical,
                     icon: Icons.fitness_center,
                   ),
@@ -891,8 +1178,15 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildTopReasons(BuildContext context, HomeMetricsService metrics) {
-    final topReasons = metrics.getTopReasons(records, days: 7, limit: 3);
+  Widget _buildTopReasons(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final topReasons = metrics.getTopReasons(filteredRecords, limit: 3);
 
     return Card(
       child: Padding(
@@ -912,8 +1206,26 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   'Top Reasons',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
+                if (hasEventFilter) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.filter_list,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ],
             ),
+            if (timeLabel != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  timeLabel,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             const SizedBox(height: 12),
             if (topReasons.isEmpty)
               Text(
@@ -942,6 +1254,49 @@ class HomeWidgetBuilder extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // ===== CUSTOM STAT BUILDER =====
+
+  Widget _buildCustomStat(
+    BuildContext context,
+    HomeMetricsService metrics,
+    List<LogRecord> filteredRecords,
+    int? days,
+    String? timeLabel,
+    bool hasEventFilter,
+  ) {
+    final metricName = config.getSetting<String>(kMetricType) ?? 'count';
+    final metricType = MetricType.values.firstWhere(
+      (m) => m.name == metricName,
+      orElse: () => MetricType.count,
+    );
+
+    String value;
+    switch (metricType) {
+      case MetricType.count:
+        value = '${metrics.getHitCount(filteredRecords)}';
+      case MetricType.totalDuration:
+        value = HomeMetricsService.formatDuration(
+          metrics.getTotalDuration(filteredRecords),
+        );
+      case MetricType.avgDuration:
+        final avg = metrics.getAverageDuration(filteredRecords);
+        value = avg != null ? '${avg.toStringAsFixed(1)}s' : '--';
+      case MetricType.mood:
+        final mood = metrics.getAverageMood(filteredRecords);
+        value = mood != null ? mood.toStringAsFixed(1) : '--';
+      case MetricType.physical:
+        final phys = metrics.getAveragePhysical(filteredRecords);
+        value = phys != null ? phys.toStringAsFixed(1) : '--';
+    }
+
+    return StatCardWidget(
+      title: metricType.displayName,
+      value: value,
+      subtitle: _subtitle(timeLabel ?? 'custom', hasEventFilter),
+      icon: Icons.tune,
     );
   }
 }

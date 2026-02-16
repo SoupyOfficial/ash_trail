@@ -5,6 +5,31 @@ import '../utils/day_boundary.dart';
 /// Centralized service for computing home widget metrics
 /// Focuses on time and duration as primary data dimensions
 class HomeMetricsService {
+  // ===== SHARED FILTERING =====
+
+  /// Apply time window and/or event type filtering in one call.
+  ///
+  /// [days] — restrict to the last N days (using 6am day boundary). Null = no
+  /// time restriction.
+  /// [eventTypes] — restrict to specific event types. Null or empty = all.
+  List<LogRecord> filterRecords(
+    List<LogRecord> records, {
+    int? days,
+    List<EventType>? eventTypes,
+  }) {
+    var result = records;
+
+    if (days != null) {
+      result = _filterByDays(result, days);
+    }
+
+    if (eventTypes != null && eventTypes.isNotEmpty) {
+      result = result.where((r) => eventTypes.contains(r.eventType)).toList();
+    }
+
+    return result;
+  }
+
   // ===== TIME-BASED METRICS =====
 
   /// Get time since the last hit

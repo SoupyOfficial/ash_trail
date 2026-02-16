@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/home_widget_config_provider.dart';
 import 'widget_catalog.dart';
+import 'widget_settings_sheet.dart';
 
 /// Bottom sheet for selecting widgets to add to the home screen
 class WidgetPickerSheet extends ConsumerWidget {
@@ -118,11 +119,10 @@ class WidgetPickerSheet extends ConsumerWidget {
                                 canAdd
                                     ? () {
                                       HapticFeedback.mediumImpact();
-                                      ref
-                                          .read(
-                                            homeLayoutConfigProvider.notifier,
-                                          )
-                                          .addWidget(entry.type);
+                                      final notifier = ref.read(
+                                        homeLayoutConfigProvider.notifier,
+                                      );
+                                      notifier.addWidget(entry.type);
                                       Navigator.pop(context);
 
                                       ScaffoldMessenger.of(
@@ -135,6 +135,29 @@ class WidgetPickerSheet extends ConsumerWidget {
                                           duration: const Duration(seconds: 3),
                                         ),
                                       );
+
+                                      // Auto-open settings for customStat
+                                      if (entry.type ==
+                                          HomeWidgetType.customStat) {
+                                        final layout = ref.read(
+                                          homeLayoutConfigProvider,
+                                        );
+                                        final newWidget = layout.widgets
+                                            .lastWhere(
+                                              (w) =>
+                                                  w.type ==
+                                                  HomeWidgetType.customStat,
+                                            );
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                              if (context.mounted) {
+                                                WidgetSettingsSheet.show(
+                                                  context,
+                                                  newWidget,
+                                                );
+                                              }
+                                            });
+                                      }
                                     }
                                     : null,
                           );

@@ -89,6 +89,10 @@ enum HomeWidgetType {
 
   /// List of recent entries
   recentEntries,
+
+  // ===== CUSTOM WIDGETS =====
+  /// Fully user-configured stat: metric + time window + event type + comparison
+  customStat,
 }
 
 /// Size category for widgets
@@ -380,6 +384,17 @@ class WidgetCatalog {
       icon: Icons.history,
       category: WidgetCategory.action,
       size: WidgetSize.large,
+    ),
+
+    // ===== CUSTOM =====
+    HomeWidgetType.customStat: WidgetCatalogEntry(
+      type: HomeWidgetType.customStat,
+      displayName: 'Custom Stat',
+      description: 'Fully configurable metric card',
+      icon: Icons.tune,
+      category: WidgetCategory.secondary,
+      allowMultiple: true,
+      size: WidgetSize.compact,
     ),
   };
 

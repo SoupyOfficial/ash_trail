@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/home_widget_config.dart';
+import '../../models/enums.dart';
 import '../../providers/home_widget_config_provider.dart';
 import 'widget_catalog.dart';
+import 'widget_settings_keys.dart';
 
 /// Bottom sheet for editing widget-specific settings.
 ///
-/// Currently supports:
-/// - `recentEntries`: number of entries to display (1–20)
-/// - `durationTrend`: number of comparison days (1–14)
-///
-/// For widget types without configurable settings, an informational message
-/// is shown.
+/// Supports shared settings (time window, event type filter) for all widget
+/// types, plus widget-specific settings (entry count, comparison days, etc.).
 class WidgetSettingsSheet extends ConsumerStatefulWidget {
   final HomeWidgetConfig config;
 
@@ -37,7 +35,9 @@ class _WidgetSettingsSheetState extends ConsumerState<WidgetSettingsSheet> {
   @override
   void initState() {
     super.initState();
-    _settings = {...?widget.config.settings};
+    // Merge persisted settings on top of defaults so every key is present.
+    final defaults = WidgetSettingsDefaults.defaultsFor(widget.config.type);
+    _settings = {...defaults, ...?widget.config.settings};
   }
 
   @override
@@ -103,10 +103,32 @@ class _WidgetSettingsSheetState extends ConsumerState<WidgetSettingsSheet> {
   }
 
   List<Widget> _buildSettingsForType(HomeWidgetType type) {
+    final widgets = <Widget>[];
+
+    // ── Shared: Time Window ─────────────────────────────────────────────
+    if (WidgetSettingsDefaults.supportsTimeWindow(type)) {
+      widgets.add(_buildTimeWindowSetting());
+      widgets.add(const SizedBox(height: 16));
+    }
+
+    // ── Shared: Event Type Filter ──────────────────────────────────────
+    if (WidgetSettingsDefaults.supportsEventTypeFilter(type)) {
+      widgets.add(_buildEventTypeFilterSetting());
+      widgets.add(const SizedBox(height: 16));
+    }
+
+    // ── Heatmap: Day Filter ─────────────────────────────────────────────
+    if (type == HomeWidgetType.weekdayHeatmap ||
+        type == HomeWidgetType.weekendHeatmap) {
+      widgets.add(_buildHeatmapDayFilterSetting());
+      widgets.add(const SizedBox(height: 16));
+    }
+
+    // ── Widget-specific settings ───────────────────────────────────────
     switch (type) {
       case HomeWidgetType.recentEntries:
         final count = _settings['count'] as int? ?? 5;
-        return [
+        widgets.add(
           _SettingSlider(
             label: 'Number of entries',
             value: count.toDouble(),
@@ -115,22 +137,170 @@ class _WidgetSettingsSheetState extends ConsumerState<WidgetSettingsSheet> {
             divisions: 19,
             onChanged: (v) => setState(() => _settings['count'] = v.round()),
           ),
-        ];
+        );
       case HomeWidgetType.durationTrend:
-        final days = _settings['days'] as int? ?? 3;
-        return [
-          _SettingSlider(
-            label: 'Comparison period (days)',
-            value: days.toDouble(),
-            min: 1,
-            max: 14,
-            divisions: 13,
-            onChanged: (v) => setState(() => _settings['days'] = v.round()),
-          ),
-        ];
+        // The time window selector already handles the days setting.
+        break;
+      case HomeWidgetType.customStat:
+        widgets.add(_buildMetricTypeSetting());
+        widgets.add(const SizedBox(height: 16));
       default:
-        return [];
+        break;
     }
+
+    return widgets;
+  }
+
+  // ── Time Window Selector ────────────────────────────────────────────
+  Widget _buildTimeWindowSetting() {
+    final currentDays = _settings[kTimeWindowDays] as int? ?? 1;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Time Window', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children:
+              WidgetSettingsDefaults.timeWindowOptions.map((days) {
+                final selected = currentDays == days;
+                return ChoiceChip(
+                  label: Text(WidgetSettingsDefaults.timeWindowLabel(days)),
+                  selected: selected,
+                  onSelected: (_) {
+                    setState(() => _settings[kTimeWindowDays] = days);
+                  },
+                );
+              }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // ── Event Type Filter ───────────────────────────────────────────────
+  Widget _buildEventTypeFilterSetting() {
+    final raw = _settings[kEventTypeFilter] as List<dynamic>? ?? [];
+    final selectedNames = raw.cast<String>().toSet();
+    final allSelected = selectedNames.isEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Event Type Filter',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const Spacer(),
+            if (!allSelected)
+              TextButton(
+                onPressed: () {
+                  setState(() => _settings[kEventTypeFilter] = <String>[]);
+                },
+                child: const Text('Clear'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilterChip(
+              label: const Text('All'),
+              selected: allSelected,
+              onSelected: (_) {
+                setState(() => _settings[kEventTypeFilter] = <String>[]);
+              },
+            ),
+            ...EventType.values.map((type) {
+              final selected = selectedNames.contains(type.name);
+              return FilterChip(
+                label: Text(_eventTypeDisplayName(type)),
+                selected: selected,
+                onSelected: (isSelected) {
+                  setState(() {
+                    final current = Set<String>.from(selectedNames);
+                    if (isSelected) {
+                      current.add(type.name);
+                    } else {
+                      current.remove(type.name);
+                    }
+                    _settings[kEventTypeFilter] = current.toList();
+                  });
+                },
+              );
+            }),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ── Heatmap Day Filter ──────────────────────────────────────────────
+  Widget _buildHeatmapDayFilterSetting() {
+    final currentName = _settings[kHeatmapDayFilter] as String? ?? 'all';
+    final current = HeatmapDayFilter.values.firstWhere(
+      (e) => e.name == currentName,
+      orElse: () => HeatmapDayFilter.all,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Day Filter', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        SegmentedButton<HeatmapDayFilter>(
+          segments:
+              HeatmapDayFilter.values
+                  .map(
+                    (f) => ButtonSegment(value: f, label: Text(f.displayName)),
+                  )
+                  .toList(),
+          selected: {current},
+          onSelectionChanged: (selection) {
+            setState(() {
+              _settings[kHeatmapDayFilter] = selection.first.name;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  // ── Metric Type Selector ────────────────────────────────────────────
+  Widget _buildMetricTypeSetting() {
+    final currentName = _settings[kMetricType] as String? ?? 'count';
+    final current = MetricType.values.firstWhere(
+      (e) => e.name == currentName,
+      orElse: () => MetricType.count,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Metric', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children:
+              MetricType.values.map((metric) {
+                final selected = current == metric;
+                return ChoiceChip(
+                  label: Text(metric.displayName),
+                  selected: selected,
+                  onSelected: (_) {
+                    setState(() => _settings[kMetricType] = metric.name);
+                  },
+                );
+              }).toList(),
+        ),
+      ],
+    );
   }
 
   void _save() {
@@ -138,6 +308,20 @@ class _WidgetSettingsSheetState extends ConsumerState<WidgetSettingsSheet> {
         .read(homeLayoutConfigProvider.notifier)
         .updateWidgetSettings(widget.config.id, _settings);
     Navigator.pop(context);
+  }
+
+  static String _eventTypeDisplayName(EventType type) {
+    return switch (type) {
+      EventType.vape => 'Vape',
+      EventType.inhale => 'Inhale',
+      EventType.sessionStart => 'Session Start',
+      EventType.sessionEnd => 'Session End',
+      EventType.note => 'Note',
+      EventType.purchase => 'Purchase',
+      EventType.tolerance => 'Tolerance',
+      EventType.symptomRelief => 'Symptom Relief',
+      EventType.custom => 'Custom',
+    };
   }
 }
 

@@ -728,4 +728,130 @@ void main() {
       expect(count, greaterThanOrEqualTo(1));
     });
   });
+
+  // ===================================================================
+  // filterRecords() — shared filtering helper
+  // ===================================================================
+  group('HomeMetricsService - filterRecords', () {
+    test('returns all records when no filters applied', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now),
+        createLogRecord(eventAt: now.subtract(const Duration(days: 5))),
+        createLogRecord(eventAt: now.subtract(const Duration(days: 20))),
+      ];
+
+      final result = service.filterRecords(records);
+      expect(result.length, 3);
+    });
+
+    test('filters by days only', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now),
+        createLogRecord(eventAt: now.subtract(const Duration(days: 2))),
+        createLogRecord(eventAt: now.subtract(const Duration(days: 10))),
+      ];
+
+      final result = service.filterRecords(records, days: 3);
+      expect(result.length, 2);
+    });
+
+    test('filters by event type only', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, eventType: EventType.vape),
+        createLogRecord(eventAt: now, eventType: EventType.inhale),
+        createLogRecord(eventAt: now, eventType: EventType.note),
+      ];
+
+      final result = service.filterRecords(
+        records,
+        eventTypes: [EventType.vape],
+      );
+      expect(result.length, 1);
+      expect(result.first.eventType, EventType.vape);
+    });
+
+    test('filters by both days and event type', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, eventType: EventType.vape),
+        createLogRecord(eventAt: now, eventType: EventType.inhale),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(days: 10)),
+          eventType: EventType.vape,
+        ),
+      ];
+
+      final result = service.filterRecords(
+        records,
+        days: 3,
+        eventTypes: [EventType.vape],
+      );
+      expect(result.length, 1);
+      expect(result.first.eventType, EventType.vape);
+    });
+
+    test('returns empty when no records match event type', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, eventType: EventType.vape),
+      ];
+
+      final result = service.filterRecords(
+        records,
+        eventTypes: [EventType.note],
+      );
+      expect(result, isEmpty);
+    });
+
+    test('returns empty when no records match day window', () {
+      final records = [
+        createLogRecord(
+          eventAt: DateTime.now().subtract(const Duration(days: 30)),
+        ),
+      ];
+
+      final result = service.filterRecords(records, days: 1);
+      expect(result, isEmpty);
+    });
+
+    test('null event types list means no filter', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, eventType: EventType.vape),
+        createLogRecord(eventAt: now, eventType: EventType.inhale),
+      ];
+
+      final result = service.filterRecords(records, eventTypes: null);
+      expect(result.length, 2);
+    });
+
+    test('empty event types list means no filter', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, eventType: EventType.vape),
+        createLogRecord(eventAt: now, eventType: EventType.inhale),
+      ];
+
+      final result = service.filterRecords(records, eventTypes: []);
+      expect(result.length, 2);
+    });
+
+    test('multiple event types', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, eventType: EventType.vape),
+        createLogRecord(eventAt: now, eventType: EventType.inhale),
+        createLogRecord(eventAt: now, eventType: EventType.note),
+      ];
+
+      final result = service.filterRecords(
+        records,
+        eventTypes: [EventType.vape, EventType.inhale],
+      );
+      expect(result.length, 2);
+    });
+  });
 }

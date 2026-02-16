@@ -1,6 +1,8 @@
 import '../models/log_record.dart';
 import '../models/enums.dart';
 import '../utils/day_boundary.dart';
+import '../widgets/home_widgets/widget_settings_keys.dart'
+    show TrendComparisonPeriod;
 
 /// Centralized service for computing home widget metrics
 /// Focuses on time and duration as primary data dimensions
@@ -681,5 +683,116 @@ class HomeMetricsService {
       final weeks = (diff.inDays / 7).floor();
       return '${weeks}w ago';
     }
+  }
+
+  // ===== TREND COMPARISON HELPERS =====
+
+  /// Return records for the reference period defined by [period].
+  ///
+  /// For single-day comparisons (previousDay, sameDayLastWeek,
+  /// sameDayLastMonth) the records span exactly one 6am-boundary day.
+  /// For average-based comparisons (weekAverage, monthAverage) the
+  /// records span the full window so the caller can divide totals by the
+  /// number of days in the window.
+  List<LogRecord> getComparisonRecords(
+    List<LogRecord> records,
+    TrendComparisonPeriod period, {
+    DateTime? now,
+  }) {
+    final referenceNow = now ?? DateTime.now();
+    switch (period) {
+      case TrendComparisonPeriod.previousDay:
+        return _filterYesterday(records);
+
+      case TrendComparisonPeriod.sameDayLastWeek:
+        final target = referenceNow.subtract(const Duration(days: 7));
+        return _filterDay(records, target);
+
+      case TrendComparisonPeriod.sameDayLastMonth:
+        final target = referenceNow.subtract(const Duration(days: 28));
+        return _filterDay(records, target);
+
+      case TrendComparisonPeriod.weekAverage:
+        return _filterByDays(records, 7);
+
+      case TrendComparisonPeriod.monthAverage:
+        return _filterByDays(records, 30);
+    }
+  }
+
+  /// Number of days in the comparison window — used to compute averages
+  /// for multi-day periods.
+  static int comparisonWindowDays(TrendComparisonPeriod period) {
+    return switch (period) {
+      TrendComparisonPeriod.previousDay => 1,
+      TrendComparisonPeriod.sameDayLastWeek => 1,
+      TrendComparisonPeriod.sameDayLastMonth => 1,
+      TrendComparisonPeriod.weekAverage => 7,
+      TrendComparisonPeriod.monthAverage => 30,
+    };
+  }
+
+  /// Compute a generic trend percentage between a current value and a
+  /// reference value derived from [period].
+  ///
+  /// For single-day periods the reference value is used directly.
+  /// For multi-day periods the reference value is divided by the window
+  /// length to produce a daily average before comparing.
+  ///
+  /// Returns 0 when the reference is 0.
+  double computeTrendForPeriod({
+    required double currentValue,
+    required double referenceTotal,
+    required TrendComparisonPeriod period,
+  }) {
+    final days = comparisonWindowDays(period);
+    final referenceValue = days > 1 ? referenceTotal / days : referenceTotal;
+    if (referenceValue == 0) return 0;
+    return ((currentValue - referenceValue) / referenceValue) * 100;
+  }
+
+  /// Hour-block-pace trend: compares today's accumulated value up to
+  /// [asOf] against the expected pace from the reference period.
+  ///
+  /// This avoids the "always down until end of day" issue when raw
+  /// daily total is compared mid-day.
+  double computeHourBlockTrend({
+    required double actualSoFar,
+    required double fullDayReference,
+    required TrendComparisonPeriod period,
+    DateTime? asOf,
+  }) {
+    final days = comparisonWindowDays(period);
+    final dailyReference =
+        days > 1 ? fullDayReference / days : fullDayReference;
+    if (dailyReference <= 0) return 0;
+
+    final cutoff = asOf ?? DateTime.now();
+    final todayStart = DayBoundary.getTodayStart();
+    const secondsPerDay = 24 * 60 * 60;
+    final elapsedSeconds = cutoff
+        .difference(todayStart)
+        .inSeconds
+        .clamp(0, secondsPerDay);
+    final fraction = elapsedSeconds / secondsPerDay;
+    final expectedByNow = dailyReference * fraction;
+    if (expectedByNow <= 0) return 0;
+    return ((actualSoFar - expectedByNow) / expectedByNow) * 100;
+  }
+
+  /// Filter records to a specific calendar day (6am boundary).
+  List<LogRecord> _filterDay(List<LogRecord> records, DateTime date) {
+    final dayStart = DayBoundary.getDayStart(date);
+    final dayEnd = dayStart.add(const Duration(days: 1));
+    return records
+        .where(
+          (r) =>
+              (r.eventAt.isAfter(
+                    dayStart.subtract(const Duration(seconds: 1)),
+                  ) ||
+                  r.eventAt.isAtSameMomentAs(dayStart)) &&
+              r.eventAt.isBefore(dayEnd),
+        )
+        .toList();
   }
 }

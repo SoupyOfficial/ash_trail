@@ -169,11 +169,16 @@ class TrendIndicator extends StatelessWidget {
   invertColors; // If true, positive = bad (red), negative = good (green)
   final String suffix; // Unit suffix (default: '%')
 
+  /// Short contextual label shown after the percentage, e.g. "vs yesterday".
+  /// When null the indicator shows only the percentage.
+  final String? comparisonLabel;
+
   const TrendIndicator({
     super.key,
     required this.percentChange,
     this.invertColors = false,
     this.suffix = '%',
+    this.comparisonLabel,
   });
 
   @override
@@ -216,6 +221,17 @@ class TrendIndicator extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          if (comparisonLabel != null) ...[
+            const SizedBox(width: 3),
+            Text(
+              comparisonLabel!,
+              style: TextStyle(
+                fontSize: 9,
+                color: color.withOpacity(0.8),
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
         ],
       ),
     );

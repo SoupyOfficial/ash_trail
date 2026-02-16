@@ -124,6 +124,12 @@ class _WidgetSettingsSheetState extends ConsumerState<WidgetSettingsSheet> {
       widgets.add(const SizedBox(height: 16));
     }
 
+    // ── Trend Comparison Period ────────────────────────────────────────
+    if (WidgetSettingsDefaults.supportsTrendComparison(type)) {
+      widgets.add(_buildTrendComparisonPeriodSetting());
+      widgets.add(const SizedBox(height: 16));
+    }
+
     // ── Widget-specific settings ───────────────────────────────────────
     switch (type) {
       case HomeWidgetType.recentEntries:
@@ -266,6 +272,48 @@ class _WidgetSettingsSheetState extends ConsumerState<WidgetSettingsSheet> {
               _settings[kHeatmapDayFilter] = selection.first.name;
             });
           },
+        ),
+      ],
+    );
+  }
+
+  // ── Trend Comparison Period Selector ──────────────────────────────
+  Widget _buildTrendComparisonPeriodSetting() {
+    final currentName =
+        _settings[kTrendComparisonPeriod] as String? ?? 'previousDay';
+    final current = TrendComparisonPeriod.values.firstWhere(
+      (e) => e.name == currentName,
+      orElse: () => TrendComparisonPeriod.previousDay,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Compare Trend To', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 4),
+        Text(
+          'What the trend indicator is measured against',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children:
+              TrendComparisonPeriod.values.map((period) {
+                final selected = current == period;
+                return ChoiceChip(
+                  label: Text(period.displayName),
+                  selected: selected,
+                  onSelected: (_) {
+                    setState(
+                      () => _settings[kTrendComparisonPeriod] = period.name,
+                    );
+                  },
+                );
+              }).toList(),
         ),
       ],
     );

@@ -23,6 +23,10 @@ const String kComparisonTarget = 'comparisonTarget';
 /// Day filter for heatmaps. Stored as [HeatmapDayFilter] enum name.
 const String kHeatmapDayFilter = 'heatmapDayFilter';
 
+/// Trend comparison period. Controls what a trend indicator is compared
+/// against. Stored as [TrendComparisonPeriod] enum name per widget.
+const String kTrendComparisonPeriod = 'trendComparisonPeriod';
+
 // ===== ENUMS =====
 
 /// Metric type for widgets that can display different metrics.
@@ -63,6 +67,26 @@ enum HeatmapDayFilter {
   weekend('Weekends');
 
   const HeatmapDayFilter(this.displayName);
+  final String displayName;
+}
+
+/// What reference period a trend indicator compares the current value against.
+///
+/// Each widget can independently pick its comparison baseline so users
+/// know exactly what "+12 %" means.
+enum TrendComparisonPeriod {
+  previousDay('vs yesterday', 'Yesterday'),
+  sameDayLastWeek('vs same day last week', 'Same day last week'),
+  sameDayLastMonth('vs same day last month', 'Same day last month'),
+  weekAverage('vs 7-day avg', '7-day average'),
+  monthAverage('vs 30-day avg', '30-day average');
+
+  const TrendComparisonPeriod(this.shortLabel, this.displayName);
+
+  /// Compact label shown inline next to the trend badge, e.g. "vs yesterday".
+  final String shortLabel;
+
+  /// Descriptive label for the settings sheet selector.
   final String displayName;
 }
 
@@ -156,6 +180,33 @@ class WidgetSettingsDefaults {
     HomeWidgetType.quickLog,
     HomeWidgetType.recentEntries,
   };
+
+  /// Widget types that support the trend comparison period setting.
+  ///
+  /// These are widgets that show some form of trend / delta indicator
+  /// (e.g. "+12 %") relative to a reference period.
+  static const Set<HomeWidgetType> trendComparableWidgets = {
+    HomeWidgetType.totalDurationToday,
+    HomeWidgetType.avgDurationPerHit,
+    HomeWidgetType.hitsToday,
+    HomeWidgetType.firstHitToday,
+    HomeWidgetType.durationTrend,
+    HomeWidgetType.todayVsYesterday,
+    HomeWidgetType.todayVsWeekAvg,
+    HomeWidgetType.dailyAvgHits,
+    HomeWidgetType.hitsPerActiveHour,
+    HomeWidgetType.longestHitToday,
+    HomeWidgetType.shortestHitToday,
+    HomeWidgetType.longestGapToday,
+    HomeWidgetType.avgTimeBetween,
+    HomeWidgetType.activeHoursToday,
+    HomeWidgetType.moodPhysicalAvg,
+  };
+
+  /// Whether a widget type supports the trend comparison period setting.
+  static bool supportsTrendComparison(HomeWidgetType type) {
+    return trendComparableWidgets.contains(type);
+  }
 
   /// Standard time window options available in the selector.
   static const List<int> timeWindowOptions = [1, 3, 7, 14, 30];

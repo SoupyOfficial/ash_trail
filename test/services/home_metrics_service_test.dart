@@ -3,6 +3,10 @@ import 'package:ash_trail/services/home_metrics_service.dart';
 import 'package:ash_trail/models/log_record.dart';
 import 'package:ash_trail/models/enums.dart';
 import 'package:ash_trail/utils/day_boundary.dart';
+import 'package:ash_trail/widgets/home_widgets/widget_settings_keys.dart'
+    show TrendComparisonPeriod, WidgetSettingsDefaults;
+import 'package:ash_trail/widgets/home_widgets/widget_catalog.dart'
+    show HomeWidgetType;
 
 /// Test helper to create a LogRecord with specific properties
 LogRecord createLogRecord({
@@ -853,5 +857,244 @@ void main() {
       );
       expect(result.length, 2);
     });
+  });
+
+  // ===== TREND COMPARISON PERIOD TESTS =====
+
+  group('HomeMetricsService - Trend Comparison', () {
+    test('getComparisonRecords previousDay returns yesterday records', () {
+      final now = DateTime.now();
+      final yesterdayStart = DayBoundary.getYesterdayStart();
+      final records = [
+        createLogRecord(
+          eventAt: yesterdayStart.add(const Duration(hours: 2)),
+          duration: 10,
+        ),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 20,
+        ),
+      ];
+
+      final result = service.getComparisonRecords(
+        records,
+        TrendComparisonPeriod.previousDay,
+        now: now,
+      );
+      expect(result.length, 1);
+      expect(result.first.duration, 10);
+    });
+
+    test(
+      'getComparisonRecords sameDayLastWeek returns records from 7 days ago',
+      () {
+        final now = DateTime.now();
+        final target = now.subtract(const Duration(days: 7));
+        final dayStart = DayBoundary.getDayStart(target);
+        final records = [
+          createLogRecord(
+            eventAt: dayStart.add(const Duration(hours: 3)),
+            duration: 15,
+          ),
+          createLogRecord(
+            eventAt: now.subtract(const Duration(hours: 1)),
+            duration: 20,
+          ),
+        ];
+
+        final result = service.getComparisonRecords(
+          records,
+          TrendComparisonPeriod.sameDayLastWeek,
+          now: now,
+        );
+        expect(result.length, 1);
+        expect(result.first.duration, 15);
+      },
+    );
+
+    test('getComparisonRecords weekAverage returns 7 day window', () {
+      final now = DateTime.now();
+      final records = <LogRecord>[];
+      // Add records for each of the last 7 days
+      for (int i = 0; i < 7; i++) {
+        records.add(
+          createLogRecord(
+            eventAt: now.subtract(Duration(days: i, hours: 2)),
+            duration: 10.0 + i,
+          ),
+        );
+      }
+      // Add a record outside window
+      records.add(
+        createLogRecord(
+          eventAt: now.subtract(const Duration(days: 10)),
+          duration: 99,
+        ),
+      );
+
+      final result = service.getComparisonRecords(
+        records,
+        TrendComparisonPeriod.weekAverage,
+        now: now,
+      );
+      // Should include all 7 recent records but not the 10-day-old one
+      expect(result.length, 7);
+    });
+
+    test('comparisonWindowDays returns correct values', () {
+      expect(
+        HomeMetricsService.comparisonWindowDays(
+          TrendComparisonPeriod.previousDay,
+        ),
+        1,
+      );
+      expect(
+        HomeMetricsService.comparisonWindowDays(
+          TrendComparisonPeriod.sameDayLastWeek,
+        ),
+        1,
+      );
+      expect(
+        HomeMetricsService.comparisonWindowDays(
+          TrendComparisonPeriod.sameDayLastMonth,
+        ),
+        1,
+      );
+      expect(
+        HomeMetricsService.comparisonWindowDays(
+          TrendComparisonPeriod.weekAverage,
+        ),
+        7,
+      );
+      expect(
+        HomeMetricsService.comparisonWindowDays(
+          TrendComparisonPeriod.monthAverage,
+        ),
+        30,
+      );
+    });
+
+    test('computeTrendForPeriod single day comparison', () {
+      final trend = service.computeTrendForPeriod(
+        currentValue: 120,
+        referenceTotal: 100,
+        period: TrendComparisonPeriod.previousDay,
+      );
+      expect(trend, closeTo(20.0, 0.01));
+    });
+
+    test('computeTrendForPeriod multi-day divides by window', () {
+      // weekAverage: referenceTotal is divided by 7
+      final trend = service.computeTrendForPeriod(
+        currentValue: 10,
+        referenceTotal: 70,
+        period: TrendComparisonPeriod.weekAverage,
+      );
+      // 70 / 7 = 10 daily avg → (10 - 10) / 10 * 100 = 0%
+      expect(trend, closeTo(0, 0.01));
+    });
+
+    test('computeTrendForPeriod returns 0 when reference is 0', () {
+      final trend = service.computeTrendForPeriod(
+        currentValue: 50,
+        referenceTotal: 0,
+        period: TrendComparisonPeriod.previousDay,
+      );
+      expect(trend, 0);
+    });
+
+    test('computeHourBlockTrend adjusts for time of day', () {
+      // At exactly midday (fraction ≈ 0.5), if reference day was 200
+      // and actual so far is 80, expected = 200 * 0.5 = 100
+      // trend = (80 - 100) / 100 * 100 = -20%
+      final todayStart = DayBoundary.getTodayStart();
+      final midday = todayStart.add(const Duration(hours: 12));
+
+      final trend = service.computeHourBlockTrend(
+        actualSoFar: 80,
+        fullDayReference: 200,
+        period: TrendComparisonPeriod.previousDay,
+        asOf: midday,
+      );
+      expect(trend, closeTo(-20.0, 1.0));
+    });
+
+    test('computeHourBlockTrend multi-day averages reference', () {
+      final todayStart = DayBoundary.getTodayStart();
+      final midday = todayStart.add(const Duration(hours: 12));
+
+      // weekAverage with 700 total → daily avg = 100
+      // At midday expected = 100 * 0.5 = 50
+      // actual = 60 → (60 - 50) / 50 * 100 = +20%
+      final trend = service.computeHourBlockTrend(
+        actualSoFar: 60,
+        fullDayReference: 700,
+        period: TrendComparisonPeriod.weekAverage,
+        asOf: midday,
+      );
+      expect(trend, closeTo(20.0, 1.0));
+    });
+  });
+
+  group('TrendComparisonPeriod - Enum Properties', () {
+    test('all periods have non-empty labels', () {
+      for (final period in TrendComparisonPeriod.values) {
+        expect(period.shortLabel, isNotEmpty);
+        expect(period.displayName, isNotEmpty);
+      }
+    });
+
+    test('shortLabel starts with "vs"', () {
+      for (final period in TrendComparisonPeriod.values) {
+        expect(period.shortLabel, startsWith('vs'));
+      }
+    });
+  });
+
+  group('WidgetSettingsDefaults - Trend Comparison', () {
+    test('supportsTrendComparison returns true for applicable widgets', () {
+      expect(
+        WidgetSettingsDefaults.supportsTrendComparison(
+          HomeWidgetType.totalDurationToday,
+        ),
+        isTrue,
+      );
+      expect(
+        WidgetSettingsDefaults.supportsTrendComparison(
+          HomeWidgetType.hitsToday,
+        ),
+        isTrue,
+      );
+      expect(
+        WidgetSettingsDefaults.supportsTrendComparison(
+          HomeWidgetType.durationTrend,
+        ),
+        isTrue,
+      );
+    });
+
+    test(
+      'supportsTrendComparison returns false for non-applicable widgets',
+      () {
+        expect(
+          WidgetSettingsDefaults.supportsTrendComparison(
+            HomeWidgetType.quickLog,
+          ),
+          isFalse,
+        );
+        expect(
+          WidgetSettingsDefaults.supportsTrendComparison(
+            HomeWidgetType.recentEntries,
+          ),
+          isFalse,
+        );
+        expect(
+          WidgetSettingsDefaults.supportsTrendComparison(
+            HomeWidgetType.weeklyPattern,
+          ),
+          isFalse,
+        );
+      },
+    );
   });
 }

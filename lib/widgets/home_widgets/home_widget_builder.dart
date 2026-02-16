@@ -50,6 +50,16 @@ class HomeWidgetBuilder extends ConsumerWidget {
         days != null ? WidgetSettingsDefaults.timeWindowLabel(days) : null;
     final hasEventFilter = eventTypes != null && eventTypes.isNotEmpty;
 
+    // ── Trend comparison period (per-widget) ─────────────────────────
+    final trendPeriodName =
+        config.getSetting<String>(kTrendComparisonPeriod) ??
+        defaults[kTrendComparisonPeriod] as String? ??
+        'previousDay';
+    final trendPeriod = TrendComparisonPeriod.values.firstWhere(
+      (e) => e.name == trendPeriodName,
+      orElse: () => TrendComparisonPeriod.previousDay,
+    );
+
     switch (config.type) {
       // ===== TIME-BASED =====
       case HomeWidgetType.timeSinceLastHit:
@@ -76,7 +86,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
         );
 
       case HomeWidgetType.firstHitToday:
-        return _buildFirstHitToday(context, metrics);
+        return _buildFirstHitToday(context, metrics, trendPeriod);
 
       case HomeWidgetType.lastHitTime:
         return _buildLastHitTime(context, metrics);
@@ -110,6 +120,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
           days,
           timeLabel,
           hasEventFilter,
+          trendPeriod,
         );
 
       case HomeWidgetType.avgDurationPerHit:
@@ -160,6 +171,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
           days,
           timeLabel,
           hasEventFilter,
+          trendPeriod,
         );
 
       // ===== COUNT-BASED =====
@@ -212,10 +224,16 @@ class HomeWidgetBuilder extends ConsumerWidget {
           config.getSetting<String>(kComparisonTarget) ??
               defaults[kComparisonTarget] as String? ??
               'yesterday',
+          trendPeriod,
         );
 
       case HomeWidgetType.todayVsWeekAvg:
-        return _buildTodayVsWeekAvg(context, metrics, filteredRecords);
+        return _buildTodayVsWeekAvg(
+          context,
+          metrics,
+          filteredRecords,
+          trendPeriod,
+        );
 
       case HomeWidgetType.weekdayVsWeekend:
         return _buildWeekdayVsWeekend(context, metrics, filteredRecords, days);
@@ -364,9 +382,23 @@ class HomeWidgetBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _buildFirstHitToday(BuildContext context, HomeMetricsService metrics) {
+  Widget _buildFirstHitToday(
+    BuildContext context,
+    HomeMetricsService metrics,
+    TrendComparisonPeriod trendPeriod,
+  ) {
     final firstHit = metrics.getFirstHitToday(records);
-    final firstHitYesterday = metrics.getFirstHitYesterday(records);
+
+    // Get comparison first hit based on period
+    final comparisonRecords = metrics.getComparisonRecords(
+      records,
+      trendPeriod,
+    );
+    final comparisonSorted =
+        comparisonRecords.where((r) => !r.isDeleted).toList()
+          ..sort((a, b) => a.eventAt.compareTo(b.eventAt));
+    final comparisonFirstHit =
+        comparisonSorted.isNotEmpty ? comparisonSorted.first.eventAt : null;
 
     String value = '--';
     if (firstHit != null) {
@@ -379,17 +411,13 @@ class HomeWidgetBuilder extends ConsumerWidget {
 
     String? subtitle;
     int? deltaMinutes;
-    if (firstHit != null && firstHitYesterday != null) {
+    if (firstHit != null && comparisonFirstHit != null) {
       // Compare time-of-day only (hours + minutes)
       final todayMinutes = firstHit.hour * 60 + firstHit.minute;
-      final yesterdayMinutes =
-          firstHitYesterday.hour * 60 + firstHitYesterday.minute;
-      deltaMinutes = todayMinutes - yesterdayMinutes;
-      if (deltaMinutes == 0) {
-        subtitle = 'vs yesterday';
-      } else {
-        subtitle = 'vs yesterday';
-      }
+      final compMinutes =
+          comparisonFirstHit.hour * 60 + comparisonFirstHit.minute;
+      deltaMinutes = todayMinutes - compMinutes;
+      subtitle = trendPeriod.shortLabel;
     } else {
       subtitle = 'today';
     }
@@ -406,6 +434,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 percentChange: deltaMinutes.toDouble(),
                 invertColors: true,
                 suffix: 'min',
+                comparisonLabel: trendPeriod.shortLabel,
               )
               : null,
     );
@@ -483,10 +512,14 @@ class HomeWidgetBuilder extends ConsumerWidget {
     int? days,
     String? timeLabel,
     bool hasEventFilter,
+    TrendComparisonPeriod trendPeriod,
   ) {
     // For the "today" case, keep the live-updating card
     if (days == 1 && !hasEventFilter) {
-      return _TotalDurationTodayCard(records: records);
+      return _TotalDurationTodayCard(
+        records: records,
+        trendPeriod: trendPeriod,
+      );
     }
     final total = metrics.getTotalDuration(filteredRecords);
     return StatCardWidget(
@@ -587,6 +620,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
     int? days,
     String? timeLabel,
     bool hasEventFilter,
+    TrendComparisonPeriod trendPeriod,
   ) {
     final effectiveDays = days ?? 3;
     final comparison = metrics.comparePeriods(
@@ -642,7 +676,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
                     ),
                   ],
                 ),
-                TrendIndicator(percentChange: comparison.percentChange),
+                TrendIndicator(
+                  percentChange: comparison.percentChange,
+                  comparisonLabel: trendPeriod.shortLabel,
+                ),
               ],
             ),
           ],
@@ -741,8 +778,20 @@ class HomeWidgetBuilder extends ConsumerWidget {
     HomeMetricsService metrics,
     List<LogRecord> filteredRecords,
     String comparisonTargetName,
+    TrendComparisonPeriod trendPeriod,
   ) {
-    final comparison = metrics.getTodayVsYesterday(filteredRecords);
+    // Get today's data
+    final todayCount = metrics.getHitCountToday(filteredRecords);
+    final todayDuration = metrics.getTotalDurationToday(filteredRecords);
+
+    // Get comparison data based on period
+    final compRecords = metrics.getComparisonRecords(
+      filteredRecords,
+      trendPeriod,
+    );
+    final compDays = HomeMetricsService.comparisonWindowDays(trendPeriod);
+    final compCount = compRecords.where((r) => !r.isDeleted).length ~/ compDays;
+    final compDuration = metrics.getTotalDuration(compRecords) / compDays;
 
     return Card(
       child: Padding(
@@ -758,9 +807,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Today vs Yesterday',
-                  style: Theme.of(context).textTheme.titleSmall,
+                Expanded(
+                  child: Text(
+                    'Today ${trendPeriod.shortLabel}',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ],
             ),
@@ -770,16 +821,16 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 Expanded(
                   child: _ComparisonColumn(
                     label: 'Today',
-                    count: comparison.todayCount,
-                    duration: comparison.todayDuration,
+                    count: todayCount,
+                    duration: todayDuration,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _ComparisonColumn(
-                    label: 'Yesterday',
-                    count: comparison.yesterdayCount,
-                    duration: comparison.yesterdayDuration,
+                    label: trendPeriod.displayName,
+                    count: compCount,
+                    duration: compDuration,
                   ),
                 ),
               ],
@@ -794,20 +845,25 @@ class HomeWidgetBuilder extends ConsumerWidget {
     BuildContext context,
     HomeMetricsService metrics,
     List<LogRecord> filteredRecords,
+    TrendComparisonPeriod trendPeriod,
   ) {
     final todayCount = metrics.getHitCountToday(filteredRecords);
     final todayDuration = metrics.getTotalDurationToday(filteredRecords);
-    final weekAvgCount = metrics.getDailyAverageHits(filteredRecords, days: 7);
-    final weekAvgDuration =
-        metrics.getTotalDuration(filteredRecords, days: 7) / 7;
+
+    // Get comparison data based on period
+    final compRecords = metrics.getComparisonRecords(
+      filteredRecords,
+      trendPeriod,
+    );
+    final compDays = HomeMetricsService.comparisonWindowDays(trendPeriod);
+    final compCount = compRecords.where((r) => !r.isDeleted).length / compDays;
+    final compDuration = metrics.getTotalDuration(compRecords) / compDays;
 
     final countDiff =
-        weekAvgCount > 0
-            ? ((todayCount - weekAvgCount) / weekAvgCount) * 100
-            : 0.0;
+        compCount > 0 ? ((todayCount - compCount) / compCount) * 100 : 0.0;
     final durationDiff =
-        weekAvgDuration > 0
-            ? ((todayDuration - weekAvgDuration) / weekAvgDuration) * 100
+        compDuration > 0
+            ? ((todayDuration - compDuration) / compDuration) * 100
             : 0.0;
 
     return Card(
@@ -824,9 +880,11 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Today vs Week Avg',
-                  style: Theme.of(context).textTheme.titleSmall,
+                Expanded(
+                  child: Text(
+                    'Today ${trendPeriod.shortLabel}',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ],
             ),
@@ -838,7 +896,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
                   children: [
                     Text('Hits', style: Theme.of(context).textTheme.bodySmall),
                     const SizedBox(height: 4),
-                    TrendIndicator(percentChange: countDiff),
+                    TrendIndicator(
+                      percentChange: countDiff,
+                      comparisonLabel: trendPeriod.shortLabel,
+                    ),
                   ],
                 ),
                 Column(
@@ -848,7 +909,10 @@ class HomeWidgetBuilder extends ConsumerWidget {
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(height: 4),
-                    TrendIndicator(percentChange: durationDiff),
+                    TrendIndicator(
+                      percentChange: durationDiff,
+                      comparisonLabel: trendPeriod.shortLabel,
+                    ),
                   ],
                 ),
               ],
@@ -1714,8 +1778,12 @@ class _RecentEntryTile extends StatelessWidget {
 /// Updates every minute to show current time.
 class _TotalDurationTodayCard extends StatefulWidget {
   final List<LogRecord> records;
+  final TrendComparisonPeriod trendPeriod;
 
-  const _TotalDurationTodayCard({required this.records});
+  const _TotalDurationTodayCard({
+    required this.records,
+    required this.trendPeriod,
+  });
 
   @override
   State<_TotalDurationTodayCard> createState() =>
@@ -1745,7 +1813,23 @@ class _TotalDurationTodayCardState extends State<_TotalDurationTodayCard> {
   Widget build(BuildContext context) {
     final asOf = _asOf;
     final metrics = HomeMetricsService();
+
+    // Today's duration up to now
     final data = metrics.getTodayDurationUpTo(widget.records, asOf: asOf);
+
+    // Compute trend using the user-selected comparison period
+    final compRecords = metrics.getComparisonRecords(
+      widget.records,
+      widget.trendPeriod,
+      now: asOf,
+    );
+    final compTotal = metrics.getTotalDuration(compRecords);
+    final trend = metrics.computeHourBlockTrend(
+      actualSoFar: data.duration,
+      fullDayReference: compTotal,
+      period: widget.trendPeriod,
+      asOf: asOf,
+    );
 
     return StatCardWidget(
       title: 'Total up to ${data.timeLabel}',
@@ -1753,8 +1837,11 @@ class _TotalDurationTodayCardState extends State<_TotalDurationTodayCard> {
       subtitle: 'duration',
       icon: Icons.today,
       trendWidget:
-          data.trendVsYesterday != 0
-              ? TrendIndicator(percentChange: data.trendVsYesterday)
+          trend != 0
+              ? TrendIndicator(
+                percentChange: trend,
+                comparisonLabel: widget.trendPeriod.shortLabel,
+              )
               : null,
     );
   }

@@ -183,6 +183,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
           days,
           timeLabel,
           hasEventFilter,
+          trendPeriod,
         );
 
       case HomeWidgetType.hitsThisWeek:
@@ -697,7 +698,15 @@ class HomeWidgetBuilder extends ConsumerWidget {
     int? days,
     String? timeLabel,
     bool hasEventFilter,
+    TrendComparisonPeriod trendPeriod,
   ) {
+    // For the "today" case, keep the live-updating card
+    if (days == 1 && !hasEventFilter) {
+      return _HitsTodayCard(
+        records: records,
+        trendPeriod: trendPeriod,
+      );
+    }
     final count = metrics.getHitCount(filteredRecords);
 
     return StatCardWidget(
@@ -1836,6 +1845,79 @@ class _TotalDurationTodayCardState extends State<_TotalDurationTodayCard> {
       value: HomeMetricsService.formatDuration(data.duration),
       subtitle: 'duration',
       icon: Icons.today,
+      trendWidget:
+          trend != 0
+              ? TrendIndicator(
+                percentChange: trend,
+                comparisonLabel: widget.trendPeriod.shortLabel,
+              )
+              : null,
+    );
+  }
+}
+
+/// Card showing today's total hits up to current (or selected) time,
+/// with hour-block trend. Rebuilds every minute to update the time label.
+/// Updates every minute to show current time.
+class _HitsTodayCard extends StatefulWidget {
+  final List<LogRecord> records;
+  final TrendComparisonPeriod trendPeriod;
+
+  const _HitsTodayCard({
+    required this.records,
+    required this.trendPeriod,
+  });
+
+  @override
+  State<_HitsTodayCard> createState() => _HitsTodayCardState();
+}
+
+class _HitsTodayCardState extends State<_HitsTodayCard> {
+  late DateTime _asOf;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _asOf = DateTime.now();
+    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() => _asOf = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asOf = _asOf;
+    final metrics = HomeMetricsService();
+
+    // Today's hit count up to now
+    final data = metrics.getTodayHitsUpTo(widget.records, asOf: asOf);
+
+    // Compute trend using the user-selected comparison period
+    final compRecords = metrics.getComparisonRecords(
+      widget.records,
+      widget.trendPeriod,
+      now: asOf,
+    );
+    final compTotal = metrics.getHitCount(compRecords);
+    final trend = metrics.computeHourBlockTrend(
+      actualSoFar: data.count.toDouble(),
+      fullDayReference: compTotal.toDouble(),
+      period: widget.trendPeriod,
+      asOf: asOf,
+    );
+
+    return StatCardWidget(
+      title: 'Hits up to ${data.timeLabel}',
+      value: '${data.count}',
+      subtitle: 'count',
+      icon: Icons.touch_app,
       trendWidget:
           trend != 0
               ? TrendIndicator(

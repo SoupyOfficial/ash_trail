@@ -640,6 +640,66 @@ void main() {
     });
   });
 
+  group('HomeMetricsService - Hits Up To', () {
+    test('getTodayHitsUpTo returns correct structure', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, duration: 30),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 20,
+        ),
+      ];
+
+      final result = service.getTodayHitsUpTo(records);
+      expect(result.count, greaterThanOrEqualTo(0));
+      expect(result.timeLabel, isNotEmpty);
+    });
+
+    test('getTodayHitsUpTo respects cutoff time', () {
+      final now = DateTime.now();
+      final cutoff = now.subtract(const Duration(hours: 2));
+      final records = [
+        createLogRecord(eventAt: now, duration: 100), // After cutoff
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 3)),
+          duration: 30,
+        ), // Before cutoff
+      ];
+
+      final result = service.getTodayHitsUpTo(records, asOf: cutoff);
+      // Only the earlier record should count
+      expect(result.count, 1);
+    });
+
+    test('getTodayHitsUpTo excludes deleted records', () {
+      final now = DateTime.now();
+      final records = [
+        createLogRecord(eventAt: now, duration: 30),
+        createLogRecord(
+          eventAt: now.subtract(const Duration(hours: 1)),
+          duration: 20,
+          isDeleted: true,
+        ), // Deleted, should not count
+      ];
+
+      final result = service.getTodayHitsUpTo(records);
+      expect(result.count, 1); // Only non-deleted record
+    });
+
+    test('getTodayHitsUpTo returns 0 for cutoff before today', () {
+      final now = DateTime.now();
+      final cutoff = now.subtract(const Duration(days: 2));
+      final records = [
+        createLogRecord(eventAt: now, duration: 30),
+      ];
+
+      final result = service.getTodayHitsUpTo(records, asOf: cutoff);
+      expect(result.count, 0);
+      expect(result.timeLabel, isNotEmpty);
+    });
+  });
+
   group('HomeMetricsService - Average Duration', () {
     test('getAverageDuration returns null for empty records', () {
       expect(service.getAverageDuration([]), isNull);

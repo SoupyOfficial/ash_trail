@@ -326,6 +326,35 @@ class HomeMetricsService {
     return getHitCount(_filterToday(records));
   }
 
+  /// Get today's hit count up to a specific time with time label.
+  /// Similar to [getTodayDurationUpTo] but for hit counts.
+  ({int count, String timeLabel}) getTodayHitsUpTo(
+    List<LogRecord> records, {
+    DateTime? asOf,
+  }) {
+    final cutoff = asOf ?? DateTime.now();
+    final todayStart = DayBoundary.getTodayStart();
+
+    if (cutoff.isBefore(todayStart)) {
+      return (
+        count: 0,
+        timeLabel: formatTimeLabel(cutoff),
+      );
+    }
+
+    final todayRecords = _filterToday(records);
+    final upToRecords =
+        todayRecords
+            .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
+            .toList();
+    final count = upToRecords.length;
+
+    return (
+      count: count,
+      timeLabel: formatTimeLabel(cutoff),
+    );
+  }
+
   /// Get daily average hits over a period
   double getDailyAverageHits(List<LogRecord> records, {int days = 7}) {
     final filtered = _filterByDays(records, days);

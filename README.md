@@ -12,6 +12,11 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
   - All accounts remain logged in simultaneously
   - Data isolation per account with automatic sync filtering
 - **Home screen logging** - Press-and-hold duration recording directly from home
+- **iOS Home Screen Widgets** - View your stats without opening the app
+  - Multiple widget sizes (Small, Medium, Large)
+  - Lock screen widgets (iOS 16+)
+  - Auto-updating with real-time data sync
+  - Shows hits today, duration, weekly patterns, and more
 - **Vape tracking (MVP)** - Focus on vape session tracking with duration in seconds
 - **Optional context** - Add mood, physical ratings, and reasons (8 categories)
 - **Immediate feedback** - See your data reflected instantly in stats and recent entries
@@ -63,6 +68,7 @@ A **multi-account, offline-first logging and analytics app** built with Flutter.
 - **FL Chart** - Analytics visualization
 - **Firebase Auth** - Authentication with Custom Token support
 - **Google Cloud Functions** - Custom token generation service for multi-account switching
+- **WidgetKit** (iOS) - Native home screen and lock screen widgets with App Groups for data sharing
 
 ### Repository Pattern
 
@@ -117,6 +123,20 @@ dart run build_runner build --delete-conflicting-outputs
 ```bash
 flutter run
 ```
+
+### iOS Widget Setup (Optional)
+
+The app includes native iOS widgets that display stats on the home screen and lock screen. To set them up:
+
+1. Open `ios/Runner.xcworkspace` in Xcode
+2. Follow the setup guide in [docs/setup/IOS_WIDGET_SETUP.md](docs/setup/IOS_WIDGET_SETUP.md)
+
+Key steps:
+- Add Widget Extension target named "AshTrailWidget"
+- Enable App Groups capability for both Runner and AshTrailWidget targets
+- Configure bundle identifiers and build settings
+
+For detailed instructions, see the [iOS Widget Setup Guide](docs/setup/IOS_WIDGET_SETUP.md).
 
 ## Development
 

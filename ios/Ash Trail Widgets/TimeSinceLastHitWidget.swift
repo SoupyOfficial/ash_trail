@@ -44,25 +44,10 @@ struct TimeSinceProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<TimeSinceEntry>) -> Void) {
-        let lastHit = iOSWidgetDataStore.lastHitDate
-        let gap: String? = iOSWidgetDataStore.averageGapSeconds.map { iOSWidgetDataStore.formatGap($0) }
-        var entries: [TimeSinceEntry] = []
-        let now = Date.now
-        
-        // Generate entries every minute for the next 30 minutes so the display updates
-        for minuteOffset in 0..<30 {
-            let entryDate = Calendar.current.date(byAdding: .minute, value: minuteOffset, to: now)!
-            let elapsed: String
-            if let lastHit {
-                elapsed = iOSWidgetDataStore.formatElapsed(entryDate.timeIntervalSince(lastHit))
-            } else {
-                elapsed = "--"
-            }
-            entries.append(TimeSinceEntry(date: entryDate, lastHitDate: lastHit, formattedElapsed: elapsed, averageGap: gap))
-        }
-        
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: now)!
-        completion(Timeline(entries: entries, policy: .after(nextUpdate)))
+        let entry = currentEntry()
+        // Refresh every 15 minutes; views use Text(date, style: .relative) for live countdown
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: .now)!
+        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
     
     private func currentEntry() -> TimeSinceEntry {
@@ -108,9 +93,15 @@ struct TimeSinceView: View {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.title2)
                 .foregroundStyle(.green)
-            Text(entry.formattedElapsed)
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .minimumScaleFactor(0.5)
+            if let lastHit = entry.lastHitDate {
+                Text(lastHit, style: .relative)
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+                    .minimumScaleFactor(0.5)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("--")
+                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
+            }
             Text("since last hit")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -132,9 +123,15 @@ struct TimeSinceView: View {
                 Image(systemName: "clock.arrow.circlepath")
                     .font(.title3)
                     .foregroundStyle(.green)
-                Text(entry.formattedElapsed)
-                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                    .minimumScaleFactor(0.6)
+                if let lastHit = entry.lastHitDate {
+                    Text(lastHit, style: .relative)
+                        .font(.system(.title2, design: .rounded, weight: .bold))
+                        .minimumScaleFactor(0.6)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("--")
+                        .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                }
                 Text("since last hit")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -179,9 +176,15 @@ struct TimeSinceView: View {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.caption)
                 .foregroundStyle(.green)
-            Text(entry.formattedElapsed)
-                .font(.system(.body, design: .rounded, weight: .bold))
-                .minimumScaleFactor(0.5)
+            if let lastHit = entry.lastHitDate {
+                Text(lastHit, style: .relative)
+                    .font(.system(.caption2, design: .rounded, weight: .bold))
+                    .minimumScaleFactor(0.5)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("--")
+                    .font(.system(.body, design: .rounded, weight: .bold))
+            }
         }
         .widgetLabel("Since Last")
     }
@@ -193,8 +196,13 @@ struct TimeSinceView: View {
             Label("Since Last Hit", systemImage: "clock.arrow.circlepath")
                 .font(.caption)
                 .foregroundStyle(.green)
-            Text(entry.formattedElapsed)
-                .font(.system(.title2, design: .rounded, weight: .bold))
+            if let lastHit = entry.lastHitDate {
+                Text(lastHit, style: .relative)
+                    .font(.system(.title3, design: .rounded, weight: .bold))
+            } else {
+                Text("--")
+                    .font(.system(.title2, design: .rounded, weight: .bold))
+            }
             if let lastHit = entry.lastHitDate {
                 Text(lastHit, style: .time)
                     .font(.caption2)
@@ -207,6 +215,15 @@ struct TimeSinceView: View {
     // MARK: - Lock Screen: Inline
     
     private var inlineView: some View {
-        Label("\(entry.formattedElapsed) since last hit", systemImage: "clock.arrow.circlepath")
+        if let lastHit = entry.lastHitDate {
+            Label {
+                Text(lastHit, style: .relative)
+                + Text(" since last hit")
+            } icon: {
+                Image(systemName: "clock.arrow.circlepath")
+            }
+        } else {
+            Label("-- since last hit", systemImage: "clock.arrow.circlepath")
+        }
     }
 }

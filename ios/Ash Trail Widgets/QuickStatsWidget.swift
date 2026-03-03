@@ -26,13 +26,14 @@ struct QuickStatsEntry: TimelineEntry {
     let hitsToday: Int
     let timeSinceLastHit: String
     let dailyAverageHits: Double?
+    let lastHitDate: Date?
 }
 
 // MARK: - Timeline Provider
 
 struct QuickStatsProvider: TimelineProvider {
     func placeholder(in context: Context) -> QuickStatsEntry {
-        QuickStatsEntry(date: .now, hitsToday: 5, timeSinceLastHit: "30m", dailyAverageHits: 8.2)
+        QuickStatsEntry(date: .now, hitsToday: 5, timeSinceLastHit: "30m", dailyAverageHits: 8.2, lastHitDate: .now.addingTimeInterval(-1800))
     }
     
     func getSnapshot(in context: Context, completion: @escaping (QuickStatsEntry) -> Void) {
@@ -40,17 +41,10 @@ struct QuickStatsProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuickStatsEntry>) -> Void) {
-        var entries: [QuickStatsEntry] = []
-        let now = Date.now
-        
-        // Generate entries every minute for 30 minutes
-        for minuteOffset in 0..<30 {
-            let entryDate = Calendar.current.date(byAdding: .minute, value: minuteOffset, to: now)!
-            entries.append(currentEntry(at: entryDate))
-        }
-        
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: now)!
-        completion(Timeline(entries: entries, policy: .after(nextUpdate)))
+        let entry = currentEntry(at: .now)
+        // Refresh every 15 minutes; views use Text(date, style: .relative) for live countdown
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: .now)!
+        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
     
     private func currentEntry(at date: Date) -> QuickStatsEntry {
@@ -65,7 +59,8 @@ struct QuickStatsProvider: TimelineProvider {
             date: date,
             hitsToday: iOSWidgetDataStore.hitsToday,
             timeSinceLastHit: elapsed,
-            dailyAverageHits: iOSWidgetDataStore.dailyAverageHits
+            dailyAverageHits: iOSWidgetDataStore.dailyAverageHits,
+            lastHitDate: lastHit
         )
     }
 }
@@ -100,8 +95,13 @@ struct QuickStatsView: View {
                 Image(systemName: "clock.arrow.circlepath")
                     .font(.caption2)
                     .foregroundStyle(.green)
-                Text(entry.timeSinceLastHit)
-                    .font(.caption.weight(.medium))
+                if let lastHit = entry.lastHitDate {
+                    Text(lastHit, style: .relative)
+                        .font(.caption.weight(.medium))
+                } else {
+                    Text(entry.timeSinceLastHit)
+                        .font(.caption.weight(.medium))
+                }
             }
             
             // Trend indicator

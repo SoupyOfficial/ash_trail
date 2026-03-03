@@ -40,7 +40,7 @@ struct AppLaunchProvider: TimelineProvider {
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<AppLaunchEntry>) -> Void) {
         let entry = AppLaunchEntry(date: .now, hitsToday: iOSWidgetDataStore.hitsToday)
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: .now)!
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: .now)!
         completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
 }

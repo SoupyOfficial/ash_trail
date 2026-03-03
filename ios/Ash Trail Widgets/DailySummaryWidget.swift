@@ -56,17 +56,10 @@ struct DailySummaryProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<DailySummaryEntry>) -> Void) {
-        var entries: [DailySummaryEntry] = []
-        let now = Date.now
-        
-        // Generate entries every minute for 30 minutes so time-since-last updates
-        for minuteOffset in 0..<30 {
-            let entryDate = Calendar.current.date(byAdding: .minute, value: minuteOffset, to: now)!
-            entries.append(entryFor(date: entryDate))
-        }
-        
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: now)!
-        completion(Timeline(entries: entries, policy: .after(nextUpdate)))
+        let entry = currentEntry()
+        // Refresh every 15 minutes; views use Text(date, style: .relative) for live countdown
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: .now)!
+        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
     
     private func currentEntry() -> DailySummaryEntry {
@@ -130,11 +123,34 @@ struct DailySummaryView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 StatCell(icon: "flame", label: "Hits", value: "\(entry.hitsToday)", color: .orange)
                 StatCell(icon: "timer", label: "Duration", value: entry.totalDuration, color: .blue)
-                StatCell(icon: "clock.arrow.circlepath", label: "Since Last", value: entry.timeSinceLastHit, color: .green)
+                timeSinceLastStatCell
                 StatCell(icon: "arrow.left.and.right", label: "Avg Gap", value: entry.averageGap ?? "--", color: .purple)
             }
         }
         .padding(.horizontal, 4)
+    }
+    
+    // MARK: - Time Since Last (live countdown)
+    
+    private var timeSinceLastStatCell: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Label("Since Last", systemImage: "clock.arrow.circlepath")
+                .font(.caption2)
+                .foregroundStyle(.green)
+                .lineLimit(1)
+            if let lastHit = entry.lastHitDate {
+                Text(lastHit, style: .relative)
+                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+            } else {
+                Text("--")
+                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     // MARK: - System Large
@@ -164,7 +180,7 @@ struct DailySummaryView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 StatCell(icon: "flame", label: "Hits", value: "\(entry.hitsToday)", color: .orange)
                 StatCell(icon: "timer", label: "Total Duration", value: entry.totalDuration, color: .blue)
-                StatCell(icon: "clock.arrow.circlepath", label: "Since Last", value: entry.timeSinceLastHit, color: .green)
+                timeSinceLastStatCell
                 StatCell(icon: "arrow.left.and.right", label: "Avg Gap", value: entry.averageGap ?? "--", color: .purple)
             }
             

@@ -1,6 +1,13 @@
 import 'package:ash_trail/main.dart';
 import 'package:ash_trail/providers/account_provider.dart';
 import 'package:ash_trail/providers/auth_provider.dart';
+import 'package:ash_trail/providers/watch_provider.dart';
+import 'package:ash_trail/providers/widget_provider.dart';
+import 'package:ash_trail/repositories/log_record_repository.dart' as lr;
+import 'package:ash_trail/services/home_metrics_service.dart';
+import 'package:ash_trail/services/log_record_service.dart';
+import 'package:ash_trail/services/watch_connectivity_service.dart';
+import 'package:ash_trail/services/widget_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,10 +20,40 @@ class _FakeUser extends Fake implements firebase_auth.User {
   _FakeUser({required this.uid});
 }
 
+class _NoOpLogRecordRepo implements lr.LogRecordRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+/// Shared overrides for providers that need real services unavailable in tests
+List<Override> get _serviceOverrides {
+  final logRecordService = LogRecordService(repository: _NoOpLogRecordRepo());
+  final homeMetricsService = HomeMetricsService();
+  return [
+    watchConnectivityServiceProvider.overrideWith((ref) {
+      return WatchConnectivityService(
+        logRecordService: logRecordService,
+        homeMetricsService: homeMetricsService,
+      );
+    }),
+    widgetServiceProvider.overrideWith((ref) {
+      return WidgetService(
+        logRecordService: logRecordService,
+        homeMetricsService: homeMetricsService,
+      );
+    }),
+  ];
+}
+
 void main() {
   group('AshTrailApp', () {
     testWidgets('renders MaterialApp with correct theme', (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: AshTrailApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: _serviceOverrides,
+          child: const AshTrailApp(),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(MaterialApp), findsOneWidget);
@@ -31,6 +68,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            ..._serviceOverrides,
             authStateProvider.overrideWith(
               (ref) => Stream.value(_FakeUser(uid: 'test-user')),
             ),

@@ -209,6 +209,7 @@ echo -e "  This may take a few minutes..."
 flutter build ipa \
   --release \
   --build-number="$BUILD_NUMBER" \
+  --export-options-plist=ios/ExportOptions.plist \
   --dart-define=VERBOSE_LOGGING=true \
   --obfuscate \
   --split-debug-info=build/app/debug-info \

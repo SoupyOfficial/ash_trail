@@ -19,6 +19,8 @@ import 'providers/auth_provider.dart';
 import 'providers/account_provider.dart';
 import 'providers/app_settings_provider.dart';
 import 'providers/home_widget_config_provider.dart';
+import 'providers/watch_provider.dart';
+import 'providers/widget_provider.dart';
 import 'navigation/main_navigation.dart';
 import 'utils/error_display.dart';
 
@@ -215,6 +217,12 @@ class AshTrailApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Initialize watch connectivity service (no-op if no watch paired)
+    ref.watch(watchConnectivityServiceProvider);
+
+    // Initialize iOS home screen widget data bridge (no-op on non-iOS)
+    ref.watch(widgetServiceProvider);
+
     // Provider-driven theme — seed color and mode come from AppSettings
     final seedColor = ref.watch(activeSeedColorProvider);
     final themeMode = ref.watch(activeThemeModeProvider);

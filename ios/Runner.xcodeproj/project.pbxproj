@@ -7,19 +7,57 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A533FA0C1827D77653BB617 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A671B5A78BC7138ADEA911 /* WatchSessionManager.swift */; };
+		12176D74A4FC690B1BC398F2 /* QuickAnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 804C0205E6A44777FCA1A5F4 /* QuickAnalyticsView.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		14DE32A556798EA362B385C9 /* ComplicationDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A824E4D96D03F233B161676 /* ComplicationDataStore.swift */; };
+		27D90325F669099AB40F8C0F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957E2903644C80DEF5E164D /* Foundation.framework */; };
+		3064CF5FC3DADCF6B1352A2F /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B48CD214C0029CFE47F2A1C4 /* Pods_Runner.framework */; };
 		331C808B294A63AB00263BE5 /* RunnerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerUITests.m */; };
+		337861955FDB41C30590EC46 /* AshTrailWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3B735C08C4DD26BCB31257 /* AshTrailWatchApp.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		4038E20F25C9E90BA9200897 /* HitsTodayComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82ED47EE6A3D14C785D62EF3 /* HitsTodayComplication.swift */; };
+		41359FE63D2944A906AD6677 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DB01EEF6D3CE056929740565 /* Assets.xcassets */; };
+		468A4254DDF4518F2EC8F45C /* Pods_Runner_RunnerUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FD69CEF16AB079ECF8A5A69 /* Pods_Runner_RunnerUITests.framework */; };
+		576B3D168965652346B27D8E /* WatchDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63344E1E89A6A6A86A6FBED1 /* WatchDataModels.swift */; };
+		5AB5F22188D1D5CE718720C0 /* QuickLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58BAE92B0821CE606CA4E4F3 /* QuickLogView.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		8A5CED9314DC0DE4B0528481 /* Ash Trail Watch Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 67302B3E774D7D2D8840D212 /* Ash Trail Watch Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8BA9F5B22D27D98417B0AEA3 /* WatchDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63344E1E89A6A6A86A6FBED1 /* WatchDataModels.swift */; };
+		8EE060A634E3F59060F6B4F6 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DFFD8867F4F86BC4EB6C73A /* WatchConnectivity.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		99A79439B6BD581F8813115E /* TimeSinceLastHitComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57DECED5E7F85767E4F62CFE /* TimeSinceLastHitComplication.swift */; };
+		9AE49C979EF68D0E4375354D /* ComplicationDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A824E4D96D03F233B161676 /* ComplicationDataStore.swift */; };
 		A1B2C3D4E5F60001PRIVACY1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60002PRIVACY2 /* PrivacyInfo.xcprivacy */; };
-		E665D516504C7C42CF11E0CE /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 317114E753EE57548976112D /* Pods_Runner.framework */; };
-		F0B8B65F3D9B27B3C2C37013 /* Pods_Runner_RunnerUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DCEEBE27FD95B1A22ABAF24F /* Pods_Runner_RunnerUITests.framework */; };
+		A2059539ACF0497CF9E0BA61 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A507E2C283FD37CC16E45C15 /* WatchConnectivityManager.swift */; };
+		A8F21B86E7AA2F68166A3EE3 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F76833AA0FD4CE5F00D4A036 /* WatchConnectivity.framework */; };
+		AE69046CEC426B3750341C35 /* Ash Trail Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 8ED536A090B992AF58149D4B /* Ash Trail Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B7CF46C87C1B2B3F174E5DD5 /* AshTrailWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5727E5758445D22BADEF9BB4 /* AshTrailWidgetBundle.swift */; };
+		C4D54112D8718206EF55173F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A575B7E80C8DA63EA7031881 /* Assets.xcassets */; };
+		D0995D028C217FB9158CAB4A /* AppLaunchComplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFFBF8FDB948AD37EEA9A4E /* AppLaunchComplication.swift */; };
+		D492EE7B1742CE6BD660FDC1 /* WatchDataModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63344E1E89A6A6A86A6FBED1 /* WatchDataModels.swift */; };
+		EA790A88E9F81EF5696CF57E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957E2903644C80DEF5E164D /* Foundation.framework */; };
+		F674C843A80DFF0DB7EF8F2F /* RecentEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27255C7DF5C343BE2886FB42 /* RecentEntriesView.swift */; };
+		AA100001AAAA000100000001 /* AshTrailIOSWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200001AAAA000100000001 /* AshTrailIOSWidgetBundle.swift */; };
+		AA100002AAAA000100000002 /* iOSWidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200002AAAA000100000002 /* iOSWidgetDataStore.swift */; };
+		AA100003AAAA000100000003 /* HitsTodayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200003AAAA000100000003 /* HitsTodayWidget.swift */; };
+		AA100004AAAA000100000004 /* TimeSinceLastHitWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200004AAAA000100000004 /* TimeSinceLastHitWidget.swift */; };
+		AA100005AAAA000100000005 /* DailySummaryWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200005AAAA000100000005 /* DailySummaryWidget.swift */; };
+		AA100006AAAA000100000006 /* QuickStatsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200006AAAA000100000006 /* QuickStatsWidget.swift */; };
+		AA100007AAAA000100000007 /* AppLaunchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200007AAAA000100000007 /* AppLaunchWidget.swift */; };
+		AA100008AAAA000100000008 /* Ash Trail Widgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AA300001AAAA000100000001 /* Ash Trail Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		02326A865005616F2000FB74 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FF0C2D3A664020EB824410D1;
+			remoteInfo = "Ash Trail Watch Widgets";
+		};
 		331C8085294A63A400263BE5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
@@ -27,9 +65,49 @@
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
 		};
+		AA400001AAAA000100000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA500001AAAA000100000001;
+			remoteInfo = "Ash Trail Widgets";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1FC2AD8005814E2285D4C321 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				AE69046CEC426B3750341C35 /* Ash Trail Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7DBBD7946E27F40FAE6967BE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8A5CED9314DC0DE4B0528481 /* Ash Trail Watch Widgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA600001AAAA000100000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AA100008AAAA000100000008 /* Ash Trail Widgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -45,16 +123,30 @@
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		2B9DB12220BA950DBDFAA6C4 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
-		317114E753EE57548976112D /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1957E2903644C80DEF5E164D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS11.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		27255C7DF5C343BE2886FB42 /* RecentEntriesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RecentEntriesView.swift; path = RecentEntriesView.swift; sourceTree = "<group>"; };
+		2DFFD8867F4F86BC4EB6C73A /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 		331C807B294A618700263BE5 /* RunnerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RunnerUITests.m; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
-		618AD5F31D99E5D5177CB337 /* Pods-Runner-RunnerUITests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.profile.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.profile.xcconfig"; sourceTree = "<group>"; };
-		70DC79A36C0D595230B141B0 /* Pods-Runner-RunnerUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.release.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.release.xcconfig"; sourceTree = "<group>"; };
+		4A3B735C08C4DD26BCB31257 /* AshTrailWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AshTrailWatchApp.swift; path = AshTrailWatchApp.swift; sourceTree = "<group>"; };
+		4EA9F3704242EA8DD3CBB494 /* Pods-Runner.debug-runner.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-runner.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-runner.xcconfig"; sourceTree = "<group>"; };
+		4FD69CEF16AB079ECF8A5A69 /* Pods_Runner_RunnerUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner_RunnerUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5727E5758445D22BADEF9BB4 /* AshTrailWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AshTrailWidgetBundle.swift; sourceTree = "<group>"; };
+		57DECED5E7F85767E4F62CFE /* TimeSinceLastHitComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeSinceLastHitComplication.swift; sourceTree = "<group>"; };
+		58BAE92B0821CE606CA4E4F3 /* QuickLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickLogView.swift; path = QuickLogView.swift; sourceTree = "<group>"; };
+		63344E1E89A6A6A86A6FBED1 /* WatchDataModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchDataModels.swift; path = WatchDataModels.swift; sourceTree = "<group>"; };
+		65FDFD18B3A70B847DCBFC96 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		66C4CF573E30CE2E6D2E1209 /* Pods-Runner-RunnerUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.release.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.release.xcconfig"; sourceTree = "<group>"; };
+		67302B3E774D7D2D8840D212 /* Ash Trail Watch Widgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Ash Trail Watch Widgets.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		7F60B39EA853E145C32A28F0 /* Pods-Runner-RunnerUITests.debug-runner.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.debug-runner.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.debug-runner.xcconfig"; sourceTree = "<group>"; };
+		804C0205E6A44777FCA1A5F4 /* QuickAnalyticsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickAnalyticsView.swift; path = QuickAnalyticsView.swift; sourceTree = "<group>"; };
+		82ED47EE6A3D14C785D62EF3 /* HitsTodayComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HitsTodayComplication.swift; sourceTree = "<group>"; };
+		8A824E4D96D03F233B161676 /* ComplicationDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComplicationDataStore.swift; sourceTree = "<group>"; };
+		8ED536A090B992AF58149D4B /* Ash Trail Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ash Trail Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -62,21 +154,52 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B624264A1F53A94B9C92486 /* Pods-Runner-RunnerUITests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.profile.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.profile.xcconfig"; sourceTree = "<group>"; };
 		A1B2C3D4E5F60002PRIVACY2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		97C1FBE5001E6D07A9CDDB15 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
-		AD6D2F5DFF46835EBE064E94 /* Pods-Runner.debug-runner.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-runner.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-runner.xcconfig"; sourceTree = "<group>"; };
-		B4D493BA7AB9F9A758329E48 /* Pods-Runner-RunnerUITests.debug-runner.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.debug-runner.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.debug-runner.xcconfig"; sourceTree = "<group>"; };
-		B7C2ADD8F8E11F352D3CE535 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
-		DCEEBE27FD95B1A22ABAF24F /* Pods_Runner_RunnerUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner_RunnerUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E67BD7ED6E35D2AC64CD40EA /* Pods-Runner-RunnerUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.debug.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		A507E2C283FD37CC16E45C15 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		A575B7E80C8DA63EA7031881 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AFA882F487316B491BBE2A41 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		B48CD214C0029CFE47F2A1C4 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2B9B473ED38B026B1D877BE /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		D8A671B5A78BC7138ADEA911 /* WatchSessionManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchSessionManager.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
+		DB01EEF6D3CE056929740565 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Assets.xcassets; sourceTree = "<group>"; };
+		EDFFBF8FDB948AD37EEA9A4E /* AppLaunchComplication.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLaunchComplication.swift; sourceTree = "<group>"; };
+		F1E5AD3448F8E73C024CEC45 /* Pods-Runner-RunnerUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.debug.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		F76833AA0FD4CE5F00D4A036 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
+		AA200001AAAA000100000001 /* AshTrailIOSWidgetBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AshTrailIOSWidgetBundle.swift; sourceTree = "<group>"; };
+		AA200002AAAA000100000002 /* iOSWidgetDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = iOSWidgetDataStore.swift; sourceTree = "<group>"; };
+		AA200003AAAA000100000003 /* HitsTodayWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HitsTodayWidget.swift; sourceTree = "<group>"; };
+		AA200004AAAA000100000004 /* TimeSinceLastHitWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimeSinceLastHitWidget.swift; sourceTree = "<group>"; };
+		AA200005AAAA000100000005 /* DailySummaryWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailySummaryWidget.swift; sourceTree = "<group>"; };
+		AA200006AAAA000100000006 /* QuickStatsWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickStatsWidget.swift; sourceTree = "<group>"; };
+		AA200007AAAA000100000007 /* AppLaunchWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppLaunchWidget.swift; sourceTree = "<group>"; };
+		AA300001AAAA000100000001 /* Ash Trail Widgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Ash Trail Widgets.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		064ECEA3D21EE29422B9A3AD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27D90325F669099AB40F8C0F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0E783E282B5C97DECF968DB7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA790A88E9F81EF5696CF57E /* Foundation.framework in Frameworks */,
+				A8F21B86E7AA2F68166A3EE3 /* WatchConnectivity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EB1CF9000F007C117D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E665D516504C7C42CF11E0CE /* Pods_Runner.framework in Frameworks */,
+				8EE060A634E3F59060F6B4F6 /* WatchConnectivity.framework in Frameworks */,
+				3064CF5FC3DADCF6B1352A2F /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,13 +207,50 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F0B8B65F3D9B27B3C2C37013 /* Pods_Runner_RunnerUITests.framework in Frameworks */,
+				468A4254DDF4518F2EC8F45C /* Pods_Runner_RunnerUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AA700001AAAA000100000001 /* Ash Trail Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				AA200001AAAA000100000001 /* AshTrailIOSWidgetBundle.swift */,
+				AA200002AAAA000100000002 /* iOSWidgetDataStore.swift */,
+				AA200003AAAA000100000003 /* HitsTodayWidget.swift */,
+				AA200004AAAA000100000004 /* TimeSinceLastHitWidget.swift */,
+				AA200005AAAA000100000005 /* DailySummaryWidget.swift */,
+				AA200006AAAA000100000006 /* QuickStatsWidget.swift */,
+				AA200007AAAA000100000007 /* AppLaunchWidget.swift */,
+			);
+			name = "Ash Trail Widgets";
+			path = "Ash Trail Widgets";
+			sourceTree = "<group>";
+		};
+		08A6334CC978A338FF96B97F /* Ash Trail Watch Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				5727E5758445D22BADEF9BB4 /* AshTrailWidgetBundle.swift */,
+				8A824E4D96D03F233B161676 /* ComplicationDataStore.swift */,
+				82ED47EE6A3D14C785D62EF3 /* HitsTodayComplication.swift */,
+				57DECED5E7F85767E4F62CFE /* TimeSinceLastHitComplication.swift */,
+				EDFFBF8FDB948AD37EEA9A4E /* AppLaunchComplication.swift */,
+				A575B7E80C8DA63EA7031881 /* Assets.xcassets */,
+			);
+			name = "Ash Trail Watch Widgets";
+			path = "Ash Trail Watch Widgets";
+			sourceTree = "<group>";
+		};
+		1ED425C6D2C45703DD5F9331 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				1957E2903644C80DEF5E164D /* Foundation.framework */,
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
 		331C8082294A63A400263BE5 /* RunnerUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -99,11 +259,30 @@
 			path = RunnerUITests;
 			sourceTree = "<group>";
 		};
+		38625CFE5E5FDCC1F500CEA9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D2B9B473ED38B026B1D877BE /* Pods-Runner.debug.xcconfig */,
+				4EA9F3704242EA8DD3CBB494 /* Pods-Runner.debug-runner.xcconfig */,
+				65FDFD18B3A70B847DCBFC96 /* Pods-Runner.release.xcconfig */,
+				AFA882F487316B491BBE2A41 /* Pods-Runner.profile.xcconfig */,
+				F1E5AD3448F8E73C024CEC45 /* Pods-Runner-RunnerUITests.debug.xcconfig */,
+				7F60B39EA853E145C32A28F0 /* Pods-Runner-RunnerUITests.debug-runner.xcconfig */,
+				66C4CF573E30CE2E6D2E1209 /* Pods-Runner-RunnerUITests.release.xcconfig */,
+				9B624264A1F53A94B9C92486 /* Pods-Runner-RunnerUITests.profile.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		6C7D811333700AC5FC18C37B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				317114E753EE57548976112D /* Pods_Runner.framework */,
-				DCEEBE27FD95B1A22ABAF24F /* Pods_Runner_RunnerUITests.framework */,
+				1ED425C6D2C45703DD5F9331 /* watchOS */,
+				F76833AA0FD4CE5F00D4A036 /* WatchConnectivity.framework */,
+				2DFFD8867F4F86BC4EB6C73A /* WatchConnectivity.framework */,
+				B48CD214C0029CFE47F2A1C4 /* Pods_Runner.framework */,
+				4FD69CEF16AB079ECF8A5A69 /* Pods_Runner_RunnerUITests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -126,8 +305,12 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerUITests */,
-				B5BA8AF566D3C811191BA96D /* Pods */,
 				6C7D811333700AC5FC18C37B /* Frameworks */,
+				C2AD1A32A53A812E95EA2B34 /* Ash Trail Watch App */,
+				F97744B16880CE933B2CF9EC /* Shared */,
+				38625CFE5E5FDCC1F500CEA9 /* Pods */,
+				08A6334CC978A338FF96B97F /* Ash Trail Watch Widgets */,
+				AA700001AAAA000100000001 /* Ash Trail Widgets */,
 			);
 			sourceTree = "<group>";
 		};
@@ -136,6 +319,9 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerUITests.xctest */,
+				8ED536A090B992AF58149D4B /* Ash Trail Watch App.app */,
+				67302B3E774D7D2D8840D212 /* Ash Trail Watch Widgets.appex */,
+				AA300001AAAA000100000001 /* Ash Trail Widgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -152,24 +338,32 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				A507E2C283FD37CC16E45C15 /* WatchConnectivityManager.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
 		};
-		B5BA8AF566D3C811191BA96D /* Pods */ = {
+		C2AD1A32A53A812E95EA2B34 /* Ash Trail Watch App */ = {
 			isa = PBXGroup;
 			children = (
-				97C1FBE5001E6D07A9CDDB15 /* Pods-Runner.debug.xcconfig */,
-				AD6D2F5DFF46835EBE064E94 /* Pods-Runner.debug-runner.xcconfig */,
-				2B9DB12220BA950DBDFAA6C4 /* Pods-Runner.release.xcconfig */,
-				B7C2ADD8F8E11F352D3CE535 /* Pods-Runner.profile.xcconfig */,
-				E67BD7ED6E35D2AC64CD40EA /* Pods-Runner-RunnerUITests.debug.xcconfig */,
-				B4D493BA7AB9F9A758329E48 /* Pods-Runner-RunnerUITests.debug-runner.xcconfig */,
-				70DC79A36C0D595230B141B0 /* Pods-Runner-RunnerUITests.release.xcconfig */,
-				618AD5F31D99E5D5177CB337 /* Pods-Runner-RunnerUITests.profile.xcconfig */,
+				4A3B735C08C4DD26BCB31257 /* AshTrailWatchApp.swift */,
+				D8A671B5A78BC7138ADEA911 /* WatchSessionManager.swift */,
+				58BAE92B0821CE606CA4E4F3 /* QuickLogView.swift */,
+				804C0205E6A44777FCA1A5F4 /* QuickAnalyticsView.swift */,
+				27255C7DF5C343BE2886FB42 /* RecentEntriesView.swift */,
+				DB01EEF6D3CE056929740565 /* Assets.xcassets */,
 			);
-			name = Pods;
-			path = Pods;
+			name = "Ash Trail Watch App";
+			path = "Ash Trail Watch App";
+			sourceTree = "<group>";
+		};
+		F97744B16880CE933B2CF9EC /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				63344E1E89A6A6A86A6FBED1 /* WatchDataModels.swift */,
+			);
+			name = Shared;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -179,12 +373,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerUITests" */;
 			buildPhases = (
-				DEC9CBB7E83EBB0156A7BA64 /* [CP] Check Pods Manifest.lock */,
+				273396F3E5BC38E4BB33C210 /* [CP] Check Pods Manifest.lock */,
 				331C807D294A63A400263BE5 /* Sources */,
 				331C807F294A63A400263BE5 /* Resources */,
 				C1923B559A8354538F375585 /* Frameworks */,
-				4D757DD53CC4BB42366B67B6 /* [CP] Embed Pods Frameworks */,
-				8C310FDF6C7E9C077F694EB8 /* [CP] Copy Pods Resources */,
+				A6C30193D339CA2349711778 /* [CP] Embed Pods Frameworks */,
+				F15B4166D3A6FD1E93854C3C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -196,28 +390,82 @@
 			productReference = 331C8081294A63A400263BE5 /* RunnerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		62B6E2F95EBAC70DE753EFD8 /* Ash Trail Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8873BDBB57FCBF714E062BA7 /* Build configuration list for PBXNativeTarget "Ash Trail Watch App" */;
+			buildPhases = (
+				AAA014953DDF868B0D4DC5D3 /* Sources */,
+				0E783E282B5C97DECF968DB7 /* Frameworks */,
+				0E9ABA680379F0150EB1A355 /* Resources */,
+				7DBBD7946E27F40FAE6967BE /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E9211B56C16A32EDE2145D0E /* PBXTargetDependency */,
+			);
+			name = "Ash Trail Watch App";
+			productName = "Ash Trail Watch App";
+			productReference = 8ED536A090B992AF58149D4B /* Ash Trail Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
-				C0DE7B9CD6642308D1F07D80 /* [CP] Check Pods Manifest.lock */,
+				EFD75605507CF8456B2DCBC5 /* [CP] Check Pods Manifest.lock */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				1FC2AD8005814E2285D4C321 /* Embed Watch Content */,
+				AA600001AAAA000100000001 /* Embed App Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				06BBC318F61292EB4CF242DA /* [CP] Embed Pods Frameworks */,
-				F9E05C58FF8EC65855D622E1 /* [CP] Copy Pods Resources */,
+				C69258F13F3EE1FF3CEB126C /* [CP] Embed Pods Frameworks */,
+				AA40753E02AF7EC2D7AED630 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AA900001AAAA000100000001 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FF0C2D3A664020EB824410D1 /* Ash Trail Watch Widgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 71CAAFF27B7DD262277ABCB2 /* Build configuration list for PBXNativeTarget "Ash Trail Watch Widgets" */;
+			buildPhases = (
+				82C2107B45F126AC5693250C /* Sources */,
+				064ECEA3D21EE29422B9A3AD /* Frameworks */,
+				8BB9960B6265D060682B680B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Ash Trail Watch Widgets";
+			productName = "Ash Trail Watch Widgets";
+			productReference = 67302B3E774D7D2D8840D212 /* Ash Trail Watch Widgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		AA500001AAAA000100000001 /* Ash Trail Widgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAB00001AAAA000100000001 /* Build configuration list for PBXNativeTarget "Ash Trail Widgets" */;
+			buildPhases = (
+				AA800001AAAA000100000001 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Ash Trail Widgets";
+			productName = "Ash Trail Widgets";
+			productReference = AA300001AAAA000100000001 /* Ash Trail Widgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -237,6 +485,9 @@
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
 					};
+					AA500001AAAA000100000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
@@ -254,15 +505,34 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerUITests */,
+				62B6E2F95EBAC70DE753EFD8 /* Ash Trail Watch App */,
+				FF0C2D3A664020EB824410D1 /* Ash Trail Watch Widgets */,
+				AA500001AAAA000100000001 /* Ash Trail Widgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0E9ABA680379F0150EB1A355 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				41359FE63D2944A906AD6677 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C807F294A63A400263BE5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8BB9960B6265D060682B680B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4D54112D8718206EF55173F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,111 +551,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		06BBC318F61292EB4CF242DA /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
-			);
-			name = "Thin Binary";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
-		};
-		4D757DD53CC4BB42366B67B6 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8C310FDF6C7E9C077F694EB8 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9740EEB61CF901F6004384FC /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
-		};
-		C0DE7B9CD6642308D1F07D80 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		DEC9CBB7E83EBB0156A7BA64 /* [CP] Check Pods Manifest.lock */ = {
+		273396F3E5BC38E4BB33C210 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -407,7 +573,55 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F9E05C58FF8EC65855D622E1 /* [CP] Copy Pods Resources */ = {
+		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}",
+			);
+			name = "Thin Binary";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+		};
+		9740EEB61CF901F6004384FC /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+		};
+		A6C30193D339CA2349711778 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AA40753E02AF7EC2D7AED630 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -424,6 +638,62 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		C69258F13F3EE1FF3CEB126C /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EFD75605507CF8456B2DCBC5 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Runner-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F15B4166D3A6FD1E93854C3C /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -435,12 +705,55 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		82C2107B45F126AC5693250C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7CF46C87C1B2B3F174E5DD5 /* AshTrailWidgetBundle.swift in Sources */,
+				14DE32A556798EA362B385C9 /* ComplicationDataStore.swift in Sources */,
+				4038E20F25C9E90BA9200897 /* HitsTodayComplication.swift in Sources */,
+				99A79439B6BD581F8813115E /* TimeSinceLastHitComplication.swift in Sources */,
+				D0995D028C217FB9158CAB4A /* AppLaunchComplication.swift in Sources */,
+				D492EE7B1742CE6BD660FDC1 /* WatchDataModels.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		97C146EA1CF9000F007C117D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				576B3D168965652346B27D8E /* WatchDataModels.swift in Sources */,
+				A2059539ACF0497CF9E0BA61 /* WatchConnectivityManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAA014953DDF868B0D4DC5D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				337861955FDB41C30590EC46 /* AshTrailWatchApp.swift in Sources */,
+				0A533FA0C1827D77653BB617 /* WatchSessionManager.swift in Sources */,
+				5AB5F22188D1D5CE718720C0 /* QuickLogView.swift in Sources */,
+				12176D74A4FC690B1BC398F2 /* QuickAnalyticsView.swift in Sources */,
+				F674C843A80DFF0DB7EF8F2F /* RecentEntriesView.swift in Sources */,
+				8BA9F5B22D27D98417B0AEA3 /* WatchDataModels.swift in Sources */,
+				9AE49C979EF68D0E4375354D /* ComplicationDataStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA800001AAAA000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA100001AAAA000100000001 /* AshTrailIOSWidgetBundle.swift in Sources */,
+				AA100002AAAA000100000002 /* iOSWidgetDataStore.swift in Sources */,
+				AA100003AAAA000100000003 /* HitsTodayWidget.swift in Sources */,
+				AA100004AAAA000100000004 /* TimeSinceLastHitWidget.swift in Sources */,
+				AA100005AAAA000100000005 /* DailySummaryWidget.swift in Sources */,
+				AA100006AAAA000100000006 /* QuickStatsWidget.swift in Sources */,
+				AA100007AAAA000100000007 /* AppLaunchWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -451,6 +764,18 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		E9211B56C16A32EDE2145D0E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Ash Trail Watch Widgets";
+			target = FF0C2D3A664020EB824410D1 /* Ash Trail Watch Widgets */;
+			targetProxy = 02326A865005616F2000FB74 /* PBXContainerItemProxy */;
+		};
+		AA900001AAAA000100000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Ash Trail Widgets";
+			target = AA500001AAAA000100000001 /* Ash Trail Widgets */;
+			targetProxy = AA400001AAAA000100000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -474,6 +799,32 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		1BAEB9E080679377ABAFF152 /* Debug-Runner */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch Widgets/AshTrailWatchWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Watch Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = "Debug-Runner";
+		};
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -532,6 +883,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = DGQ5P34GS9;
 				ENABLE_BITCODE = NO;
@@ -550,11 +902,11 @@
 		};
 		331C8088294A63A400263BE5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E67BD7ED6E35D2AC64CD40EA /* Pods-Runner-RunnerUITests.debug.xcconfig */;
+			baseConfigurationReference = F1E5AD3448F8E73C024CEC45 /* Pods-Runner-RunnerUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(BUILT_PRODUCTS_DIR)",
@@ -572,11 +924,11 @@
 		};
 		331C8089294A63A400263BE5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 70DC79A36C0D595230B141B0 /* Pods-Runner-RunnerUITests.release.xcconfig */;
+			baseConfigurationReference = 66C4CF573E30CE2E6D2E1209 /* Pods-Runner-RunnerUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(BUILT_PRODUCTS_DIR)",
@@ -592,11 +944,11 @@
 		};
 		331C808A294A63A400263BE5 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 618AD5F31D99E5D5177CB337 /* Pods-Runner-RunnerUITests.profile.xcconfig */;
+			baseConfigurationReference = 9B624264A1F53A94B9C92486 /* Pods-Runner-RunnerUITests.profile.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(BUILT_PRODUCTS_DIR)",
@@ -609,6 +961,131 @@
 				TEST_TARGET_NAME = Runner;
 			};
 			name = Profile;
+		};
+		5F3C7A4819F437497ACDF6DB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch Widgets/AshTrailWatchWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Watch Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		6493C027C2E961F8FC4E265F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch Widgets/AshTrailWatchWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Watch Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		7DB5A804D9F5F50615A329A5 /* Debug-Runner */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch App/AshTrailWatchApp.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail";
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.soup.smokeLog;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp;
+				PRODUCT_MODULE_NAME = Ash_Trail_Watch_App;
+				PRODUCT_NAME = "Ash Trail Watch App";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = "Debug-Runner";
+		};
+		954FDC3029F1DDABDFC3DC20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch App/AshTrailWatchApp.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail";
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.soup.smokeLog;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp;
+				PRODUCT_MODULE_NAME = Ash_Trail_Watch_App;
+				PRODUCT_NAME = "Ash Trail Watch App";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
 		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -727,6 +1204,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = DGQ5P34GS9;
 				ENABLE_BITCODE = NO;
@@ -750,6 +1228,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = DGQ5P34GS9;
 				ENABLE_BITCODE = NO;
@@ -772,6 +1251,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = DGQ5P34GS9;
 				ENABLE_BITCODE = NO;
@@ -842,11 +1322,11 @@
 		};
 		B2C1470A294A63A400263BE6 /* Debug-Runner */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B4D493BA7AB9F9A758329E48 /* Pods-Runner-RunnerUITests.debug-runner.xcconfig */;
+			baseConfigurationReference = 7F60B39EA853E145C32A28F0 /* Pods-Runner-RunnerUITests.debug-runner.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "i386";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = i386;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(BUILT_PRODUCTS_DIR)",
@@ -862,6 +1342,225 @@
 			};
 			name = "Debug-Runner";
 		};
+		D3D934CCA129514D3AB434B7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch App/AshTrailWatchApp.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail";
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.soup.smokeLog;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp;
+				PRODUCT_MODULE_NAME = Ash_Trail_Watch_App;
+				PRODUCT_NAME = "Ash Trail Watch App";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		FDE098C852C55462B68EA364 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch App/AshTrailWatchApp.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail";
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.soup.smokeLog;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp;
+				PRODUCT_MODULE_NAME = Ash_Trail_Watch_App;
+				PRODUCT_NAME = "Ash Trail Watch App";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Profile;
+		};
+		FFEC58FFB281C08A83E081D4 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Watch Widgets/AshTrailWatchWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Watch Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.watchkitapp.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Profile;
+		};
+		AAC00001AAAA000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Widgets/AshTrailWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AAC00002AAAA000100000002 /* Debug-Runner */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Widgets/AshTrailWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Debug-Runner";
+		};
+		AAC00003AAAA000100000003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Widgets/AshTrailWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AAC00004AAAA000100000004 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ash Trail Widgets/AshTrailWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = DGQ5P34GS9;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ash Trail Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Ash Trail Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.soup.smokeLog.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -872,6 +1571,28 @@
 				B2C1470A294A63A400263BE6 /* Debug-Runner */,
 				331C8089294A63A400263BE5 /* Release */,
 				331C808A294A63A400263BE5 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		71CAAFF27B7DD262277ABCB2 /* Build configuration list for PBXNativeTarget "Ash Trail Watch Widgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F3C7A4819F437497ACDF6DB /* Release */,
+				6493C027C2E961F8FC4E265F /* Debug */,
+				1BAEB9E080679377ABAFF152 /* Debug-Runner */,
+				FFEC58FFB281C08A83E081D4 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8873BDBB57FCBF714E062BA7 /* Build configuration list for PBXNativeTarget "Ash Trail Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3D934CCA129514D3AB434B7 /* Release */,
+				954FDC3029F1DDABDFC3DC20 /* Debug */,
+				7DB5A804D9F5F50615A329A5 /* Debug-Runner */,
+				FDE098C852C55462B68EA364 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -894,6 +1615,17 @@
 				B2C147081CF9000F007C117E /* Debug-Runner */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAB00001AAAA000100000001 /* Build configuration list for PBXNativeTarget "Ash Trail Widgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAC00001AAAA000100000001 /* Debug */,
+				AAC00002AAAA000100000002 /* Debug-Runner */,
+				AAC00003AAAA000100000003 /* Release */,
+				AAC00004AAAA000100000004 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

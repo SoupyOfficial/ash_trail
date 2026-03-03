@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import GoogleMaps
+import WatchConnectivity
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -25,6 +26,12 @@ import GoogleMaps
     }
     
     GeneratedPluginRegistrant.register(with: self)
+
+    // Configure WatchConnectivity bridge
+    if let controller = window?.rootViewController as? FlutterViewController {
+      WatchConnectivityManager.shared.configure(with: controller)
+    }
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }

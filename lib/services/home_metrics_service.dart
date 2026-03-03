@@ -270,6 +270,27 @@ class HomeMetricsService {
     );
   }
 
+  /// Get today's hit count up to [asOf] time, with a formatted time label.
+  ({int count, String timeLabel}) getTodayHitsUpTo(
+    List<LogRecord> records, {
+    DateTime? asOf,
+  }) {
+    final cutoff = asOf ?? DateTime.now();
+    final todayStart = DayBoundary.getTodayStart();
+
+    if (cutoff.isBefore(todayStart)) {
+      return (count: 0, timeLabel: formatTimeLabel(cutoff));
+    }
+
+    final todayRecords = _filterToday(records);
+    final upToRecords =
+        todayRecords
+            .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
+            .toList();
+
+    return (count: upToRecords.length, timeLabel: formatTimeLabel(cutoff));
+  }
+
   /// Get average duration per hit
   double? getAverageDuration(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;

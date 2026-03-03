@@ -82,7 +82,7 @@ class WidgetService {
           'widget_lastHitTimestamp',
           timeSince != null
               ? DateTime.now().subtract(timeSince).millisecondsSinceEpoch /
-                  1000.0
+                    1000.0
               : 0,
         ),
         HomeWidget.saveWidgetData<double>(

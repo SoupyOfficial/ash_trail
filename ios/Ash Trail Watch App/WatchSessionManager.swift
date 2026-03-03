@@ -62,7 +62,11 @@ class WatchSessionManager: NSObject, ObservableObject {
 
     /// Request fresh recent entries from the iPhone
     func refreshRecentEntries() {
-        guard let session, session.isReachable else { return }
+        guard let session, session.isReachable else {
+            // Reload complications with whatever cached data we have
+            WidgetCenter.shared.reloadAllTimelines()
+            return
+        }
 
         isLoading = true
         let message: [String: Any] = [
@@ -84,7 +88,11 @@ class WatchSessionManager: NSObject, ObservableObject {
 
     /// Request fresh analytics from the iPhone
     func refreshAnalytics() {
-        guard let session, session.isReachable else { return }
+        guard let session, session.isReachable else {
+            // Reload complications with whatever cached data we have
+            WidgetCenter.shared.reloadAllTimelines()
+            return
+        }
 
         isLoading = true
         let message: [String: Any] = [
@@ -108,6 +116,14 @@ class WatchSessionManager: NSObject, ObservableObject {
     func refreshAll() {
         refreshRecentEntries()
         refreshAnalytics()
+    }
+
+    /// Called from background tasks — ensures session is active and attempts to fetch
+    func backgroundRefresh() {
+        if session == nil || session?.activationState != .activated {
+            activateSession()
+        }
+        refreshAll()
     }
 
     // MARK: - Parse incoming data

@@ -47,6 +47,11 @@ struct ComplicationDataStore {
         return ts > 0 ? Date(timeIntervalSince1970: ts) : .distantPast
     }
     
+    /// Whether the cached data is older than the given interval (default 15 minutes)
+    static func isStale(threshold: TimeInterval = 15 * 60) -> Bool {
+        Date().timeIntervalSince(lastUpdated) > threshold
+    }
+    
     // MARK: - Write (called by watch app)
     
     static func update(from analytics: WatchAnalytics) {

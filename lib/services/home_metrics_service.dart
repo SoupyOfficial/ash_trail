@@ -51,17 +51,33 @@ class HomeMetricsService {
   }
 
   /// Get average time gap between hits
-  /// Returns null if less than 2 records
+  /// Only considers gaps within the same logical day (6am–6am),
+  /// so overnight sleep gaps and days with no data don't inflate the average.
+  /// Returns null if less than 2 records in any single day.
   Duration? getAverageGap(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;
     final sorted = _getNonDeletedSorted(filtered);
 
     if (sorted.length < 2) return null;
 
-    final gaps = <Duration>[];
-    for (int i = 0; i < sorted.length - 1; i++) {
-      gaps.add(sorted[i].eventAt.difference(sorted[i + 1].eventAt));
+    // Group records by logical day
+    final dayGroups = <DateTime, List<LogRecord>>{};
+    for (final record in sorted) {
+      final dayStart = DayBoundary.getDayStart(record.eventAt);
+      dayGroups.putIfAbsent(dayStart, () => []).add(record);
     }
+
+    // Collect only intra-day gaps (skip days with <2 records)
+    final gaps = <Duration>[];
+    for (final dayRecords in dayGroups.values) {
+      if (dayRecords.length < 2) continue;
+      // Already sorted newest-first from _getNonDeletedSorted
+      for (int i = 0; i < dayRecords.length - 1; i++) {
+        gaps.add(dayRecords[i].eventAt.difference(dayRecords[i + 1].eventAt));
+      }
+    }
+
+    if (gaps.isEmpty) return null;
 
     final totalMs = gaps.fold<int>(0, (sum, gap) => sum + gap.inMilliseconds);
     return Duration(milliseconds: totalMs ~/ gaps.length);
@@ -86,7 +102,8 @@ class HomeMetricsService {
     return Duration(milliseconds: totalSpan.inMilliseconds ~/ numberOfGaps);
   }
 
-  /// Get longest gap between hits for a period
+  /// Get longest gap between hits for a period.
+  /// Only considers gaps within the same logical day to exclude overnight gaps.
   ({Duration gap, DateTime startTime, DateTime endTime})? getLongestGap(
     List<LogRecord> records, {
     int? days,
@@ -96,16 +113,26 @@ class HomeMetricsService {
 
     if (sorted.length < 2) return null;
 
+    // Group records by logical day
+    final dayGroups = <DateTime, List<LogRecord>>{};
+    for (final record in sorted) {
+      final dayStart = DayBoundary.getDayStart(record.eventAt);
+      dayGroups.putIfAbsent(dayStart, () => []).add(record);
+    }
+
     Duration longestGap = Duration.zero;
     DateTime? gapStart;
     DateTime? gapEnd;
 
-    for (int i = 0; i < sorted.length - 1; i++) {
-      final gap = sorted[i].eventAt.difference(sorted[i + 1].eventAt);
-      if (gap > longestGap) {
-        longestGap = gap;
-        gapStart = sorted[i + 1].eventAt;
-        gapEnd = sorted[i].eventAt;
+    for (final dayRecords in dayGroups.values) {
+      if (dayRecords.length < 2) continue;
+      for (int i = 0; i < dayRecords.length - 1; i++) {
+        final gap = dayRecords[i].eventAt.difference(dayRecords[i + 1].eventAt);
+        if (gap > longestGap) {
+          longestGap = gap;
+          gapStart = dayRecords[i + 1].eventAt;
+          gapEnd = dayRecords[i].eventAt;
+        }
       }
     }
 
@@ -228,10 +255,9 @@ class HomeMetricsService {
     }
 
     final todayRecords = _filterToday(records);
-    final upToRecords =
-        todayRecords
-            .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
-            .toList();
+    final upToRecords = todayRecords
+        .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
+        .toList();
     final duration = getTotalDuration(upToRecords);
     final count = upToRecords.length;
 
@@ -283,10 +309,9 @@ class HomeMetricsService {
     }
 
     final todayRecords = _filterToday(records);
-    final upToRecords =
-        todayRecords
-            .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
-            .toList();
+    final upToRecords = todayRecords
+        .where((r) => !r.isDeleted && !r.eventAt.isAfter(cutoff))
+        .toList();
 
     return (count: upToRecords.length, timeLabel: formatTimeLabel(cutoff));
   }
@@ -390,33 +415,29 @@ class HomeMetricsService {
     // Use 6am day boundary for more natural period comparisons
     // Current period
     final currentStart = DayBoundary.getDayStartDaysAgo(currentDays - 1);
-    final currentRecords =
-        records
-            .where(
-              (r) =>
-                  !r.isDeleted &&
-                  r.eventAt.isAfter(
-                    currentStart.subtract(const Duration(seconds: 1)),
-                  ),
-            )
-            .toList();
+    final currentRecords = records
+        .where(
+          (r) =>
+              !r.isDeleted &&
+              r.eventAt.isAfter(
+                currentStart.subtract(const Duration(seconds: 1)),
+              ),
+        )
+        .toList();
 
     // Previous period
     final previousStart = currentStart.subtract(Duration(days: previousDays));
     final previousEnd = currentStart.subtract(const Duration(seconds: 1));
-    final previousRecords =
-        records
-            .where(
-              (r) =>
-                  !r.isDeleted &&
-                  r.eventAt.isAfter(
-                    previousStart.subtract(const Duration(seconds: 1)),
-                  ) &&
-                  r.eventAt.isBefore(
-                    previousEnd.add(const Duration(seconds: 1)),
-                  ),
-            )
-            .toList();
+    final previousRecords = records
+        .where(
+          (r) =>
+              !r.isDeleted &&
+              r.eventAt.isAfter(
+                previousStart.subtract(const Duration(seconds: 1)),
+              ) &&
+              r.eventAt.isBefore(previousEnd.add(const Duration(seconds: 1))),
+        )
+        .toList();
 
     double current = 0;
     double previous = 0;
@@ -436,10 +457,9 @@ class HomeMetricsService {
         break;
     }
 
-    final percentChange =
-        previous > 0
-            ? ((current - previous) / previous) * 100
-            : (current > 0 ? 100.0 : 0.0);
+    final percentChange = previous > 0
+        ? ((current - previous) / previous) * 100
+        : (current > 0 ? 100.0 : 0.0);
 
     return (current: current, previous: previous, percentChange: percentChange);
   }
@@ -462,14 +482,12 @@ class HomeMetricsService {
     final todayDuration = getTotalDuration(todayRecords);
     final yesterdayDuration = getTotalDuration(yesterdayRecords);
 
-    final countChange =
-        yesterdayCount > 0
-            ? ((todayCount - yesterdayCount) / yesterdayCount) * 100
-            : (todayCount > 0 ? 100.0 : 0.0);
-    final durationChange =
-        yesterdayDuration > 0
-            ? ((todayDuration - yesterdayDuration) / yesterdayDuration) * 100
-            : (todayDuration > 0 ? 100.0 : 0.0);
+    final countChange = yesterdayCount > 0
+        ? ((todayCount - yesterdayCount) / yesterdayCount) * 100
+        : (todayCount > 0 ? 100.0 : 0.0);
+    final durationChange = yesterdayDuration > 0
+        ? ((todayDuration - yesterdayDuration) / yesterdayDuration) * 100
+        : (todayDuration > 0 ? 100.0 : 0.0);
 
     return (
       todayCount: todayCount,
@@ -492,10 +510,12 @@ class HomeMetricsService {
     final filtered = _filterByDays(records, days);
     final nonDeleted = filtered.where((r) => !r.isDeleted).toList();
 
-    final weekdayRecords =
-        nonDeleted.where((r) => r.eventAt.weekday <= 5).toList();
-    final weekendRecords =
-        nonDeleted.where((r) => r.eventAt.weekday > 5).toList();
+    final weekdayRecords = nonDeleted
+        .where((r) => r.eventAt.weekday <= 5)
+        .toList();
+    final weekendRecords = nonDeleted
+        .where((r) => r.eventAt.weekday > 5)
+        .toList();
 
     // Count unique weekdays and weekend days (using 6am day boundary)
     final weekdayDays = <int>{};
@@ -527,8 +547,9 @@ class HomeMetricsService {
   /// Get average mood rating
   double? getAverageMood(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;
-    final withMood =
-        filtered.where((r) => !r.isDeleted && r.moodRating != null).toList();
+    final withMood = filtered
+        .where((r) => !r.isDeleted && r.moodRating != null)
+        .toList();
 
     if (withMood.isEmpty) return null;
     return withMood.map((r) => r.moodRating!).reduce((a, b) => a + b) /
@@ -538,10 +559,9 @@ class HomeMetricsService {
   /// Get average physical rating
   double? getAveragePhysical(List<LogRecord> records, {int? days}) {
     final filtered = days != null ? _filterByDays(records, days) : records;
-    final withPhysical =
-        filtered
-            .where((r) => !r.isDeleted && r.physicalRating != null)
-            .toList();
+    final withPhysical = filtered
+        .where((r) => !r.isDeleted && r.physicalRating != null)
+        .toList();
 
     if (withPhysical.isEmpty) return null;
     return withPhysical.map((r) => r.physicalRating!).reduce((a, b) => a + b) /
@@ -565,9 +585,8 @@ class HomeMetricsService {
       }
     }
 
-    final sorted =
-        reasonCounts.entries.toList()
-          ..sort((a, b) => b.value.compareTo(a.value));
+    final sorted = reasonCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
     return sorted
         .take(limit)
@@ -784,8 +803,9 @@ class HomeMetricsService {
     DateTime? asOf,
   }) {
     final days = comparisonWindowDays(period);
-    final dailyReference =
-        days > 1 ? fullDayReference / days : fullDayReference;
+    final dailyReference = days > 1
+        ? fullDayReference / days
+        : fullDayReference;
     if (dailyReference <= 0) return 0;
 
     final cutoff = asOf ?? DateTime.now();

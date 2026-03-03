@@ -706,6 +706,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 : 'Something went wrong. Please try again.',
           ),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
     }

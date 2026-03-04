@@ -246,6 +246,10 @@ class AshTrailApp extends ConsumerWidget {
           ),
         ),
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+        snackBarTheme: const SnackBarThemeData(
+          showCloseIcon: true,
+          behavior: SnackBarBehavior.floating,
+        ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -267,19 +271,29 @@ class AshTrailApp extends ConsumerWidget {
           elevation: 0,
           backgroundColor: Colors.black,
         ),
+        snackBarTheme: const SnackBarThemeData(
+          showCloseIcon: true,
+          behavior: SnackBarBehavior.floating,
+        ),
       ),
       themeMode: themeMode,
       navigatorObservers: [
         if (AppAnalyticsService.instance.observer != null)
           AppAnalyticsService.instance.observer!,
       ],
-      builder:
-          reduceMotion
-              ? (context, child) => MediaQuery(
-                data: MediaQuery.of(context).copyWith(disableAnimations: true),
-                child: child!,
-              )
-              : null,
+      builder: (context, child) {
+        // iOS "Reduce Motion" sets accessibleNavigation=true which makes
+        // SnackBars persist indefinitely. Override to false so they
+        // auto-dismiss per their explicit duration. The close icon in
+        // snackBarTheme provides a manual fallback for all users.
+        var data = MediaQuery.of(context).copyWith(
+          accessibleNavigation: false,
+        );
+        if (reduceMotion) {
+          data = data.copyWith(disableAnimations: true);
+        }
+        return MediaQuery(data: data, child: child!);
+      },
       home: const AuthWrapper(),
     );
   }

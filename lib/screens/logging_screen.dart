@@ -175,25 +175,24 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
   ) async {
     final shouldRequest = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Location Access'),
-            content: const Text(
-              'Ash Trail requires location access to automatically tag your logs. '
-              'This helps you track where events occur. '
-              'Location will be collected automatically when you create logs.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Not Now'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Allow'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Location Access'),
+        content: const Text(
+          'Ash Trail requires location access to automatically tag your logs. '
+          'This helps you track where events occur. '
+          'Location will be collected automatically when you create logs.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Not Now'),
           ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Allow'),
+          ),
+        ],
+      ),
     );
 
     if (shouldRequest == true && mounted) {
@@ -260,13 +259,12 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                           vertical: Spacing.sm.value,
                         ),
                       ),
-                      items:
-                          EventType.values.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(_formatEnumName(type.name)),
-                            );
-                          }).toList(),
+                      items: EventType.values.map((type) {
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(_formatEnumName(type.name)),
+                        );
+                      }).toList(),
                       onChanged: (value) {
                         if (value != null) {
                           draftNotifier.setEventType(value);
@@ -376,10 +374,10 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                     SizedBox(height: Spacing.lg.value),
                     Center(
                       child: GestureDetector(
-                        onLongPressStart:
-                            (_) => _startDurationRecording(draftNotifier),
-                        onLongPressEnd:
-                            (_) => _endDurationRecording(draft, draftNotifier),
+                        onLongPressStart: (_) =>
+                            _startDurationRecording(draftNotifier),
+                        onLongPressEnd: (_) =>
+                            _endDurationRecording(draft, draftNotifier),
                         onLongPressCancel: () => _cancelDurationRecording(),
                         child: Container(
                           width: 120,
@@ -387,13 +385,12 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                           padding: Paddings.lg,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color:
-                                _isRecording
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer
-                                        .withValues(alpha: 0.1),
+                            color: _isRecording
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer
+                                      .withValues(alpha: 0.1),
                             border: Border.all(
                               color: Theme.of(context).colorScheme.primary,
                               width: 3,
@@ -415,13 +412,15 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                   _recordedDuration.inSeconds > 0
                                       ? '${_recordedDuration.inSeconds}s'
                                       : 'Hold',
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
                                 ),
                               ],
                             ),
@@ -500,15 +499,13 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                 label:
                                     draft.moodRating?.toStringAsFixed(1) ??
                                     'Tap to set',
-                                inactiveColor:
-                                    draft.moodRating == null
-                                        ? Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest
-                                        : null,
-                                onChanged:
-                                    (value) =>
-                                        draftNotifier.setMoodRating(value),
+                                inactiveColor: draft.moodRating == null
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerHighest
+                                    : null,
+                                onChanged: (value) =>
+                                    draftNotifier.setMoodRating(value),
                               ),
                             ),
                             const Icon(
@@ -522,12 +519,11 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color:
-                                      draft.moodRating == null
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant
-                                          : null,
+                                  color: draft.moodRating == null
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant
+                                      : null,
                                 ),
                               ),
                             ),
@@ -536,18 +532,16 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
-                            onPressed:
-                                draft.moodRating != null
-                                    ? () => draftNotifier.setMoodRating(null)
-                                    : null,
+                            onPressed: draft.moodRating != null
+                                ? () => draftNotifier.setMoodRating(null)
+                                : null,
                             style: TextButton.styleFrom(
-                              foregroundColor:
-                                  draft.moodRating != null
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant
-                                          .withOpacity(0.3),
+                              foregroundColor: draft.moodRating != null
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant
+                                        .withOpacity(0.3),
                             ),
                             icon: const Icon(Icons.clear, size: 16),
                             label: Text(
@@ -581,17 +575,16 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                 label:
                                     draft.physicalRating?.toStringAsFixed(1) ??
                                     'Tap to set',
-                                activeColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                inactiveColor:
-                                    draft.physicalRating == null
-                                        ? Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest
-                                        : null,
-                                onChanged:
-                                    (value) =>
-                                        draftNotifier.setPhysicalRating(value),
+                                activeColor: Theme.of(
+                                  context,
+                                ).colorScheme.secondary,
+                                inactiveColor: draft.physicalRating == null
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.surfaceContainerHighest
+                                    : null,
+                                onChanged: (value) =>
+                                    draftNotifier.setPhysicalRating(value),
                               ),
                             ),
                             const Icon(
@@ -605,12 +598,11 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color:
-                                      draft.physicalRating == null
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant
-                                          : null,
+                                  color: draft.physicalRating == null
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant
+                                      : null,
                                 ),
                               ),
                             ),
@@ -619,19 +611,16 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton.icon(
-                            onPressed:
-                                draft.physicalRating != null
-                                    ? () =>
-                                        draftNotifier.setPhysicalRating(null)
-                                    : null,
+                            onPressed: draft.physicalRating != null
+                                ? () => draftNotifier.setPhysicalRating(null)
+                                : null,
                             style: TextButton.styleFrom(
-                              foregroundColor:
-                                  draft.physicalRating != null
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant
-                                          .withOpacity(0.3),
+                              foregroundColor: draft.physicalRating != null
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant
+                                        .withOpacity(0.3),
                             ),
                             icon: const Icon(Icons.clear, size: 16),
                             label: Text(
@@ -707,10 +696,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                           Container(
                             padding: Paddings.md,
                             decoration: BoxDecoration(
-                              color:
-                                  Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
                               borderRadius: BorderRadii.sm,
                             ),
                             child: Row(
@@ -718,10 +706,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                 Icon(
                                   Icons.location_on,
                                   size: IconSize.md.value,
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
                                 ),
                                 SizedBox(width: Spacing.md.value),
                                 Expanded(
@@ -731,27 +718,28 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                     children: [
                                       Text(
                                         'Location Captured',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              Theme.of(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(
                                                 context,
                                               ).colorScheme.onPrimaryContainer,
-                                        ),
+                                            ),
                                       ),
                                       SizedBox(height: Spacing.xs.value),
                                       Text(
                                         '${draft.latitude!.toStringAsFixed(6)}, ${draft.longitude!.toStringAsFixed(6)}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer
-                                              .withOpacity(0.8),
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimaryContainer
+                                                  .withOpacity(0.8),
+                                            ),
                                       ),
                                     ],
                                   ),
@@ -759,10 +747,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                 Icon(
                                   Icons.check_circle,
                                   size: IconSize.md.value,
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
                                 ),
                               ],
                             ),
@@ -772,8 +759,8 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             children: [
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed:
-                                      () => _openMapPicker(draftNotifier),
+                                  onPressed: () =>
+                                      _openMapPicker(draftNotifier),
                                   icon: const Icon(Icons.map, size: 18),
                                   label: const Text('Edit on Map'),
                                 ),
@@ -781,8 +768,8 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                               SizedBox(width: Spacing.sm.value),
                               Expanded(
                                 child: OutlinedButton.icon(
-                                  onPressed:
-                                      () => _captureLocation(draftNotifier),
+                                  onPressed: () =>
+                                      _captureLocation(draftNotifier),
                                   icon: const Icon(Icons.my_location, size: 18),
                                   label: const Text('Recapture'),
                                 ),
@@ -818,8 +805,9 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                     'Location not available',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color:
-                                          Theme.of(context).colorScheme.error,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
                                     ),
                                   ),
                                 ),
@@ -828,20 +816,18 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                           ),
                           const SizedBox(height: 8),
                           FilledButton.icon(
-                            onPressed:
-                                _isFetchingLocation
-                                    ? null
-                                    : () => _captureLocation(draftNotifier),
-                            icon:
-                                _isFetchingLocation
-                                    ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                    : const Icon(Icons.my_location),
+                            onPressed: _isFetchingLocation
+                                ? null
+                                : () => _captureLocation(draftNotifier),
+                            icon: _isFetchingLocation
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.my_location),
                             label: Text(
                               _isFetchingLocation
                                   ? 'Getting location...'
@@ -862,17 +848,16 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                 Expanded(
                   child: OutlinedButton(
                     key: const Key('logging_clear_button'),
-                    onPressed:
-                        _isSubmitting
-                            ? null
-                            : () {
-                              draftNotifier.reset();
-                              _durationController.clear();
-                              _noteController.clear();
-                              setState(() {
-                                _recordedDuration = Duration.zero;
-                              });
-                            },
+                    onPressed: _isSubmitting
+                        ? null
+                        : () {
+                            draftNotifier.reset();
+                            _durationController.clear();
+                            _noteController.clear();
+                            setState(() {
+                              _recordedDuration = Duration.zero;
+                            });
+                          },
                     child: const Text('Clear'),
                   ),
                 ),
@@ -885,17 +870,16 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: Spacing.md.value),
                     ),
-                    child:
-                        _isSubmitting
-                            ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            )
-                            : const Text('Log Event'),
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          )
+                        : const Text('Log Event'),
                   ),
                 ),
               ],
@@ -992,12 +976,11 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
       context,
       MaterialPageRoute(
         settings: const RouteSettings(name: 'LocationMapPicker'),
-        builder:
-            (context) => LocationMapPicker(
-              initialLatitude: draft.latitude,
-              initialLongitude: draft.longitude,
-              title: 'Select Location',
-            ),
+        builder: (context) => LocationMapPicker(
+          initialLatitude: draft.latitude,
+          initialLongitude: draft.longitude,
+          title: 'Select Location',
+        ),
       ),
     );
 
@@ -1043,24 +1026,23 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
           // Show dialog explaining permission needed
           final shouldRequest = await showDialog<bool>(
             context: context,
-            builder:
-                (context) => AlertDialog(
-                  title: const Text('Location Permission'),
-                  content: const Text(
-                    'Ash Trail needs location permission to tag your logs with location data. '
-                    'This helps you track where events occur.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text('Cancel'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text('Grant Permission'),
-                    ),
-                  ],
+            builder: (context) => AlertDialog(
+              title: const Text('Location Permission'),
+              content: const Text(
+                'Ash Trail needs location permission to tag your logs with location data. '
+                'This helps you track where events occur.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
                 ),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Grant Permission'),
+                ),
+              ],
+            ),
           );
 
           if (shouldRequest == true && mounted) {
@@ -1133,15 +1115,15 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
         // Show success message with location info if available
         final locationMessage =
             draft.latitude != null && draft.longitude != null
-                ? 'Event logged successfully! Location captured.'
-                : 'Event logged successfully!';
+            ? 'Event logged successfully! Location captured.'
+            : 'Event logged successfully!';
 
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(
-          content: Text(locationMessage),
-          duration: const Duration(seconds: 3),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(locationMessage),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e, st) {
       if (mounted) {

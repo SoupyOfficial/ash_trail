@@ -49,29 +49,28 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             onSelected: (grouping) {
               setState(() => _grouping = grouping);
             },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: HistoryGrouping.none,
-                    child: Text('No grouping'),
-                  ),
-                  const PopupMenuItem(
-                    value: HistoryGrouping.day,
-                    child: Text('By day'),
-                  ),
-                  const PopupMenuItem(
-                    value: HistoryGrouping.week,
-                    child: Text('By week'),
-                  ),
-                  const PopupMenuItem(
-                    value: HistoryGrouping.month,
-                    child: Text('By month'),
-                  ),
-                  const PopupMenuItem(
-                    value: HistoryGrouping.eventType,
-                    child: Text('By event type'),
-                  ),
-                ],
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: HistoryGrouping.none,
+                child: Text('No grouping'),
+              ),
+              const PopupMenuItem(
+                value: HistoryGrouping.day,
+                child: Text('By day'),
+              ),
+              const PopupMenuItem(
+                value: HistoryGrouping.week,
+                child: Text('By week'),
+              ),
+              const PopupMenuItem(
+                value: HistoryGrouping.month,
+                child: Text('By month'),
+              ),
+              const PopupMenuItem(
+                value: HistoryGrouping.eventType,
+                child: Text('By event type'),
+              ),
+            ],
           ),
         ],
       ),
@@ -149,29 +148,26 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     // Filter by event type
     if (_selectedEventType != null) {
-      filtered =
-          filtered.where((r) => r.eventType == _selectedEventType).toList();
+      filtered = filtered
+          .where((r) => r.eventType == _selectedEventType)
+          .toList();
     }
 
     // Filter by date range
     if (_dateRange != null) {
-      filtered =
-          filtered.where((r) {
-            return r.eventAt.isAfter(_dateRange!.start) &&
-                r.eventAt.isBefore(
-                  _dateRange!.end.add(const Duration(days: 1)),
-                );
-          }).toList();
+      filtered = filtered.where((r) {
+        return r.eventAt.isAfter(_dateRange!.start) &&
+            r.eventAt.isBefore(_dateRange!.end.add(const Duration(days: 1)));
+      }).toList();
     }
 
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered =
-          filtered.where((r) {
-            return (r.note?.toLowerCase().contains(query) ?? false) ||
-                r.eventType.name.toLowerCase().contains(query);
-          }).toList();
+      filtered = filtered.where((r) {
+        return (r.note?.toLowerCase().contains(query) ?? false) ||
+            r.eventType.name.toLowerCase().contains(query);
+      }).toList();
     }
 
     return filtered;
@@ -267,8 +263,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: records.length,
-      itemBuilder:
-          (context, index) => _buildRecordTile(context, records[index]),
+      itemBuilder: (context, index) =>
+          _buildRecordTile(context, records[index]),
     );
   }
 
@@ -607,23 +603,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   void _showFilterDialog() {
     showModalBottomSheet(
       context: context,
-      builder:
-          (context) => _FilterBottomSheet(
-            selectedEventType: _selectedEventType,
-            dateRange: _dateRange,
-            onEventTypeChanged: (type) {
-              setState(() => _selectedEventType = type);
-              Navigator.pop(context);
-            },
-            onDateRangeChanged: (range) {
-              setState(() => _dateRange = range);
-              Navigator.pop(context);
-            },
-            onClear: () {
-              _clearFilters();
-              Navigator.pop(context);
-            },
-          ),
+      builder: (context) => _FilterBottomSheet(
+        selectedEventType: _selectedEventType,
+        dateRange: _dateRange,
+        onEventTypeChanged: (type) {
+          setState(() => _selectedEventType = type);
+          Navigator.pop(context);
+        },
+        onDateRangeChanged: (range) {
+          setState(() => _dateRange = range);
+          Navigator.pop(context);
+        },
+        onClear: () {
+          _clearFilters();
+          Navigator.pop(context);
+        },
+      ),
     );
   }
 
@@ -643,24 +638,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Delete Log Entry'),
-            content: Text(
-              'Are you sure you want to delete this ${record.eventType.name} entry from ${DateFormat('MMM d, y h:mm a').format(record.eventAt)}?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('Delete'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Log Entry'),
+        content: Text(
+          'Are you sure you want to delete this ${record.eventType.name} entry from ${DateFormat('MMM d, y h:mm a').format(record.eventAt)}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true && mounted) {
@@ -747,17 +741,16 @@ class _FilterBottomSheet extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children:
-                EventType.values.map((type) {
-                  final isSelected = selectedEventType == type;
-                  return FilterChip(
-                    label: Text(type.name),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      onEventTypeChanged(selected ? type : null);
-                    },
-                  );
-                }).toList(),
+            children: EventType.values.map((type) {
+              final isSelected = selectedEventType == type;
+              return FilterChip(
+                label: Text(type.name),
+                selected: isSelected,
+                onSelected: (selected) {
+                  onEventTypeChanged(selected ? type : null);
+                },
+              );
+            }).toList(),
           ),
           const SizedBox(height: 16),
           Text('Date Range', style: Theme.of(context).textTheme.titleSmall),

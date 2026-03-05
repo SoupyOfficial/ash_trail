@@ -212,6 +212,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
             content: Text('Exported ${records.length} records to clipboard'),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 3),
+            persist: false,
             action: SnackBarAction(label: 'OK', onPressed: () {}),
           ),
         );

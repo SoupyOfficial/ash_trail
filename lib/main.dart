@@ -282,13 +282,10 @@ class AshTrailApp extends ConsumerWidget {
           AppAnalyticsService.instance.observer!,
       ],
       builder: (context, child) {
-        // iOS "Reduce Motion" sets accessibleNavigation=true which makes
-        // SnackBars persist indefinitely. Override to false so they
-        // auto-dismiss per their explicit duration. The close icon in
-        // snackBarTheme provides a manual fallback for all users.
-        var data = MediaQuery.of(context).copyWith(
-          accessibleNavigation: false,
-        );
+        // Override accessibleNavigation so SnackBars auto-dismiss per their
+        // explicit duration. The close icon in snackBarTheme still provides
+        // a manual dismiss fallback for all users.
+        var data = MediaQuery.of(context).copyWith(accessibleNavigation: false);
         if (reduceMotion) {
           data = data.copyWith(disableAnimations: true);
         }

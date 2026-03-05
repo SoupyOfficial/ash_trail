@@ -175,6 +175,7 @@ class _TransferLogDialogState extends ConsumerState<TransferLogDialog> {
               'Log transferred to ${_selectedAccount!.displayName ?? _selectedAccount!.email}',
             ),
             duration: const Duration(seconds: 5),
+            persist: false,
             action: SnackBarAction(
               label: 'UNDO',
               onPressed: () async {

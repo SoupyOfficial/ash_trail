@@ -50,6 +50,7 @@ class ErrorDisplay {
         backgroundColor: _colorFor(error.severity),
         behavior: SnackBarBehavior.floating,
         duration: duration ?? _durationFor(error.severity),
+        persist: false,
         action: action,
       ),
     );

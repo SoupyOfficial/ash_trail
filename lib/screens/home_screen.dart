@@ -338,6 +338,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SnackBar(
                   content: const Text('Widget moved'),
                   duration: const Duration(seconds: 3),
+                  persist: false,
                   action: SnackBarAction(
                     label: 'UNDO',
                     onPressed: () {
@@ -402,6 +403,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     SnackBar(
                       content: Text('Removed ${entry.displayName}'),
                       duration: const Duration(seconds: 3),
+                      persist: false,
                       action: SnackBarAction(
                         label: 'UNDO',
                         onPressed: () {
@@ -440,6 +442,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         SnackBar(
           content: const Text('Entry deleted'),
           duration: const Duration(seconds: 3),
+          persist: false,
           action: SnackBarAction(
             label: 'UNDO',
             onPressed: () async {

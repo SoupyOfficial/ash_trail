@@ -312,6 +312,7 @@ class _HomeQuickLogWidgetState extends ConsumerState<HomeQuickLogWidget> {
           SnackBar(
             content: Text(locationMessage),
             duration: const Duration(seconds: 3),
+            persist: false,
             action: SnackBarAction(
               label: 'UNDO',
               onPressed: () async {

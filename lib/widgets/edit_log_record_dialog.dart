@@ -139,6 +139,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
         SnackBar(
           content: const Text('Entry deleted'),
           duration: const Duration(seconds: 3),
+          persist: false,
           action: SnackBarAction(
             label: 'UNDO',
             onPressed: () async {

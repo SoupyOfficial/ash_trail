@@ -277,7 +277,7 @@ void main() {
       });
 
       test('handles special characters in note', () {
-        final specialChars =
+        const specialChars =
             '🔥💨 Test <script>alert("xss")</script> & "quotes"';
         final record = LogRecord.create(
           logId: 'special-chars',
@@ -294,7 +294,7 @@ void main() {
       });
 
       test('handles unicode in note', () {
-        final unicodeNote = '日本語テスト العربية 中文测试';
+        const unicodeNote = '日本語テスト العربية 中文测试';
         final record = LogRecord.create(
           logId: 'unicode-note',
           accountId: 'test-account',
@@ -583,7 +583,7 @@ void main() {
     });
 
     test('handles unicode in display name', () {
-      final unicodeName = '用户名 🎉 مستخدم';
+      const unicodeName = '用户名 🎉 مستخدم';
       final account = Account.create(
         userId: 'test-user',
         email: 'test@example.com',

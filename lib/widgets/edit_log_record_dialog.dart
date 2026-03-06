@@ -422,7 +422,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                       foregroundColor:
                           _moodRating != null
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                              : theme.colorScheme.onSurfaceVariant.withValues(alpha:
                                 0.3,
                               ),
                     ),
@@ -486,7 +486,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                       foregroundColor:
                           _physicalRating != null
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                              : theme.colorScheme.onSurfaceVariant.withValues(alpha:
                                 0.3,
                               ),
                     ),
@@ -553,7 +553,7 @@ class _EditLogRecordDialogState extends ConsumerState<EditLogRecordDialog> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: theme.colorScheme.onPrimaryContainer
-                                        .withOpacity(0.8),
+                                        .withValues(alpha: 0.8),
                                   ),
                                 ),
                               ],

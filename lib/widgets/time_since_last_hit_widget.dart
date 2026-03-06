@@ -319,9 +319,9 @@ class _TimeSinceLastHitWidgetState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -342,7 +342,7 @@ class _TimeSinceLastHitWidgetState
               comparisonLabel,
               style: TextStyle(
                 fontSize: 9,
-                color: textColor.withOpacity(0.8),
+                color: textColor.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -369,7 +369,7 @@ class _TimeSinceLastHitWidgetState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadii.md,
         side: BorderSide(
-          color: colorScheme.outlineVariant.withOpacity(0.2),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -404,7 +404,7 @@ class _TimeSinceLastHitWidgetState
                     Icon(
                       icon,
                       size: IconSize.sm.value,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     ),
                     SizedBox(width: Spacing.xs.value),
                   ],
@@ -412,7 +412,7 @@ class _TimeSinceLastHitWidgetState
                     child: Text(
                       title,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
@@ -458,7 +458,7 @@ class _TimeSinceLastHitWidgetState
                     child: Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                       ),
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
@@ -825,7 +825,7 @@ class _TimeSinceLastHitWidgetState
               Icon(
                 Icons.timer_outlined,
                 size: IconSize.xxl.value,
-                color: colorScheme.primary.withOpacity(0.6),
+                color: colorScheme.primary.withValues(alpha: 0.6),
               ),
               SizedBox(height: Spacing.md.value),
               Text(
@@ -838,7 +838,7 @@ class _TimeSinceLastHitWidgetState
               Text(
                 'Time since last hit will appear here',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -946,7 +946,7 @@ class _TimeSinceLastHitWidgetState
               Divider(
                 color: Theme.of(
                   context,
-                ).colorScheme.outlineVariant.withOpacity(0.3),
+                ).colorScheme.outlineVariant.withValues(alpha: 0.3),
                 thickness: 1,
               ),
               SizedBox(height: Spacing.md.value),

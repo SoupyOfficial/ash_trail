@@ -84,6 +84,7 @@ class HourlyHeatmap extends StatelessWidget {
         final intensity = maxCount > 0 ? count.toDouble() / maxCount : 0.0;
 
         return _HeatmapCell(
+          key: ValueKey<int>(index),
           hour: index,
           count: count,
           intensity: intensity,
@@ -157,6 +158,7 @@ class _HeatmapCell extends StatelessWidget {
   final Color baseColor;
 
   const _HeatmapCell({
+    super.key,
     required this.hour,
     required this.count,
     required this.intensity,
@@ -506,6 +508,7 @@ class WeekdayHourlyHeatmap extends StatelessWidget {
         final intensity = maxCount > 0 ? count.toDouble() / maxCount : 0.0;
 
         return _HeatmapCell(
+          key: ValueKey<int>(index),
           hour: index,
           count: count,
           intensity: intensity,
@@ -658,6 +661,7 @@ class WeekendHourlyHeatmap extends StatelessWidget {
         final intensity = maxCount > 0 ? count.toDouble() / maxCount : 0.0;
 
         return _HeatmapCell(
+          key: ValueKey<int>(index),
           hour: index,
           count: count,
           intensity: intensity,

@@ -563,8 +563,8 @@ void main() {
     group('Sync Account Isolation', () {
       test('sync status is independent per account', () {
         // GIVEN: Records for different accounts
-        final account1 = 'account-001';
-        final account2 = 'account-002';
+        const account1 = 'account-001';
+        const account2 = 'account-002';
 
         var record1 = LogRecord.create(
           logId: uuid.v4(),
@@ -590,8 +590,8 @@ void main() {
 
       test('pending records from one account do not affect another', () {
         // GIVEN: Multiple accounts
-        final account1 = 'account-001';
-        final account2 = 'account-002';
+        const account1 = 'account-001';
+        const account2 = 'account-002';
 
         final records = <LogRecord>[
           LogRecord.create(
@@ -639,8 +639,8 @@ void main() {
 
       test('synced state does not cross account boundaries', () {
         // GIVEN: Multiple accounts with mixed sync states
-        final account1 = 'account-001';
-        final account2 = 'account-002';
+        const account1 = 'account-001';
+        const account2 = 'account-002';
 
         var records = <LogRecord>[
           LogRecord.create(

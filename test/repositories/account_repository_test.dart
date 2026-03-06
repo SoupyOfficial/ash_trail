@@ -313,9 +313,7 @@ void main() {
     test('watchAll() emits updates on save', () async {
       final stream = repository.watchAll();
       final emittedLists = <List<Account>>[];
-      final subscription = stream.listen((accounts) {
-        emittedLists.add(accounts);
-      });
+      final subscription = stream.listen(emittedLists.add);
 
       await Future.delayed(const Duration(milliseconds: 10));
       await repository.save(createTestAccount(userId: 'user-1'));
@@ -330,9 +328,7 @@ void main() {
     test('watchActive() emits updates when active changes', () async {
       final stream = repository.watchActive();
       final emittedAccounts = <Account?>[];
-      final subscription = stream.listen((account) {
-        emittedAccounts.add(account);
-      });
+      final subscription = stream.listen(emittedAccounts.add);
 
       await Future.delayed(const Duration(milliseconds: 10));
       await repository.save(createTestAccount(userId: 'user-1'));

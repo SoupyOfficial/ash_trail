@@ -351,7 +351,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onRemove: (config) => _confirmRemoveWidget(context, ref, config),
             onLogCreated: () => ref.invalidate(activeAccountLogRecordsProvider),
             onRecordTap: () {},
-            onRecordDelete: (record) => _deleteLogRecord(record),
+            onRecordDelete: _deleteLogRecord,
           ),
         ),
         if (isEditMode)

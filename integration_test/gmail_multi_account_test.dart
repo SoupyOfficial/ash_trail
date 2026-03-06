@@ -200,7 +200,7 @@ bool _verifySnackbarDuration(
   final actualSeconds = double.tryParse(match.group(1)!) ?? 0;
   final expectedSeconds = holdDuration.inMilliseconds / 1000.0;
   final diff = (actualSeconds - expectedSeconds).abs();
-  final toleranceSeconds = 1.0;
+  const toleranceSeconds = 1.0;
 
   _log.data('Snackbar duration', '${actualSeconds}s');
   _log.data('Expected duration', '~${expectedSeconds.toStringAsFixed(1)}s');

@@ -435,10 +435,10 @@ void main() {
       );
 
       // Should not throw
-      expect(() => syncService.stopAutoSync(), returnsNormally);
+      expect(syncService.stopAutoSync, returnsNormally);
 
       // Stop again should also not throw
-      expect(() => syncService.stopAutoSync(), returnsNormally);
+      expect(syncService.stopAutoSync, returnsNormally);
 
       syncService.dispose();
     });
@@ -452,7 +452,7 @@ void main() {
       );
 
       syncService.startAutoSync();
-      expect(() => syncService.dispose(), returnsNormally);
+      expect(syncService.dispose, returnsNormally);
     });
   });
 

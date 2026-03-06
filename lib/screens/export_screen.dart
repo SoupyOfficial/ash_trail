@@ -50,7 +50,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               description:
                   'Flat format for spreadsheets (Excel, Google Sheets)',
               icon: Icons.table_chart,
-              onTap: _isExporting ? null : () => _exportCsv(),
+              onTap: _isExporting ? null : _exportCsv,
             ),
             const SizedBox(height: 8),
             _buildExportCard(
@@ -58,7 +58,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               title: 'Export as JSON',
               description: 'Full-fidelity backup format',
               icon: Icons.data_object,
-              onTap: _isExporting ? null : () => _exportJson(),
+              onTap: _isExporting ? null : _exportJson,
             ),
             const SizedBox(height: 24),
 
@@ -77,7 +77,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               title: 'Import from CSV',
               description: 'Import entries from a CSV file',
               icon: Icons.table_chart,
-              onTap: _isImporting ? null : () => _importCsv(),
+              onTap: _isImporting ? null : _importCsv,
             ),
             const SizedBox(height: 8),
             _buildImportCard(
@@ -85,7 +85,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
               title: 'Import from JSON',
               description: 'Restore from a JSON backup',
               icon: Icons.data_object,
-              onTap: _isImporting ? null : () => _importJson(),
+              onTap: _isImporting ? null : _importJson,
             ),
             const SizedBox(height: 24),
 

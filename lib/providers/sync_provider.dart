@@ -12,9 +12,7 @@ final syncServiceProvider = Provider<SyncService>((ref) {
     tokenService: tokenService,
   );
   
-  ref.onDispose(() {
-    service.dispose();
-  });
+  ref.onDispose(service.dispose);
 
   return service;
 });

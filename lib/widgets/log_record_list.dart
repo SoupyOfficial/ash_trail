@@ -45,7 +45,7 @@ class LogRecordList extends ConsumerWidget {
           itemCount: records.length,
           itemBuilder: (context, index) {
             final record = records[index];
-            return LogRecordTile(record: record);
+            return LogRecordTile(key: ValueKey<String>(record.logId), record: record);
           },
         );
       },
@@ -80,7 +80,7 @@ class LogRecordTile extends ConsumerWidget {
                     size: 16,
                     color: Theme.of(
                       context,
-                    ).colorScheme.tertiary.withOpacity(0.7),
+                    ).colorScheme.tertiary.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -88,7 +88,7 @@ class LogRecordTile extends ConsumerWidget {
               Icon(
                 Icons.location_on,
                 size: 16,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
               ),
           ],
         ),

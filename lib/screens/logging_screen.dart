@@ -378,7 +378,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             _startDurationRecording(draftNotifier),
                         onLongPressEnd: (_) =>
                             _endDurationRecording(draft, draftNotifier),
-                        onLongPressCancel: () => _cancelDurationRecording(),
+                        onLongPressCancel: _cancelDurationRecording,
                         child: Container(
                           width: 120,
                           height: 120,
@@ -504,8 +504,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                         context,
                                       ).colorScheme.surfaceContainerHighest
                                     : null,
-                                onChanged: (value) =>
-                                    draftNotifier.setMoodRating(value),
+                                onChanged: draftNotifier.setMoodRating,
                               ),
                             ),
                             const Icon(
@@ -541,7 +540,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                   : Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                             ),
                             icon: const Icon(Icons.clear, size: 16),
                             label: Text(
@@ -583,8 +582,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                         context,
                                       ).colorScheme.surfaceContainerHighest
                                     : null,
-                                onChanged: (value) =>
-                                    draftNotifier.setPhysicalRating(value),
+                                onChanged: draftNotifier.setPhysicalRating,
                               ),
                             ),
                             const Icon(
@@ -620,7 +618,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                   : Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                             ),
                             icon: const Icon(Icons.clear, size: 16),
                             label: Text(
@@ -665,7 +663,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                         hintText: 'Add any notes...',
                       ),
                       maxLines: 3,
-                      onChanged: (value) => draftNotifier.setNote(value),
+                      onChanged: draftNotifier.setNote,
                     ),
                   ],
                 ),
@@ -738,7 +736,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .onPrimaryContainer
-                                                  .withOpacity(0.8),
+                                                  .withValues(alpha: 0.8),
                                             ),
                                       ),
                                     ],
@@ -787,7 +785,7 @@ class _DetailedLogTabState extends ConsumerState<_DetailedLogTab> {
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
-                              ).colorScheme.errorContainer.withOpacity(0.3),
+                              ).colorScheme.errorContainer.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: Theme.of(context).colorScheme.error,

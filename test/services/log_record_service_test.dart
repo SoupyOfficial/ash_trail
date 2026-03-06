@@ -141,7 +141,7 @@ void main() {
       () async {
         // This test verifies the bug we fixed - service should fail gracefully
         // when database is not initialized
-        expect(() => LogRecordService(), throwsA(isA<Exception>()));
+        expect(LogRecordService.new, throwsA(isA<Exception>()));
       },
     );
 
@@ -423,7 +423,7 @@ void main() {
     test('should require database context when no repository provided', () {
       // This is the bug we fixed - verify it throws helpful error
       expect(
-        () => LogRecordService(),
+        LogRecordService.new,
         throwsA(
           predicate(
             (e) =>

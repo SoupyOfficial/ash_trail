@@ -33,9 +33,7 @@ final widgetServiceProvider = Provider<WidgetService>((ref) {
 
   service.initialize();
 
-  ref.onDispose(() {
-    service.dispose();
-  });
+  ref.onDispose(service.dispose);
 
   return service;
 });

@@ -1017,7 +1017,7 @@ Future<bool> debugVerifyLogPersisted(
     testLog('  Expected log time: ~$approximateLogTime');
 
     // Find records within ±2 minutes of the expected time
-    final window = const Duration(minutes: 2);
+    const window = Duration(minutes: 2);
     final nearbyRecords =
         records.where((r) {
           final diff = r.eventAt.difference(approximateLogTime).abs();

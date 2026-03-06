@@ -146,7 +146,7 @@ class LegacyDataAdapter {
     if (data['reasons'] != null && data['reasons'] is List) {
       record.reasons =
           (data['reasons'] as List)
-              .map((r) => _parseLogReason(r))
+              .map(_parseLogReason)
               .whereType<enums.LogReason>()
               .toList();
     }

@@ -35,7 +35,7 @@ class WidgetPickerSheet extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -195,7 +195,7 @@ class _WidgetPickerTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color:
-          isAdded ? colorScheme.surfaceContainerHighest.withOpacity(0.5) : null,
+          isAdded ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5) : null,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor:
@@ -208,7 +208,7 @@ class _WidgetPickerTile extends StatelessWidget {
             color:
                 canAdd
                     ? colorScheme.onPrimaryContainer
-                    : colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
         ),
         title: Text(
@@ -218,7 +218,7 @@ class _WidgetPickerTile extends StatelessWidget {
             color:
                 canAdd
                     ? colorScheme.onSurface
-                    : colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
         ),
         subtitle: Text(
@@ -227,7 +227,7 @@ class _WidgetPickerTile extends StatelessWidget {
             color:
                 canAdd
                     ? colorScheme.onSurfaceVariant
-                    : colorScheme.onSurfaceVariant.withOpacity(0.4),
+                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
           ),
         ),
         trailing:

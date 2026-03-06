@@ -46,7 +46,7 @@ class StatCardWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: baseBorderRadius,
         side: BorderSide(
-          color: colorScheme.outlineVariant.withOpacity(0.2),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -80,7 +80,7 @@ class StatCardWidget extends StatelessWidget {
                     Icon(
                       icon,
                       size: IconSize.sm.value,
-                      color: effectiveColor.withOpacity(0.7),
+                      color: effectiveColor.withValues(alpha: 0.7),
                     ),
                     SizedBox(width: Spacing.xs.value),
                   ],
@@ -88,7 +88,7 @@ class StatCardWidget extends StatelessWidget {
                     child: Text(
                       title,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
@@ -139,7 +139,7 @@ class StatCardWidget extends StatelessWidget {
                           style: Theme.of(
                             context,
                           ).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant.withOpacity(
+                            color: colorScheme.onSurfaceVariant.withValues(alpha:
                               0.7,
                             ),
                           ),
@@ -204,9 +204,9 @@ class TrendIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -227,7 +227,7 @@ class TrendIndicator extends StatelessWidget {
               comparisonLabel!,
               style: TextStyle(
                 fontSize: 9,
-                color: color.withOpacity(0.8),
+                color: color.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w400,
               ),
             ),

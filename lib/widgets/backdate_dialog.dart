@@ -377,7 +377,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                       foregroundColor:
                           _moodRating != null
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                              : theme.colorScheme.onSurfaceVariant.withValues(alpha:
                                 0.3,
                               ),
                     ),
@@ -441,7 +441,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                       foregroundColor:
                           _physicalRating != null
                               ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant.withOpacity(
+                              : theme.colorScheme.onSurfaceVariant.withValues(alpha:
                                 0.3,
                               ),
                     ),
@@ -461,7 +461,7 @@ class _BackdateDialogState extends ConsumerState<BackdateDialog> {
                     color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: theme.colorScheme.outline.withOpacity(0.5),
+                      color: theme.colorScheme.outline.withValues(alpha: 0.5),
                     ),
                   ),
                   child: Row(

@@ -304,7 +304,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
     }
   }
 
-  /// Parse event type filter from settings (stored as List<String>).
+  /// Parse event type filter from settings (stored as `List<String>`).
   static List<EventType>? _parseEventTypes(List<dynamic>? raw) {
     if (raw == null || raw.isEmpty) return null;
     final types = <EventType>[];
@@ -1058,7 +1058,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: Theme.of(
                             context,
-                          ).colorScheme.primary.withOpacity(0.7),
+                          ).colorScheme.primary.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -1142,6 +1142,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                 final intensity = maxCount > 0 ? count / maxCount : 0.0;
 
                 return Tooltip(
+                  key: ValueKey<int>(index),
                   message:
                       '${HomeMetricsService.formatHour(index)}: $count hits',
                   child: Container(
@@ -1149,7 +1150,7 @@ class HomeWidgetBuilder extends ConsumerWidget {
                       color:
                           count > 0
                               ? Theme.of(context).colorScheme.primary
-                                  .withOpacity(0.2 + intensity * 0.7)
+                                  .withValues(alpha: 0.2 + intensity * 0.7)
                               : Theme.of(
                                 context,
                               ).colorScheme.surfaceContainerHighest,
@@ -1514,7 +1515,7 @@ class _TimeSinceLastHitWidgetState extends State<_TimeSinceLastHitWidget> {
                 Icon(
                   Icons.timer_outlined,
                   size: 48,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -1610,7 +1611,7 @@ class _RecentEntriesWidget extends StatelessWidget {
                   size: 48,
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.3),
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -1675,7 +1676,7 @@ class _RecentEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(record.logId),
+      key: ValueKey<String>(record.logId),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
         return await showDialog<bool>(

@@ -86,7 +86,7 @@ void main() {
 
       test('nonce contains only valid characters', () {
         final nonce = _testGenerateNonce(100);
-        final validChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+        const validChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
         for (final char in nonce.split('')) {
           expect(validChars.contains(char), isTrue,
               reason: 'Character "$char" is not in valid charset');

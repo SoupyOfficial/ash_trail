@@ -33,11 +33,11 @@ class ReasonChipsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reasons = LogReason.values;
+    const reasons = LogReason.values;
     final rows = <Widget>[];
     
     // Fixed chip height for 2 lines of text
-    const double chipHeight = 52.0;
+    const chipHeight = 52.0;
 
     // Split reasons into rows
     for (var i = 0; i < reasons.length; i += columnsPerRow) {

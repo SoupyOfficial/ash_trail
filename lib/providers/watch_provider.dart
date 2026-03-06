@@ -33,9 +33,7 @@ final watchConnectivityServiceProvider = Provider<WatchConnectivityService>((
 
   service.initialize();
 
-  ref.onDispose(() {
-    service.dispose();
-  });
+  ref.onDispose(service.dispose);
 
   return service;
 });

@@ -67,7 +67,7 @@ class ExportService {
         'version': '1.0.0',
         'exportedAt': DateTime.now().toIso8601String(),
         'recordCount': records.length,
-        'records': records.map((r) => _recordToJson(r)).toList(),
+        'records': records.map(_recordToJson).toList(),
       };
 
       // Use dart:convert for proper JSON encoding with escaping
